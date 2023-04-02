@@ -74,6 +74,8 @@ class TestWidget(QtWidgets.QWidget, Ui_Form):
 			self.query_response_edit.set_text(f'{response}')
 		elif return_type == list[float]:
 			self.query_response_edit.set_text(f'{response}')
+		elif return_type == list[int]:
+			self.query_response_edit.set_text(f'{response}')
 		elif issubclass(return_type, enum.Enum):
 			self.query_response_edit.set_text(f'{response}')
 		else:
@@ -86,6 +88,7 @@ class TestWidget(QtWidgets.QWidget, Ui_Form):
 
 
 	def make_command_arg_widget(self, type_, key):
+
 		if type_ == int:
 			widget = QtWidgets.QLineEdit(f'{key} (int)')
 			self._command_args[key] = {'callable': lambda: widget.text, 'type': type_}

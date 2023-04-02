@@ -1,5 +1,5 @@
 import enum
-from typing import Union
+from typing import Union, Tuple
 
 from ...instruments._instrument import Instrument, query, command
 
@@ -23,7 +23,7 @@ class DisplayMode(enum.Enum):
 	INPUT_B = 1
 	INPUT_C = 2
 	INPUT_D = 3
-	CUSTOM = 4
+	#CUSTOM = 4
 	FOUR_LOOP = 5
 	ALL_INPUTS = 6
 	INPUT_D2 = 7
@@ -33,24 +33,33 @@ class DisplayMode(enum.Enum):
 
 
 class DisplayCustomNumber(enum.Enum):
-	_IGNORE = ''
 	LARGE_2 = 0
 	LARGE_4 = 1
 	SMALL_8 = 2
 
 
 class DisplayAllInputsSize(enum.Enum):
-	_IGNORE = ''
 	SMALL = 0
 	LARGE = 1
 
 
 class DisplayCustomOutput(enum.Enum):
-	_IGNORE = ''
 	OUTPUT_1 = 1
 	OUTPUT_2 = 2
 	OUTPUT_3 = 3
 	OUTPUT_4 = 4
+
+
+class FilterInput(enum.Enum):
+	INPUT_A = 'A'
+	INPUT_B = 'B'
+	INPUT_C = 'C'
+	INPUT_D = 'D'
+
+
+class FilterState(enum.Enum):
+	OFF = 0
+	ON = 1
 
 
 
@@ -96,13 +105,81 @@ class Lakeshore_350(Instrument):
 
 
 	@command
-	def set_display_setup(self, 
-		mode: DisplayMode, 
-		number: Union[DisplayCustomNumber,DisplayAllInputsSize] = DisplayCustomNumber._IGNORE,
-		output_source: DisplayCustomOutput = DisplayCustomNumber._IGNORE,
+	def set_display_setup(self, mode: DisplayMode):
+		return self._command(f'DISPLAY {mode.value},0,0')
+
+
+	@command
+	def set_custom_display_setup(self,
+		number: DisplayCustomNumber,
+		output_source: DisplayCustomOutput,
 		):
-		return self._command(f'DISPLAY {mode.value},{number.value},{output_source.value}')
+		return self._command(f'DISPLAY 4,{number.value},{output_source.value}')
 
 
+	@query # NEED TO CAST RESULT AS TUPLE OF ENUMS?
+	def get_display_setup(self) -> list[int]:
+		return [int(i) for i in self._query(f'DISPLAY?').split(',')]
 
 
+	@command
+	def set_input_filter(self, 
+		input_channel: FilterInput,
+		state: FilterState,
+		points: int, # range 2-64
+		window: float, # range 1%-10%
+		):
+		return self._command(f'FILTER {input_channel.value},{state},{points},{window:.1f}')
+
+
+	@query
+	def get_input_filter(self, input_channel: FilterInput) -> Tuple[FilterInput, FilterState, int, float]:
+		response = self._query(f'FILTER? {input_channel.value}').split(',')
+		return (FilterInput(response[0]).name, FilterState(response[1]).name, int(response[2]), float(response[3]))
+
+
+	# HEATER OUTPUT QUERY
+
+	# HEATER SETUP COMMAND
+
+	# HEATER SETUP QUERY
+
+	# HEATER STATUS QUERY
+
+	# FRONT PLANEL LOCK
+
+	# FRONT PANEL QUERY
+
+	# MANUAL OUTPUT COMMAND
+
+	# MANUAL OUTPUT QUERY
+
+	# OUTPUT MODE COMMAND
+
+	# OUTPUT MODE QUERY
+
+	# PID COMMAND
+
+	# PID QUERY
+
+	# RAMP COMMAND
+	
+	# RAMP QUERY
+
+	# RAMP STATUS QUERY
+
+	# HEATER RANGE COMMAND
+
+	# HEATER RANGE QUERY
+
+	# INPUT READING STATUS QUERY
+
+	# SETPOINT COMMAND
+
+	# SETPOINT QUERY
+
+	# TEMPERATURE LIMIT COMMAND
+
+	# TEMPERATURE LIMIT QUERY
+
+	
