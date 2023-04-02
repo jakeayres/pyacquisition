@@ -1,0 +1,16 @@
+{
+	"clock": {
+		"class_name": "Clock"
+	},
+	"wave": {
+		"class_name": "Waveform_Generator"
+	},
+	"lockin": {
+		"visa_resource_string": "GPIB0::11::INSTR",
+		"class_name": "SR_830"
+	},
+	"lakeshore": {
+		"visa_resource_string": "GPIB0::12::INSTR",
+		"class_name": "Lakeshore_350"
+	}
+}

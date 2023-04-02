@@ -1,0 +1,9 @@
+{
+	"clock": {
+		"class_name": "Clock"
+	},
+
+	// "wave": {
+	// 	"class_name": "Waveform_Generator"
+	// }
+}
