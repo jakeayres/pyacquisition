@@ -1,5 +1,5 @@
-from .query_widget import Ui_query_widget
-from .type_widgets import FloatWidget, IntWidget, EnumWidget, ValueWidget
+from .ui_query_widget import Ui_query_widget
+from ..type_widgets import FloatWidget, IntWidget, EnumWidget, ValueWidget
 
 from PySide6 import QtWidgets, QtGui, QtCore
 import inspect, enum
@@ -12,7 +12,7 @@ from typing import Union, Tuple
 class QueryWidget(QtWidgets.QWidget, Ui_query_widget):
 
 
-	def __init__(self,query):
+	def __init__(self, query):
 		super().__init__()
 		self.setupUi(self)
 
@@ -49,7 +49,7 @@ class QueryWidget(QtWidgets.QWidget, Ui_query_widget):
 			widget.setPlaceholderText(str(type_))
 			validator = QtGui.QDoubleValidator()
 			widget.setValidator(validator)
-			return widget, float(widget.text())
+			return widget, lambda: float(widget.text())
 		
 		elif issubclass(type_, enum.Enum):
 			widget = QtWidgets.QComboBox()

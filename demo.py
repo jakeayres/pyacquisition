@@ -1,7 +1,7 @@
 from pyacquisition.rack import Rack
 
 
-from pyacquisition.ui import QueryWidget
+from pyacquisition.ui import QueryWidget, CommandWidget
 from pyacquisition.ui.type_widgets import GraphicalFloatWidget
 
 import sys, inspect, time
@@ -9,26 +9,36 @@ from PySide6 import QtCore, QtGui, QtWidgets, QtUiTools
 
 
 
-
-
 if __name__ == "__main__":
 
-	import numpy as np
+	from pyacquisition.ui.app.app import App
 
-	rack = Rack.from_filepath('soft_config.json', visa_backend='dummy')
-	inst = rack._instruments['wave']
-	query = inst.queries()['get_signal']
 
 	app = QtWidgets.QApplication(sys.argv)
-	w = GraphicalFloatWidget()
-	w._plot()
+	w = App()
 
-	for i in range(100):
-		time.sleep(0.015)
-		w.set_value(query())
+	rack = Rack.from_filepath('instrument_config.json', visa_backend='pyvisa')
+
+	w.populate_instruments_from_rack(rack)
 
 	w.show()
 	sys.exit(app.exec())
+
+
+# if __name__ == "__main__":
+
+# 	import numpy as np
+
+# 	rack = Rack.from_filepath('soft_config.json', visa_backend='dummy')
+# 	inst = rack.instruments['wave']	
+# 	query = inst.queries['get_amplitude']
+# 	command = inst.commands['set_amplitude']
+
+# 	app = QtWidgets.QApplication(sys.argv)
+# 	w = CommandWidget(command)
+
+# 	w.show()
+# 	sys.exit(app.exec())
 	
 
 

@@ -94,7 +94,7 @@ class SR_830(Instrument):
 
 	@query
 	def get_reference_source(self) -> ReferenceSource:
-		return ReferenceSource(int(self._query(f'FMOD?'))).name
+		return ReferenceSource(int(self._query(f'FMOD?')))
 
 
 	@command
@@ -114,7 +114,7 @@ class SR_830(Instrument):
 
 	@query
 	def get_external_referece_slope(self) -> ReferenceSlope:
-		return ReferenceSlope(int(self._query(f'RSLP?'))).name
+		return ReferenceSlope(int(self._query(f'RSLP?')))
 
 
 	@command
@@ -147,7 +147,7 @@ class SR_830(Instrument):
 
 	@query
 	def get_input_configuration(self) -> InputConfiguration:
-		return InputConfiguration(int(self._query(f'ISRC?'))).name
+		return InputConfiguration(int(self._query(f'ISRC?')))
 
 
 	@command
@@ -157,7 +157,7 @@ class SR_830(Instrument):
 
 	@query
 	def get_input_grounding(self) -> InputGrounding:
-		return InputGrounding(int(self._query(f'IGND?'))).name
+		return InputGrounding(int(self._query(f'IGND?')))
 
 
 	@command
@@ -167,7 +167,7 @@ class SR_830(Instrument):
 
 	@query
 	def get_input_coupling(self) -> InputCoupling:
-		return InputCoupling(int(self._query(f'ICPL?'))).name
+		return InputCoupling(int(self._query(f'ICPL?')))
 
 
 	@command
@@ -189,7 +189,7 @@ class SR_830(Instrument):
 
 	@query
 	def get_sensitivity(self) -> Sensitivity:
-		return Sensitivity(int(self._query(f'SENS?'))).name
+		return Sensitivity(int(self._query(f'SENS?')))
 
 
 	@command
@@ -199,7 +199,7 @@ class SR_830(Instrument):
 
 	@query
 	def get_dynamic_reserve(self) -> DynamicReserve:
-		return DynamicReserve(int(self._query(f'RMOD?'))).name
+		return DynamicReserve(int(self._query(f'RMOD?')))
 
 
 	@command
@@ -225,14 +225,14 @@ class SR_830(Instrument):
 	""" DATA TRANSFER
 	"""
 
-	# @query
-	# def get_output(self, parameter: int):
-	# 	return self._query(f'OUTP? {parameter}')
+	@query
+	def get_output(self, parameter: int) -> float:
+		return float(self._query(f'OUTP? {parameter}'))
 
 
-	# @query
-	# def get_display_output(self, parameter: int):
-	# 	return self._query(f'OUTR? {parameter}')
+	@query
+	def get_display_output(self, parameter: int) -> float:
+		return float(self._query(f'OUTR? {parameter}'))
 
 
 	@query

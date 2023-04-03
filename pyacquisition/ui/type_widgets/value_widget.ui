@@ -77,14 +77,11 @@ padding-right: 5px;</string>
     </font>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: white;
-border-left: 2px;
-border-top: 2px;
-border-bottom: 2px;
-border-color: #555;
-border-style: solid;
-color: #AAA;
-padding-left: 5px;</string>
+    <string notr="true">color: #AAA;
+padding-left: 5px;
+border-top: 2px solid #555;
+border-left: 2px solid #555;
+border-bottom: 2px solid #555</string>
    </property>
    <property name="frameShape">
     <enum>QFrame::Box</enum>

@@ -70,11 +70,13 @@ class Instrument(metaclass=QueryCommandProvider):
 		self._visa_resource = visa_resource
 
 
+	@property
 	def queries(self):
 		""" return dictionary of registered queries as externally executable partials """
 		return {q.__name__: partial(q, self) for q in self._queries}
 
 
+	@property
 	def commands(self):
 		""" return dictionary of registered commands as externally executable partials """
 		return {c.__name__: partial(c, self) for c in self._commands}
@@ -115,11 +117,13 @@ class SoftInstrument(metaclass=QueryCommandProvider):
 	name = 'Software Instrument'
 	
 
+	@property
 	def queries(self):
 		""" return dictionary of registered queries as externally executable partials """
 		return {q.__name__: partial(q, self) for q in self._queries}
 
 
+	@property
 	def commands(self):
 		""" return dictionary of registered commands as externally executable partials """
 		return {c.__name__: partial(c, self) for c in self._commands}

@@ -56,7 +56,7 @@ class Rack(object):
 
 	@property
 	def instruments(self):
-		return instruments
+		return self._instruments
 
 
 
