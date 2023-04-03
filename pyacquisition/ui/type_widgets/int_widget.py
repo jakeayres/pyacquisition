@@ -3,8 +3,8 @@ from PySide6 import QtWidgets, QtGui
 
 
 
-class FloatWidget(ValueWidget):
+class IntWidget(ValueWidget):
 
 
-    def __init__(self, type_=float, formatter=lambda x: f'{x:.3f}', *args, **kwargs):
+    def __init__(self, type_=int, formatter=lambda x: f'{x}', *args, **kwargs):
         super().__init__(type_=type_, formatter=formatter, *args, **kwargs)
