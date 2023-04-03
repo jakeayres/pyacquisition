@@ -4,6 +4,12 @@ from typing import Union, Tuple
 from ...instruments._instrument import Instrument, query, command
 
 
+
+class State(enum.Enum):
+	OFF = 0
+	ON = 1
+
+
 class AutotuneMode(enum.Enum):
 	P = 0
 	PI = 1
@@ -55,11 +61,6 @@ class FilterInput(enum.Enum):
 	INPUT_B = 'B'
 	INPUT_C = 'C'
 	INPUT_D = 'D'
-
-
-class FilterState(enum.Enum):
-	OFF = 0
-	ON = 1
 
 
 
@@ -125,7 +126,7 @@ class Lakeshore_350(Instrument):
 	@command
 	def set_input_filter(self, 
 		input_channel: FilterInput,
-		state: FilterState,
+		state: State,
 		points: int, # range 2-64
 		window: float, # range 1%-10%
 		):
@@ -133,7 +134,7 @@ class Lakeshore_350(Instrument):
 
 
 	@query
-	def get_input_filter(self, input_channel: FilterInput) -> Tuple[FilterInput, FilterState, int, float]:
+	def get_input_filter(self, input_channel: FilterInput) -> Tuple[FilterInput, State, int, float]:
 		response = self._query(f'FILTER? {input_channel.value}').split(',')
 		return (FilterInput(response[0]).name, FilterState(response[1]).name, int(response[2]), float(response[3]))
 
@@ -162,11 +163,32 @@ class Lakeshore_350(Instrument):
 
 	# PID QUERY
 
-	# RAMP COMMAND
 	
-	# RAMP QUERY
+	@command
+	def set_ramp(
+		self,
+		output_channel: int,
+		state: State,
+		rate: float,
+		):
+		return self._command(f'RAMP {output_channel},{state.value},{rate:.3f}')
+	
+	
+	@query
+	def get_ramp(
+		self, 
+		output_channel: int,
+		) -> Tuple[int, float]:
+		response = self._query(f'RAMP? {output_channel}').split(',')
+		return (int(response[0]), float(response[1]))
 
-	# RAMP STATUS QUERY
+
+	@query
+	def get_ramp_status(
+		self,
+		output_channel: int,
+		) -> State:
+		return State(self._query(f'RAMPST? {output_channel}')).name
 
 	# HEATER RANGE COMMAND
 
@@ -174,12 +196,24 @@ class Lakeshore_350(Instrument):
 
 	# INPUT READING STATUS QUERY
 
-	# SETPOINT COMMAND
+	
+	@command
+	def set_setpoint(
+		self,
+		output_channel: int,
+		setpoint: float,
+		):
+		return self._command(f'SETP {output_channel},{setpoint:.2f}')
 
-	# SETPOINT QUERY
+	
+	@query
+	def get_setpoint(
+		self,
+		output_channel: int,
+		) -> float:
+		return float(self._query(f'SETP? {output_channel}'))
 
 	# TEMPERATURE LIMIT COMMAND
 
 	# TEMPERATURE LIMIT QUERY
 
-	

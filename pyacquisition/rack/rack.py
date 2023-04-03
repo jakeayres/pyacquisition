@@ -22,10 +22,8 @@ class Rack(object):
 		""" Parse dictionary entry from json config file
 		"""
 		if 'visa_resource_string' in dictionary.keys():
-			print('ADDING HARDWARE')
 			self.add_instrument(key, dictionary['class_name'], dictionary['visa_resource_string'])
 		else:
-			print('ADDING SOFTWARE')
 			self.add_software_instrument(key, dictionary['class_name'])
 
 
@@ -33,7 +31,7 @@ class Rack(object):
 	def from_filepath(cls, filepath, **kwargs):
 		""" Create Rack object from filepath of json config
 		"""
-		with open('instrument_config.json') as f:
+		with open(filepath) as f:
 			return cls.from_file(f, **kwargs)
 
 
@@ -54,6 +52,11 @@ class Rack(object):
 			print(key, config)
 			rack._parse_dictionary(key, config)
 		return rack
+
+
+	@property
+	def instruments(self):
+		return instruments
 
 
 

@@ -1,9 +1,11 @@
 {
+	"gizmo": {
+		"class_name": "Gizmotron"
+	},
 	"clock": {
 		"class_name": "Clock"
 	},
-
-	// "wave": {
-	// 	"class_name": "Waveform_Generator"
-	// }
+	"wave": {
+		"class_name": "Waveform_Generator"
+	}
 }

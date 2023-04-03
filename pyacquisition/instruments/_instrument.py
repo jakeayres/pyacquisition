@@ -125,7 +125,6 @@ class SoftInstrument(metaclass=QueryCommandProvider):
 		return {c.__name__: partial(c, self) for c in self._commands}
 
 
-
 	@query
 	def identify(self):
 		return self.name
