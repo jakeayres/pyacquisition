@@ -3,6 +3,11 @@ import enum
 from ...instruments._instrument import Instrument, query, command
 
 
+class State(enum.Enum):
+	OFF = 0
+	ON = 1
+
+
 class ReferenceSource(enum.Enum):
 	INTERNAL = 0
 	EXTERNAL = 1
@@ -66,6 +71,36 @@ class Sensitivity(enum.Enum):
 	mV_200 = 24
 	mV_500 = 25
 	V_1 = 26
+
+
+class TimeConstant(enum.Enum):
+	us_10 = 0
+	us_30 = 1
+	us_100 = 2
+	us_300 = 3
+	ms_1 = 4
+	ms_3 = 5
+	ms_10 = 6
+	ms_30 = 7
+	ms_100 = 8
+	ms_300 = 9
+	s_1 = 10
+	s_3 = 11
+	s_10 = 12
+	s_30 = 13
+	s_100 = 14
+	s_300 = 15
+	ks_1 = 16
+	ks_3 = 17
+	ks_10 = 18
+	ks_30 = 19
+
+
+class FilterSlope(enum.Enum):
+	db6 = 0
+	db12 = 1
+	db18 = 2
+	db24 = 3
 
 
 class DynamicReserve(enum.Enum):
@@ -220,6 +255,36 @@ class SR_830(Instrument):
 	@command
 	def set_dynamic_reserve(self, reserve: DynamicReserve):
 		return self._command(f'RMOD {reserve.value}')
+
+
+	@query 
+	def get_time_constant(self) -> TimeConstant:
+		return TimeConstant(int(self._query(f'OFLT?')))
+
+
+	@command
+	def set_time_constant(self, time_constant: TimeConstant):
+		return self._command(f'OFLT {time_constant.value}')
+
+
+	@query
+	def get_filter_slope(self) -> FilterSlope:
+		return FilterSlope(int(self._query(f'OFSL?')))
+
+
+	@command
+	def set_filter_slope(self, filter_slope: FilterSlope):
+		return self._command(f'OFSL {filter_slope.value}')
+
+
+	@query
+	def get_sync_filter_state(self) -> State:
+		return State(int(self._query(f'SYNC?')))
+
+
+	@command
+	def set_sync_filter_state(self, state: State):
+		return self._command(f'SYNC {state.value}')
 
 
 	""" DISPLAY AND OUTPUT
