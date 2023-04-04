@@ -1,4 +1,7 @@
-{
+{	
+	"recorder": {
+		"class_name": "File_Recorder"
+	},
 	"clock": {
 		"class_name": "Clock"
 	},
@@ -7,7 +10,21 @@
 	},
 	"lockin": {
 		"visa_resource_string": "GPIB0::11::INSTR",
-		"class_name": "SR_830"
+		"class_name": "SR_830",
+		"measure": {
+			"Vx": {
+				"method": "get_x"
+			},
+			"Vy": {
+				"method": "get_y"
+			},
+			"Phase": {
+				"method": "get_phase"
+			},
+			"Harm": {
+				"method": "get_harmonic"
+			}
+		}
 	},
 	"lakeshore": {
 		"visa_resource_string": "GPIB0::12::INSTR",

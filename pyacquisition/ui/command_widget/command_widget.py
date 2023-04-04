@@ -50,12 +50,24 @@ class CommandWidget(QtWidgets.QWidget, Ui_command_widget):
 			validator = QtGui.QDoubleValidator()
 			widget.setValidator(validator)
 			return widget, lambda: float(widget.text())
+
+		elif type_ == str:
+			widget = QtWidgets.QLineEdit()
+			widget.setPlaceholderText(str(type_))
+			#validator = QtGui.QDoubleValidator()
+			#widget.setValidator(validator)
+			return widget, lambda: str(widget.text())
 		
 		elif issubclass(type_, enum.Enum):
 			widget = QtWidgets.QComboBox()
 			for option in type_:
 				widget.addItem(option.name, option)
 			return widget, lambda: widget.currentData()
+
+		else:
+			widget = QtWidgets.QLineEdit()
+			widget.setPlaceholderText('(unrecognised type)')
+			return widget, lambda: str(widget.text())
 
 
 	def populate_args(self):

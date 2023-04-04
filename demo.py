@@ -1,9 +1,6 @@
 from pyacquisition.rack import Rack
 
 
-from pyacquisition.ui import QueryWidget, CommandWidget
-from pyacquisition.ui.type_widgets import GraphicalFloatWidget
-
 import sys, inspect, time
 from PySide6 import QtCore, QtGui, QtWidgets, QtUiTools
 
@@ -15,40 +12,42 @@ if __name__ == "__main__":
 
 
 	app = QtWidgets.QApplication(sys.argv)
-	w = App()
-
-	rack = Rack.from_filepath('instrument_config.json', visa_backend='pyvisa')
-
-	w.populate_instruments_from_rack(rack)
-
+	w = App('instrument_config.json')
 	w.show()
 	sys.exit(app.exec())
 
 
 # if __name__ == "__main__":
 
-# 	import numpy as np
-
-# 	rack = Rack.from_filepath('soft_config.json', visa_backend='dummy')
-# 	inst = rack.instruments['wave']	
-# 	query = inst.queries['get_amplitude']
-# 	command = inst.commands['set_amplitude']
+# 	from pyacquisition.ui import MeasureWidget
 
 # 	app = QtWidgets.QApplication(sys.argv)
-# 	w = CommandWidget(command)
+
+# 	rack = Rack.from_filepath('instrument_config.json', visa_backend='pyvisa')
+
+
+# 	w = MeasureWidget.from_filepath('instrument_config.json', rack)
 
 # 	w.show()
 # 	sys.exit(app.exec())
-	
 
 
 # if __name__ == "__main__":
 
+# 	import numpy as np
+# 	from pyacquisition.ui.type_widgets import GraphicalFloatWidget
+
 # 	rack = Rack.from_filepath('soft_config.json', visa_backend='dummy')
-# 	inst = rack._instruments['gizmo']
-# 	query = inst.queries()['get_color_addition']
+# 	inst = rack.instruments['wave']	
+
+# 	inst.commands['set_frequency'](5)
 
 # 	app = QtWidgets.QApplication(sys.argv)
-# 	w = QueryWidget(query)
+# 	w = GraphicalFloatWidget()
+
+# 	for i in range(100):
+# 		time.sleep(0.001)
+# 		w.set_value(inst.queries['get_signal']())
+
 # 	w.show()
 # 	sys.exit(app.exec())

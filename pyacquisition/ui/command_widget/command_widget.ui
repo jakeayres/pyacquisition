@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>200</width>
-    <height>250</height>
+    <height>295</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -48,13 +48,6 @@
        </size>
       </property>
      </spacer>
-    </item>
-    <item>
-     <widget class="QPushButton" name="send_button">
-      <property name="text">
-       <string>Send</string>
-      </property>
-     </widget>
     </item>
    </layout>
   </widget>
@@ -116,6 +109,44 @@
    </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="send_button">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>250</y>
+     <width>190</width>
+     <height>40</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <family>Segoe UI</family>
+     <pointsize>14</pointsize>
+     <bold>true</bold>
+    </font>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">background-color: #1abc9c;
+border-radius: 12px;
+color: white;
+</string>
+   </property>
+   <property name="text">
+    <string>SEND</string>
+   </property>
+   <property name="flat">
+    <bool>false</bool>
    </property>
   </widget>
  </widget>

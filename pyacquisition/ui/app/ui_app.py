@@ -16,14 +16,18 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QMainWindow, QMenu, QMenuBar,
-    QSizePolicy, QStatusBar, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QGridLayout, QMainWindow, QMenu,
+    QMenuBar, QSizePolicy, QStatusBar, QWidget)
 
 class Ui_app(object):
     def setupUi(self, app):
         if not app.objectName():
             app.setObjectName(u"app")
-        app.resize(800, 600)
+        app.resize(957, 815)
+        font = QFont()
+        font.setPointSize(11)
+        font.setBold(True)
+        app.setFont(font)
         self.actionAdd_Instrument = QAction(app)
         self.actionAdd_Instrument.setObjectName(u"actionAdd_Instrument")
         self.actionRemove = QAction(app)
@@ -40,16 +44,20 @@ class Ui_app(object):
         self.actionCommand2.setObjectName(u"actionCommand2")
         self.centralwidget = QWidget(app)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.verticalLayoutWidget = QWidget(self.centralwidget)
-        self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(10, 10, 231, 541))
-        self.query_layout = QVBoxLayout(self.verticalLayoutWidget)
-        self.query_layout.setObjectName(u"query_layout")
-        self.query_layout.setContentsMargins(0, 0, 0, 0)
+        self.widget = QWidget(self.centralwidget)
+        self.widget.setObjectName(u"widget")
+        self.widget.setGeometry(QRect(0, 0, 261, 761))
+        self.widget.setStyleSheet(u"")
+        self.gridLayoutWidget = QWidget(self.widget)
+        self.gridLayoutWidget.setObjectName(u"gridLayoutWidget")
+        self.gridLayoutWidget.setGeometry(QRect(10, 10, 251, 741))
+        self.left_layout = QGridLayout(self.gridLayoutWidget)
+        self.left_layout.setObjectName(u"left_layout")
+        self.left_layout.setContentsMargins(0, 0, 0, 0)
         app.setCentralWidget(self.centralwidget)
         self.menu_bar = QMenuBar(app)
         self.menu_bar.setObjectName(u"menu_bar")
-        self.menu_bar.setGeometry(QRect(0, 0, 800, 22))
+        self.menu_bar.setGeometry(QRect(0, 0, 957, 26))
         self.instruments_menu = QMenu(self.menu_bar)
         self.instruments_menu.setObjectName(u"instruments_menu")
         app.setMenuBar(self.menu_bar)

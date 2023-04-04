@@ -1,4 +1,7 @@
 {
+	"recorder": {
+		"class_name": "File_Recorder"
+	},
 	"gizmo": {
 		"class_name": "Gizmotron"
 	},

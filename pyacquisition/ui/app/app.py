@@ -1,5 +1,6 @@
 from .ui_app import Ui_app
-from .. import QueryWidget, CommandWidget
+from .. import QueryWidget, CommandWidget, MeasureWidget
+from ...rack import Rack
 
 
 from PySide6 import QtWidgets, QtGui, QtCore
@@ -8,9 +9,15 @@ from functools import partial
 
 class App(QtWidgets.QMainWindow, Ui_app):
 
-	def __init__(self, *args, **kwargs):
+	def __init__(self, config, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 		self.setupUi(self)
+
+		self._rack = Rack.from_filepath(config, visa_backend='pyvisa')
+		self.populate_instruments_menu_from_rack(self._rack)
+
+		self._measurement_widget = 	MeasureWidget.from_filepath(config, self._rack)
+		self.left_layout.addWidget(self._measurement_widget)
 
 
 	def open_query_widget(self, query):
@@ -25,7 +32,7 @@ class App(QtWidgets.QMainWindow, Ui_app):
 		self.w.show()
 
 
-	def populate_instruments_from_rack(self, rack):
+	def populate_instruments_menu_from_rack(self, rack):
 
 		for name, inst in rack.instruments.items():
 
