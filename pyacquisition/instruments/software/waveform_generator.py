@@ -67,4 +67,4 @@ class WaveformGenerator(SoftInstrument):
 	@query
 	def get_signal(self) -> float:
 		t = time.time() - self._t0
-		return self._function[self._shape](self._amplitude, self._frequency, t)
+		return float(self._function[self._shape](self._amplitude, self._frequency, t))

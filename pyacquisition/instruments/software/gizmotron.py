@@ -28,7 +28,7 @@ class Color(enum.Enum):
 	GREEN = 4
 	CYAN = 6
 	BLUE = 8
-	MAGNETA = 5
+	MAGENTA = 5
 
 
 class Gizmotron(SoftInstrument):

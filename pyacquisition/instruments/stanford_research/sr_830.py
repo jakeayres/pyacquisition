@@ -83,6 +83,21 @@ class SR_830(Instrument):
 	"""
 
 	@query
+	def identify(self):
+		return self._query('*IDN?')
+
+
+	@command
+	def reset(self):
+		return self._command('*RST')
+
+
+	@command
+	def clear(self):
+		return self._command('*CLS')
+
+
+	@query
 	def get_phase(self) -> float:
 		return float(self._query("PHAS?"))
 
@@ -236,7 +251,17 @@ class SR_830(Instrument):
 
 
 	@query
-	def get_voltage(self) -> list[float]:
+	def get_x(self) -> float:
+		return float(self._query(f'OUTP? 1'))
+
+
+	@query
+	def get_y(self) -> float:
+		return float(self._query(f'OUTP? 2'))
+
+
+	@query
+	def get_xy(self) -> list[float]:
 		return [float(s) for s in self._query(f'SNAP? 1,2').split(',')]
 
 
