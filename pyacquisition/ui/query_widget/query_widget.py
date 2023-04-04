@@ -1,5 +1,6 @@
 from .ui_query_widget import Ui_query_widget
-from ..type_widgets import FloatWidget, IntWidget, EnumWidget, ValueWidget
+from ..type_widgets import (FloatWidget, IntWidget, EnumWidget, 
+	ValueWidget, GraphicalFloatWidget)
 
 from PySide6 import QtWidgets, QtGui, QtCore
 import inspect, enum
@@ -74,7 +75,7 @@ class QueryWidget(QtWidgets.QWidget, Ui_query_widget):
 		if type_ == int:
 			return IntWidget
 		elif type_ == float:
-			return FloatWidget
+			return GraphicalFloatWidget
 		elif issubclass(type_, enum.Enum):
 			return EnumWidget
 		else:
@@ -83,7 +84,7 @@ class QueryWidget(QtWidgets.QWidget, Ui_query_widget):
 
 	def widgets_from_response(self, response):
 
-		if isinstance(response, (int, float, enum.Enum)):
+		if isinstance(response, (str, int, float, enum.Enum)):
 			widget = self.widget_from_flat_type(type(response))(value=response, type_=type(response))
 			return [widget]
 
@@ -110,7 +111,7 @@ class QueryWidget(QtWidgets.QWidget, Ui_query_widget):
 		return_type = inspect.getfullargspec(self._func).annotations['return']
 
 		if return_type == float:
-			self.response_edit.setText(f'{response:.6e}')
+			self.response_edit.setText(f'{response}')
 		elif return_type == int:
 			self.response_edit.setText(f'{response}')
 		else:

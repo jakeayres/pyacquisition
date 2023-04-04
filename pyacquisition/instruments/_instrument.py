@@ -92,21 +92,6 @@ class Instrument(metaclass=QueryCommandProvider):
 		return self._visa_resource.write(command_String)
 
 
-	@query
-	def identify(self):
-		return self._query('*IDN?')
-
-
-	@command
-	def reset(self):
-		return self._command('*RST')
-
-
-	@command
-	def clear(self):
-		return self._command('*CLS')
-
-
 
 class SoftInstrument(metaclass=QueryCommandProvider):
 	""" Base class for software (non-hardware) instruments. 

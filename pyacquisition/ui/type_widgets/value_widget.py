@@ -5,7 +5,14 @@ from PySide6 import QtWidgets, QtGui
 class ValueWidget(QtWidgets.QWidget, Ui_value_widget):
 
 
-    def __init__(self, value='', type_='unknown', unit='', formatter=lambda x: f'{x}'):
+    def __init__(
+        self, 
+        name='', 
+        value='', 
+        type_='unknown', 
+        unit='', 
+        formatter=lambda x: f'{x}'
+        ):
         super().__init__()
         self.setupUi(self)
 
@@ -13,7 +20,9 @@ class ValueWidget(QtWidgets.QWidget, Ui_value_widget):
         self._type = type_
         self._unit = unit
         self._formatter = formatter
+        self._name = name
 
+        self.set_name(name)
         self.set_value(value)
         self.set_unit(unit)
         self.set_type(type_)
@@ -27,6 +36,11 @@ class ValueWidget(QtWidgets.QWidget, Ui_value_widget):
     def set_formatter(self, formatter):
         self._formatter = formatter
         self.value_label.setText(self._formatter(self._value))
+
+
+    def set_name(self, name):
+        self._name = name
+        self.name_label.setText(self._name)
 
 
     def set_unit(self, unit):
