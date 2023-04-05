@@ -16,6 +16,9 @@ class ValueWidget(QtWidgets.QWidget, Ui_value_widget):
         super().__init__()
         self.setupUi(self)
 
+        self.setMaximumSize(250, 28)
+        self.setMinimumSize(250, 28)
+
         self._value = value
         self._type = type_
         self._unit = unit

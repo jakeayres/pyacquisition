@@ -83,11 +83,11 @@ class Ui_graphical_value_widget(object):
         font2.setBold(True)
         self.name_label.setFont(font2)
         self.name_label.setStyleSheet(u"color: white;\n"
-"background-color: rgba(0, 0, 0, 100);")
+"background-color: rgba(0, 0, 0, 150);")
         self.name_label.setAlignment(Qt.AlignCenter)
         self.value_label = QLabel(graphical_value_widget)
         self.value_label.setObjectName(u"value_label")
-        self.value_label.setGeometry(QRect(100, 40, 120, 20))
+        self.value_label.setGeometry(QRect(100, 35, 120, 25))
         font3 = QFont()
         font3.setPointSize(10)
         font3.setBold(True)
@@ -97,7 +97,7 @@ class Ui_graphical_value_widget(object):
         self.value_label.setFrameShape(QFrame.NoFrame)
         self.value_label.setLineWidth(0)
         self.value_label.setTextFormat(Qt.AutoText)
-        self.value_label.setAlignment(Qt.AlignBottom|Qt.AlignRight|Qt.AlignTrailing)
+        self.value_label.setAlignment(Qt.AlignRight|Qt.AlignTrailing|Qt.AlignVCenter)
         self.value_label.setMargin(0)
         self.value_label.setIndent(-1)
 

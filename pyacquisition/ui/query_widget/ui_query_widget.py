@@ -23,9 +23,8 @@ class Ui_query_widget(object):
     def setupUi(self, query_widget):
         if not query_widget.objectName():
             query_widget.setObjectName(u"query_widget")
-        query_widget.resize(600, 239)
-        query_widget.setStyleSheet(u"background-color: white;\n"
-"")
+        query_widget.resize(666, 239)
+        query_widget.setStyleSheet(u"")
         self._query_label = QLabel(query_widget)
         self._query_label.setObjectName(u"_query_label")
         self._query_label.setGeometry(QRect(10, 10, 191, 16))
@@ -54,20 +53,20 @@ class Ui_query_widget(object):
         self._response_label.setGeometry(QRect(220, 10, 91, 16))
         self.verticalLayoutWidget = QWidget(query_widget)
         self.verticalLayoutWidget.setObjectName(u"verticalLayoutWidget")
-        self.verticalLayoutWidget.setGeometry(QRect(410, 30, 181, 201))
+        self.verticalLayoutWidget.setGeometry(QRect(410, 30, 251, 201))
         self.response_layout = QVBoxLayout(self.verticalLayoutWidget)
         self.response_layout.setObjectName(u"response_layout")
         self.response_layout.setContentsMargins(0, 0, 0, 0)
         self._response_label_2 = QLabel(query_widget)
         self._response_label_2.setObjectName(u"_response_label_2")
         self._response_label_2.setGeometry(QRect(410, 10, 101, 16))
-        self.widget = QWidget(query_widget)
-        self.widget.setObjectName(u"widget")
-        self.widget.setGeometry(QRect(10, 70, 191, 161))
-        self.verticalLayout = QVBoxLayout(self.widget)
+        self.layoutWidget = QWidget(query_widget)
+        self.layoutWidget.setObjectName(u"layoutWidget")
+        self.layoutWidget.setGeometry(QRect(10, 70, 191, 161))
+        self.verticalLayout = QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setObjectName(u"verticalLayout")
         self.verticalLayout.setContentsMargins(0, 0, 0, 0)
-        self._args_label = QLabel(self.widget)
+        self._args_label = QLabel(self.layoutWidget)
         self._args_label.setObjectName(u"_args_label")
 
         self.verticalLayout.addWidget(self._args_label)
@@ -81,7 +80,7 @@ class Ui_query_widget(object):
 
         self.verticalLayout.addItem(self.vertical_spacer)
 
-        self.send_button = QPushButton(self.widget)
+        self.send_button = QPushButton(self.layoutWidget)
         self.send_button.setObjectName(u"send_button")
 
         self.verticalLayout.addWidget(self.send_button)

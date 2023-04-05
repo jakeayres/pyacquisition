@@ -23,16 +23,21 @@ class Ui_value_widget(object):
         if not value_widget.objectName():
             value_widget.setObjectName(u"value_widget")
         value_widget.resize(250, 28)
+        value_widget.setMinimumSize(QSize(250, 28))
+        value_widget.setBaseSize(QSize(250, 28))
         value_widget.setStyleSheet(u"background-color: rgba(255, 255, 255, 255);")
         self.value_label = QLabel(value_widget)
         self.value_label.setObjectName(u"value_label")
-        self.value_label.setGeometry(QRect(129, 0, 91, 28))
+        self.value_label.setGeometry(QRect(130, 0, 90, 28))
+        self.value_label.setMinimumSize(QSize(90, 28))
+        self.value_label.setMaximumSize(QSize(90, 28))
         font = QFont()
         font.setPointSize(10)
         font.setBold(True)
         self.value_label.setFont(font)
         self.value_label.setStyleSheet(u"background-color: rgba(255, 255, 255, 255);\n"
-"padding-right: 5px;")
+"padding-right: 5px;\n"
+"color: black;")
         self.value_label.setFrameShape(QFrame.Box)
         self.value_label.setLineWidth(0)
         self.value_label.setTextFormat(Qt.AutoText)
@@ -83,7 +88,7 @@ class Ui_value_widget(object):
         font3.setBold(True)
         self.name_label.setFont(font3)
         self.name_label.setStyleSheet(u"color: white;\n"
-"background-color: rgba(0, 0, 0, 100);")
+"background-color: rgba(0, 0, 0, 150);")
         self.name_label.setAlignment(Qt.AlignCenter)
 
         self.retranslateUi(value_widget)
@@ -93,7 +98,7 @@ class Ui_value_widget(object):
 
     def retranslateUi(self, value_widget):
         value_widget.setWindowTitle(QCoreApplication.translate("value_widget", u"Form", None))
-        self.value_label.setText(QCoreApplication.translate("value_widget", u"Value", None))
+        self.value_label.setText(QCoreApplication.translate("value_widget", u"0", None))
         self.type_label.setText(QCoreApplication.translate("value_widget", u"(type)", None))
         self.unit_label.setText(QCoreApplication.translate("value_widget", u"unit", None))
         self.name_label.setText(QCoreApplication.translate("value_widget", u"Name", None))

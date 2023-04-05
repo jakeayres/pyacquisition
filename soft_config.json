@@ -2,11 +2,39 @@
 	"recorder": {
 		"class_name": "File_Recorder"
 	},
-	"gizmo": {
-		"class_name": "Gizmotron"
-	},
 	"clock": {
-		"class_name": "Clock"
+		"class_name": "Clock",
+		"measure": {
+			"time": {
+				"method": "timestamp_ms"
+			}
+		}
+	},
+	"gizmo": {
+		"class_name": "Gizmotron",
+		"measure": {
+			"float0": {
+				"method": "get_float"
+			},
+			"float1": {
+				"method": "get_float"
+			},
+			"enum1": {
+				"method": "get_direction"
+			},
+			"integer0": {
+				"method": "get_integer"
+			},
+			"integer1": {
+				"method": "get_integer"
+			},
+			"float2": {
+				"method": "get_float"
+			},
+			"integer2": {
+				"method": "get_integer"
+			}
+		}
 	},
 	"wave": {
 		"class_name": "Waveform_Generator"

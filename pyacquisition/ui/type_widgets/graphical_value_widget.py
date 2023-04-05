@@ -20,6 +20,8 @@ class GraphicalValueWidget(QtWidgets.QWidget, Ui_graphical_value_widget):
         super().__init__()
         self.setupUi(self)
 
+        self.setMaximumSize(250, 60)
+        self.setMinimumSize(250, 60)
 
         self._name = name
         self._value = value

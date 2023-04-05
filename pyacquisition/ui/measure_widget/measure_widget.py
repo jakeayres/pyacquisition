@@ -22,10 +22,11 @@ class Worker(QtCore.QObject):
 		self._callables = callables
 		self._timer = QtCore.QTimer(self)
 		self._timer.timeout.connect(self.poll)
+		self._rate = 100
 
 
 	def polling_start(self):
-		self._timer.start(100)
+		self._timer.start(self._rate)
 		self._t0_time = time.time()
 		self._t0_loop = time.time()
 
@@ -45,8 +46,7 @@ class Worker(QtCore.QObject):
 	def poll(self):
 		""" Continuous task
 		"""
-		for key, func in self._callables.items():
-			self.output.emit({key: func()})
+		self.output.emit({k: f() for k, f in self._callables.items()})
 		t1 = time.time()
 		self.loop_time.emit(t1-self._t0_loop)
 		self.run_time.emit(t1-self._t0_time)
@@ -60,6 +60,8 @@ class MeasureWidget(QtWidgets.QWidget, Ui_measure_widget):
 	signal_start =  QtCore.Signal()
 	signal_stop = QtCore.Signal()
 	signal_toggle = QtCore.Signal()
+
+	data_signal = QtCore.Signal(dict)
 
 
 	def __init__(self, rack):
@@ -117,7 +119,6 @@ class MeasureWidget(QtWidgets.QWidget, Ui_measure_widget):
 
 
 	def _toggle_button(self):
-		print('toggled')
 		self._running = not self._running
 		if self._running:
 			self.run_button.setText('Stop')
@@ -153,19 +154,17 @@ class MeasureWidget(QtWidgets.QWidget, Ui_measure_widget):
 		self.signal_start.connect(self._worker.polling_start)
 		self.signal_toggle.connect(self._worker.polling_toggle)
 
-
-		""" NEED A WAY TO CLEANLY TIDY UP THE WORKER AND THREAD
-			WHEN NEEDED eg WHEN CLOSING THE APPLICATION
-		""" 
-		# self._worker.finished.connect(self._thread.quit)
-		# self._worker.finished.connect(self._worker.deleteLater)
-		# self._thread.finished.connect(self._thread.deleteLater)
-
 		self._worker.output.connect(self._report_output)
 		self._worker.loop_time.connect(self._update_loop_time)
 		self._worker.run_time.connect(self._update_run_time)
 
 		self._thread.start()
+
+
+	def _stop_worker(self):
+		self._thread.quit()
+		self._worker.deleteLater()
+		self._thread.deleteLater()
 
 
 	def _widget_from_flat_type(self, type_):
@@ -188,7 +187,8 @@ class MeasureWidget(QtWidgets.QWidget, Ui_measure_widget):
 	def _report_output(self, response):
 		for key, value in response.items():
 			self._widgets[key].set_value(value)
-			#self._signals[key].emit(value)
+		self.data_signal.emit(response)
+		
 
 
 	def add_callable(self, key, func):
@@ -196,4 +196,9 @@ class MeasureWidget(QtWidgets.QWidget, Ui_measure_widget):
 		self._widgets[key] = self._widget_from_callable(func)(name=key)
 
 		self.main_layout.addWidget(self._widgets[key], QtCore.Qt.AlignTop)
-		#self._signals[key] = QtCore.Signal()
+		self._signals[key] = QtCore.Signal()
+
+
+	def close_cleanly(self, ):
+		self._stop_worker()
+		self.deleteLater()

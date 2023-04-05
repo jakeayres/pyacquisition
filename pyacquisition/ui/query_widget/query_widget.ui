@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>666</width>
     <height>239</height>
    </rect>
   </property>
@@ -14,7 +14,7 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">background-color: white;
+   <string notr="true">
 </string>
   </property>
   <widget class="QLabel" name="_query_label">
@@ -108,7 +108,7 @@
     <rect>
      <x>410</x>
      <y>30</y>
-     <width>181</width>
+     <width>251</width>
      <height>201</height>
     </rect>
    </property>
@@ -127,7 +127,7 @@
     <string>Response Widgets:</string>
    </property>
   </widget>
-  <widget class="QWidget" name="">
+  <widget class="QWidget" name="layoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>

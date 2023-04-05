@@ -1,5 +1,5 @@
 from .ui_app import Ui_app
-from .. import QueryWidget, CommandWidget, MeasureWidget
+from .. import QueryWidget, CommandWidget, MeasureWidget, RecordWidget, PlotWidget
 from ...rack import Rack
 
 
@@ -13,21 +13,27 @@ class App(QtWidgets.QMainWindow, Ui_app):
 		super().__init__(*args, **kwargs)
 		self.setupUi(self)
 
-		self._rack = Rack.from_filepath(config, visa_backend='pyvisa')
+		self._rack = Rack.from_filepath(config, visa_backend='dummy')
 		self.populate_instruments_menu_from_rack(self._rack)
 
 		self._measurement_widget = 	MeasureWidget.from_filepath(config, self._rack)
-		self.left_layout.addWidget(self._measurement_widget)
+		self.left_column.addWidget(self._measurement_widget)
+
+		self._plot_widget = PlotWidget()
+		self.middle_grid.addWidget(self._plot_widget)
+
+		self._measurement_widget.data_signal.connect(self._plot_widget.receive_data)
+
+		self._record_widget = RecordWidget()
+		self.right_column.addWidget(self._record_widget)
 
 
 	def open_query_widget(self, query):
-
 		self.w = QueryWidget(query)
 		self.w.show()
 
 
 	def open_command_widget(self, command):
-
 		self.w = CommandWidget(command)
 		self.w.show()
 
@@ -54,3 +60,11 @@ class App(QtWidgets.QMainWindow, Ui_app):
 				command_menu.addAction(command_action)
 
 			self.instruments_menu.addMenu(inst_menu)
+
+
+	def closeEvent(self, event):
+		""" Make sure widgets (eg those that contain worker threads)
+		close down cleanly.
+		"""
+		self._measurement_widget.close_cleanly()
+		event.accept()

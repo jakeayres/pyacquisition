@@ -15,8 +15,8 @@ class Clock(SoftInstrument):
 
 
 	@query
-	def timestamp(self) -> float:
-		return time.time()
+	def timestamp_ms(self) -> float:
+		return float(f'{time.time():.3f}')
 
 
 	@command

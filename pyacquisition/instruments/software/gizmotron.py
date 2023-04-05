@@ -37,7 +37,7 @@ class Gizmotron(SoftInstrument):
 	def __init__(self):
 		super().__init__()
 
-		self._direction = 0
+		self._direction = Direction(0)
 		self._random_outputs = [np.random.random, np.random.random]
 
 
@@ -47,8 +47,18 @@ class Gizmotron(SoftInstrument):
 
 
 	@query
+	def get_float(self) -> float:
+		return float(f'{np.random.random():.3f}')
+
+
+	@query
 	def get_two_integers(self) -> tuple[int, int]:
 		return (int(np.random.random()*10), int(np.random.random()*10))
+
+
+	@query
+	def get_two_floats(self) -> tuple[float, float]:
+		return (float(f'{np.random.random():.3f}'), float(f'{np.random.random():.3f}'))
 
 
 	@query

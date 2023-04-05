@@ -22,7 +22,7 @@ class Ui_measure_widget(object):
     def setupUi(self, measure_widget):
         if not measure_widget.objectName():
             measure_widget.setObjectName(u"measure_widget")
-        measure_widget.resize(250, 388)
+        measure_widget.resize(250, 554)
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(1)
         sizePolicy.setVerticalStretch(1)
@@ -53,9 +53,11 @@ class Ui_measure_widget(object):
         font.setPointSize(10)
         font.setBold(True)
         self.run_button.setFont(font)
-        self.run_button.setStyleSheet(u"background: rgb(100, 200, 25);\n"
-"border-radius: 5px;\n"
-"color: white;")
+        self.run_button.setStyleSheet(u"QPushButton {\n"
+"	background: rgb(100, 200, 25);\n"
+"	border-radius: 5px;\n"
+"	color: white;\n"
+"}")
         self._measure_label = QLabel(self.title_widget)
         self._measure_label.setObjectName(u"_measure_label")
         self._measure_label.setGeometry(QRect(20, 0, 91, 51))

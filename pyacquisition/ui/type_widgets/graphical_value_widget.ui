@@ -168,7 +168,7 @@ padding-right: 3px;</string>
    </property>
    <property name="styleSheet">
     <string notr="true">color: white;
-background-color: rgba(0, 0, 0, 100);</string>
+background-color: rgba(0, 0, 0, 150);</string>
    </property>
    <property name="text">
     <string>Name</string>
@@ -181,9 +181,9 @@ background-color: rgba(0, 0, 0, 100);</string>
    <property name="geometry">
     <rect>
      <x>100</x>
-     <y>40</y>
+     <y>35</y>
      <width>120</width>
-     <height>20</height>
+     <height>25</height>
     </rect>
    </property>
    <property name="font">
@@ -209,7 +209,7 @@ padding-right: 5px;</string>
     <enum>Qt::AutoText</enum>
    </property>
    <property name="alignment">
-    <set>Qt::AlignBottom|Qt::AlignRight|Qt::AlignTrailing</set>
+    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
    </property>
    <property name="margin">
     <number>0</number>

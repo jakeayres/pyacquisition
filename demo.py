@@ -12,9 +12,10 @@ if __name__ == "__main__":
 
 
 	app = QtWidgets.QApplication(sys.argv)
-	w = App('instrument_config.json')
+	w = App('soft_config.json')
 	w.show()
-	sys.exit(app.exec())
+	app.exec()
+	sys.exit()
 
 
 # if __name__ == "__main__":
