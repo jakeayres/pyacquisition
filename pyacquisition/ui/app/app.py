@@ -22,10 +22,11 @@ class App(QtWidgets.QMainWindow, Ui_app):
 		self._plot_widget = PlotWidget()
 		self.middle_grid.addWidget(self._plot_widget)
 
-		self._measurement_widget.data_signal.connect(self._plot_widget.receive_data)
-
 		self._record_widget = RecordWidget()
 		self.right_column.addWidget(self._record_widget)
+
+		self._measurement_widget.data_signal.connect(self._plot_widget.receive_data)
+		self._measurement_widget.data_signal.connect(self._record_widget.receive_data)
 
 
 	def open_query_widget(self, query):
@@ -67,4 +68,5 @@ class App(QtWidgets.QMainWindow, Ui_app):
 		close down cleanly.
 		"""
 		self._measurement_widget.close_cleanly()
+		self._record_widget.close_cleanly()
 		event.accept()

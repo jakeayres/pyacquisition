@@ -16,7 +16,7 @@ from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
     QImage, QKeySequence, QLinearGradient, QPainter,
     QPalette, QPixmap, QRadialGradient, QTransform)
 from PySide6.QtWidgets import (QApplication, QFrame, QGridLayout, QHBoxLayout,
-    QLabel, QSizePolicy, QSpacerItem, QToolButton,
+    QLabel, QSizePolicy, QSpacerItem, QToolButton, QPushButton,
     QWidget)
 
 from pyqtgraph import PlotWidget
@@ -62,7 +62,7 @@ class Ui_plot_widget(object):
         self.toolButton_4.setStyleSheet(u"background: rgb(100, 100, 125);\n"
 "color: #EEE;\n"
 "border-radius: 5px")
-        self.toolButton_4.setPopupMode(QToolButton.DelayedPopup)
+        self.toolButton_4.setPopupMode(QToolButton.MenuButtonPopup)
 
         self.horizontalLayout.addWidget(self.toolButton_4)
 
@@ -73,7 +73,7 @@ class Ui_plot_widget(object):
         self.toolButton_2.setStyleSheet(u"background: rgb(50, 50, 150);\n"
 "color: #EEE;\n"
 "border-radius: 5px")
-        self.toolButton_2.setPopupMode(QToolButton.DelayedPopup)
+        self.toolButton_2.setPopupMode(QToolButton.MenuButtonPopup)
 
         self.horizontalLayout.addWidget(self.toolButton_2)
 
