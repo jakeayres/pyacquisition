@@ -71,12 +71,19 @@ class MeasureWidget(QtWidgets.QWidget, Ui_measure_widget):
 		self._rack = rack
 
 		self._callables = {}
-		self._signals = {}
+		#self._signals = {}
 		self._widgets = {}
 
 		self.run_button.clicked.connect(self.signal_toggle.emit)
 
+		self.signal_toggle.connect(self._toggle_running)
 		self.signal_toggle.connect(self._toggle_button)
+
+		self.signal_stop.connect(self._set_running_false)
+		self.signal_stop.connect(self._set_button_not_running)
+
+		self.signal_start.connect(self._set_running_true)
+		self.signal_start.connect(self._set_button_running)
 
 		self._thread = QtCore.QThread()
 		self._worker = None
@@ -117,23 +124,42 @@ class MeasureWidget(QtWidgets.QWidget, Ui_measure_widget):
 					self.add_callable(name, self._rack.instruments[inst].queries[measure_config['method']])
 
 
+	def _set_running_true(self):
+		self._running = True
+
+
+	def _set_running_false(self):
+		self._running = False
+
+
+	def _toggle_running(self):
+		self._running = not self._running
+
+
+	def _set_button_running(self):
+		self.run_button.setText('Stop')
+		self.run_button.setStyleSheet('\
+			background: rgb(200, 50, 25);\
+			border-radius: 5px;\
+			color: white;'
+		)
+
+
+	def _set_button_not_running(self):
+		self.run_button.setText('Run')
+		self.run_button.setStyleSheet('\
+			background: rgb(100, 200, 25);\
+			border-radius: 5px;\
+			color: white;'
+		)
+
 
 	def _toggle_button(self):
-		self._running = not self._running
 		if self._running:
-			self.run_button.setText('Stop')
-			self.run_button.setStyleSheet('\
-				background: rgb(200, 50, 25);\
-				border-radius: 5px;\
-				color: white;'
-			)
+			self._set_button_running()
 		else:
-			self.run_button.setText('Run')
-			self.run_button.setStyleSheet('\
-				background: rgb(100, 200, 25);\
-				border-radius: 5px;\
-				color: white;'
-			)
+			self._set_button_not_running()
+
 
 	def _update_loop_time(self, t: float):
 		self.loop_label.setText(f'{t:.3f}')
@@ -141,7 +167,6 @@ class MeasureWidget(QtWidgets.QWidget, Ui_measure_widget):
 
 	def _update_run_time(self, t: float):
 		self.time_label.setText(f'{t:.3f}')
-
 
 
 	def _start_worker(self):
@@ -188,15 +213,28 @@ class MeasureWidget(QtWidgets.QWidget, Ui_measure_widget):
 		for key, value in response.items():
 			self._widgets[key].set_value(value)
 		self.data_signal.emit(response)
-		
+
+
+	def start(self):
+		self.signal_start.emit()
+
+
+	def stop(self):
+		self.signal_stop.emit()
+
+
+	def toggle(self):
+		self.signal_toggle.emit()
 
 
 	def add_callable(self, key, func):
+		""" Take a key and a callable function and add it to the dictionary
+		of callables and add the appropriate widget to layout be displayed.
+		"""
 		self._callables[key] = func
 		self._widgets[key] = self._widget_from_callable(func)(name=key)
 
 		self.main_layout.addWidget(self._widgets[key], QtCore.Qt.AlignTop)
-		self._signals[key] = QtCore.Signal()
 
 
 	def close_cleanly(self, ):

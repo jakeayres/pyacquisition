@@ -19,7 +19,7 @@ class Worker(QtCore.QObject):
 
 		self._timer = QtCore.QTimer(self)
 		self._timer.timeout.connect(self.poll)
-		self._rate = 5000
+		self._rate = 1000
 
 		self._data = {}
 		self._path = None
@@ -120,7 +120,15 @@ class RecordWidget(QtWidgets.QWidget, Ui_record_widget):
 		self._callables = {}
 
 		self.run_button.clicked.connect(self.signal_toggle.emit)
+
 		self.signal_toggle.connect(self._toggle_running)
+		self.signal_toggle.connect(self._toggle_button)
+
+		self.signal_stop.connect(self._set_running_false)
+		self.signal_stop.connect(self._set_button_not_running)
+
+		self.signal_start.connect(self._set_running_true)
+		self.signal_start.connect(self._set_button_running)
 
 		self._thread = QtCore.QThread()
 		self._worker = None
@@ -155,41 +163,41 @@ class RecordWidget(QtWidgets.QWidget, Ui_record_widget):
 		self._thread.deleteLater()
 
 
+	def _set_running_true(self):
+		self._running = True
+
+
+	def _set_running_false(self):
+		self._running = False
+
+
 	def _toggle_running(self):
 		self._running = not self._running
-		self._toggle_button()
-		self._toggle_edits()
 
-		if self._running:
-			self.path_signal.emit(self._get_path())
+
+	def _set_button_running(self):
+		self.run_button.setText('Stop')
+		self.run_button.setStyleSheet('\
+			background: rgb(200, 50, 25);\
+			border-radius: 5px;\
+			color: white;'
+		)
+
+
+	def _set_button_not_running(self):
+		self.run_button.setText('Run')
+		self.run_button.setStyleSheet('\
+			background: rgb(100, 200, 25);\
+			border-radius: 5px;\
+			color: white;'
+		)
 
 
 	def _toggle_button(self):
 		if self._running:
-			self.run_button.setText('Stop')
-			self.run_button.setStyleSheet('\
-				background: rgb(200, 50, 25);\
-				border-radius: 5px;\
-				color: white;'
-			)
+			self._set_button_running()
 		else:
-			self.run_button.setText('Run')
-			self.run_button.setStyleSheet('\
-				background: rgb(100, 200, 25);\
-				border-radius: 5px;\
-				color: white;'
-			)
-
-
-	def _toggle_edits(self):
-		if self._running:
-			self.directory_edit.setEnabled(False)
-			self.stem_edit.setEnabled(False)
-			self.number_edit.setEnabled(False)
-		else:
-			self.directory_edit.setEnabled(True)
-			self.stem_edit.setEnabled(True)
-			self.number_edit.setEnabled(True)
+			self._set_button_not_running()
 
 
 	def _update_loop_time(self, t: float):
@@ -207,11 +215,43 @@ class RecordWidget(QtWidgets.QWidget, Ui_record_widget):
 		return f'{root}/{stem}_{number}.data'
 
 
+	def start(self):
+		self.signal_start.emit()
+
+
+	def stop(self):
+		self.signal_stop.emit()
+
+
+	def toggle(self):
+		self.signal_toggle.emit()
+
+
+	def set_directory(self, directory: str):
+		self.directory_edit.setText(directory)
+		self.path_signal.emit(self._get_path())
+
+
+	def set_stem(self, stem: str):
+		self.stem_edit.setText(stem)
+		self.path_signal.emit(self._get_path())
+
+
+	def set_number(self, number: int):
+		self.number_edit.setText(f'{number:04}')
+		self.path_signal.emit(self._get_path())
+
+
+	def increment_file(self):
+		i = int(self.number_edit.text())
+		self.set_number(i+1)
+
+
 	def receive_data(self, data: dict):
 		self.data_signal.emit(data)
 
 
-	def close_cleanly(self, ):
+	def close_cleanly(self):
 		self._stop_worker()
 		self.deleteLater()
 

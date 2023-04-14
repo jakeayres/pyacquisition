@@ -24,7 +24,7 @@ class Ui_app(object):
     def setupUi(self, app):
         if not app.objectName():
             app.setObjectName(u"app")
-        app.resize(691, 668)
+        app.resize(1000, 700)
         font = QFont()
         font.setPointSize(11)
         font.setBold(True)
@@ -87,7 +87,7 @@ class Ui_app(object):
         app.setCentralWidget(self.centralwidget)
         self.menu_bar = QMenuBar(app)
         self.menu_bar.setObjectName(u"menu_bar")
-        self.menu_bar.setGeometry(QRect(0, 0, 691, 26))
+        self.menu_bar.setGeometry(QRect(0, 0, 1000, 26))
         self.instruments_menu = QMenu(self.menu_bar)
         self.instruments_menu.setObjectName(u"instruments_menu")
         app.setMenuBar(self.menu_bar)

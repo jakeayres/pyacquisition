@@ -37,6 +37,11 @@
 		}
 	},
 	"wave": {
-		"class_name": "Waveform_Generator"
+		"class_name": "Waveform_Generator",
+		"measure": {
+			"signal": {
+				"method": "get_signal"
+			}
+		}
 	}
 }

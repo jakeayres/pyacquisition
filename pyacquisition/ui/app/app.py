@@ -70,3 +70,34 @@ class App(QtWidgets.QMainWindow, Ui_app):
 		self._measurement_widget.close_cleanly()
 		self._record_widget.close_cleanly()
 		event.accept()
+
+
+
+	@property
+	def instruments(self) -> dict:
+		return self._rack.instruments
+
+
+
+	def start_measuring(self):
+		self._measurement_widget.start()
+
+
+	def stop_measuring(self):
+		self._measurement_widget.stop()
+
+
+	def toggle_measuring(self):
+		self._measurement_widget.toggle()
+
+
+	def start_recording(self):
+		self._record_widget.start()
+		
+
+	def stop_recording(self):
+		self._record_widget.stop()
+
+
+	def increment_file(self):
+		self._record_widget.increment_file()

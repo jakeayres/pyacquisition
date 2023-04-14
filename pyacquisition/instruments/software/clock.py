@@ -11,7 +11,8 @@ class Clock(SoftInstrument):
 	def __init__(self):
 		super().__init__()
 
-		self._timers = {}
+		self._named_timers = {}
+		self._t0 = time.time()
 
 
 	@query
@@ -19,12 +20,17 @@ class Clock(SoftInstrument):
 		return float(f'{time.time():.3f}')
 
 
+	@query
+	def time(self) -> float:
+		return time.time() - self._t0
+
+
 	@command
-	def start_timer(self, timer_name):
-		self._timers[timer_name] = time.time()
+	def start_named_timer(self, timer_name: str):
+		self._named_timers[timer_name] = time.time()
 		return 0
 
 
 	@query
-	def read_timer(self, timer_name) -> float:
-		return self._timers[timer_name] - self.timestamp()
+	def read_named_timer(self, timer_name: str) -> float:
+		return self.timestamp_ms() - self._named_timers[timer_name]
