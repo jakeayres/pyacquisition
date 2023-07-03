@@ -1,7 +1,4 @@
 {
-	"recorder": {
-		"class_name": "File_Recorder"
-	},
 	"clock": {
 		"class_name": "Clock",
 		"measure": {
@@ -36,7 +33,15 @@
 			}
 		}
 	},
-	"wave": {
+	"wave1": {
+		"class_name": "Waveform_Generator",
+		"measure": {
+			"signal": {
+				"method": "get_signal"
+			}
+		}
+	},
+	"wave2": {
 		"class_name": "Waveform_Generator",
 		"measure": {
 			"signal": {
