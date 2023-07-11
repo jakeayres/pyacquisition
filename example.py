@@ -5,7 +5,7 @@ import asyncio, json
 
 
 async def sweep_gizmotron(
-	graph: Graph,
+	#graph: Graph,
 	scribe: Scribe, 
 	gizmo: Gizmotron, 
 	max_value: float,
@@ -45,8 +45,8 @@ async def sweep_gizmotron(
 	while gizmo.get_value() < 0:
 		await asyncio.sleep(0.25)
 
-	graph.save(f'Sweep{max_value}.png')
-	graph.clear()
+	# graph.save(f'Sweep{max_value}.png')
+	# graph.clear()
 
 
 
@@ -59,12 +59,12 @@ class MyExperiment(Experiment):
 
 	async def execute(self):
 
-		graph = self.add_async_graph('time', 'value')
+		#graph = self.add_async_graph('time', 'value')
 
-		g2 = self.add_async_graph('value', 'signal_1')
+		#g2 = self.add_async_graph('value', 'signal_1')
 
-		await sweep_gizmotron(g2, self.scribe, self.rack.gizmo, 30)
-		await sweep_gizmotron(g2, self.scribe, self.rack.gizmo, 20)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 3)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 4)
 
 
 

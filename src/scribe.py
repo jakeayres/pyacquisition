@@ -1,6 +1,11 @@
 from .consumer import Consumer
 import asyncio, os, datetime
 import pandas as pd
+import colorama
+
+
+# WINDOWS SPECIFIC REQUIREMENT
+colorama.init(convert=True)
 
 
 class Scribe(Consumer):
@@ -77,7 +82,6 @@ class Scribe(Consumer):
 			self.next_section()
 		self._title = title
 		self._log_new_file()
-		self.log(f'New File : {self.filename}')
 
 
 	def _write(self, data):
@@ -103,7 +107,10 @@ class Scribe(Consumer):
 		else:
 			mode = 'a'
 		with open(self.loglog_path, mode) as file:
-			file.write(f'{self._formatted_time} : {entry}\n')
+			file.write(f'{self._formatted_date} {self._formatted_time} : {entry}\n')
+			print(colorama.Fore.YELLOW + colorama.Style.DIM + f'{self._formatted_date}', end='')
+			print(colorama.Fore.YELLOW + colorama.Style.BRIGHT + f' {self._formatted_time}', end='')
+			print(colorama.Fore.WHITE + colorama.Style.BRIGHT + f'   {entry}', end='\n')
 
 
 	def _log_new_file(self):
@@ -112,15 +119,20 @@ class Scribe(Consumer):
 		else:
 			mode = 'a'
 		with open(self.filelog_path, mode) as file:
-			file.write(f'{self._formatted_time} {self.filename}\n')
+			self.log(f'{self.filename}')
 
 
 	@property
 	def _formatted_time(self):
-		return datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+		return datetime.datetime.now().strftime("%H:%M:%S")
+
+
+	@property
+	def _formatted_date(self):
+		return datetime.datetime.now().strftime("%Y-%m-%d")
+
 
 	async def run(self): 
 		while True:
 			x = await self._queue.get()
-			print(x)
 			self.record(x)
