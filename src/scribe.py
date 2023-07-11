@@ -119,7 +119,8 @@ class Scribe(Consumer):
 		else:
 			mode = 'a'
 		with open(self.filelog_path, mode) as file:
-			self.log(f'{self.filename}')
+			file.write(f'{self._formatted_date} {self._formatted_time} : {self.filename}\n')
+			self.log(f'New File : {self.filename}')
 
 
 	@property

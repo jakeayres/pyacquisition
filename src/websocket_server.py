@@ -7,6 +7,10 @@ from .consumer import Consumer
 
 
 class WebSocketServer(Consumer):
+	"""
+	This class starts a websocket server and passes messages
+	from it's Consumer (inhereted class) queue to it.
+	"""
 
 
 	def __init__(self, host, port):
