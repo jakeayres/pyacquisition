@@ -8,8 +8,8 @@ class Clock(SoftInstrument):
 	name = 'Clock'
 
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
 
 		self._named_timers = {}
 		self._t0 = time.time()
@@ -34,3 +34,16 @@ class Clock(SoftInstrument):
 	@query
 	def read_named_timer(self, timer_name: str) -> float:
 		return self.timestamp_ms() - self._named_timers[timer_name]
+
+
+	def register_endpoints(self, app):
+		super().register_endpoints(app)
+
+		@app.get(f'/{self._uid}/'+'timestamp/get/', tags=[self._uid])
+		def timestamp():
+			return self.timestamp_ms()
+
+		@app.get(f'/{self._uid}/'+'time/get/', tags=[self._uid])
+		def time():
+			return self.time()
+

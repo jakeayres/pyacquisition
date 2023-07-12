@@ -5,9 +5,9 @@ from scipy.signal import square, sawtooth
 
 
 class WaveformShape(enum.Enum):
-	SINE = 0
-	SQUARE = 1
-	SAW = 2
+	SINE = 'sine'
+	SQUARE = 'square'
+	SAW = 'saw'
 
 
 
@@ -17,18 +17,18 @@ class WaveformGenerator(SoftInstrument):
 	name = 'Waveform_Generator'
 
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
 
 		self._t0 = time.time()
 		self._amplitude = 1
 		self._frequency = 1
-		self._shape = 0
+		self._shape = WaveformShape.SINE
 
 		self._function = {
-			0: lambda a, f, t: a * np.sin(t * 2 * np.pi * f),
-			1: lambda a, f, t: a * square(t * 2 * np.pi * f, duty=0.5),
-			2: lambda a, f, t: a * sawtooth(t * 2 * np.pi * f, width=0),
+			'sine': lambda a, f, t: a * np.sin(t * 2 * np.pi * f),
+			'square': lambda a, f, t: a * square(t * 2 * np.pi * f, duty=0.5),
+			'saw': lambda a, f, t: a * sawtooth(t * 2 * np.pi * f, width=0),
 		}
 
 
@@ -56,15 +56,44 @@ class WaveformGenerator(SoftInstrument):
 
 	@query
 	def get_shape(self) -> WaveformShape:
-		return WaveformShape(self._shape).name
+		return self._shape
 
 
 	@command
 	def set_shape(self, shape: WaveformShape):
-		self._shape = shape.value
+		self._shape = shape
+		return 0
 
 
 	@query
 	def get_signal(self) -> float:
 		t = time.time() - self._t0
-		return float(self._function[self._shape](self._amplitude, self._frequency, t))
+		return float(self._function[self._shape.value](self._amplitude, self._frequency, t))
+
+
+	def register_endpoints(self, app):
+		super().register_endpoints(app)
+
+		@app.get(f'/{self._uid}/'+'amplitude/get/', tags=[self._uid])
+		def get_amplitude() -> float:
+			return self.get_amplitude()
+
+		@app.get(f'/{self._uid}/'+'amplitude/set/{value}', tags=[self._uid])
+		def set_amplitude(value: float) -> int:
+			return self.set_amplitude(value)
+
+		@app.get(f'/{self._uid}/'+'frequency/get/', tags=[self._uid])
+		def get_frequency() -> float:
+			return self.get_frequency()
+
+		@app.get(f'/{self._uid}/'+'frequency/set/{value}', tags=[self._uid])
+		def set_frequency(value: float) -> int:
+			return self.set_frequency(value)
+
+		@app.get(f'/{self._uid}/'+'shape/get/', tags=[self._uid])
+		def get_shape() -> WaveformShape:
+			return self.get_shape()
+
+		@app.get(f'/{self._uid}/'+'shape/set/{value}', tags=[self._uid])
+		def set_shape(value: WaveformShape) -> int:
+			return self.set_shape(value)

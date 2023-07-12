@@ -8,15 +8,8 @@ class Rack(Broadcaster):
 	def __init__(self):
 		super().__init__()
 
-		# self.clock = Clock()
-		# self.wave1 = WaveformGenerator()
-		# self.wave2 = WaveformGenerator()
-		# self.gizmo = Gizmotron()
-
-		# self.wave2.set_amplitude(5)
-
+		self._instruments = {}
 		self._measurements = {}
-		self._results = {}
 
 
 	def add_measurement(self, key, func):
@@ -28,22 +21,26 @@ class Rack(Broadcaster):
 		self.emit(result)
 
 
-	def add_instrument(self, key, instrument_class_name, visa_resource_string):
+	def add_instrument(self, key, instrument_class, visa_resource_string, api=None):
 		""" Add instrument object to dictionary of _instruments 
 		"""
-		from src.instruments import instruments
 		res = self._visa_resource_manager.open_resource(visa_resource_string)
-		inst = instruments[instrument_class_name](res)
+		inst = instrument_class(res)
 		self.__dict__[key] = inst
+		self._instruments[key] = inst
+		if api != None:
+			inst.register_endpoints(app)
 		return inst
 
 
-	def add_software_instrument(self, key, instrument_class_name):
+	def add_software_instrument(self, key, instrument_class, api=None):
 		""" Add software instrument as a property of self
 		"""
-		from src.instruments import instruments
-		inst = instruments[instrument_class_name]()
+		inst = instrument_class(uid=key)
 		self.__dict__[key] = inst
+		self._instruments[key] = inst
+		if api != None:
+			inst.register_endpoints(app)
 		return inst
 
 
@@ -78,14 +75,24 @@ class Rack(Broadcaster):
 		"""
 		rack = cls(**kwargs)
 		for key, config in json_.items():
-			print(key, config)
 			rack._parse_dictionary(key, config)
 		return rack
 
 
-	async def run(self):
+	def register_endpoints(self, app):
+
+		@app.get('/rack/instruments', tags=['Rack'])
+		def instruments():
+			return [k for k, v in self._instruments.items()]
+
+		@app.get('/rack/measurements', tags=['Rack'])
+		def measurements():
+			return [k for k, v in self._measurements.items()]
+
+
+	async def run(self, period=0.5):
 		while True:
 			self.measure()
-			await asyncio.sleep(0.5)
+			await asyncio.sleep(period)
 
 

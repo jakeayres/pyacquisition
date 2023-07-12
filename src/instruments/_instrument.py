@@ -66,7 +66,8 @@ class Instrument(metaclass=QueryCommandProvider):
 	name = 'Base Instrument'
 
 
-	def __init__(self, visa_resource):
+	def __init__(self, uid, visa_resource):
+		self._uid = uid
 		self._visa_resource = visa_resource
 
 
@@ -92,6 +93,19 @@ class Instrument(metaclass=QueryCommandProvider):
 		return self._visa_resource.write(command_String)
 
 
+	def register_endpoints(self, app):
+		
+		@app.get(f'/{self._uid}/'+'queries/', tags=[self._uid])
+		def queries(app) -> list[str]:
+			return [name for name, _ in self.queries.items()]
+
+
+		@app.get(f'/{self._uid}/'+'commands/', tags=[self._uid])
+		def queries(app) -> list[str]:
+			return [name for name, _ in self.commands.items()]
+
+
+
 
 class SoftInstrument(metaclass=QueryCommandProvider):
 	""" Base class for software (non-hardware) instruments. 
@@ -100,7 +114,11 @@ class SoftInstrument(metaclass=QueryCommandProvider):
 	"""
 
 	name = 'Software Instrument'
-	
+
+
+	def __init__(self, uid):
+		self._uid = uid
+
 
 	@property
 	def queries(self):
@@ -117,3 +135,15 @@ class SoftInstrument(metaclass=QueryCommandProvider):
 	@query
 	def identify(self):
 		return self.name
+
+
+	def register_endpoints(self, app):
+		
+		@app.get(f'/{self._uid}/'+'queries/', tags=[self._uid])
+		def queries() -> list[str]:
+			return [name for name, _ in self.queries.items()]
+
+
+		@app.get(f'/{self._uid}/'+'commands/', tags=[self._uid])
+		def commands() -> list[str]:
+			return [name for name, _ in self.commands.items()]

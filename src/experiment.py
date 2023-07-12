@@ -4,35 +4,67 @@ from .scribe import Scribe
 from .graph import Graph
 from .consumer import Consumer
 from .websocket_server import WebSocketServer
+from .api import API
 
 
 class Experiment:
 
-	def __init__(self, root, rack_config):
-		self.rack = Rack.from_filepath(rack_config)
+	def __init__(self, root):
+		self.rack = Rack()
 		self.scribe = Scribe(root=root)
 		self.scribe.subscribe_to(self.rack)
 		self.ws_server = WebSocketServer("localhost", 8765)
 		self.ws_server.subscribe_to(self.rack)
+		self._api = API()
+		self._api.subscribe_to(self.rack)
 
-	
-		# Somehow deal with addition of measurement funcs 
-		# without explicit declaration here
-		self.rack.add_measurement('time', self.rack.clock.time)
-		self.rack.add_measurement('value', self.rack.gizmo.get_value)
-		self.rack.add_measurement('signal_1', self.rack.wave1.get_signal)
-		self.rack.add_measurement('signal_2', self.rack.wave2.get_signal)
+		self.setup()
+		self.register_endpoints()
 
 
-	async def execute(self):
+	@property
+	def api(self):
+		return self._api.app
+
+
+	def add_software_instrument(self, key, instrument_class):
+		inst = self.rack.add_software_instrument(key, instrument_class)
+		inst.register_endpoints(self.api)
+		return inst
+
+
+	def add_hardware_instrument(self, key, instrument_class, visa_resource_string):
+		inst = self.rack.add_instrument(key, instrument_class, visa_resource_string)
+		inst.register_endpoints(self.api)
+		return inst
+
+
+	def add_measurement(self, key, func):
+		meas = self.rack.add_measurement(key, func)
+		return func
+
+
+	def setup(self):
 		""" OVERIDE IN INHERETING CLASS
+
+		Add instruments and measurements in here
 		"""
 		pass
 
 
-	async def teardown(self):
-		for task in asyncio.all_tasks():
-			task.cancel()
+	async def execute(self):
+		""" OVERIDE IN INHERETING CLASS
+
+		The main measurement coroutine
+		"""
+		pass
+
+
+	def register_endpoints(self):
+		""" OVERIDE IN INHERETING CLASS
+		"""
+		self.rack.register_endpoints(self.api)
+		self.scribe.register_endpoints(self.api)
 
 
 	async def run(self):
@@ -41,7 +73,9 @@ class Experiment:
 		scribe_task = asyncio.create_task(self.scribe.run())
 		ws_task = asyncio.create_task(self.ws_server.run())
 		main_task = asyncio.create_task(self.execute())
+		fast_api_server_task = self._api.coroutine()
 
+		self.scribe.log('Experiment started')
 		
 		done, pending = await asyncio.wait(
 			[
@@ -49,6 +83,7 @@ class Experiment:
 			rack_task,
 			ws_task,
 			main_task,
+			fast_api_server_task,
 			],
 			return_when=asyncio.FIRST_COMPLETED,
 		)

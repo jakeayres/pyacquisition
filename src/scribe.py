@@ -5,7 +5,7 @@ import colorama
 
 
 # WINDOWS SPECIFIC REQUIREMENT
-colorama.init(convert=True)
+#colorama.init(convert=True)
 
 
 class Scribe(Consumer):
@@ -108,9 +108,10 @@ class Scribe(Consumer):
 			mode = 'a'
 		with open(self.loglog_path, mode) as file:
 			file.write(f'{self._formatted_date} {self._formatted_time} : {entry}\n')
-			print(colorama.Fore.YELLOW + colorama.Style.DIM + f'{self._formatted_date}', end='')
-			print(colorama.Fore.YELLOW + colorama.Style.BRIGHT + f' {self._formatted_time}', end='')
-			print(colorama.Fore.WHITE + colorama.Style.BRIGHT + f'   {entry}', end='\n')
+			print(colorama.Style.RESET_ALL, end='')
+			print(colorama.Fore.BLUE + f' {self._formatted_date}', end='')
+			print(colorama.Fore.BLUE + colorama.Style.BRIGHT + f' {self._formatted_time}', end='')
+			print(colorama.Style.RESET_ALL + f'   {entry}', end='\n')
 
 
 	def _log_new_file(self):
@@ -131,6 +132,18 @@ class Scribe(Consumer):
 	@property
 	def _formatted_date(self):
 		return datetime.datetime.now().strftime("%Y-%m-%d")
+
+
+	def register_endpoints(self, app):
+
+		@app.get('/scribe/filename', tags=['Scribe'])
+		def filename() -> str:
+			return self.filename
+
+		@app.get('/scribe/log/{entry}', tags=['Scribe'])
+		def log(entry: str) -> int:
+			self.log(entry)
+			return 0
 
 
 	async def run(self): 

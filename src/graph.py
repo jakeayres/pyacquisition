@@ -33,7 +33,7 @@ class Graph(Consumer):
 		self.ax.relim()
 		self.ax.autoscale_view()
 		plt.draw()
-		plt.pause(0.003)
+		plt.pause(0.05)
 
 
 	def plot(self, key, x, y, **kwargs):

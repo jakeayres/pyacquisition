@@ -42,12 +42,14 @@ class RealTimePlot:
 		async with websockets.connect(uri) as websocket:
 			while True:
 				data = await websocket.recv()
+				print(type(data))
 				data = json.loads(data)
+				print(type(data))
 				print(json.dumps(data, indent=2))
-				# x, y = data['time'], data['value']
+				x, y = data['time'], data['value']
 
-				# self._update_line('async', x, y)
-				# self._redraw()
+				self._update_line('async', x, y)
+				self._redraw()
 
 
 	async def run(self, websocket_uri):
@@ -63,7 +65,7 @@ class RealTimePlot:
 
 
 # Define the WebSocket server URI
-websocket_uri = "ws://localhost:8000/ws"  # Replace with the actual URI of your WebSocket server
+websocket_uri = "ws://localhost:8000/stream"  # Replace with the actual URI of your WebSocket server
 
 # Create and run the real-time plot
 real_time_plot = RealTimePlot()

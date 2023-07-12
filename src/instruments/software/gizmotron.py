@@ -1,7 +1,7 @@
 from ...instruments._instrument import SoftInstrument, query, command
 import time, enum
 import numpy as np
-from typing import Union, Tuple
+from typing import Union, Tuple, get_type_hints
 
 
 class Direction(enum.Enum):
@@ -34,8 +34,8 @@ class Color(enum.Enum):
 class Gizmotron(SoftInstrument):
 
 
-	def __init__(self):
-		super().__init__()
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
 
 		self._direction = Direction(0)
 		self._random_outputs = [np.random.random, np.random.random]
@@ -45,7 +45,7 @@ class Gizmotron(SoftInstrument):
 
 
 	@query
-	def get_integer(self) -> int:
+	def get_integer() -> int:
 		return int(np.random.random()*10)
 
 
@@ -86,6 +86,11 @@ class Gizmotron(SoftInstrument):
 
 
 	@query
+	def get_setpoint(self) -> float:
+		return self._setpoint
+
+
+	@query
 	def get_value(self) -> float:
 		t = time.time() - self._setpoint_time
 		d = self._setpoint - self._value
@@ -96,3 +101,20 @@ class Gizmotron(SoftInstrument):
 			self._value = max([self._value - t, self._setpoint])
 			self._setpoint_time = time.time()
 		return self._value
+
+
+	def register_endpoints(self, app):
+		super().register_endpoints(app)
+
+		@app.get(f'/{self._uid}/'+'setpoint/set/{value}', tags=[self._uid])
+		def endpoint(value: float) -> float:
+			self.set_setpoint(value)
+			return self.get_setpoint()
+
+		@app.get(f'/{self._uid}/'+'setpoint/get/', tags=[self._uid])
+		def get_setpoint() -> float:
+			return self.get_setpoint()
+
+		@app.get(f'/{self._uid}/'+'value/get/', tags=[self._uid])
+		def get_value() -> float:
+			return self.get_value()
