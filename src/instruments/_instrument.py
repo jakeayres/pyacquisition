@@ -96,12 +96,12 @@ class Instrument(metaclass=QueryCommandProvider):
 	def register_endpoints(self, app):
 		
 		@app.get(f'/{self._uid}/'+'queries/', tags=[self._uid])
-		def queries(app) -> list[str]:
+		def queries() -> list[str]:
 			return [name for name, _ in self.queries.items()]
 
 
 		@app.get(f'/{self._uid}/'+'commands/', tags=[self._uid])
-		def queries(app) -> list[str]:
+		def commands() -> list[str]:
 			return [name for name, _ in self.commands.items()]
 
 

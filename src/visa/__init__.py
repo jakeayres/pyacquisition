@@ -10,6 +10,6 @@ _backends = {
 }
 
 
-def resource_manager(backend='pyvisa'):
-	return _backends[backend]
+def resource_manager(backend='pyvisa', *args, **kwargs):
+	return _backends[backend](*args, **kwargs)
 

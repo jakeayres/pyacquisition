@@ -5,15 +5,17 @@ import json
 
 from src.experiment import Experiment
 
-from src.instruments import Clock, WaveformGenerator, Gizmotron
+from src.instruments import Clock, WaveformGenerator, Gizmotron, SR_830
 
-from src.coroutines import pause, sweep_gizmotron
+from src.coroutines import pause, sweep_gizmotron, sweep_lockin_frequency
+
+from src.visa import resource_manager
 
 from fastapi import FastAPI, WebSocket
 import uvicorn
 
 
-class MyExperiment(Experiment):
+class SoftExperiment(Experiment):
 
 
 	def setup(self):
@@ -40,12 +42,36 @@ class MyExperiment(Experiment):
 
 	async def execute(self):
 		await pause(self.scribe, 3)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 30)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 40)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 3000)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 4000)
+
+
+
+class MyExperiment(Experiment):
+
+	def setup(self):
+		clock = self.add_software_instrument('clock', Clock)
+		self.add_measurement('time', clock.time)
+
+		lockin = self.add_hardware_instrument(
+			'lockin', 
+			SR_830, 
+			resource_manager(backend='prologix', com_port=3).open_resource('GPIB0::12::INSTR')
+		)
+		self.add_measurement('freq', lockin.get_frequency)
+		self.add_measurement('x', lockin.get_x)
+		self.add_measurement('y', lockin.get_y)
+
+
+	async def execute(self):
+		await pause(self.scribe, 10)
+		await sweep_lockin_frequency(self.scribe, self.rack.lockin, 10, 50)
+		await pause(self.scribe, 3)
+
 
 
 async def main():
-	exp = MyExperiment("./data/")
+	exp = SoftExperiment("./data/")
 	await asyncio.create_task(exp.run())
 
 

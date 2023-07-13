@@ -159,7 +159,7 @@ class SR_830(Instrument):
 
 	@command
 	def set_frequency(self, frequency: float):
-		return self._command(f'FREQ {frequency:.2f}')
+		return self._command(f'FREQ {frequency:.3f}')
 
 
 	@query
@@ -341,4 +341,11 @@ class SR_830(Instrument):
 	""" STATUS
 	"""
 
+
+	def register_endpoints(self, app):
+
+		@app.get(f'/{self._uid}/'+'frequency/set/{freq}', tags=[self._uid])
+		def set_frequency(freq: float) -> 0:
+			self.set_frequency(freq)
+			return 0
 

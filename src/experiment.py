@@ -33,8 +33,8 @@ class Experiment:
 		return inst
 
 
-	def add_hardware_instrument(self, key, instrument_class, visa_resource_string):
-		inst = self.rack.add_instrument(key, instrument_class, visa_resource_string)
+	def add_hardware_instrument(self, key, instrument_class, visa_resource):
+		inst = self.rack.add_instrument(key, instrument_class, visa_resource)
 		inst.register_endpoints(self.api)
 		return inst
 

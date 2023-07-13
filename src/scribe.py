@@ -5,7 +5,7 @@ import colorama
 
 
 # WINDOWS SPECIFIC REQUIREMENT
-#colorama.init(convert=True)
+colorama.init(convert=True)
 
 
 class Scribe(Consumer):
@@ -25,8 +25,6 @@ class Scribe(Consumer):
 		self._make_root_directory()
 		self._increment_to_non_existant_chapter()
 		self._log_new_file()
-
-		self.log('Experiment started')
 
 
 	@property
