@@ -5,13 +5,24 @@ import uvicorn
 import logging
 import asyncio
 import json
+from fastapi.middleware.cors import CORSMiddleware
 
 
 class API(Consumer):
 
 
-	def __init__(self):
+	def __init__(self, allowed_cors_origins=None: list):
 		super().__init__()
+
+		if allowed_cors_origins != None:
+
+			app.add_middleware(
+				CORSMiddleware,
+				allow_origins=[allowed_cors_origins],
+				allow_credentials=True,
+				allow_methods=["*"],
+				allow_headers=["*"],
+			)
 
 		self.app = FastAPI(
 			title='PyAcquisition FastAPI',
