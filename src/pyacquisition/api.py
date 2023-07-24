@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 class API(Consumer):
 
 
-	def __init__(self, allowed_cors_origins=None: list):
+	def __init__(self, allowed_cors_origins: list = None):
 		super().__init__()
 
 		if allowed_cors_origins != None:

@@ -11,6 +11,13 @@ class Rack(Broadcaster):
 		self._instruments = {}
 		self._measurements = {}
 
+		self._last_point = {}
+
+
+	@property
+	def data(self):
+		return self._last_point
+
 
 	def add_measurement(self, key, func):
 		self._measurements[key] = func
@@ -18,6 +25,7 @@ class Rack(Broadcaster):
 
 	def measure(self):
 		result = {k: v() for k, v in self._measurements.items()}
+		self._last_points = result
 		self.emit(result)
 
 

@@ -26,20 +26,31 @@ class QueryCommandProvider(type):
 
 
 
-def query(f):
-	""" Decorator for marking methods as queries. """
+def query(func):
+	""" Decorator for marking methods as queries
+	and adding cache functionality to prevent requerying
+	an instrumetn if from_cache flag in True.
+	"""
 
-	f._is_query = True
+	func._is_query = True
+	cached = [0]
+	def wrapper(*args, from_cache=False, **kwargs):
+		if from_cache:
+			return cached[0]
+		else:
+			result = func(*args, **kwargs)
+			cached[0] = result
+			return result
 
-	return f
+	return wrapper
 
 
-def command(f):
+def command(func):
 	""" Decorator for marking methods as commands. """
 
-	f._is_command = True
+	func._is_command = True
 
-	return f
+	return func
 
 
 # def parse(returns):

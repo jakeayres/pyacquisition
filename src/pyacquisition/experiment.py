@@ -18,6 +18,8 @@ class Experiment:
 		self._api = API(allowed_cors_origins=['http://localhost:3000/'])
 		self._api.subscribe_to(self.rack)
 
+		self.pause_event = asyncio.Event()
+
 		self.setup()
 		self.register_endpoints()
 
@@ -52,6 +54,14 @@ class Experiment:
 		pass
 
 
+	async def pause(self):
+		self.pause_event.set()
+
+
+	async def resume(self):
+		self.pause_event.clear()
+
+
 	async def execute(self):
 		""" OVERIDE IN INHERETING CLASS
 
@@ -62,7 +72,18 @@ class Experiment:
 
 	def register_endpoints(self):
 		""" OVERIDE IN INHERETING CLASS
+
+			CALL SUPER() to keep the below functionality
 		"""
+
+		@app.get('/experiment/pause', tags=['Experiment'])
+		def pause() -> str:
+			return self.pause()
+
+		@app.get('/experiment/resume', tags=['Experiment'])
+		def resume() -> str:
+			return self.resume()
+
 		self.rack.register_endpoints(self.api)
 		self.scribe.register_endpoints(self.api)
 
