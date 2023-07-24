@@ -1,4 +1,4 @@
-from functools import partial
+from functools import partial, wraps
 
 
 class QueryCommandProvider(type):
@@ -25,15 +25,23 @@ class QueryCommandProvider(type):
 		cls._commands = commands
 
 
-
-def query(func):
-	""" Decorator for marking methods as queries
-	and adding cache functionality to prevent requerying
-	an instrumetn if from_cache flag in True.
-	"""
-
+def mark_query(func):
+	""" Decorator for marking method as a query """
 	func._is_query = True
+	return func
+
+
+def mark_command(func):
+	""" Decorator for marking method as a query """
+	func._is_command = True
+	return func
+
+
+def has_cache(func):
+	""" Add cache functionality (save last result only) """
 	cached = [0]
+
+	@wraps(func) # This passes the func metadata onto wrapper
 	def wrapper(*args, from_cache=False, **kwargs):
 		if from_cache:
 			return cached[0]
@@ -45,13 +53,15 @@ def query(func):
 	return wrapper
 
 
+def query(func):
+	""" Mark as query and give cache """
+	return mark_query(has_cache(func))
+
+
 def command(func):
 	""" Decorator for marking methods as commands. """
-
-	func._is_command = True
-
-	return func
-
+	return mark_command(func)
+	
 
 # def parse(returns):
 # 	""" Decorator for parsing instrument responses. """

@@ -103,11 +103,22 @@ class Gizmotron(SoftInstrument):
 		return self._value
 
 
+	def endpoint_factory(self, method_name):
+
+		async def endpoint():
+			method = getattr(self, method_name)
+			if args is None:
+				return method()
+			else:
+				return method(*args.args, **args.kwargs)
+			return endpoint
+
+
 	def register_endpoints(self, app):
 		super().register_endpoints(app)
 
 		@app.get(f'/{self._uid}/'+'setpoint/set/{value}', tags=[self._uid])
-		def endpoint(value: float) -> float:
+		def set_setpoint(value: float) -> float:
 			self.set_setpoint(value)
 			return self.get_setpoint()
 
