@@ -3,16 +3,10 @@ import websockets
 import random
 import json
 
-from src.experiment import Experiment
-
-from src.instruments import Clock, WaveformGenerator, Gizmotron, SR_830
-
-from src.coroutines import pause, sweep_gizmotron, sweep_lockin_frequency
-
-from src.visa import resource_manager
-
-from fastapi import FastAPI, WebSocket
-import uvicorn
+from pyacquisition.experiment import Experiment
+from pyacquisition.instruments import Clock, WaveformGenerator, Gizmotron, SR_830
+from pyacquisition.coroutines import pause, sweep_gizmotron, sweep_lockin_frequency
+from pyacquisition.visa import resource_manager
 
 
 class SoftExperiment(Experiment):

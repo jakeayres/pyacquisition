@@ -14,20 +14,20 @@ class API(Consumer):
 	def __init__(self, allowed_cors_origins: list = None):
 		super().__init__()
 
+		self.app = FastAPI(
+			title='PyAcquisition FastAPI',
+			description='Connect your GUI to this.'
+		)
+
 		if allowed_cors_origins != None:
 
-			app.add_middleware(
+			self.app.add_middleware(
 				CORSMiddleware,
 				allow_origins=[allowed_cors_origins],
 				allow_credentials=True,
 				allow_methods=["*"],
 				allow_headers=["*"],
 			)
-
-		self.app = FastAPI(
-			title='PyAcquisition FastAPI',
-			description='Connect your GUI to this.'
-		)
 
 		@self.app.websocket('/stream')
 		async def stream_endpoint(websocket: WebSocket):

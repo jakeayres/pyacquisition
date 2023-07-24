@@ -76,11 +76,11 @@ class Experiment:
 			CALL SUPER() to keep the below functionality
 		"""
 
-		@app.get('/experiment/pause', tags=['Experiment'])
+		@self.api.get('/experiment/pause', tags=['Experiment'])
 		def pause() -> str:
 			return self.pause()
 
-		@app.get('/experiment/resume', tags=['Experiment'])
+		@self.api.get('/experiment/resume', tags=['Experiment'])
 		def resume() -> str:
 			return self.resume()
 
