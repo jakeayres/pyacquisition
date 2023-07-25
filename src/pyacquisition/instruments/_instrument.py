@@ -39,15 +39,15 @@ def mark_command(func):
 
 def has_cache(func):
 	""" Add cache functionality (save last result only) """
-	cached = [0]
+	func._cached = [0]
 
 	@wraps(func) # This passes the func metadata onto wrapper
 	def wrapper(*args, from_cache=False, **kwargs):
 		if from_cache:
-			return cached[0]
+			return func._cached[0]
 		else:
 			result = func(*args, **kwargs)
-			cached[0] = result
+			func._cached[0] = result
 			return result
 
 	return wrapper

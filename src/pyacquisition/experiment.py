@@ -15,7 +15,7 @@ class Experiment:
 		self.scribe.subscribe_to(self.rack)
 		self.ws_server = WebSocketServer("localhost", 8765)
 		self.ws_server.subscribe_to(self.rack)
-		self._api = API(allowed_cors_origins=['http://localhost:3000/'])
+		self._api = API(allowed_cors_origins=['http://localhost:3000'])
 		self._api.subscribe_to(self.rack)
 
 		self.pause_event = asyncio.Event()

@@ -23,7 +23,7 @@ class API(Consumer):
 
 			self.app.add_middleware(
 				CORSMiddleware,
-				allow_origins=[allowed_cors_origins],
+				allow_origins=allowed_cors_origins,
 				allow_credentials=True,
 				allow_methods=["*"],
 				allow_headers=["*"],

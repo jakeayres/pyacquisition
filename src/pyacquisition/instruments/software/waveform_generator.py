@@ -20,9 +20,9 @@ class WaveformGenerator(SoftInstrument):
 	def __init__(self, *args, **kwargs):
 		super().__init__(*args, **kwargs)
 
-		self._t0 = time.time()
-		self._amplitude = 1
-		self._frequency = 1
+		self._t0 = time.time() + np.random.random()*10
+		self._amplitude = 1.5
+		self._frequency = 0.1
 		self._shape = WaveformShape.SINE
 
 		self._function = {

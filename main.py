@@ -25,6 +25,22 @@ class SoftExperiment(Experiment):
 		wave2 = self.add_software_instrument('wave2', WaveformGenerator)
 		self.add_measurement('signal_2', wave2.get_signal)
 
+		wave3 = self.add_software_instrument('wave3', WaveformGenerator)
+		self.add_measurement('signal_3', wave3.get_signal)
+
+		wave4 = self.add_software_instrument('wave4', WaveformGenerator)
+		self.add_measurement('signal_4', wave4.get_signal)
+
+		wave5 = self.add_software_instrument('wave5', WaveformGenerator)
+		self.add_measurement('signal_5', wave5.get_signal)
+
+		wave6 = self.add_software_instrument('wave6', WaveformGenerator)
+		self.add_measurement('signal_6', wave6.get_signal)
+
+		self.add_measurement('half signal', lambda: gizmo.get_value(from_cache=True)/2)
+		self.add_measurement('half wave', lambda: wave1.get_signal(from_cache=True)*gizmo.get_value(from_cache=True))
+
+		wave6.set_amplitude(3)
 
 	def register_endpoints(self):
 		super().register_endpoints()
@@ -36,8 +52,18 @@ class SoftExperiment(Experiment):
 
 	async def execute(self):
 		await pause(self.scribe, 3)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 3000)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 4000)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
+		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
 
 
 
