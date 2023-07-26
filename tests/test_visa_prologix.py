@@ -3,6 +3,11 @@ from pyacquisition.visa import PrologixResourceManager
 from pyacquisition.visa.prologix import PrologixResource
 
 
+pytestmark = [
+	pytest.mark.software,
+]
+
+
 def test_resource_manager_init(mocker):
 	mock_serial = mocker.patch('serial.Serial', autospec=True)
 	rm = PrologixResourceManager(1)

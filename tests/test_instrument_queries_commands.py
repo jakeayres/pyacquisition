@@ -4,6 +4,11 @@ import time
 from pyacquisition.instruments import Gizmotron
 
 
+pytestmark = [
+	pytest.mark.software,
+]
+
+
 @pytest.fixture
 def gizmo():
 	return Gizmotron('my_gizmo')

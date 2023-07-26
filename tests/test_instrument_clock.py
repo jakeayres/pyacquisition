@@ -3,6 +3,11 @@ from pyacquisition.instruments import Clock
 import time
 
 
+pytestmark = [
+    pytest.mark.software,
+]
+
+
 # Instantiate the Clock class
 @pytest.fixture
 def clock():

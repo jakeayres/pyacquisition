@@ -4,6 +4,9 @@ import time
 from pyacquisition.instruments import Clock
 
 
+pytestmark = pytest.mark.software
+
+
 @pytest.fixture
 def clock():
 	return Clock('my_clock')

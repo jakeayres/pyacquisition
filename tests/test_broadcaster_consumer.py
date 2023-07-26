@@ -5,6 +5,12 @@ from pyacquisition import Broadcaster
 from pyacquisition import Consumer
 
 
+pytestmark = [
+	pytest.mark.software,
+]
+
+
+
 @pytest.fixture
 def broadcaster():
 	return Broadcaster()

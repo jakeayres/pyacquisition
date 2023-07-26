@@ -4,7 +4,7 @@ import random
 import json
 
 from pyacquisition.experiment import Experiment
-from pyacquisition.instruments import Clock, WaveformGenerator, Gizmotron, SR_830
+from pyacquisition.instruments import Clock, WaveformGenerator, Gizmotron, SR_830, SR_860
 from pyacquisition.coroutines import pause, sweep_gizmotron, sweep_lockin_frequency
 from pyacquisition.visa import resource_manager
 
@@ -67,16 +67,17 @@ class SoftExperiment(Experiment):
 
 
 
-class MyExperiment(Experiment):
+class HardExperiment(Experiment):
 
 	def setup(self):
+
 		clock = self.add_software_instrument('clock', Clock)
 		self.add_measurement('time', clock.time)
 
 		lockin = self.add_hardware_instrument(
 			'lockin', 
-			SR_830, 
-			resource_manager(backend='prologix', com_port=3).open_resource('GPIB0::12::INSTR')
+			SR_860, 
+			resource_manager('prologix', com_port=3).open_resource('GPIB0::4::INSTR')
 		)
 		self.add_measurement('freq', lockin.get_frequency)
 		self.add_measurement('x', lockin.get_x)
@@ -91,7 +92,7 @@ class MyExperiment(Experiment):
 
 
 async def main():
-	exp = SoftExperiment("./data/")
+	exp = HardExperiment("./data/")
 	await asyncio.create_task(exp.run())
 
 
