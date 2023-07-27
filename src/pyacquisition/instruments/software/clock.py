@@ -40,10 +40,10 @@ class Clock(SoftInstrument):
 		super().register_endpoints(app)
 
 		@app.get(f'/{self._uid}/'+'timestamp/get/', tags=[self._uid])
-		def timestamp():
+		def timestamp() -> float:
 			return self.timestamp_ms()
 
 		@app.get(f'/{self._uid}/'+'time/get/', tags=[self._uid])
-		def time():
+		def time() -> float:
 			return self.time()
 

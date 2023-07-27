@@ -126,6 +126,11 @@ class Instrument(metaclass=QueryCommandProvider):
 			return [name for name, _ in self.commands.items()]
 
 
+		@app.get(f'/{self._uid}/'+'ask/{query_name}', tags=[self._uid])
+		def query(query_name: str):
+			return self.queries[query_name]()
+
+
 
 
 class SoftInstrument(metaclass=QueryCommandProvider):
@@ -159,6 +164,7 @@ class SoftInstrument(metaclass=QueryCommandProvider):
 
 
 	def register_endpoints(self, app):
+
 		
 		@app.get(f'/{self._uid}/'+'queries/', tags=[self._uid])
 		def queries() -> list[str]:
@@ -168,3 +174,12 @@ class SoftInstrument(metaclass=QueryCommandProvider):
 		@app.get(f'/{self._uid}/'+'commands/', tags=[self._uid])
 		def commands() -> list[str]:
 			return [name for name, _ in self.commands.items()]
+
+
+		@app.get(f'/{self._uid}/'+'ask/{query_name}', tags=[self._uid])
+		def query(query_name: str):
+			return self.queries[query_name]()
+
+
+
+

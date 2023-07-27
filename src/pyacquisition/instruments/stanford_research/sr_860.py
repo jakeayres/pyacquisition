@@ -1,47 +1,48 @@
-import enum
+from enum import Enum
+from pydantic import BaseModel
 
 from ...instruments._instrument import Instrument, query, command
 
 
-class State(enum.Enum):
-	OFF = 0
-	ON = 1
-
-
-class ReferenceSource(enum.Enum):
+class ReferenceSource(str, Enum):
 	INTERNAL = 0
 	EXTERNAL = 1
 	DUAL = 2
 	CHOP = 3
 
 
-class ReferenceSlope(enum.Enum):
+class ReferenceSlope(str, Enum):
 	SINE = 0
 	TTL_RISING = 1
 	TTL_FALLING = 2
 
 
-class InputMode(enum.Enum):
+class InputMode(str, Enum):
 	VOLTAGE = 0
 	CURRENT = 1
 
 
-class InputConfiguration(enum.Enum):
+class InputConfiguration(str, Enum):
 	A = 0
 	A_B = 1
 
 
-class InputGrounding(enum.Enum):
+class InputGrounding(str, Enum):
 	FLOAT = 0
 	GROUND = 1
 
 
-class InputCoupling(enum.Enum):
+class InputGroundingModel(str, Enum):
+	FLOAT = 'Floating'
+	GROUND = 'Grounded'
+
+
+class InputCoupling(str, Enum):
 	AC = 0
 	DC = 1
 
 
-class InputVoltageRange(enum.Enum):
+class InputVoltageRange(str, Enum):
 	V_1 = 0
 	mV_300 = 1
 	mV_100 = 2
@@ -49,17 +50,17 @@ class InputVoltageRange(enum.Enum):
 	mV_10 = 4
 
 
-class SyncFilter(enum.Enum):
+class SyncFilter(str, Enum):
 	OFF = 0
 	ON = 1
 
 
-class AdvancedFilter(enum.Enum):
+class AdvancedFilter(str, Enum):
 	OFF = 0
 	ON = 1
 
 
-class Sensitivity(enum.Enum):
+class Sensitivity(str, Enum):
 	nV_1 = 27
 	nV_2 = 26
 	nV_5 = 25
@@ -90,7 +91,38 @@ class Sensitivity(enum.Enum):
 	V_1 = 0
 
 
-class TimeConstant(enum.Enum):
+class SensitivityModel(str, Enum):
+	nV_1 = '1 nV'
+	nV_2 = '2 nV'
+	nV_5 = '5 nV'
+	nV_10 = '10 nV'
+	nV_20 = '20 nV'
+	nV_50 = '50 nV'
+	nV_100 = '100 nV'
+	nV_200 = '200 nV'
+	nV_500 = '500 nV'
+	uV_1 = '1 µV'
+	uV_2 = '2 µV'
+	uV_5 = '5 µV'
+	uV_10 = '10 µV'
+	uV_20 = '20 µV'
+	uV_50 = '50 µV'
+	uV_100 = '100 µV'
+	uV_200 = '200 µV'
+	uV_500 = '500 µV'
+	mV_1 = '1 mV'
+	mV_2 = '2 mV'
+	mV_5 = '5 mV'
+	mV_10 = '10 mV'
+	mV_20 = '20 mV'
+	mV_50 = '50 mV'
+	mV_100 = '100 mV'
+	mV_200 = '200 mV'
+	mV_500 = '500 mV'
+	V_1 = '1 V'
+
+
+class TimeConstant(str, Enum):
 	us_1 = 0
 	us_3 = 1
 	us_10 = 2
@@ -115,7 +147,7 @@ class TimeConstant(enum.Enum):
 	ks_30 = 21
 
 
-class FilterSlope(enum.Enum):
+class FilterSlope(str, Enum):
 	db6 = 0
 	db12 = 1
 	db18 = 2
@@ -265,6 +297,7 @@ class SR_860(Instrument):
 
 	@command
 	def set_input_grounding(self, grounding: InputGrounding):
+		print(grounding)
 		return self._command(f'IGND {grounding.value}')
 
 
@@ -395,9 +428,19 @@ class SR_860(Instrument):
 
 
 	def register_endpoints(self, app):
+		super().register_endpoints(app)
 
 		@app.get(f'/{self._uid}/'+'frequency/set/{freq}', tags=[self._uid])
-		def set_frequency(freq: float) -> 0:
-			self.set_frequency(freq)
-			return 0
+		async def set_frequency(freq: float) -> 0:
+			return self.set_frequency(freq)
+
+
+		@app.get(f'/{self._uid}/'+'sensitivity/set/{sens}', tags=[self._uid])
+		async def set_sensitivity(sens: SensitivityModel) -> 0:
+			return self.set_sensitivity(Sensitivity[sens.name])
+
+
+		@app.get(f'/{self._uid}/'+'input_grounding/set/{grounding}', tags=[self._uid])
+		async def set_input_grounding(grounding: InputGroundingModel) -> 0:
+			return self.set_input_grounding(InputGrounding[grounding.name])
 

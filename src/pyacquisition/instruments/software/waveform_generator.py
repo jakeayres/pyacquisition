@@ -5,6 +5,12 @@ from scipy.signal import square, sawtooth
 
 
 class WaveformShape(enum.Enum):
+	SINE = 0
+	SQUARE = 1
+	SAW = 2
+
+
+class WaveformShapeModel(enum.Enum):
 	SINE = 'sine'
 	SQUARE = 'square'
 	SAW = 'saw'
@@ -26,9 +32,9 @@ class WaveformGenerator(SoftInstrument):
 		self._shape = WaveformShape.SINE
 
 		self._function = {
-			'sine': lambda a, f, t: a * np.sin(t * 2 * np.pi * f),
-			'square': lambda a, f, t: a * square(t * 2 * np.pi * f, duty=0.5),
-			'saw': lambda a, f, t: a * sawtooth(t * 2 * np.pi * f, width=0),
+			0: lambda a, f, t: a * np.sin(t * 2 * np.pi * f),
+			1: lambda a, f, t: a * square(t * 2 * np.pi * f, duty=0.5),
+			2: lambda a, f, t: a * sawtooth(t * 2 * np.pi * f, width=0),
 		}
 
 
@@ -95,5 +101,5 @@ class WaveformGenerator(SoftInstrument):
 			return self.get_shape()
 
 		@app.get(f'/{self._uid}/'+'shape/set/{value}', tags=[self._uid])
-		def set_shape(value: WaveformShape) -> int:
-			return self.set_shape(value)
+		def set_shape(value: WaveformShapeModel) -> int:
+			return self.set_shape(WaveformShape[value.name])

@@ -86,13 +86,13 @@ class HardExperiment(Experiment):
 
 	async def execute(self):
 		await pause(self.scribe, 10)
-		await sweep_lockin_frequency(self.scribe, self.rack.lockin, 10, 50)
+		await sweep_lockin_frequency(self.scribe, self.rack.lockin, 10, 200)
 		await pause(self.scribe, 3)
 
 
 
 async def main():
-	exp = HardExperiment("./data/")
+	exp = SoftExperiment("./data/")
 	await asyncio.create_task(exp.run())
 
 
