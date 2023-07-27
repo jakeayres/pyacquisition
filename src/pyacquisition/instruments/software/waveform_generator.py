@@ -11,9 +11,9 @@ class WaveformShape(enum.Enum):
 
 
 class WaveformShapeModel(enum.Enum):
-	SINE = 'sine'
-	SQUARE = 'square'
-	SAW = 'saw'
+	SINE = 'Sine'
+	SQUARE = 'Square'
+	SAW = 'Sawtooth'
 
 
 
@@ -97,8 +97,8 @@ class WaveformGenerator(SoftInstrument):
 			return self.set_frequency(value)
 
 		@app.get(f'/{self._uid}/'+'shape/get/', tags=[self._uid])
-		def get_shape() -> WaveformShape:
-			return self.get_shape()
+		def get_shape() -> WaveformShapeModel:
+			return WaveformShapeModel[self.get_shape().name]
 
 		@app.get(f'/{self._uid}/'+'shape/set/{value}', tags=[self._uid])
 		def set_shape(value: WaveformShapeModel) -> int:
