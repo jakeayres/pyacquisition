@@ -41,6 +41,8 @@ class Clock(SoftInstrument):
 
 		@app.get(f'/{self._uid}/'+'timestamp/get/', tags=[self._uid])
 		def timestamp() -> float:
+			"""Get a unix timestamp rounded to ms
+			"""
 			return self.timestamp_ms()
 
 		@app.get(f'/{self._uid}/'+'time/get/', tags=[self._uid])
