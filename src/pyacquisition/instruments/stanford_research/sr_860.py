@@ -4,45 +4,73 @@ from pydantic import BaseModel
 from ...instruments._instrument import Instrument, query, command
 
 
-class ReferenceSource(str, Enum):
+class ReferenceSource(Enum):
 	INTERNAL = 0
 	EXTERNAL = 1
 	DUAL = 2
 	CHOP = 3
 
 
-class ReferenceSlope(str, Enum):
+class ReferenceSourceModel(Enum):
+	INTERNAL = 'Internal'
+	EXTERNAL = 'External'
+	DUAL = 'Dual'
+	CHOP = 'Chopped'
+
+
+class ReferenceSlope(Enum):
 	SINE = 0
 	TTL_RISING = 1
 	TTL_FALLING = 2
 
 
-class InputMode(str, Enum):
+class ReferenceSlopeModel(Enum):
+	SINE = 'Sine'
+	TTL_RISING = 'TTL Rising'
+	TTL_FALLING = 'TLL Falling'
+
+
+class InputMode(Enum):
 	VOLTAGE = 0
 	CURRENT = 1
 
 
-class InputConfiguration(str, Enum):
+class InputModeModel(Enum):
+	VOLTAGE = 'Voltage'
+	CURRENT = 'Current'
+
+
+class InputConfiguration(Enum):
 	A = 0
 	A_B = 1
 
 
-class InputGrounding(str, Enum):
+class InputConfigurationModel(Enum):
+	A = 'A'
+	A_B = 'A-B'
+
+
+class InputGrounding(Enum):
 	FLOAT = 0
 	GROUND = 1
 
 
-class InputGroundingModel(str, Enum):
+class InputGroundingModel(Enum):
 	FLOAT = 'Floating'
 	GROUND = 'Grounded'
 
 
-class InputCoupling(str, Enum):
+class InputCoupling(Enum):
 	AC = 0
 	DC = 1
 
 
-class InputVoltageRange(str, Enum):
+class InputCouplingModel(Enum):
+	AC = 'AC'
+	DC = 'DC'
+
+
+class InputVoltageRange(Enum):
 	V_1 = 0
 	mV_300 = 1
 	mV_100 = 2
@@ -50,17 +78,35 @@ class InputVoltageRange(str, Enum):
 	mV_10 = 4
 
 
-class SyncFilter(str, Enum):
+class InputVoltageRangeModel(Enum):
+	V_1 = '1 V'
+	mV_300 = '300 mV'
+	mV_100 = '100 mV'
+	mV_30 = '30 mV'
+	mV_10 = '10 mV'
+
+
+class SyncFilter(Enum):
 	OFF = 0
 	ON = 1
 
 
-class AdvancedFilter(str, Enum):
+class SyncFilterModel(Enum):
+	OFF = 'Off'
+	ON = 'On'
+
+
+class AdvancedFilter(Enum):
 	OFF = 0
 	ON = 1
 
 
-class Sensitivity(str, Enum):
+class AdvancedFilterModel(Enum):
+	OFF = 'Off'
+	ON = 'On'
+
+
+class Sensitivity(Enum):
 	nV_1 = 27
 	nV_2 = 26
 	nV_5 = 25
@@ -91,7 +137,7 @@ class Sensitivity(str, Enum):
 	V_1 = 0
 
 
-class SensitivityModel(str, Enum):
+class SensitivityModel(Enum):
 	nV_1 = '1 nV'
 	nV_2 = '2 nV'
 	nV_5 = '5 nV'
@@ -122,7 +168,7 @@ class SensitivityModel(str, Enum):
 	V_1 = '1 V'
 
 
-class TimeConstant(str, Enum):
+class TimeConstant(Enum):
 	us_1 = 0
 	us_3 = 1
 	us_10 = 2
@@ -147,11 +193,43 @@ class TimeConstant(str, Enum):
 	ks_30 = 21
 
 
-class FilterSlope(str, Enum):
+class TimeConstantModel(Enum):
+	us_1 = '1 us'
+	us_3 = '3 us'
+	us_10 = '10 us'
+	us_30 = '30 us'
+	us_100 = '100 us'
+	us_300 = '300 us'
+	ms_1 = '1 ms'
+	ms_3 = '3 ms'
+	ms_10 = '10 ms'
+	ms_30 = '30 ms'
+	ms_100 = '100 ms'
+	ms_300 = '300 ms'
+	s_1 = '1 s'
+	s_3 = '3 s'
+	s_10 = '10 s'
+	s_30 = '30 s'
+	s_100 = '100 s'
+	s_300 = '300 s'
+	ks_1 = '1 ks'
+	ks_3 = '3 ks'
+	ks_10 = '10 ks'
+	ks_30 = '30 ks'
+
+
+class FilterSlope(Enum):
 	db6 = 0
 	db12 = 1
 	db18 = 2
 	db24 = 3
+
+
+class FilterSlopeModel(Enum):
+	db6 = '6 db'
+	db12 = '12 db'
+	db18 = '18 db'
+	db24 = '24 db'
 
 
 
@@ -218,7 +296,7 @@ class SR_860(Instrument):
 
 
 	@query
-	def get_external_referece_slope(self) -> ReferenceSlope:
+	def get_external_reference_slope(self) -> ReferenceSlope:
 		return ReferenceSlope(int(self._query(f'RSLP?')))
 
 
@@ -430,17 +508,155 @@ class SR_860(Instrument):
 	def register_endpoints(self, app):
 		super().register_endpoints(app)
 
-		@app.get(f'/{self._uid}/'+'frequency/set/{freq}', tags=[self._uid])
-		async def set_frequency(freq: float) -> 0:
-			return self.set_frequency(freq)
+		@app.get(f'/{self._uid}/'+'phase/get', tags=[self._uid])
+		async def get_phase() -> float:
+			return self.get_phase()
+		
+		@app.get(f'/{self._uid}/'+'phase/set/{phase}', tags=[self._uid])
+		async def set_phase(phase: float) -> int:
+			self.set_phase(phase)
+			return 0
+		
+		@app.get(f'/{self._uid}/'+'reference_source/get', tags=[self._uid])
+		async def get_reference_source() -> ReferenceSourceModel:
+			return ReferenceSourceModel[self.get_reference_source().name]
+		
+		@app.get(f'/{self._uid}/'+'reference_source/set/{source}', tags=[self._uid])
+		async def set_reference_source(source: ReferenceSourceModel) -> int:
+			self.set_reference_source(ReferenceSource[source.name])
+			return 0
+		
+		@app.get(f'/{self._uid}/'+'frequency/get', tags=[self._uid])
+		async def get_frequency() -> float:
+			return self.get_frequency()
+		
+		@app.get(f'/{self._uid}/'+'frequency/set/{frequency}', tags=[self._uid])
+		async def set_frequency(frequency: float) -> int:
+			self.set_frequency(frequency)
+			return 0
 
+		@app.get(f'/{self._uid}/'+'external_reference_slope/get', tags=[self._uid])
+		async def get_external_reference_slope() -> ReferenceSlopeModel:
+			return ReferenceSlopeModel[self.get_external_reference_slope().name]
+		
+		@app.get(f'/{self._uid}/'+'external_reference_slope/set/{slope}', tags=[self._uid])
+		async def set_external_reference_slope(slope: ReferenceSlopeModel) -> int:
+			self.set_external_reference_slope(ReferenceSlope[slope.name])
+			return 0
 
-		@app.get(f'/{self._uid}/'+'sensitivity/set/{sens}', tags=[self._uid])
-		async def set_sensitivity(sens: SensitivityModel) -> 0:
-			return self.set_sensitivity(Sensitivity[sens.name])
+		@app.get(f'/{self._uid}/'+'harmonic/get', tags=[self._uid])
+		async def get_harmonic() -> int:
+			return self.get_harmonic()
+		
+		@app.get(f'/{self._uid}/'+'harmonic/set/{harmonic}', tags=[self._uid])
+		async def set_harmonic(harmonic: int) -> int:
+			self.set_harmonic(harmonic)
+			return 0
 
+		@app.get(f'/{self._uid}/'+'reference_amplitude/get', tags=[self._uid])
+		async def get_reference_amplitude() -> float:
+			return self.get_reference_amplitude()
+		
+		@app.get(f'/{self._uid}/'+'reference_amplitude/set/{reference_amplitude}', tags=[self._uid])
+		async def set_reference_amplitude(reference_amplitude: float) -> int:
+			self.set_reference_amplitude(reference_amplitude)
+			return 0
 
+		@app.get(f'/{self._uid}/'+'reference_offset/get', tags=[self._uid])
+		async def get_reference_offset() -> float:
+			return self.get_reference_offset()
+		
+		@app.get(f'/{self._uid}/'+'reference_offset/set/{reference_offset}', tags=[self._uid])
+		async def set_reference_offset(reference_offset: float) -> int:
+			self.set_reference_offset(reference_offset)
+			return 0
+
+		@app.get(f'/{self._uid}/'+'input_mode/get', tags=[self._uid])
+		async def get_input_mode() -> InputModeModel:
+			return InputModeModel[self.get_input_mode().name]
+		
+		@app.get(f'/{self._uid}/'+'input_mode/set/{mode}', tags=[self._uid])
+		async def set_input_mode(mode: InputModeModel) -> int:
+			self.set_input_mode(InputMode[mode.name])
+			return 0
+
+		@app.get(f'/{self._uid}/'+'input_configuration/get', tags=[self._uid])
+		async def get_input_configuration() -> InputConfigurationModel:
+			return InputConfigurationModel[self.get_input_configuration().name]
+		
+		@app.get(f'/{self._uid}/'+'input_configuration/set/{configuration}', tags=[self._uid])
+		async def set_input_configuration(configuration: InputConfigurationModel) -> int:
+			self.set_input_configuration(InputConfiguration[configuration.name])
+			return 0
+
+		@app.get(f'/{self._uid}/'+'input_coupling/get', tags=[self._uid])
+		async def get_input_coupling() -> InputCouplingModel:
+			return InputCouplingModel[self.get_input_coupling().name]
+		
+		@app.get(f'/{self._uid}/'+'input_coupling/set/{coupling}', tags=[self._uid])
+		async def set_input_coupling(coupling: InputCouplingModel) -> int:
+			self.set_input_coupling(InputCoupling[coupling.name])
+			return 0
+
+		@app.get(f'/{self._uid}/'+'input_grounding/get', tags=[self._uid])
+		async def get_input_grounding() -> InputGroundingModel:
+			return InputGroundingModel[self.get_input_grounding().name]
+		
 		@app.get(f'/{self._uid}/'+'input_grounding/set/{grounding}', tags=[self._uid])
-		async def set_input_grounding(grounding: InputGroundingModel) -> 0:
-			return self.set_input_grounding(InputGrounding[grounding.name])
+		async def set_input_grounding(grounding: InputGroundingModel) -> int:
+			self.set_input_grounding(InputGrounding[grounding.name])
+			return 0
 
+		@app.get(f'/{self._uid}/'+'input_voltage_range/get', tags=[self._uid])
+		async def get_input_voltage_range() -> InputVoltageRangeModel:
+			return InputVoltageRangeModel[self.get_input_voltage_range().name]
+		
+		@app.get(f'/{self._uid}/'+'input_voltage_range/set/{voltage_range}', tags=[self._uid])
+		async def set_input_voltage_range(voltage_range: InputVoltageRangeModel) -> int:
+			self.set_input_voltage_range(InputVoltageRange[voltage_range.name])
+			return 0
+
+		@app.get(f'/{self._uid}/'+'sync_filter/get', tags=[self._uid])
+		async def get_sync_filter() -> SyncFilterModel:
+			return SyncFilterModel[self.get_sync_filter().name]
+		
+		@app.get(f'/{self._uid}/'+'sync_filter/set/{sync_filter}', tags=[self._uid])
+		async def set_sync_filter(sync_filter: SyncFilterModel) -> int:
+			self.set_sync_filter(SyncFilter[sync_filter.name])
+			return 0
+
+		@app.get(f'/{self._uid}/'+'advanced_filter/get', tags=[self._uid])
+		async def get_advanced_filter() -> AdvancedFilterModel:
+			return AdvancedFilterModel[self.get_advanced_filter().name]
+		
+		@app.get(f'/{self._uid}/'+'advanced_filter/set/{advanced_filter}', tags=[self._uid])
+		async def set_advanced_filter(advanced_filter: AdvancedFilterModel) -> int:
+			self.set_advanced_filter(AdvancedFilter[advanced_filter.name])
+			return 0
+
+		@app.get(f'/{self._uid}/'+'sensitivity/get', tags=[self._uid])
+		async def get_sensitivity() -> SensitivityModel:
+			return SensitivityModel[self.get_sensitivity().name]
+		
+		@app.get(f'/{self._uid}/'+'sensitivity/set/{sensitivity}', tags=[self._uid])
+		async def set_sensitivity(sensitivity: SensitivityModel) -> int:
+			self.set_sensitivity(Sensitivity[sensitivity.name])
+			return 0
+
+		@app.get(f'/{self._uid}/'+'time_constant/get', tags=[self._uid])
+		async def get_time_constant() -> TimeConstantModel:
+			return TimeConstantModel[self.get_time_constant().name]
+		
+		@app.get(f'/{self._uid}/'+'time_constant/set/{time_constant}', tags=[self._uid])
+		async def set_time_constant(time_constant: TimeConstantModel) -> int:
+			self.set_time_constant(TimeConstant[time_constant.name])
+			return 0
+
+		@app.get(f'/{self._uid}/'+'filter_slope/get', tags=[self._uid])
+		async def get_filter_slope() -> FilterSlopeModel:
+			return FilterSlopeModel[self.get_filter_slope().name]
+		
+		@app.get(f'/{self._uid}/'+'filter_slope/set/{filter_slope}', tags=[self._uid])
+		async def set_filter_slope(filter_slope: FilterSlopeModel) -> int:
+			self.set_filter_slope(FilterSlope[filter_slope.name])
+			return 0

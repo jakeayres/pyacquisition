@@ -29,7 +29,7 @@ pytestmark = [
 
 @pytest.fixture
 def inst():
-	visa_res = resource_manager('prologix', com_port=3).open_resource('GPIB0::4::INSTR')
+	visa_res = resource_manager('prologix', com_port=3).open_resource('GPIB0::1::INSTR')
 	return SR_860('my_lia', visa_res)
 
 
