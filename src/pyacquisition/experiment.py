@@ -4,6 +4,7 @@ from .scribe import Scribe
 from .graph import Graph
 from .consumer import Consumer
 from .websocket_server import WebSocketServer
+from .inspectable_queue import InspectableQueue
 from .api import API
 
 
@@ -18,7 +19,10 @@ class Experiment:
 		self._api = API(allowed_cors_origins=['http://localhost:3000'])
 		self._api.subscribe_to(self.rack)
 
+		self.running = True
 		self.pause_event = asyncio.Event()
+		self.current_task = None
+		self.task_queue = InspectableQueue()
 
 		self.setup()
 		self.register_endpoints()
@@ -63,11 +67,18 @@ class Experiment:
 
 
 	async def execute(self):
-		""" OVERIDE IN INHERETING CLASS
+		
+		while self.running:
 
-		The main measurement coroutine
-		"""
-		pass
+			self.current_task = 'Waiting...'
+			task = await self.task_queue.get()
+			self.current_task = task.string()
+
+			if asyncio.iscoroutine(task.coroutine):
+				await task.coroutine
+
+			else:
+				await task.coroutine()
 
 
 	def register_endpoints(self):
@@ -77,12 +88,20 @@ class Experiment:
 		"""
 
 		@self.api.get('/experiment/pause', tags=['Experiment'])
-		def pause() -> str:
+		async def pause() -> str:
 			return self.pause()
 
 		@self.api.get('/experiment/resume', tags=['Experiment'])
-		def resume() -> str:
+		async def resume() -> str:
 			return self.resume()
+
+		@self.api.get('/experiment/current_task', tags=['Experiment'])
+		async def current_task() -> str:
+			return self.current_task
+
+		@self.api.get('/experiment/list_tasks', tags=['Experiment'])
+		async def list_tasks() -> list:
+			return [task.string() for task in self.task_queue.inspect()]
 
 		self.rack.register_endpoints(self.api)
 		self.scribe.register_endpoints(self.api)

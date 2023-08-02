@@ -5,7 +5,7 @@ import json
 
 from pyacquisition.experiment import Experiment
 from pyacquisition.instruments import Clock, WaveformGenerator, Gizmotron, SR_830, SR_860
-from pyacquisition.coroutines import pause, sweep_gizmotron, sweep_lockin_frequency
+from pyacquisition.coroutines import pause, sweep_gizmotron, SweepGizmotron, sweep_lockin_frequency, LockinFrequencySweep
 from pyacquisition.visa import resource_manager
 
 
@@ -42,24 +42,15 @@ class SoftExperiment(Experiment):
 
 		wave6.set_amplitude(3)
 
+
 	def register_endpoints(self):
 		super().register_endpoints()
 
+		@self.api.get('/experiment/perform_sweep/{max_value}', tags=['Experiment'])
+		async def perform_sweep(max_value: float) -> int:
+			await self.task_queue.put(SweepGizmotron(self.scribe, self.rack.gizmo, max_value))
+			return 0
 
-	async def execute(self):
-		await pause(self.scribe, 3)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 300)
-		await sweep_gizmotron(self.scribe, self.rack.gizmo, 400)
 
 
 
@@ -67,28 +58,46 @@ class HardExperiment(Experiment):
 
 	def setup(self):
 
-		clock = self.add_software_instrument('clock', Clock)
+		rm = resource_manager('prologix', com_port=3)
+
+		clock = self.add_software_instrument(
+			'Clock', 
+			Clock,
+		)
 		self.add_measurement('time', clock.time)
 
-		lockin = self.add_hardware_instrument(
-			'lockin', 
+		lockin1 = self.add_hardware_instrument(
+			'Lockin1', 
 			SR_860, 
-			resource_manager('prologix', com_port=3).open_resource('GPIB0::4::INSTR')
+			rm.open_resource('GPIB0::1::INSTR')
 		)
-		self.add_measurement('freq', lockin.get_frequency)
-		self.add_measurement('x', lockin.get_x)
-		self.add_measurement('y', lockin.get_y)
+		self.add_measurement('freq1', lockin1.get_frequency)
+		self.add_measurement('x1', lockin1.get_x)
+		self.add_measurement('y1', lockin1.get_y)
+
+		# lockin2 = self.add_hardware_instrument(
+		# 	'Lockin2', 
+		# 	SR_860, 
+		# 	rm.open_resource('GPIB0::2::INSTR')
+		# )
+		# self.add_measurement('freq2', lockin2.get_frequency)
+		# self.add_measurement('x2', lockin2.get_x)
+		# self.add_measurement('y2', lockin2.get_y)
 
 
-	async def execute(self):
-		await pause(self.scribe, 10)
-		await sweep_lockin_frequency(self.scribe, self.rack.lockin, 10, 200)
-		await pause(self.scribe, 3)
+	def register_endpoints(self):
+		super().register_endpoints()
+
+		@self.api.get('/experiment/perform_sweep/{max_value}', tags=['Experiment'])
+		async def perform_sweep(max_value: float) -> int:
+			await self.task_queue.put(LockinFrequencySweep(self.scribe, self.rack.Lockin1, 1, max_value))
+			return 0
+
 
 
 
 async def main():
-	exp = SoftExperiment("./data/")
+	exp = HardExperiment("./data/")
 	await asyncio.create_task(exp.run())
 
 
