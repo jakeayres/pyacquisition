@@ -1,5 +1,6 @@
 from ...instruments._instrument import SoftInstrument, query, command
 import time
+from datetime import datetime
 
 
 class Clock(SoftInstrument):
@@ -25,6 +26,11 @@ class Clock(SoftInstrument):
 		return time.time() - self._t0
 
 
+	@query
+	def datetime(self) -> datetime:
+		return datetime.now()
+
+
 	@command
 	def start_named_timer(self, timer_name: str):
 		self._named_timers[timer_name] = time.time()
@@ -40,12 +46,23 @@ class Clock(SoftInstrument):
 		super().register_endpoints(app)
 
 		@app.get(f'/{self._uid}/'+'timestamp/get/', tags=[self._uid])
-		def timestamp() -> float:
+		async def timestamp() -> float:
 			"""Get a unix timestamp rounded to ms
 			"""
 			return self.timestamp_ms()
 
 		@app.get(f'/{self._uid}/'+'time/get/', tags=[self._uid])
-		def time() -> float:
+		async def time() -> float:
+			"""Time since clock initiated
+			"""
 			return self.time()
+
+
+		@app.get(f'/{self._uid}/'+'datetime/get/', tags=[self._uid])
+		async def date_time() -> datetime:
+			"""Datetime object
+			"""
+			return self.datetime()
+
+
 
