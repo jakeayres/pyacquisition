@@ -134,12 +134,39 @@ class Scribe(Consumer):
 
 	def register_endpoints(self, app):
 
-		@app.get('/scribe/filename', tags=['Scribe'])
-		def filename() -> str:
+		@app.get('/scribe/current_filename', tags=['Scribe'])
+		def current_filename() -> str:
+			"""Get current filename
+			
+			Returns:
+			    str: Current filename
+			"""
 			return self.filename
+
+		@app.get('/scribe/next_file/{title}/{next_chapter}', tags=['Scribe'])
+		def next_file(title: str, next_chapter: bool = False) -> int:
+			"""Create a new file.
+			
+			Args:
+			    title (str): File title
+			    next_chapter (bool, optional): Increment chapter
+			
+			Returns:
+			    int: Description
+			"""
+			self.next_file(title, new_chapter=next_chapter)
+			return 0
 
 		@app.get('/scribe/log/{entry}', tags=['Scribe'])
 		def log(entry: str) -> int:
+			"""Log some text
+			
+			Args:
+			    entry (str): Message to log
+			
+			Returns:
+			    int: Description
+			"""
 			self.log(entry)
 			return 0
 

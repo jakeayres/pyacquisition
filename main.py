@@ -44,10 +44,6 @@ class SoftExperiment(Experiment):
 
 	def register_endpoints(self):
 		super().register_endpoints()
-		
-		@self.api.get("/current_file")
-		def message():
-			return {'message': f'{self.scribe.filename}'}
 
 
 	async def execute(self):
