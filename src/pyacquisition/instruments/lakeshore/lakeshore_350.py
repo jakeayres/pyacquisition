@@ -9,12 +9,22 @@ class State(enum.Enum):
 	OFF = 0
 	ON = 1
 
+class StateModel(enum.Enum):
+	OFF = 'Off'
+	ON = 'On'
+
 
 class InputChannel(enum.Enum):
 	INPUT_A = 'A'
 	INPUT_B = 'B'
 	INPUT_C = 'C'
 	INPUT_D = 'D'
+
+class InputChannelModel(enum.Enum):
+	INPUT_A = 'Input A'
+	INPUT_B = 'Input B'
+	INPUT_C = 'Input C'
+	INPUT_D = 'Input D'
 
 
 class OutputChannel(enum.Enum):
@@ -23,11 +33,22 @@ class OutputChannel(enum.Enum):
 	OUTPUT_3 = 3
 	OUTPUT_4 = 4
 
+class OutputChannelModel(enum.Enum):
+	OUTPUT_1 = 'Output 1'
+	OUTPUT_2 = 'Output 2'
+	OUTPUT_3 = 'Output 3'
+	OUTPUT_4 = 'Output 4'
+
 
 class AutotuneMode(enum.Enum):
 	P = 0
 	PI = 1
 	PID = 2
+
+class AutotuneModeModel(enum.Enum):
+	P = 'P'
+	PI = 'PI'
+	PID = 'PID'
 
 
 class DisplayContrast(enum.Enum):
@@ -36,6 +57,13 @@ class DisplayContrast(enum.Enum):
 	NORMAL = 18
 	BRIGHT = 26
 	MAXIMUM = 32
+
+class DisplayContrastModel(enum.Enum):
+	OFF = 'Off'
+	DIM = 'Dim'
+	NORMAL = 'Normal'
+	BRIGHT = 'Bright'
+	MAXIMUM = 'Maximum'
 
 
 class DisplayMode(enum.Enum):
@@ -220,9 +248,22 @@ class Lakeshore_350(Instrument):
 		self,
 		output_channel: OutputChannel,
 		) -> float:
+		print(output_channel.value)
 		return float(self._query(f'SETP? {output_channel.value}'))
 
 	# TEMPERATURE LIMIT COMMAND
 
 	# TEMPERATURE LIMIT QUERY
 
+
+	def register_endpoints(self, app):
+		super().register_endpoints(app)
+
+		@app.get(f'/{self._uid}/'+'setpoint/get/{channel}', tags=[self._uid])
+		async def get_setpoint(channel: OutputChannelModel) -> float:
+			return self.get_setpoint(OutputChannel[channel.name])
+		
+		# @app.get(f'/{self._uid}/'+'setpoint/set/{phase}', tags=[self._uid])
+		# async def set_phase(phase: float) -> int:
+		# 	self.set_phase(phase)
+		# 	return 0

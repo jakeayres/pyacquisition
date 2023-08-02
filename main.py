@@ -4,7 +4,7 @@ import random
 import json
 
 from pyacquisition.experiment import Experiment
-from pyacquisition.instruments import Clock, WaveformGenerator, Gizmotron, SR_830, SR_860
+from pyacquisition.instruments import Clock, WaveformGenerator, Gizmotron, SR_830, SR_860, Lakeshore_350
 from pyacquisition.coroutines import pause, sweep_gizmotron, SweepGizmotron, sweep_lockin_frequency, LockinFrequencySweep
 from pyacquisition.visa import resource_manager
 
@@ -64,25 +64,32 @@ class HardExperiment(Experiment):
 			'Clock', 
 			Clock,
 		)
-		self.add_measurement('time', clock.time)
 
 		lockin1 = self.add_hardware_instrument(
 			'Lockin1', 
 			SR_860, 
 			rm.open_resource('GPIB0::1::INSTR')
 		)
+		lockin2 = self.add_hardware_instrument(
+			'Lockin2', 
+			SR_860, 
+			rm.open_resource('GPIB0::2::INSTR')
+		)
+		lake = self.add_hardware_instrument(
+			'Lakeshore', 
+			Lakeshore_350, 
+			rm.open_resource('GPIB0::2::INSTR')
+		)
+
+		self.add_measurement('time', clock.time)
+
 		self.add_measurement('freq1', lockin1.get_frequency)
 		self.add_measurement('x1', lockin1.get_x)
 		self.add_measurement('y1', lockin1.get_y)
 
-		# lockin2 = self.add_hardware_instrument(
-		# 	'Lockin2', 
-		# 	SR_860, 
-		# 	rm.open_resource('GPIB0::2::INSTR')
-		# )
-		# self.add_measurement('freq2', lockin2.get_frequency)
-		# self.add_measurement('x2', lockin2.get_x)
-		# self.add_measurement('y2', lockin2.get_y)
+		self.add_measurement('freq2', lockin2.get_frequency)
+		self.add_measurement('x2', lockin2.get_x)
+		self.add_measurement('y2', lockin2.get_y)
 
 
 	def register_endpoints(self):
@@ -97,7 +104,7 @@ class HardExperiment(Experiment):
 
 
 async def main():
-	exp = HardExperiment("./data/")
+	exp = SoftExperiment("./data/")
 	await asyncio.create_task(exp.run())
 
 

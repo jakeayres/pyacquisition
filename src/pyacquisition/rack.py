@@ -99,7 +99,10 @@ class Rack(Broadcaster):
 
 	async def run(self, period=0.5):
 		while True:
-			self.measure()
-			await asyncio.sleep(period)
+			try:
+				self.measure()
+				await asyncio.sleep(period)
+			except Exception as e:
+				print(e)
 
 
