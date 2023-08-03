@@ -87,13 +87,18 @@ class Experiment:
 			CALL SUPER() to keep the below functionality
 		"""
 
-		@self.api.get('/experiment/pause', tags=['Experiment'])
-		async def pause() -> str:
-			return self.pause()
+		@self.api.get('/experiment/wait_for/{mins}/{secs}', tags=['Experiment'])
+		async def wait_for(mins: int = 0, secs: int = 0) -> int:
+			await self.task_queue.put(PauseFor(self.scribe, minutes=mins, seconds=secs))
+			return 0
 
-		@self.api.get('/experiment/resume', tags=['Experiment'])
-		async def resume() -> str:
-			return self.resume()
+		# @self.api.get('/experiment/pause', tags=['Experiment'])
+		# async def pause() -> str:
+		# 	return self.pause()
+
+		# @self.api.get('/experiment/resume', tags=['Experiment'])
+		# async def resume() -> str:
+		# 	return self.resume()
 
 		@self.api.get('/experiment/current_task', tags=['Experiment'])
 		async def current_task() -> str:

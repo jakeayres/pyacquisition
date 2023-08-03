@@ -2,11 +2,14 @@ import asyncio
 import websockets
 import random
 import json
+from functools import partial
 
 from pyacquisition.experiment import Experiment
 from pyacquisition.instruments import Clock, WaveformGenerator, Gizmotron, SR_830, SR_860, Lakeshore_350
 from pyacquisition.coroutines import PauseFor, PauseUntil, SweepGizmotron, LockinFrequencySweep
 from pyacquisition.visa import resource_manager
+
+from pyacquisition.instruments.lakeshore.lakeshore_350 import OutputChannel, InputChannel
 
 
 class SoftExperiment(Experiment):
@@ -34,11 +37,6 @@ class SoftExperiment(Experiment):
 			await self.task_queue.put(SweepGizmotron(self.scribe, self.rack.gizmo, max_value))
 			return 0
 
-		@self.api.get('/experiment/wait_for/{mins}/{secs}', tags=['Experiment'])
-		async def wait_for(mins: int = 0, secs: int = 0) -> int:
-			await self.task_queue.put(PauseFor(self.scribe, minutes=mins, seconds=secs))
-			return 0
-
 
 class HardExperiment(Experiment):
 
@@ -64,18 +62,20 @@ class HardExperiment(Experiment):
 		lake = self.add_hardware_instrument(
 			'Lakeshore', 
 			Lakeshore_350, 
-			rm.open_resource('GPIB0::2::INSTR')
+			rm.open_resource('GPIB0::3::INSTR')
 		)
 
 		self.add_measurement('time', clock.time)
 
-		self.add_measurement('freq1', lockin1.get_frequency)
 		self.add_measurement('x1', lockin1.get_x)
 		self.add_measurement('y1', lockin1.get_y)
 
-		self.add_measurement('freq2', lockin2.get_frequency)
 		self.add_measurement('x2', lockin2.get_x)
 		self.add_measurement('y2', lockin2.get_y)
+
+		self.add_measurement('setpoint', partial(lake.get_setpoint, OutputChannel.OUTPUT_1))
+		self.add_measurement('resistance', partial(lake.get_resistance, InputChannel.INPUT_A))
+		self.add_measurement('temperature', partial(lake.get_temperature, InputChannel.INPUT_A))
 
 
 	def register_endpoints(self):
@@ -90,7 +90,7 @@ class HardExperiment(Experiment):
 
 
 async def main():
-	exp = SoftExperiment("./data/")
+	exp = HardExperiment("./data/")
 	await asyncio.create_task(exp.run())
 
 

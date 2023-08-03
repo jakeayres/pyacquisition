@@ -51,6 +51,28 @@ class AutotuneModeModel(enum.Enum):
 	PID = 'PID'
 
 
+class CurveFormat(enum.Enum):
+	MV_K = 1
+	V_K = 2
+	OHM_K = 3
+	LOGOHM_K = 4
+
+class CurveFormatModel(enum.Enum):
+	MV_K = 'mV / K'
+	V_K = 'V / K'
+	OHM_K = 'Ohm / K'
+	LOGOHM_K = 'log(Ohm) / K'
+
+
+class CurveCoefficient(enum.Enum):
+	NEGATIVE = 1
+	POSITIVE = 2
+
+class CurveCoefficientModel(enum.Enum):
+	NEGATIVE = 'Negative'
+	POSITIVE = 'Positive'
+
+
 class DisplayContrast(enum.Enum):
 	OFF = 1
 	DIM = 12
@@ -138,6 +160,34 @@ class Lakeshore_350(Instrument):
 
 
 	@command
+	def set_curve_header(
+		self, 
+		curve_index: int, 
+		name: str, 
+		serial_no: str, 
+		curve_format: CurveFormat,
+		upper_limit: int,
+		coefficient: CurveCoefficient
+		):
+		return self._command(f'CRVHDR {curve_index},{name},{serial_no},{curve_format.value},{upper_limit},{coefficient.value}')
+
+
+	@query
+	def get_curve_header(self, curve_index: int) -> str:
+		return self._query(f'CRVHDR? {curve_index}') 
+
+
+	@query
+	def get_curve_point(self, curve_index: int, point_index: int) -> str:
+		return self._query(f'CRVPT? {curve_index},{point_index}')
+
+
+	@command
+	def set_curve_point(self, curve_index: int, point_index: int, sensor: float, temperature: float) -> int:
+		return self._command(f'CRVPT {curve_index},{point_index},{sensor},{temperature}')
+
+
+	@command
 	def set_display_setup(self, mode: DisplayMode):
 		return self._command(f'DISPLAY {mode.value},0,0')
 
@@ -184,6 +234,13 @@ class Lakeshore_350(Instrument):
 
 	# HEATER STATUS QUERY
 
+	@query
+	def get_temperature(
+		self,
+		input_channel: InputChannel,
+		) -> float:
+		return float(self._query(f'KRDG? {input_channel.value}'))
+
 	# FRONT PLANEL LOCK
 
 	# FRONT PANEL QUERY
@@ -208,7 +265,7 @@ class Lakeshore_350(Instrument):
 		state: State,
 		rate: float,
 		):
-		return self._command(f'RAMP {output_channel},{state.value},{rate:.3f}')
+		return self._command(f'RAMP {output_channel.value},{state.value},{rate:.3f}')
 	
 	
 	@query
@@ -217,7 +274,7 @@ class Lakeshore_350(Instrument):
 		output_channel: OutputChannel,
 		) -> Tuple[int, float]:
 		response = self._query(f'RAMP? {output_channel.value}').split(',')
-		return (OutputChannel(response[0]), float(response[1]))
+		return [State(int(response[0])), float(response[1])]
 
 
 	@query
@@ -225,7 +282,7 @@ class Lakeshore_350(Instrument):
 		self,
 		output_channel: OutputChannel,
 		) -> State:
-		return State(self._query(f'RAMPST? {output_channel.value}'))
+		return State(int(self._query(f'RAMPST? {output_channel.value}')))
 
 	# HEATER RANGE COMMAND
 
@@ -248,8 +305,16 @@ class Lakeshore_350(Instrument):
 		self,
 		output_channel: OutputChannel,
 		) -> float:
-		print(output_channel.value)
 		return float(self._query(f'SETP? {output_channel.value}'))
+
+
+	@query
+	def get_resistance(
+		self,
+		input_channel: InputChannel,
+		) -> float:
+		return float(self._query(f'SRDG? {input_channel.value}'))
+
 
 	# TEMPERATURE LIMIT COMMAND
 
@@ -262,8 +327,62 @@ class Lakeshore_350(Instrument):
 		@app.get(f'/{self._uid}/'+'setpoint/get/{channel}', tags=[self._uid])
 		async def get_setpoint(channel: OutputChannelModel) -> float:
 			return self.get_setpoint(OutputChannel[channel.name])
+
+		@app.get(f'/{self._uid}/'+'setpoint/set/{channel}/{setpoint}', tags=[self._uid])
+		async def set_setpoint(channel: OutputChannelModel, setpoint: float) -> float:
+			self.set_setpoint(OutputChannel[channel.name], setpoint)
+			return 0
+
+		@app.get(f'/{self._uid}/'+'ramp/get/{channel}', tags=[self._uid])
+		async def get_ramp(channel: OutputChannelModel) -> list[State, float]:
+			return self.get_ramp(OutputChannel[channel.name])
+
+		@app.get(f'/{self._uid}/'+'ramp/set/{channel}/{state}/{rate}', tags=[self._uid])
+		async def set_ramp(channel: OutputChannelModel, state: StateModel, rate: float) -> float:
+			self.set_ramp(OutputChannel[channel.name], State[state.name], rate)
+			return 0
+
+		@app.get(f'/{self._uid}/'+'ramp_status/get/{channel}', tags=[self._uid])
+		async def get_ramp_status(channel: OutputChannelModel) -> StateModel:
+			return StateModel[self.get_ramp_status(OutputChannel[channel.name]).name]
+
+		@app.get(f'/{self._uid}/'+'temperature/get/{channel}', tags=[self._uid])
+		async def get_temperature(channel: InputChannelModel) -> float:
+			return self.get_temperature(InputChannel[channel.name])
+
+		@app.get(f'/{self._uid}/'+'resistance/get/{channel}', tags=[self._uid])
+		async def get_resistance(channel: InputChannelModel) -> float:
+			return self.get_resistance(InputChannel[channel.name])
+
+
+		@app.get(f'/{self._uid}/'+'curve_header/get/{curve_index}', tags=[self._uid])
+		async def get_curve_header(curve_index: int) -> str:
+			return self.get_curve_header(curve_index)
+
+		@app.get(f'/{self._uid}/'+'curve_header/set/{curve_index}/{curve_name}/{serial_no}/{curve_format}/{upper_limit}/{curve_coefficient}', tags=[self._uid])
+		async def set_curve_header(
+			curve_index: int,
+			curve_name: str,
+			serial_no: str,
+			curve_format: CurveFormatModel,
+			upper_limit: int,
+			curve_coefficient: CurveCoefficientModel,
+			) -> int:
+			self.set_curve_header(
+				curve_index, 
+				curve_name, 
+				serial_no, 
+				CurveFormat[curve_format.name], 
+				upper_limit, 
+				CurveCoefficient[curve_coefficient.name]
+				)
+			return 0
+
+		@app.get(f'/{self._uid}/'+'curve_point/get/{curve_index}/{point_index}', tags=[self._uid])
+		async def get_curve_point(curve_index: int, point_index: int) -> str:
+			return self.get_curve_point(curve_index, point_index)
+
+		@app.get(f'/{self._uid}/'+'curve_point/set/{curve_index}/{point_index}/{sensor}/{temperature}', tags=[self._uid])
+		async def set_curve_point(curve_index: int, point_index: int, sensor: float, temperature: float) -> str:
+			return self.set_curve_point(curve_index, point_index, sensor, temperature)
 		
-		# @app.get(f'/{self._uid}/'+'setpoint/set/{phase}', tags=[self._uid])
-		# async def set_phase(phase: float) -> int:
-		# 	self.set_phase(phase)
-		# 	return 0

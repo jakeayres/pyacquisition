@@ -22,4 +22,5 @@ markers = [
 	"software: software test, no physical hardware required",
 	"hardware: requires physical hardware",
 	"SR_860: requires SR860 be connected",
+	"lakeshore_350: requires lakeshore 350 be connected"
 ]

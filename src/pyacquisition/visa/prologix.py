@@ -23,7 +23,7 @@ class PrologixResourceManager(object):
 
 
 	def _read(self):
-		response = self._serial_object.read(256)
+		response = self._serial_object.readline()
 		return response.decode('utf-8')
 
 
@@ -77,7 +77,7 @@ class PrologixResource(object):
 
 
 	def _read(self):
-		response = self._serial_object.read(256);
+		response = self._serial_object.readline();
 		return response.decode('utf-8')
 
 
