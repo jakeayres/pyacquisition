@@ -1,4 +1,4 @@
-import serial
+from serial import Serial
 import datetime
 
 
@@ -13,7 +13,7 @@ class PrologixResourceManager(object):
 	TIMEOUT = 0.1
 
 	def __init__(self, com_port):
-		self._serial_object = serial.Serial(f'COM{com_port}', self.BUAD_RATE, timeout=self.TIMEOUT)
+		self._serial_object = Serial(f'COM{com_port}', self.BUAD_RATE, timeout=self.TIMEOUT)
 		self._resources = []
 
 

@@ -6,10 +6,12 @@ from functools import partial
 
 from pyacquisition.experiment import Experiment
 from pyacquisition.instruments import Clock, WaveformGenerator, Gizmotron, SR_830, SR_860, Lakeshore_350
-from pyacquisition.coroutines import PauseFor, PauseUntil, SweepGizmotron, LockinFrequencySweep
+from pyacquisition.coroutines import WaitFor, WaitUntil, SweepGizmotron, LockinFrequencySweep
 from pyacquisition.visa import resource_manager
 
 from pyacquisition.instruments.lakeshore.lakeshore_350 import OutputChannel, InputChannel
+
+from pyacquisition.coroutines import Coroutine
 
 
 class SoftExperiment(Experiment):
@@ -25,16 +27,14 @@ class SoftExperiment(Experiment):
 		wave1 = self.add_software_instrument('wave1', WaveformGenerator)
 		self.add_measurement('signal_1', wave1.get_signal)
 
-		wave2 = self.add_software_instrument('wave2', WaveformGenerator)
-		self.add_measurement('signal_2', wave2.get_signal)
-
 
 	def register_endpoints(self):
 		super().register_endpoints()
 
+
 		@self.api.get('/experiment/perform_sweep/{max_value}', tags=['Experiment'])
 		async def perform_sweep(max_value: float) -> int:
-			await self.task_queue.put(SweepGizmotron(self.scribe, self.rack.gizmo, max_value))
+			await self.add_task(SweepGizmotron(self.scribe, self.rack.gizmo, max_value))
 			return 0
 
 
@@ -88,9 +88,8 @@ class HardExperiment(Experiment):
 
 
 
-
 async def main():
-	exp = HardExperiment("./data/")
+	exp = SoftExperiment("./data/")
 	await asyncio.create_task(exp.run())
 
 

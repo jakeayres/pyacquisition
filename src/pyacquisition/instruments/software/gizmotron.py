@@ -11,6 +11,13 @@ class Direction(enum.Enum):
 	RIGHT = 3
 
 
+class DirectionModel(enum.Enum):
+	UP = 'Up'
+	DOWN = 'Down'
+	LEFT = 'Left'
+	RIGHT = 'Right'
+
+
 class Channel(enum.Enum):
 	OUTPUT_1 = 0
 	OUTPUT_2 = 1
@@ -103,29 +110,46 @@ class Gizmotron(SoftInstrument):
 		return self._value
 
 
-	def endpoint_factory(self, method_name):
-
-		async def endpoint():
-			method = getattr(self, method_name)
-			if args is None:
-				return method()
-			else:
-				return method(*args.args, **args.kwargs)
-			return endpoint
+	@query
+	def get_various_types(self) -> tuple[Direction, float, str, int]:
+		return (self.get_direction(), self.get_float(), 'a string', 1)
 
 
 	def register_endpoints(self, app):
 		super().register_endpoints(app)
+
 
 		@app.get(f'/{self._uid}/'+'setpoint/set/{value}', tags=[self._uid])
 		def set_setpoint(value: float) -> float:
 			self.set_setpoint(value)
 			return self.get_setpoint()
 
+
 		@app.get(f'/{self._uid}/'+'setpoint/get/', tags=[self._uid])
 		def get_setpoint() -> float:
 			return self.get_setpoint()
 
+
 		@app.get(f'/{self._uid}/'+'value/get/', tags=[self._uid])
 		def get_value() -> float:
 			return self.get_value()
+
+
+		@app.get(f'/{self._uid}/'+'two_integers/get/', tags=[self._uid])
+		def get_two_integers() -> tuple[int, int]:
+			return self.get_two_integers()
+
+
+		@app.get(f'/{self._uid}/'+'two_floats/get/', tags=[self._uid])
+		def get_two_floats() -> tuple[float, float]:
+			return self.get_two_floats()
+
+
+		@app.get(f'/{self._uid}/'+'various_types/get/', tags=[self._uid])
+		def get_various_types() -> tuple[DirectionModel, float, str, int]:
+			return (
+				DirectionModel[self.get_various_types()[0].name],
+				self.get_various_types()[1],
+				self.get_various_types()[2],
+				self.get_various_types()[3],
+			)
