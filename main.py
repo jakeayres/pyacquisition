@@ -23,6 +23,7 @@ class SoftExperiment(Experiment):
 
 		gizmo = self.add_software_instrument('gizmo', Gizmotron)
 		self.add_measurement('value', gizmo.get_value)
+		self.add_measurement('value2', gizmo.get_value, call_every=5)
 
 		wave1 = self.add_software_instrument('wave1', WaveformGenerator)
 		self.add_measurement('signal_1', wave1.get_signal)

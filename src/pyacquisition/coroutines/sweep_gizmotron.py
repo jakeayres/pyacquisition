@@ -64,6 +64,9 @@ class SweepGizmotron(Coroutine):
 		while self.gizmo.get_value(from_cache=self.from_cache) < 0:
 			await asyncio.sleep(self.wait_time)
 
+		await asyncio.sleep(self.wait_time)
+		self.scribe.next_file('Teardown')
+
 		yield ''
 
 

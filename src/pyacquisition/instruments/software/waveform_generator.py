@@ -38,6 +38,16 @@ class WaveformGenerator(SoftInstrument):
 		}
 
 
+	@property
+	def metadata(self):
+		metadata = super().metadata()
+		metadata.update({
+			"frequency": self.get_frequency(),
+			"shape": self.get_shape(),
+		})
+		return metadata
+
+
 	@query
 	def get_amplitude(self) -> float:
 		return self._amplitude

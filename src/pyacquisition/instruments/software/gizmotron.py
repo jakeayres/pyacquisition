@@ -51,6 +51,16 @@ class Gizmotron(SoftInstrument):
 		self._value = 0
 
 
+	@property
+	def metadata(self):
+		metadata = super().metadata
+		metadata.update({
+			"direction": self.get_direction(),
+			"setpoint": self.get_setpoint(),
+		})
+		return metadata
+
+
 	@query
 	def get_integer() -> int:
 		return int(np.random.random()*10)

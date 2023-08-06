@@ -93,6 +93,15 @@ class Instrument(metaclass=QueryCommandProvider):
 
 
 	@property
+	def metadata(self):
+		return {
+			'id': self._uid,
+			'class': self.name,
+			'address': self._visa_resource.address(),
+		}
+
+
+	@property
 	def queries(self):
 		""" return dictionary of registered queries as externally executable partials """
 		return {q.__name__: partial(q, self) for q in self._queries}
@@ -144,6 +153,14 @@ class SoftInstrument(metaclass=QueryCommandProvider):
 
 	def __init__(self, uid):
 		self._uid = uid
+
+
+	@property
+	def metadata(self):
+		return {
+			'id': self._uid,
+			'class': self.name,
+		}
 
 
 	@property

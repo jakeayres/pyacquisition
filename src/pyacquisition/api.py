@@ -1,6 +1,7 @@
 from .consumer import Consumer
 
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from websockets.exceptions import ConnectionClosedOK
 import uvicorn
 import logging
 import asyncio
@@ -80,12 +81,20 @@ class API(Consumer):
 				}
 
 			await websocket.accept()
-			while True:
-				data = await poll_function()
-				for key, value in data.items():
-					if isinstance(value, enum.Enum):
-						data[key] = enum_to_selected_dict(value)
-				await websocket.send_json(data)
+			try:
+				while True:
+					data = await poll_function()
+					for key, value in data.items():
+						if isinstance(value, enum.Enum):
+							data[key] = enum_to_selected_dict(value)
+					await websocket.send_json(data)
+			except WebSocketDisconnect:
+				pass
+			except ConnectionClosedOK:
+				pass
+			except Exception as e:
+				print(f'Exception type: {type(e)}')
+				print(f'Exception message: {str(e)}')
 
 
 	def add_endpoint(self, url: str, func: Callable):

@@ -32,6 +32,9 @@ class Coroutine:
 
 
 	async def coroutine(self):
+		""" Step through generator (run()) and check
+		flags at each yield.
+		"""
 		async for step in self.run():
 			if self._abort_event.is_set():
 				return  # or raise an exception
@@ -41,6 +44,9 @@ class Coroutine:
 
 
 	async def run(self):
+		""" run() is to be overwriten in inheriting
+		classes. Must be a generator method (ie yields stuff)
+		"""
 
 		self.scribe.log('started')
 

@@ -14,7 +14,7 @@ class Clock(SoftInstrument):
 
 		self._named_timers = {}
 		self._t0 = time.time()
-
+		
 
 	@query
 	def timestamp_ms(self) -> float:

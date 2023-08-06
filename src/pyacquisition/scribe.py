@@ -5,7 +5,7 @@ import colorama
 
 
 # WINDOWS SPECIFIC REQUIREMENT
-colorama.init(convert=True)
+#colorama.init(convert=True)
 
 
 class Scribe(Consumer):
@@ -28,23 +28,36 @@ class Scribe(Consumer):
 
 
 	@property
-	def filename(self):
+	def current_data_filename(self):
 		chapter = f'{self._chapter:0{2}}'
 		section = f'{self._section:0{2}}'
 		return f'{chapter}.{section} {self._title}{self._data_extension}'
 
 
 	@property
-	def full_filepath(self):
-		return f'{self._root}{self.filename}'
+	def current_meta_filename(self):
+		chapter = f'{self._chapter:0{2}}'
+		section = f'{self._section:0{2}}'
+		return f'{chapter}.{section} {self._title}{self._meta_extension}'
+
 
 	@property
-	def filelog_path(self):
+	def full_data_filepath(self):
+		return f'{self._root}{self.current_data_filename}'
+
+
+	@property
+	def full_meta_filepath(self):
+		return f'{self._root}{self.current_meta_filename}'
+
+
+	@property
+	def full_filelog_filepath(self):
 		return f'{self._root}files{self._log_extension}'
 
 
 	@property 
-	def loglog_path(self):
+	def full_log_filepath(self):
 		return f'{self._root}log{self._log_extension}'
 
 
@@ -84,42 +97,48 @@ class Scribe(Consumer):
 
 	def _write(self, data):
 		df = pd.DataFrame({k: [v] for k, v in data.items()})
-		df.to_csv(self.full_filepath, mode='w', header=True, index=False)
+		df.to_csv(self.full_data_filepath, mode='w', header=True, index=False)
 
 
 	def _append(self, data):
 		df = pd.DataFrame({k: [v] for k, v in data.items()})
-		df.to_csv(self.full_filepath, mode='a', header=False, index=False)
+		df.to_csv(self.full_data_filepath, mode='a', header=False, index=False)
 
 
 	def record(self, data):
-		if not os.path.exists(self.full_filepath):
+		if not os.path.exists(self.full_data_filepath):
 			self._write(data)
 		else:
 			self._append(data)
 
 
-	def log(self, entry):
-		if not os.path.exists(self.loglog_path):
+	def save_meta(self, data):
+		with open(self.full_meta_filepath, 'w') as file:
+			json.dump(data, file, indent=4, sort_keys=True)
+
+
+	def log(self, entry, stem=None):
+		if not os.path.exists(self.full_log_filepath):
 			mode = 'w'
 		else:
 			mode = 'a'
-		with open(self.loglog_path, mode) as file:
+		with open(self.full_log_filepath, mode) as file:
 			file.write(f'{self._formatted_date} {self._formatted_time} : {entry}\n')
 			print(colorama.Style.RESET_ALL, end='')
 			print(colorama.Fore.BLUE + f' {self._formatted_date}', end='')
 			print(colorama.Fore.BLUE + colorama.Style.BRIGHT + f' {self._formatted_time}', end='')
-			print(colorama.Style.RESET_ALL + f'   {entry}', end='\n')
+			if stem != None: print(colorama.Fore.YELLOW + colorama.Style.BRIGHT + f'  {stem.ljust(15)}', end='')
+			print(colorama.Style.RESET_ALL + f'  {entry}', end='\n')
 
 
 	def _log_new_file(self):
-		if not os.path.exists(self.filelog_path):
+		if not os.path.exists(self.full_filelog_filepath):
 			mode = 'w'
 		else:
 			mode = 'a'
-		with open(self.filelog_path, mode) as file:
-			file.write(f'{self._formatted_date} {self._formatted_time} : {self.filename}\n')
-			self.log(f'New File : {self.filename}')
+		with open(self.full_filelog_filepath, mode) as file:
+			file.write(f'{self._formatted_date} {self._formatted_time} : {self.current_data_filename}\n')
+			self.log(f'{self.current_data_filename}', stem='New File')
 
 
 	@property
@@ -141,7 +160,7 @@ class Scribe(Consumer):
 			Returns:
 			    str: Current filename
 			"""
-			return self.filename
+			return self.current_data_filename
 
 		@app.get('/scribe/next_file/{title}/{next_chapter}', tags=['Scribe'])
 		def next_file(title: str, next_chapter: bool = False) -> int:
@@ -167,7 +186,7 @@ class Scribe(Consumer):
 			Returns:
 			    int: Description
 			"""
-			self.log(entry)
+			self.log(entry, stem='User Log')
 			return 0
 
 

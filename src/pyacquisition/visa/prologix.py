@@ -90,6 +90,10 @@ class PrologixResource(object):
 		self._write(f'++addr {self._gpib_address}')
 
 
+	def address(self):
+		return self._gpib_address()
+
+
 	def write(self, command):
 		self._set_gpib_address()
 		self._write(command)

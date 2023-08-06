@@ -1,29 +1,44 @@
 from ..scribe import Scribe
+from ._coroutine import Coroutine
 
 import asyncio
 from datetime import datetime
 from dataclasses import dataclass
+from pydantic import BaseModel
+
+
+
+class WaitDuration(BaseModel):
+	hours: int = 0
+	minutes: int = 0
+	seconds: int = 0
 
 
 @dataclass
-class WaitFor:
+class WaitFor(Coroutine):
 
 	scribe: Scribe
+	hours: int = 0
 	minutes: int = 0
 	seconds: int = 0
 
 
 	def string(self):
-		return f'Pausing for {self.minutes}m {self.seconds}s'
+		return f'Pausing for {self.hours}:{self.minutes}:{self.seconds}'
 
 
-	async def coroutine(self):
+	def _seconds(self):
+		return self.hours*60*60 + self.minutes*60 + self.seconds
+
+
+	async def run(self):
 		self.scribe.log(self.string())
-		await asyncio.sleep(self.minutes*60 + self.seconds)
+		await asyncio.sleep(self._seconds())
+		yield ''
 
 
 @dataclass
-class WaitUntil:
+class WaitUntil(Coroutine):
 
 	scribe: Scribe
 	date_time: datetime
@@ -33,9 +48,10 @@ class WaitUntil:
 		return f'Pausing until {self.date_time}'
 
 
-	async def coroutine(self):
+	async def run(self):
 		self.scribe.log(self.string())
 		while datetime.now() < self.date_time:
 			await asyncio.sleep(2)
+		yield ''
 
 
