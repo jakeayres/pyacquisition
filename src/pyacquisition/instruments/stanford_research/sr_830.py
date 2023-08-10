@@ -1,49 +1,82 @@
-import enum
+from enum import Enum
 
 from ...instruments._instrument import Instrument, query, command
 
 
-class State(enum.Enum):
+class SyncFilterState(Enum):
 	OFF = 0
 	ON = 1
 
+class SyncFilterStateModel(Enum):
+	OFF = 'Off'
+	ON = 'On'
 
-class ReferenceSource(enum.Enum):
+
+class ReferenceSource(Enum):
 	INTERNAL = 0
 	EXTERNAL = 1
 
+class ReferenceSourceModel(Enum):
+	INTERNAL = 'Internal'
+	EXTERNAL = 'External'
 
-class ReferenceSlope(enum.Enum):
+
+class ReferenceSlope(Enum):
 	SINE = 0
 	TTL_RISING = 1
 	TTL_FALLING = 2
 
+class ReferenceSlopeModel(Enum):
+	SINE = 'Sine'
+	TTL_RISING = 'TTL Rising'
+	TTL_FALLING = 'TTL Falling'
 
-class InputConfiguration(enum.Enum):
+
+class InputConfiguration(Enum):
 	A = 0
 	A_B = 1
 	I_10e6 = 2
 	I_100e6 = 3
 
+class InputConfigurationModel(Enum):
+	A = 'A'
+	A_B = 'A-B'
+	I_10e6 = 'Current 10uA'
+	I_100e6 = 'Curretn 100uA'
 
-class InputGrounding(enum.Enum):
+
+class InputGrounding(Enum):
 	FLOAT = 0
 	GROUND = 1
 
+class InputGroundingModel(Enum):
+	FLOAT = 'Float'
+	GROUND = 'Ground'
 
-class InputCoupling(enum.Enum):
+
+class InputCoupling(Enum):
 	AC = 0
 	DC = 1
 
+class InputCouplingModel(Enum):
+	AC = 'AC'
+	DC = 'DC'
 
-class NotchFilters(enum.Enum):
+
+class NotchFilters(Enum):
 	NONE = 0
 	LINE_1 = 1
 	LINE_2 = 2
 	BOTH = 3
 
+class NotchFiltersModel(Enum):
+	NONE = 'None'
+	LINE_1 = 'Line'
+	LINE_2 = 'Line x2'
+	BOTH = 'Both'
 
-class Sensitivity(enum.Enum):
+
+class Sensitivity(Enum):
 	nV_2 = 0
 	nV_5 = 1
 	nV_10 = 2
@@ -72,8 +105,37 @@ class Sensitivity(enum.Enum):
 	mV_500 = 25
 	V_1 = 26
 
+class SensitivityModel(Enum):
+	nV_2 = '2 nV'
+	nV_5 = '5 nV'
+	nV_10 = '10 nV'
+	nV_20 = '20 nV'
+	nV_50 = '50 nV'
+	nV_100 = '100 nV'
+	nV_200 = '200 nV'
+	nV_500 = '500 nV'
+	uV_1 = '1 uV'
+	uV_2 = '2 uV'
+	uV_5 = '5 uV'
+	uV_10 = '10 uV'
+	uV_20 = '20 uV'
+	uV_50 = '50 uV'
+	uV_100 = '100 uV'
+	uV_200 = '200 uV'
+	uV_500 = '500 uV'
+	mV_1 = '1 mV'
+	mV_2 = '2 mV'
+	mV_5 = '5 mV'
+	mV_10 = '10 mV'
+	mV_20 = '20 mV'
+	mV_50 = '50 mV'
+	mV_100 = '100 mV'
+	mV_200 = '200 mV'
+	mV_500 = '500 mV'
+	V_1 = '1 V'
 
-class TimeConstant(enum.Enum):
+
+class TimeConstant(Enum):
 	us_10 = 0
 	us_30 = 1
 	us_100 = 2
@@ -96,17 +158,51 @@ class TimeConstant(enum.Enum):
 	ks_30 = 19
 
 
-class FilterSlope(enum.Enum):
+class TimeConstantModel(Enum):
+	us_10 = '10 µs'
+	us_30 = '30 µs'
+	us_100 = '100 µs'
+	us_300 = '300 µs'
+	ms_1 = '1 ms'
+	ms_3 = '3 ms'
+	ms_10 = '10 ms'
+	ms_30 = '30 ms'
+	ms_100 = '100 ms'
+	ms_300 = '300 ms'
+	s_1 = '1 s'
+	s_3 = '3 s'
+	s_10 = '10 s'
+	s_30 = '30 s'
+	s_100 = '100 s'
+	s_300 = '300 s'
+	ks_1 = '1 ks'
+	ks_3 = '3 ks'
+	ks_10 = '10 ks'
+	ks_30 = '30 ks'
+
+
+class FilterSlope(Enum):
 	db6 = 0
 	db12 = 1
 	db18 = 2
 	db24 = 3
 
+class FilterSlopeModel(Enum):
+	db6 = '6 db'
+	db12 = '12 db'
+	db18 = '18 db'
+	db24 = '24 db'
 
-class DynamicReserve(enum.Enum):
+
+class DynamicReserve(Enum):
 	HIGH_RESERVE = 0
 	NORMAL = 1
 	LOW_NOISE = 2
+
+class DynamicReserveModel(Enum):
+	HIGH_RESERVE = 'High Reserve'
+	NORMAL = 'Normal'
+	LOW_NOISE = 'Low Noise'
 
 
 
@@ -278,12 +374,12 @@ class SR_830(Instrument):
 
 
 	@query
-	def get_sync_filter_state(self) -> State:
-		return State(int(self._query(f'SYNC?')))
+	def get_sync_filter_state(self) -> SyncFilterState:
+		return SyncFilterState(int(self._query(f'SYNC?')))
 
 
 	@command
-	def set_sync_filter_state(self, state: State):
+	def set_sync_filter_state(self, state: SyncFilterState):
 		return self._command(f'SYNC {state.value}')
 
 
@@ -344,8 +440,131 @@ class SR_830(Instrument):
 
 	def register_endpoints(self, app):
 
-		@app.get(f'/{self._uid}/'+'frequency/set/{freq}', tags=[self._uid])
-		def set_frequency(freq: float) -> 0:
-			self.set_frequency(freq)
+		@app.get(f'/{self._uid}/'+'phase/get', tags=[self._uid])
+		async def get_phase() -> float:
+			return self.get_phase()
+		
+		@app.get(f'/{self._uid}/'+'phase/set/{phase}', tags=[self._uid])
+		async def set_phase(phase: float) -> int:
+			self.set_phase(phase)
 			return 0
 
+
+		@app.get(f'/{self._uid}/'+'reference_source/get', tags=[self._uid])
+		async def get_reference_source() -> ReferenceSourceModel:
+			return ReferenceSourceModel[self.get_reference_source().name]
+		
+		@app.get(f'/{self._uid}/'+'reference_source/set/{source}', tags=[self._uid])
+		async def set_reference_source(source: ReferenceSourceModel) -> int:
+			self.set_reference_source(ReferenceSource[source.name])
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'frequency/get', tags=[self._uid])
+		async def get_frequency() -> float:
+			return self.get_frequency()
+		
+		@app.get(f'/{self._uid}/'+'frequency/set/{frequency}', tags=[self._uid])
+		async def set_frequency(frequency: float) -> int:
+			self.set_frequency(frequency)
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'external_reference_slope/get', tags=[self._uid])
+		async def get_external_reference_slope() -> ReferenceSlopeModel:
+			return ReferenceSlopeModel[self.get_external_reference_slope().name]
+		
+		@app.get(f'/{self._uid}/'+'external_reference_slope/set/{slope}', tags=[self._uid])
+		async def set_external_reference_slope(slope: ReferenceSlopeModel) -> int:
+			self.set_external_reference_slope(ReferenceSlope[slope.name])
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'harmonic/get', tags=[self._uid])
+		async def get_harmonic() -> int:
+			return self.get_harmonic()
+		
+		@app.get(f'/{self._uid}/'+'harmonic/set/{harmonic}', tags=[self._uid])
+		async def set_harmonic(harmonic: int) -> int:
+			self.set_harmonic(harmonic)
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'reference_amplitude/get', tags=[self._uid])
+		async def get_reference_amplitude() -> float:
+			return self.get_reference_amplitude()
+		
+		@app.get(f'/{self._uid}/'+'reference_amplitude/set/{reference_amplitude}', tags=[self._uid])
+		async def set_reference_amplitude(reference_amplitude: float) -> int:
+			self.set_reference_amplitude(reference_amplitude)
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'input_configuration/get', tags=[self._uid])
+		async def get_input_configuration() -> InputConfigurationModel:
+			return InputConfigurationModel[self.get_input_configuration().name]
+		
+		@app.get(f'/{self._uid}/'+'input_configuration/set/{configuration}', tags=[self._uid])
+		async def set_input_configuration(configuration: InputConfigurationModel) -> int:
+			self.set_input_configuration(InputConfiguration[configuration.name])
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'input_coupling/get', tags=[self._uid])
+		async def get_input_coupling() -> InputCouplingModel:
+			return InputCouplingModel[self.get_input_coupling().name]
+		
+		@app.get(f'/{self._uid}/'+'input_coupling/set/{coupling}', tags=[self._uid])
+		async def set_input_coupling(coupling: InputCouplingModel) -> int:
+			self.set_input_coupling(InputCoupling[coupling.name])
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'input_grounding/get', tags=[self._uid])
+		async def get_input_grounding() -> InputGroundingModel:
+			return InputGroundingModel[self.get_input_grounding().name]
+		
+		@app.get(f'/{self._uid}/'+'input_grounding/set/{grounding}', tags=[self._uid])
+		async def set_input_grounding(grounding: InputGroundingModel) -> int:
+			self.set_input_grounding(InputGrounding[grounding.name])
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'dynamic_reserve/get', tags=[self._uid])
+		async def get_dynamic_reserve() -> DynamicReserveModel:
+			return DynamicReserveModel[self.get_dynamic_reserve().name]
+		
+		@app.get(f'/{self._uid}/'+'dynamic_reserve/set/{reserve}', tags=[self._uid])
+		async def set_dynamic_reserve(reserve: DynamicReserveModel) -> int:
+			self.set_dynamic_reserve(DynamicReserve[reserve.name])
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'sensitivity/get', tags=[self._uid])
+		async def get_sensitivity() -> SensitivityModel:
+			return SensitivityModel[self.get_sensitivity().name]
+		
+		@app.get(f'/{self._uid}/'+'sensitivity/set/{sensitivity}', tags=[self._uid])
+		async def set_sensitivity(sensitivity: SensitivityModel) -> int:
+			self.set_sensitivity(Sensitivity[sensitivity.name])
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'time_constant/get', tags=[self._uid])
+		async def get_time_constant() -> TimeConstantModel:
+			return TimeConstantModel[self.get_time_constant().name]
+		
+		@app.get(f'/{self._uid}/'+'time_constant/set/{time_constant}', tags=[self._uid])
+		async def set_time_constant(time_constant: TimeConstantModel) -> int:
+			self.set_time_constant(TimeConstant[time_constant.name])
+			return 0
+
+
+		@app.get(f'/{self._uid}/'+'filter_slope/get', tags=[self._uid])
+		async def get_filter_slope() -> FilterSlopeModel:
+			return FilterSlopeModel[self.get_filter_slope().name]
+		
+		@app.get(f'/{self._uid}/'+'filter_slope/set/{filter_slope}', tags=[self._uid])
+		async def set_filter_slope(filter_slope: FilterSlopeModel) -> int:
+			self.set_filter_slope(FilterSlope[filter_slope.name])
+			return 0

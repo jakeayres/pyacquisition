@@ -49,48 +49,40 @@ class HardExperiment(Experiment):
 			'Clock', 
 			Clock,
 		)
+		self.add_measurement('time', clock.time)
 
 		lockin1 = self.add_hardware_instrument(
 			'Lockin1', 
 			SR_860, 
-			rm.open_resource('GPIB0::1::INSTR')
+			rm.open_resource('GPIB0::8::INSTR')
 		)
-		lockin2 = self.add_hardware_instrument(
-			'Lockin2', 
-			SR_860, 
-			rm.open_resource('GPIB0::2::INSTR')
-		)
-		lake = self.add_hardware_instrument(
-			'Lakeshore', 
-			Lakeshore_350, 
-			rm.open_resource('GPIB0::3::INSTR')
-		)
-
-		self.add_measurement('time', clock.time)
-
+		self.add_measurement('frequency', lockin1.get_frequency)
 		self.add_measurement('x1', lockin1.get_x)
 		self.add_measurement('y1', lockin1.get_y)
 
+		lockin2 = self.add_hardware_instrument(
+			'Lockin2', 
+			SR_830, 
+			rm.open_resource('GPIB0::7::INSTR')
+		)
+
 		self.add_measurement('x2', lockin2.get_x)
 		self.add_measurement('y2', lockin2.get_y)
-
-		self.add_measurement('setpoint', partial(lake.get_setpoint, OutputChannel.OUTPUT_1))
-		self.add_measurement('resistance', partial(lake.get_resistance, InputChannel.INPUT_A))
-		self.add_measurement('temperature', partial(lake.get_temperature, InputChannel.INPUT_A))
 
 
 	def register_endpoints(self):
 		super().register_endpoints()
 
-		@self.api.get('/experiment/perform_sweep/{max_value}', tags=['Experiment'])
-		async def perform_sweep(max_value: float) -> int:
-			await self.task_queue.put(LockinFrequencySweep(self.scribe, self.rack.Lockin1, 1, max_value))
+		@self.api.get('/experiment/perform_sweep/{min_value}/{max_value}', tags=['Experiment'])
+		async def perform_sweep(min_value: float, max_value: float) -> int:
+			""" Sweeps lockin 1 from 1Hz to max value """
+			await self.add_task(LockinFrequencySweep(self.scribe, self.rack.Lockin2, min_value, max_value))
 			return 0
 
 
 
 async def main():
-	exp = SoftExperiment("./data/")
+	exp = HardExperiment("./data/")
 	await asyncio.create_task(exp.run())
 
 
