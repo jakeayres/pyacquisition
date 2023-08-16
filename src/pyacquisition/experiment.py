@@ -3,7 +3,6 @@ from fastapi import Depends
 from datetime import datetime
 from .rack import Rack
 from .scribe import Scribe
-from .graph import Graph
 from .consumer import Consumer
 from .websocket_server import WebSocketServer
 from .inspectable_queue import InspectableQueue

@@ -9,7 +9,7 @@ class PrologixResourceManager(object):
 	"""
 
 	GPIB_ADDRESS_RANGE = (1, 30)
-	BUAD_RATE = 115200
+	BUAD_RATE = 9800
 	TIMEOUT = 0.1
 
 	def __init__(self, com_port):

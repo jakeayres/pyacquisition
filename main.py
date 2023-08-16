@@ -5,14 +5,15 @@ import json
 from functools import partial
 
 from pyacquisition.experiment import Experiment
-from pyacquisition.instruments import Clock, WaveformGenerator, Gizmotron, SR_830, SR_860, Lakeshore_350
+from pyacquisition.instruments import (Clock, WaveformGenerator, 
+	Gizmotron, SR_830, SR_860, Lakeshore_340, Lakeshore_350)
 from pyacquisition.coroutines import WaitFor, WaitUntil, SweepGizmotron, LockinFrequencySweep
 from pyacquisition.visa import resource_manager
 
-from pyacquisition.instruments.lakeshore.lakeshore_350 import OutputChannel, InputChannel
 
 from pyacquisition.coroutines import Coroutine
 
+from pyacquisition.instruments.lakeshore.lakeshore_340 import OutputChannel, InputChannel
 
 class SoftExperiment(Experiment):
 
@@ -51,6 +52,13 @@ class HardExperiment(Experiment):
 		)
 		self.add_measurement('time', clock.time)
 
+		lake = self.add_hardware_instrument(
+			'Lake', 
+			Lakeshore_340, 
+			rm.open_resource('GPIB0::2::INSTR')
+		)
+		self.add_measurement('temperature', partial(lake.get_temperature, InputChannel.INPUT_A))
+
 		lockin1 = self.add_hardware_instrument(
 			'Lockin1', 
 			SR_860, 
@@ -82,7 +90,7 @@ class HardExperiment(Experiment):
 
 
 async def main():
-	exp = SoftExperiment("./data/")
+	exp = HardExperiment("./data/")
 	await asyncio.create_task(exp.run())
 
 

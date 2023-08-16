@@ -48,7 +48,7 @@ class Rack(Broadcaster):
 		self._measurements = {}
 		self._last_point = {}
 
-		self._period = 0.5
+		self._period = 1.0
 
 
 	@property
