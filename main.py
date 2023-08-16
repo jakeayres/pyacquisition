@@ -82,7 +82,7 @@ class HardExperiment(Experiment):
 
 
 async def main():
-	exp = HardExperiment("./data/")
+	exp = SoftExperiment("./data/")
 	await asyncio.create_task(exp.run())
 
 
