@@ -237,6 +237,7 @@ class SR_860(Instrument):
 
 	name = 'SR_860'
 
+
 	""" REFERENCE AND PHASE
 	"""
 

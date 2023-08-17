@@ -63,19 +63,6 @@ def command(func):
 	return mark_command(func)
 	
 
-# def parse(returns):
-# 	""" Decorator for parsing instrument responses. """
-
-# 	def outer(f):
-
-# 		def inner(self, *args, **kwargs):
-# 			response = self._query(f(self, *args, **kwargs))
-# 			return {key[0]: key[1](value) for key, valye in zip(returns, response)}
-
-# 		return innter
-
-# 	return outer
-
 
 
 class Instrument(metaclass=QueryCommandProvider):
@@ -135,9 +122,9 @@ class Instrument(metaclass=QueryCommandProvider):
 			return [name for name, _ in self.commands.items()]
 
 
-		@app.get(f'/{self._uid}/'+'ask/{query_name}', tags=[self._uid])
-		def query(query_name: str):
-			return self.queries[query_name]()
+		# @app.get(f'/{self._uid}/'+'ask/{query_name}', tags=[self._uid])
+		# def query(query_name: str):
+		# 	return self.queries[query_name]()
 
 
 

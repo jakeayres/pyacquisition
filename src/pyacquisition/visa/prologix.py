@@ -9,8 +9,9 @@ class PrologixResourceManager(object):
 	"""
 
 	GPIB_ADDRESS_RANGE = (1, 30)
-	BUAD_RATE = 9800
+	BUAD_RATE = 19200
 	TIMEOUT = 0.1
+
 
 	def __init__(self, com_port):
 		self._serial_object = Serial(f'COM{com_port}', self.BUAD_RATE, timeout=self.TIMEOUT)

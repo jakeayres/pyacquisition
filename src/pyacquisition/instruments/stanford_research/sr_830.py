@@ -213,6 +213,7 @@ class SR_830(Instrument):
 	""" REFERENCE AND PHASE
 	"""
 
+
 	@query
 	def identify(self):
 		return self._query('*IDN?')
@@ -224,8 +225,14 @@ class SR_830(Instrument):
 
 
 	@command
+	def reset_data_buffer(self):
+		return self._command('*REST')
+
+
+	@command
 	def clear(self):
 		return self._command('*CLS')
+
 
 
 	@query

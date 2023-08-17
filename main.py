@@ -54,15 +54,16 @@ class HardExperiment(Experiment):
 
 		lake = self.add_hardware_instrument(
 			'Lake', 
-			Lakeshore_340, 
+			Lakeshore_350, 
 			rm.open_resource('GPIB0::2::INSTR')
 		)
 		self.add_measurement('temperature', partial(lake.get_temperature, InputChannel.INPUT_A))
 
+
 		lockin1 = self.add_hardware_instrument(
 			'Lockin1', 
 			SR_860, 
-			rm.open_resource('GPIB0::8::INSTR')
+			rm.open_resource('GPIB0::9::INSTR')
 		)
 		self.add_measurement('frequency', lockin1.get_frequency)
 		self.add_measurement('x1', lockin1.get_x)

@@ -121,6 +121,32 @@ class Lakeshore_350(Instrument):
 	""" COMMANDS AS LISTED IN 350 MANUAL (ALPHABETICALLY)
 	"""
 
+	def __init__(self, *args, **kwargs):
+		super().__init__(*args, **kwargs)
+		self.clear()
+		self.clear_event_register()
+	
+
+	@query
+	def identify(self):
+		return self._query('*IDN?')
+
+
+	@command
+	def reset(self):
+		return self._command('*RST')
+
+
+	@command
+	def clear(self):
+		return self._command('*CLS')
+
+
+	@command
+	def clear_event_register(self):
+		return self._command('*ESR')
+
+
 	@query
 	def get_alarm(self) -> dict:
 		response = self._query(f'ALARM?').split(',')
@@ -272,9 +298,9 @@ class Lakeshore_350(Instrument):
 	def get_ramp(
 		self, 
 		output_channel: OutputChannel,
-		) -> Tuple[int, float]:
+		) -> float:
 		response = self._query(f'RAMP? {output_channel.value}').split(',')
-		return [State(int(response[0])), float(response[1])]
+		return float(response[1])
 
 
 	@query
@@ -324,27 +350,30 @@ class Lakeshore_350(Instrument):
 	def register_endpoints(self, app):
 		super().register_endpoints(app)
 
+
 		@app.get(f'/{self._uid}/'+'setpoint/get/{channel}', tags=[self._uid])
 		async def get_setpoint(channel: OutputChannelModel) -> float:
 			return self.get_setpoint(OutputChannel[channel.name])
 
 		@app.get(f'/{self._uid}/'+'setpoint/set/{channel}/{setpoint}', tags=[self._uid])
-		async def set_setpoint(channel: OutputChannelModel, setpoint: float) -> float:
+		async def set_setpoint(channel: OutputChannelModel, setpoint: float) -> int:
 			self.set_setpoint(OutputChannel[channel.name], setpoint)
 			return 0
 
+
 		@app.get(f'/{self._uid}/'+'ramp/get/{channel}', tags=[self._uid])
-		async def get_ramp(channel: OutputChannelModel) -> list[State, float]:
+		async def get_ramp(channel: OutputChannelModel) -> float:
 			return self.get_ramp(OutputChannel[channel.name])
 
 		@app.get(f'/{self._uid}/'+'ramp/set/{channel}/{state}/{rate}', tags=[self._uid])
-		async def set_ramp(channel: OutputChannelModel, state: StateModel, rate: float) -> float:
+		async def set_ramp(channel: OutputChannelModel, state: StateModel, rate: float) -> int:
 			self.set_ramp(OutputChannel[channel.name], State[state.name], rate)
 			return 0
 
 		@app.get(f'/{self._uid}/'+'ramp_status/get/{channel}', tags=[self._uid])
 		async def get_ramp_status(channel: OutputChannelModel) -> StateModel:
 			return StateModel[self.get_ramp_status(OutputChannel[channel.name]).name]
+
 
 		@app.get(f'/{self._uid}/'+'temperature/get/{channel}', tags=[self._uid])
 		async def get_temperature(channel: InputChannelModel) -> float:

@@ -29,11 +29,19 @@ class Measurement:
 
 
 	def run(self):
-		self._call_counter -= 1
-		if (self._call_counter == 0) or (self._last_result == None):
-			self.call()
-			self._call_counter = self._call_every
-		return self._last_result
+		try:
+			self._call_counter -= 1
+			if (self._call_counter == 0) or (self._last_result == None):
+				self.call()
+				self._call_counter = self._call_every
+			return self._last_result
+			
+		except Exception as e:
+			print(f'Failed to run measurement func:\t{self._name}')
+			print(f'Returning last result:\t {self._last_result}')
+			print(e)
+			return self._last_result
+
 
 
 
