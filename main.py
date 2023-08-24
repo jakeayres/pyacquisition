@@ -13,7 +13,7 @@ from pyacquisition.visa import resource_manager
 
 from pyacquisition.coroutines import Coroutine
 
-from pyacquisition.instruments.lakeshore.lakeshore_340 import OutputChannel, InputChannel
+from pyacquisition.instruments.lakeshore.lakeshore_350 import OutputChannel, InputChannel
 
 class SoftExperiment(Experiment):
 
@@ -81,6 +81,15 @@ class HardExperiment(Experiment):
 
 	def register_endpoints(self):
 		super().register_endpoints()
+
+		from pyacquisition.coroutines import RampTemperature
+
+		@self.api.get('/experiment/ramp_temperature/', tags=['Experiment'])
+		async def ramp_temperature(setpoint: float, ramp_rate: float) -> int:
+			""" Ramp lakeshore to setpoint at ramp rate """
+			await self.add_task(RampTemperature(self.scribe, self.rack.Lake, setpoint, ramp_rate))
+			return 0
+
 
 		@self.api.get('/experiment/perform_sweep/{min_value}/{max_value}', tags=['Experiment'])
 		async def perform_sweep(min_value: float, max_value: float) -> int:

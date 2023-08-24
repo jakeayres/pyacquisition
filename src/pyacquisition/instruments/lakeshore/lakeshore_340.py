@@ -261,7 +261,7 @@ class Lakeshore_340(Instrument):
 	@command
 	def set_ramp(
 		self,
-		output_channel: int,
+		output_channel: OutputChannel,
 		state: State,
 		rate: float,
 		):

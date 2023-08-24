@@ -17,6 +17,7 @@ class Coroutine:
 		self._pause_event.set()
 		self._abort_event = asyncio.Event()
 		self._is_paused = False
+		self._status_message = ''
 
 
 	def string(self):
