@@ -48,23 +48,7 @@ class Coroutine:
 		""" run() is to be overwriten in inheriting
 		classes. Must be a generator method (ie yields stuff)
 		"""
-
-		self.scribe.log('started')
-
-		self.scribe.log('running 1')
-		await asyncio.sleep(3)
 		yield ''
-		self.scribe.log('running 2')
-		await asyncio.sleep(3)
-		yield ''
-		self.scribe.log('running 3')
-		await asyncio.sleep(3)
-		yield ''
-		self.scribe.log('running 4')
-		await asyncio.sleep(3)
-		yield ''
-
-		self.scribe.log('finished')
 
 
 	def pause(self):
@@ -85,3 +69,11 @@ class Coroutine:
 
 	def is_paused(self):
 		return self._is_paused
+
+
+	@classmethod
+	def register_endpoints(cls, app, experiment):
+		"""
+		Overide this function in inheriting classes
+		"""
+		pass

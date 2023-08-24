@@ -4,7 +4,9 @@ from ._coroutine import Coroutine
 import asyncio
 from datetime import datetime
 from dataclasses import dataclass
+from dataclasses import dataclass
 from pydantic import BaseModel
+from fastapi import Depends
 
 
 
@@ -32,9 +34,19 @@ class WaitFor(Coroutine):
 
 
 	async def run(self):
-		self.scribe.log(self.string())
+		self.scribe.log(self.string(), stem='WaitFor')
 		await asyncio.sleep(self._seconds())
 		yield ''
+
+
+	@classmethod
+	def register_endpoints(cls, experiment):
+
+		@experiment.api.get('/experiment/wait_for/', tags=['Experiment'])
+		async def wait_for(duration: WaitDuration = Depends()) -> int:
+			""" Wait for given time """
+			await experiment.add_task(cls(experiment.scribe, **duration.dict()))
+			return 0
 
 
 @dataclass
@@ -49,7 +61,7 @@ class WaitUntil(Coroutine):
 
 
 	async def run(self):
-		self.scribe.log(self.string())
+		self.scribe.log(self.string(), stem='WaitUnit')
 		while datetime.now() < self.date_time:
 			await asyncio.sleep(2)
 		yield ''

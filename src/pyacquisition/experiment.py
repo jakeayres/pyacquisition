@@ -1,14 +1,11 @@
 import asyncio
-from fastapi import Depends
 from datetime import datetime
 from .rack import Rack
 from .scribe import Scribe
 from .consumer import Consumer
-from .websocket_server import WebSocketServer
 from .inspectable_queue import InspectableQueue
 from .api import API
-from .coroutines import WaitFor, WaitUntil
-from .coroutines.wait import WaitDuration
+from .coroutines import WaitFor
 
 
 class Experiment:
@@ -17,8 +14,6 @@ class Experiment:
 		self.rack = Rack()
 		self.scribe = Scribe(root=root)
 		self.scribe.subscribe_to(self.rack)
-		#self.ws_server = WebSocketServer("localhost", 8765)
-		#self.ws_server.subscribe_to(self.rack)
 		self._api = API(allowed_cors_origins=['http://localhost:3000'])
 		self._api.subscribe_to(self.rack)
 
@@ -176,17 +171,8 @@ class Experiment:
 			return 0
 
 
-		@self.api.get('/experiment/wait_for/', tags=['Experiment'])
-		async def wait_for(duration: WaitDuration = Depends()) -> int:
-			print('OK TO HERE')
-			await self.add_task(WaitFor(self.scribe, **duration.dict()))
-			return 0
-
-
-		# @self.api.get('/experiment/wait_until/{date_time}', tags=['Experiment'])
-		# async def wait_until(date_time: datetime) -> int:
-		# 	await self.add_task(WaitUntil(self.scribe, date_time))
-		# 	return 0
+		from .coroutines import WaitFor
+		WaitFor.register_endpoints(self)
 
 
 		self.rack.register_endpoints(self.api)
@@ -197,7 +183,6 @@ class Experiment:
 
 		rack_task = asyncio.create_task(self.rack.run())
 		scribe_task = asyncio.create_task(self.scribe.run())
-		#ws_task = asyncio.create_task(self.ws_server.run())
 		main_task = asyncio.create_task(self.execute())
 		fast_api_server_task = self._api.coroutine()
 

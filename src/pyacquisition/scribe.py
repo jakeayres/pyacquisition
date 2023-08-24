@@ -138,7 +138,7 @@ class Scribe(Consumer):
 				(f" {self._formatted_date} ", "blue"),
 				(f"{self._formatted_time}  ", "bold blue"),
 				self.LEVEL_CHAR[level],
-				(f"{stem.ljust(15)} ", "bold white"),
+				(f"{stem.ljust(20)} ", "bold white"),
 				(f"{entry}", "dim white")
 			)
 			self._console.print(text)
