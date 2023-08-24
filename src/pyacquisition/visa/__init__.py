@@ -4,7 +4,7 @@ from .dummy import DummyResourceManager
 
 
 _backends = {
-	'pyvisa': pyvisa.ResourceManager(),
+	'pyvisa': pyvisa.ResourceManager,
 	'prologix': PrologixResourceManager,
 	'dummy': DummyResourceManager,
 }
