@@ -2,6 +2,8 @@ from .consumer import Consumer
 import asyncio, os, datetime
 import pandas as pd
 import colorama
+from rich.console import Console
+from rich.text import Text
 
 
 # WINDOWS SPECIFIC REQUIREMENT
@@ -9,6 +11,12 @@ import colorama
 
 
 class Scribe(Consumer):
+
+	LEVEL_CHAR = {
+		'info': ('>  ', 'bold green'),
+		'warning': ('#  ', 'bold magenta'),
+		'error': ('@! ', 'bold red'),
+	}
 
 
 	def __init__(self, root='./'):
@@ -21,6 +29,7 @@ class Scribe(Consumer):
 		self._data_extension = '.data'
 		self._meta_extension = '.meta'
 		self._log_extension = '.log'
+		self._console = Console()
 
 		self._make_root_directory()
 		self._increment_to_non_existant_chapter()
@@ -117,18 +126,27 @@ class Scribe(Consumer):
 			json.dump(data, file, indent=4, sort_keys=True)
 
 
-	def log(self, entry, stem=None):
+	def log(self, entry, stem='', level='info'):
 		if not os.path.exists(self.full_log_filepath):
 			mode = 'w'
 		else:
 			mode = 'a'
 		with open(self.full_log_filepath, mode) as file:
 			file.write(f'{self._formatted_date} {self._formatted_time} : {entry}\n')
-			print(colorama.Style.RESET_ALL, end='')
-			print(colorama.Fore.BLUE + f' {self._formatted_date}', end='')
-			print(colorama.Fore.BLUE + colorama.Style.BRIGHT + f' {self._formatted_time}', end='')
-			if stem != None: print(colorama.Fore.YELLOW + colorama.Style.BRIGHT + f'  {stem.ljust(15)}', end='')
-			print(colorama.Style.RESET_ALL + f'  {entry}', end='\n')
+
+			text = Text.assemble(
+				(f" {self._formatted_date} ", "blue"),
+				(f"{self._formatted_time}  ", "bold blue"),
+				self.LEVEL_CHAR[level],
+				(f"{stem.ljust(15)} ", "bold white"),
+				(f"{entry}", "dim white")
+			)
+			self._console.print(text)
+			# print(colorama.Style.RESET_ALL, end='')
+			# print(colorama.Fore.BLUE + f' {self._formatted_date}', end='')
+			# print(colorama.Fore.BLUE + colorama.Style.BRIGHT + f' {self._formatted_time}', end='')
+			# if stem != None: print(colorama.Fore.YELLOW + colorama.Style.BRIGHT + f'  {stem.ljust(15)}', end='')
+			# print(colorama.Style.RESET_ALL + f'  {entry}', end='\n')
 
 
 	def _log_new_file(self):
