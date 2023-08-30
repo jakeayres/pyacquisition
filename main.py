@@ -8,7 +8,8 @@ from pyacquisition.experiment import Experiment
 from pyacquisition.instruments import (
 	Clock, WaveformGenerator, Gizmotron, 
 	SR_830, SR_860, 
-	Lakeshore_340, Lakeshore_350
+	Lakeshore_340, Lakeshore_350,
+	Mercury_IPS
 	)
 from pyacquisition.visa import resource_manager
 
@@ -45,31 +46,41 @@ class HardExperiment(Experiment):
 
 	def setup(self):
 
-		rm = resource_manager('prologix', com_port=3)
+		rm = resource_manager('pyvisa')
+
 
 		clock = self.add_software_instrument(
 			'Clock', 
 			Clock,
 		)
-
+		magnet = self.add_hardware_instrument(
+			'Magnet', 
+			Mercury_IPS, 
+			rm.open_resource(
+				'GPIB0::26::INSTR', 
+				read_termination='\r',
+				write_termination='\r',
+			)
+		)
 		lake = self.add_hardware_instrument(
 			'Lake', 
-			Lakeshore_350, 
+			Lakeshore_340, 
 			rm.open_resource('GPIB0::2::INSTR')
 		)
 		lockin1 = self.add_hardware_instrument(
 			'Lockin1', 
-			SR_860, 
-			rm.open_resource('GPIB0::9::INSTR')
+			SR_830, 
+			rm.open_resource('GPIB0::7::INSTR')
 		)
 		lockin2 = self.add_hardware_instrument(
 			'Lockin2', 
 			SR_830, 
-			rm.open_resource('GPIB0::7::INSTR')
+			rm.open_resource('GPIB0::8::INSTR')
 		)
 
 		self.add_measurement('time', clock.time)
 		self.add_measurement('temperature', partial(lake.get_temperature, InputChannel.INPUT_A))
+		self.add_measurement('field', magnet.get_output_field)
 		self.add_measurement('x1', lockin1.get_x)
 		self.add_measurement('y1', lockin1.get_y)
 		self.add_measurement('x2', lockin2.get_x)
@@ -85,7 +96,8 @@ class HardExperiment(Experiment):
 		from pyacquisition.coroutines import StabilizeTemperature
 		StabilizeTemperature.register_endpoints(self, self.rack.Lake, InputChannel.INPUT_A, OutputChannel.OUTPUT_1)
 
-
+		from pyacquisition.coroutines import SweepMagneticField
+		SweepMagneticField.register_endpoints(self, self.rack.Magnet)
 
 
 async def main():

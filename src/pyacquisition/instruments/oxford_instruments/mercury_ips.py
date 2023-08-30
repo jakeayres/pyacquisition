@@ -229,101 +229,126 @@ class Mercury_IPS(Instrument):
 	# 	}
 
 
+	def _parse_status_string(self, string: str, index: int):
+
+		if not isinstance(string, str):
+			raise TypeError(f'Expected to receive a string, got {type(string).__name__}')
+
+		elif len(string) not in [12, 15]:
+			raise ValueError(f'Expected status string of length 12 or 15, got {string} (len {len(string)})')
+
+		elif string[0] != 'X':
+			raise ValueError(f'"X" not found at string[0]. Expected string of form XmnAnCnHnMmnPmn, got {string}')
+
+		elif string[3] != 'A':
+			raise ValueError(f'"A" not found at string[3]. Expected string of form XmnAnCnHnMmnPmn, got {string}')
+
+		else:
+			return string[index]
+
+
 	@query 
 	def get_system_status(self) -> SystemStatusM:
-		response = self._query("X")[1]
+		response = self._query("X")
+		response = self._parse_status_string(response, 1)
 		return SystemStatusM(int(response))
 
 
 	@query
 	def get_limit_status(self) -> SystemStatusN:
-		response = self._query("X")[2]
+		response = self._query("X")
+		response = self._parse_status_string(response, 2)
 		return SystemStatusN(int(response))
 
 
 	@query
 	def get_activity_status(self) -> ActivityStatus:
-		response = self._query("X")[4]
+		response = self._query("X")
+		response = self._parse_status_string(response, 4)
 		return ActivityStatus(int(response))
 
 
 	@query
 	def get_remote_status(self) -> RemoteStatus:
-		response = self._query("X")[6]
+		response = self._query("X")
+		response = self._parse_status_string(response, 6)
 		return RemoteStatus(int(response))
 
 
 	@query
 	def get_switch_heater_status(self) -> SwitchHeaterStatus:
-		response = self._query("X")[8]
+		response = self._query("X")
+		response = self._parse_status_string(response, 8)
 		return SwitchHeaterStatus(int(response))
 
 
 	@query
 	def get_sweep_mode_status(self) -> ModeStatusM:
-		response = self._query("X")[10]
+		response = self._query("X")
+		response = self._parse_status_string(response, 10)
 		return ModeStatusM(int(response))
 
 
 	@query
 	def get_sweep_status(self) -> ModeStatusN:
-		response = self._query("X")[11]
+		response = self._query("X")
+		response = self._parse_status_string(response, 11)
 		return ModeStatusN(int(response))
 
 
-	@command
+	@query
 	def hold(self) -> int:
-		return self._command("A0")
+		return self._query("A0")
 
 
-	@command
+	@query
 	def to_setpoint(self) -> int:
-		return self._command("A1")
+		return self._query("A1")
 
 
-	@command
+	@query
 	def to_zero(self) -> int:
-		return self._command("A2")
+		return self._query("A2")
 
 
-	@command
+	@query
 	def clamp(self) -> int:
-		return self._command("A4")
+		return self._query("A4")
 
 
-	@command
-	def heater_off(self) -> int:
-		return self._command("H0")
+	@query
+	def heater_off(self) -> str:
+		return self._query("H0")
 
 
-	@command
-	def heater_on(self) -> int:
-		return self._command("H1")
+	@query
+	def heater_on(self) -> str:
+		return self._query("H1")
 
 
-	@command
+	@query
 	def force_heater_on(self) -> int:
-		return self._command("H2")
+		return self._query("H2")
 
 
-	@command
+	@query
 	def set_target_current(self, current: float) -> int:
-		return self._command(f"I{current:.3f}")
+		return self._query(f"I{current:.3f}")
 
 
-	@command
+	@query
 	def set_target_field(self, field: float) -> int:
-		return self._command(f"J{field:.3f}")
+		return self._query(f"J{field:.3f}")
 
 
-	@command
+	@query
 	def set_current_sweep_rate(self, rate: float) -> int:
-		return self._command(f"S{rate:.3f}")
+		return self._query(f"S{rate:.3f}")
 
 
-	@command
+	@query
 	def set_field_sweep_rate(self, rate: float) -> int:
-		return self._command(f"T{rate:.3f}")
+		return self._query(f"T{rate:.3f}")
 
 
 
