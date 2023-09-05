@@ -99,9 +99,12 @@ class HardExperiment(Experiment):
 		from pyacquisition.coroutines import SweepMagneticField
 		SweepMagneticField.register_endpoints(self, self.rack.Magnet)
 
+		from pyacquisition.coroutines import CreateNewFile
+		CreateNewFile.register_endpoints(self)
+
 
 async def main():
-	exp = HardExperiment("./data/")
+	exp = HardExperiment("../data/")
 	await asyncio.create_task(exp.run())
 
 

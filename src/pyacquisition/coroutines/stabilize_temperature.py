@@ -25,11 +25,13 @@ class StabilizeTemperature(Coroutine):
 	input_channel: IC340|IC350 = IC350.INPUT_A
 	output_channel: OC340|OC350 = OC350.OUTPUT_1
 	mean_tolerance: float = 10e-3
-	maximum_drift: float = 1e-3
+	maximum_drift: float = 5e-4
 	stability_time: float = 10
 	log_every: float = None
 	wait_time: float = 1
 	from_cache: bool = False
+	new_file: bool = True
+	new_chapter: bool = False
 
 
 	def string(self):
@@ -45,7 +47,7 @@ class StabilizeTemperature(Coroutine):
 	def _acceptable_mean(self, points, log=False):
 		mean = np.mean([point[1] for point in points])
 		if log:
-			self.scribe.log(f"Mean: {mean}", stem='Stab.Temperature')
+			self.scribe.log(f"Mean: {mean}", stem='Stab. Temperature')
 		return True if np.isclose(mean, self.setpoint, atol=self.mean_tolerance) else False
 
 
@@ -59,7 +61,7 @@ class StabilizeTemperature(Coroutine):
 				[point[1] for point in points],
 				)
 			if log:
-				self.scribe.log(f"Drift: {popt[1]:.4f}", stem='Stab.Temperature')
+				self.scribe.log(f"Drift: {popt[1]:.4f}", stem='Stab. Temperature')
 			return True if abs(popt[1]) <= self.maximum_drift else False
 
 
@@ -67,9 +69,12 @@ class StabilizeTemperature(Coroutine):
 	async def run(self):
 
 		# Start
-		self.scribe.log("Started", stem="Stab.Temperature")
+		self.scribe.log("Started", stem="Stab. Temperature")
 		await asyncio.sleep(self.wait_time)
 		yield ''
+
+		if self.new_file:
+			self.scribe.next_file(f"Stabilizing {self.setpoint:.2f}K", new_chapter=self.new_chapter)
 
 		# Ramp to setpoint
 		ramp_coroutine = RampTemperature(
@@ -77,12 +82,13 @@ class StabilizeTemperature(Coroutine):
 			self.lakeshore,
 			self.setpoint,
 			self.ramp_rate,
+			new_file=False,
 		)
 		await ramp_coroutine.coroutine()
 		yield ''
 
 		# Acquire data to compute mean and drift
-		self.scribe.log(f"Waiting for {self.stability_time}s of data", stem="Stab.Temperature")
+		self.scribe.log(f"Waiting for {self.stability_time}s of data", stem="Stab. Temperature")
 		t0 = time.time()
 		points = []
 		while time.time() - t0 < self.stability_time:
@@ -94,9 +100,8 @@ class StabilizeTemperature(Coroutine):
 			yield ''
 
 		# Check mean and drift
-		self.scribe.log(f"Checking stability. Mean:{self.mean_tolerance}. Drift{self.maximum_drift}", stem="Stab.Temperature")
-		mean_ok = self._acceptable_mean(points)
-		drift_ok = self._acceptable_drift(points)
+		self.scribe.log(f"Checking stability. Mean:{self.mean_tolerance}. Drift{self.maximum_drift}", stem="Stab. Temperature")
+		mean_ok, drift_ok = False, False
 		i = 1
 		while False in [mean_ok, drift_ok]:
 			await asyncio.sleep(self.wait_time)
@@ -111,13 +116,19 @@ class StabilizeTemperature(Coroutine):
 					_log = True
 				else:
 					_log = False
-			mean_ok = self._acceptable_mean(points, log=_log)
-			drift_ok = self._acceptable_drift(points, log=_log)
+			try:
+				mean_ok = self._acceptable_mean(points, log=_log)
+				drift_ok = self._acceptable_drift(points, log=_log)
+			except Exception as e:
+				scribe.log('mean and drift not calculated', level='error', stem='Stab. Temperature')
+				print(e)
+				mean_ok, drift_ok = False, False
+
 			i+=1
 			yield ''
 
 		# Finish
-		self.scribe.log("Finished", stem="Stab.Temperature")
+		self.scribe.log("Finished", stem="Stab. Temperature")
 
 
 
@@ -138,6 +149,8 @@ class StabilizeTemperature(Coroutine):
 			maximum_drift: float = 1e-3,
 			stability_time: float = 10,
 			log_every: int = -1,
+			new_file: bool = True,
+			new_chapter: bool = False,
 			) -> int:
 			""" Ramp lakeshore to setpoint at ramp rate """
 			await experiment.add_task(
@@ -151,6 +164,8 @@ class StabilizeTemperature(Coroutine):
 					mean_tolerance=mean_tolerance,
 					maximum_drift=mean_tolerance,
 					log_every=log_every,
+					new_file=new_file,
+					new_chapter=new_chapter,
 					)
 				)
 			return 0

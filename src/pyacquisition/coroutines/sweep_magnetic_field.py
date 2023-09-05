@@ -5,6 +5,7 @@ from ..instruments.oxford_instruments.mercury_ips import (
 
 from ..scribe import Scribe
 from ._coroutine import Coroutine
+from .create_new_file import CreateNewFile
 
 import asyncio
 import numpy as np
@@ -20,6 +21,7 @@ class SweepMagneticField(Coroutine):
 	ramp_rate: float
 	wait_time: float = 1
 	from_cache: bool = False
+	new_chapter: bool = False
 
 
 	def string(self):
@@ -222,6 +224,8 @@ class SweepMagneticField(Coroutine):
 
 		try:
 
+			self.scribe.next_file(f'Field Sweep to {"p" if self.setpoint>=0 else "n"}{abs(self.setpoint):.1f}T', new_chapter=self.new_chapter)
+
 			# Check system status
 			await self.check_system_normal()
 			yield ''
@@ -241,6 +245,8 @@ class SweepMagneticField(Coroutine):
 			# Go to setpoint
 			await self.sweep_to_setpoint(self.setpoint)
 			yield ''
+
+			self.scribe.next_file(f'Field Sweep to 0T', new_chapter=False)
 
 			# Go to zero
 			await self.sweep_to_zero()
@@ -275,6 +281,7 @@ class SweepMagneticField(Coroutine):
 		async def sweep_field_one_polarity(
 			setpoint: float,
 			ramp_rate: float,
+			new_chapter: bool = False,
 			) -> int:
 			""" Field sweep at ramp_rate to setpoint and back to zero"""
 			await experiment.add_task(
@@ -292,6 +299,7 @@ class SweepMagneticField(Coroutine):
 		async def sweep_field_both_polarities(
 			setpoint: float,
 			ramp_rate: float,
+			new_chapter: bool = False,
 			) -> int:
 			""" Field sweep at ramp_rate to setpoint and back to zero in both polarities"""
 			await experiment.add_task(
@@ -300,6 +308,7 @@ class SweepMagneticField(Coroutine):
 					magnet_psu=magnet_psu, 
 					setpoint=setpoint, 
 					ramp_rate=ramp_rate,
+					new_chapter=new_chapter,
 					)
 				)
 			await experiment.add_task(
@@ -308,6 +317,7 @@ class SweepMagneticField(Coroutine):
 					magnet_psu=magnet_psu, 
 					setpoint=-setpoint, 
 					ramp_rate=ramp_rate,
+					new_chapter=False,
 					)
 				)
 			return 0

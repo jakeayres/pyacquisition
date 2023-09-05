@@ -23,6 +23,8 @@ class RampTemperature(Coroutine):
 	tolerance: float = 1e-3
 	wait_time: float = 1
 	from_cache: bool = False
+	new_file: bool = True
+	new_chapter: bool = False
 
 
 	def string(self):
@@ -31,7 +33,9 @@ class RampTemperature(Coroutine):
 
 	async def run(self):
 
-		self.scribe.log('Started', stem='RampTemperature')
+		if self.new_file:
+			self.scribe.next_file(f'Temperature Sweep to {self.setpoint:.2f}K', new_chapter=self.new_chapter)
+
 		await asyncio.sleep(self.wait_time)
 		yield ''
 
@@ -72,6 +76,8 @@ class RampTemperature(Coroutine):
 		async def ramp_temperature(
 			setpoint: float,
 			ramp_rate: float,
+			new_file: bool = True,
+			new_chapter: bool = False,
 			) -> int:
 			""" Ramp lakeshore to setpoint at ramp rate """
 			await experiment.add_task(
@@ -81,6 +87,7 @@ class RampTemperature(Coroutine):
 					setpoint=setpoint, 
 					ramp_rate=ramp_rate,
 					output_channel=output_channel,
+					new_chapter=new_chapter,
 					)
 				)
 			return 0
