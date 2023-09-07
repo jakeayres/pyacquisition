@@ -1,11 +1,12 @@
 import asyncio
+from .inspectable_queue import InspectableQueue
 
 
 class Consumer:
 	"""A consumer class that can subscribe and unsubsribe to a Broadcaster """
 
 	def __init__(self):
-		self._queue = asyncio.Queue()
+		self._queue = InspectableQueue()
 
 
 	def subscribe_to(self, broadcaster: 'Broadcaster') -> None:

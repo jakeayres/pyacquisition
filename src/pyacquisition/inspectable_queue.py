@@ -100,3 +100,13 @@ class InspectableQueue:
 			self.put_nowait(item)
 		return popped
 
+
+	def length(self):
+		"""
+		Return the length of the queue
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
+		return len(self.inspect())
+

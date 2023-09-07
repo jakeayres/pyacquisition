@@ -6,6 +6,7 @@ from .consumer import Consumer
 from .inspectable_queue import InspectableQueue
 from .api import API
 from .coroutines import WaitFor
+from .dataframe import DataFrame
 
 
 class Experiment:
@@ -93,6 +94,19 @@ class Experiment:
 		"""
 		meas = self.rack.add_measurement(key, func, call_every=call_every)
 		return func
+
+
+	def create_dataframe(self):
+		"""
+		Instantiate a dataframe (consumer) object that is subscribed to the rack.
+		
+		:returns:   the dataframe
+		:rtype:     DataFrame
+		"""
+		dataframe = DataFrame(self.rack.measurement_keys)
+		dataframe.subscribe_to(self.rack)
+		return dataframe
+
 
 
 	async def add_task(self, task):

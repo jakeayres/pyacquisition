@@ -74,6 +74,11 @@ class Rack(Broadcaster):
 		return self._period
 
 
+	@property
+	def measurement_keys(self):
+		return [k for k, v in self._measurements.items()]
+
+
 	def set_period(self, period: float):
 		"""
 		Set the measurement period
@@ -108,7 +113,7 @@ class Rack(Broadcaster):
 		"""
 		result = {k: v.run() for k, v in self._measurements.items()}
 		self._last_datapoint = result
-		self.emit(self._last_point)
+		self.emit(self._last_datapoint)
 
 
 	def add_instrument(self, key, instrument_class, visa_resource, api=None):
@@ -144,7 +149,7 @@ class Rack(Broadcaster):
 
 		@app.get('/rack/measurements', tags=['Rack'])
 		def measurements() -> list[str]:
-			return [k for k, v in self._measurements.items()]
+			return self._measurement_keys
 
 
 		@app.get('/rack/period/get', tags=['Rack'])
