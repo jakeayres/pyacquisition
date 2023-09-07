@@ -9,7 +9,8 @@ from pyacquisition.instruments import (
 	Clock, WaveformGenerator, Gizmotron, 
 	SR_830, SR_860, 
 	Lakeshore_340, Lakeshore_350,
-	Mercury_IPS
+	Mercury_IPS,
+	FakeMagnetPSU,
 	)
 from pyacquisition.visa import resource_manager
 
@@ -20,33 +21,28 @@ class SoftExperiment(Experiment):
 
 
 	def setup(self):
-		clock = self.add_software_instrument('clock', Clock)
+		clock = self.add_software_instrument('Clock', Clock)
 		self.add_measurement('time', clock.time)
 
-		gizmo = self.add_software_instrument('gizmo', Gizmotron)
-		self.add_measurement('value', gizmo.get_value)
-		self.add_measurement('value2', gizmo.get_value, call_every=5)
+		magnet = self.add_software_instrument('Magnet', FakeMagnetPSU)
+		self.add_measurement('field', magnet.get_output_field)
 
-		wave1 = self.add_software_instrument('wave1', WaveformGenerator)
+		wave1 = self.add_software_instrument('Wave1', WaveformGenerator)
 		self.add_measurement('signal_1', wave1.get_signal)
 
 
 	def register_endpoints(self):
 		super().register_endpoints()
 
-		from pyacquisition.coroutines import SweepGizmotron
-
-		@self.api.get('/experiment/perform_sweep/{max_value}', tags=['Experiment'])
-		async def perform_sweep(max_value: float) -> int:
-			await self.add_task(SweepGizmotron(self.scribe, self.rack.gizmo, max_value))
-			return 0
+		from pyacquisition.coroutines import SweepMagneticField
+		SweepMagneticField.register_endpoints(self, self.rack.Magnet)
 
 
 class HardExperiment(Experiment):
 
 	def setup(self):
 
-		rm = resource_manager('pyvisa')
+		rm = resource_manager('dummy')
 
 
 		clock = self.add_software_instrument(
@@ -104,7 +100,7 @@ class HardExperiment(Experiment):
 
 
 async def main():
-	exp = HardExperiment("../data/")
+	exp = SoftExperiment("../data/")
 	await asyncio.create_task(exp.run())
 
 

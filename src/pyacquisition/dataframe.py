@@ -7,7 +7,6 @@ class DataFrame(Consumer):
 	"""
 	Wraps the pandas dataframe but consumes data from broadcasters
 
-
 	Intended use:
 
 	-  Instantiated within coroutines with a subscription to Rack object.
@@ -28,15 +27,47 @@ class DataFrame(Consumer):
 		return self._dataframe
 
 
-	async def update(self):
+	@property
+	def columns(self):
+		return self._dataframe.columns
+
+
+	async def _clear_queue(self):
+		self._queue.clear()
+
+
+	async def _get_data_from_queue(self):
 		"""
-		Retrieve data from the queue and add it to the pandas DataFrame
+		New dataframe with data from the queue
+
+		:returns:   The data from queue.
+		:rtype:     { return_type_description }
 		"""
 
+		df = pd.DataFrame(columns=self.columns)
 		for i in range(self._queue.length()):
 			x = await self._queue.get()
-			print(x)
-			self._dataframe = pd.concat([self._dataframe, pd.DataFrame(x)], ignore_index=True)
+			df.loc[i] = [v for k, v in x.items()]
+		return df
+
+
+	async def update(self):
+		"""
+		Update the pandas DataFrame with data from the queue
+		"""
+		new_data = await self._get_data_from_queue()
+		self._dataframe = pd.concat([self._dataframe, new_data])
+
+
+	async def clear(self):
+		await self._clear_queue()
+		self._dataframe = pd.DataFrame(columns=self.columns)
+
+
+
+
+
+
 
 
 

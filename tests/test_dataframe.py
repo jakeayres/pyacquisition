@@ -20,7 +20,6 @@ def experiment(temporary_directory):
 	return exp
 
 
-
 def test_dataframe_instantiation(experiment):
 
 	dataframe = experiment.create_dataframe()
@@ -30,14 +29,29 @@ def test_dataframe_instantiation(experiment):
 
 
 @pytest.mark.asyncio
-async def test_subscription(experiment):
+async def test_update(experiment):
 
 	dataframe = experiment.create_dataframe()
 	experiment.rack.measure()
-
+	experiment.rack.measure()
 	await dataframe.update()
-	print(dataframe.data)
-	assert dataframe.data.columns == ['test']
-	
+
+	assert 'var1' in dataframe.columns
+	assert len(dataframe.data['var1']) == 2
+
+
+@pytest.mark.asyncio
+async def test_clear(experiment):
+
+	dataframe = experiment.create_dataframe()
+	experiment.rack.measure()
+	experiment.rack.measure()
+	await dataframe.clear()
+
+	assert 'var1' in dataframe.columns
+	assert len(dataframe.data['var1']) == 0
+
+
+
 
 

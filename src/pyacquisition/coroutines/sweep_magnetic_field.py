@@ -4,6 +4,7 @@ from ..instruments.oxford_instruments.mercury_ips import (
 	)
 
 from ..scribe import Scribe
+from ..dataframe import DataFrame
 from ._coroutine import Coroutine
 from .create_new_file import CreateNewFile
 
@@ -16,6 +17,7 @@ from dataclasses import dataclass
 class SweepMagneticField(Coroutine):
 
 	scribe: Scribe
+	dataframe: DataFrame
 	magnet_psu: Mercury_IPS
 	setpoint: float
 	ramp_rate: float
@@ -44,6 +46,7 @@ class SweepMagneticField(Coroutine):
 
 		if system_status != SystemStatusM.NORMAL:
 			raise ValueError(f'Magnet system status {system_status}. Expected {SystemStatusM.NORMAL}')
+
 
 
 	async def check_is_holding(self):
@@ -238,6 +241,9 @@ class SweepMagneticField(Coroutine):
 			await self.switch_heater_on()
 			yield ''
 
+			await self.dataframe.clear()
+			yield ''
+
 			# Set ramp rate
 			await self.set_ramp_rate(self.ramp_rate)
 			yield ''
@@ -250,6 +256,9 @@ class SweepMagneticField(Coroutine):
 
 			# Go to zero
 			await self.sweep_to_zero()
+			yield ''
+
+			await self.dataframe.update()
 			yield ''
 
 			# Turn off switch heater
@@ -266,7 +275,7 @@ class SweepMagneticField(Coroutine):
 			await self.check_system_normal()
 			yield ''
 
-
+		
 
 
 
@@ -286,7 +295,8 @@ class SweepMagneticField(Coroutine):
 			""" Field sweep at ramp_rate to setpoint and back to zero"""
 			await experiment.add_task(
 				cls(
-					scribe=experiment.scribe, 
+					scribe=experiment.scribe,
+					dataframe=experiment.create_dataframe(),
 					magnet_psu=magnet_psu, 
 					setpoint=setpoint, 
 					ramp_rate=ramp_rate,
@@ -304,7 +314,8 @@ class SweepMagneticField(Coroutine):
 			""" Field sweep at ramp_rate to setpoint and back to zero in both polarities"""
 			await experiment.add_task(
 				cls(
-					scribe=experiment.scribe, 
+					scribe=experiment.scribe,
+					dataframe=experiment.create_dataframe(),
 					magnet_psu=magnet_psu, 
 					setpoint=setpoint, 
 					ramp_rate=ramp_rate,
@@ -313,7 +324,8 @@ class SweepMagneticField(Coroutine):
 				)
 			await experiment.add_task(
 				cls(
-					scribe=experiment.scribe, 
+					scribe=experiment.scribe,
+					dataframe=experiment.create_dataframe(),
 					magnet_psu=magnet_psu, 
 					setpoint=-setpoint, 
 					ramp_rate=ramp_rate,
