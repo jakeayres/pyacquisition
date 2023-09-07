@@ -21,6 +21,12 @@ class Coroutine:
 
 
 	def string(self):
+		"""
+		Coroutine description. Expected to be overidden.
+
+		:returns:   Descriptive string
+		:rtype:     str
+		"""
 		return f'Base coroutine'
 
 
@@ -33,15 +39,17 @@ class Coroutine:
 
 
 	async def coroutine(self):
-		""" Step through generator (run()) and check
-		flags at each yield.
+		""" 
+		The main entry point to execute the Coroutine.
+		Step through run() generator and check flags at each yield.
+		This is the method that is ultimately called by the Experiment class
 		"""
 		async for step in self.run():
 			if self._abort_event.is_set():
 				return  # or raise an exception
-			_is_paused = True
+			self._is_paused = True
 			await self._pause_event.wait()
-			_is_paused = False
+			self._is_paused = False
 
 
 	async def run(self):
@@ -52,22 +60,43 @@ class Coroutine:
 
 
 	def pause(self):
+		"""
+		Clear the pause event
+		"""
 		self._pause_event.clear()
 
 
 	def resume(self):
+		"""
+		Set the pause event
+		"""
 		self._pause_event.set()
 
 
 	def abort(self):
+		"""
+		Set the pause event
+		"""
 		self._abort_event.set()
 
 
 	def pause_raised(self):
+		"""
+		Return whether a pause event has been raised
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		return not self._pause_event.is_set()
 
 
 	def is_paused(self):
+		"""
+		Return whether the task is paused
+
+		:returns:   True if paused, False otherwise.
+		:rtype:     bool
+		"""
 		return self._is_paused
 
 

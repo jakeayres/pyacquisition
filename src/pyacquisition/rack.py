@@ -49,12 +49,12 @@ class Measurement:
 
 class Rack(Broadcaster):
 
-	def __init__(self, period=0.5):
+	def __init__(self, period: float = 0.5):
 		super().__init__()
 
 		self._instruments = {}
 		self._measurements = {}
-		self._last_point = {}
+		self._last_datapoint = {}
 
 		self._period = 1.0
 
@@ -74,11 +74,27 @@ class Rack(Broadcaster):
 		return self._period
 
 
-	def set_period(self, period):
+	def set_period(self, period: float):
+		"""
+		Set the measurement period
+
+		:param      period:  Measurement period
+		:type       period:  float
+		"""
 		self._period = period
 
 
-	def add_measurement(self, key, func, call_every=1):
+	def add_measurement(self, key: str, func: callable, call_every: int=1):
+		"""
+		Add a measurement to the dictionary of measurements
+
+		:param      key:         dictionary key
+		:type       key:         str
+		:param      func:        The callable function
+		:type       func:        callable
+		:param      call_every:  Call every nth period
+		:type       call_every:  int
+		"""
 		self._measurements[key] = Measurement(
 			key, 
 			func,
@@ -87,13 +103,17 @@ class Rack(Broadcaster):
 
 
 	def measure(self):
+		"""
+		Call all of the Measurement objects and emit a dict of their results
+		"""
 		result = {k: v.run() for k, v in self._measurements.items()}
-		self._last_points = result
-		self.emit(result)
+		self._last_datapoint = result
+		self.emit(self._last_point)
 
 
 	def add_instrument(self, key, instrument_class, visa_resource, api=None):
-		""" Add instrument object to dictionary of _instruments 
+		""" 
+		Add instrument object to dictionary of _instruments 
 		"""
 		inst = instrument_class(uid=key, visa_resource=visa_resource)
 		self.__dict__[key] = inst
@@ -104,7 +124,8 @@ class Rack(Broadcaster):
 
 
 	def add_software_instrument(self, key, instrument_class, api=None):
-		""" Add software instrument as a property of self
+		""" 
+		Add software instrument as a property of self
 		"""
 		inst = instrument_class(uid=key)
 		self.__dict__[key] = inst
@@ -138,6 +159,10 @@ class Rack(Broadcaster):
 
 
 	async def run(self):
+		"""
+		Main entry point to run the rack object
+		"""
+
 		while True:
 			try:
 				t0 = time.time()

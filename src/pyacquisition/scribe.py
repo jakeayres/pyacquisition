@@ -142,11 +142,6 @@ class Scribe(Consumer):
 				(f"{entry}", "dim white")
 			)
 			self._console.print(text)
-			# print(colorama.Style.RESET_ALL, end='')
-			# print(colorama.Fore.BLUE + f' {self._formatted_date}', end='')
-			# print(colorama.Fore.BLUE + colorama.Style.BRIGHT + f' {self._formatted_time}', end='')
-			# if stem != None: print(colorama.Fore.YELLOW + colorama.Style.BRIGHT + f'  {stem.ljust(15)}', end='')
-			# print(colorama.Style.RESET_ALL + f'  {entry}', end='\n')
 
 
 	def _log_new_file(self):

@@ -30,5 +30,5 @@ def test_start_and_read_named_timer(clock):
     timer_value = clock.read_named_timer('test_timer')
 
     # The timer value should be greater than 0.1 as we slept for 100ms
-    assert timer_value >= 0.1
-    assert timer_value <= 0.15
+    assert timer_value >= 0.098
+    assert timer_value <= 0.102

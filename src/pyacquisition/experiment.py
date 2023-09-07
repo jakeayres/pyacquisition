@@ -11,14 +11,13 @@ from .coroutines import WaitFor
 class Experiment:
 
 	def __init__(self, root):
-		self.rack = Rack()
-		self.scribe = Scribe(root=root)
-		self.scribe.subscribe_to(self.rack)
+		self._rack = Rack()
+		self._scribe = Scribe(root=root)
+		self._scribe.subscribe_to(self.rack)
 		self._api = API(allowed_cors_origins=['http://localhost:3000'])
 		self._api.subscribe_to(self.rack)
 
 		self.running = True
-		self.pause_event = asyncio.Event()
 		self.current_task = None
 		self.current_task_string = None
 		self.task_queue = InspectableQueue()
@@ -28,88 +27,164 @@ class Experiment:
 
 
 	@property
+	def rack(self):
+		return self._rack
+
+
+	@property
+	def scribe(self):
+		return self._scribe
+
+
+	@property
 	def api(self):
 		return self._api.app
 
 
-	def add_software_instrument(self, key, instrument_class):
+	def add_software_instrument(self, key: str, instrument_class):
+		"""
+		Adds a software instrument to the Rack.
+
+		:param      key:               The key
+		:type       key:               { type_description }
+		:param      instrument_class:  The instrument class
+		:type       instrument_class:  { type_description }
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		inst = self.rack.add_software_instrument(key, instrument_class)
 		inst.register_endpoints(self.api)
 		return inst
 
 
-	def add_hardware_instrument(self, key, instrument_class, visa_resource):
+	def add_hardware_instrument(self, key: str, instrument_class, visa_resource):
+		"""
+		Adds a hardware instrument to the rack.
+
+		:param      key:               The key
+		:type       key:               { type_description }
+		:param      instrument_class:  The instrument class
+		:type       instrument_class:  { type_description }
+		:param      visa_resource:     The visa resource
+		:type       visa_resource:     { type_description }
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		inst = self.rack.add_instrument(key, instrument_class, visa_resource)
 		inst.register_endpoints(self.api)
 		return inst
 
 
-	def add_measurement(self, key, func, call_every=1):
+	def add_measurement(self, key: str, func: callable, call_every=1):
+		"""
+		Add a measurement (callable) to be polled by the Rack object.
+
+		:param      key:         The key
+		:type       key:         { type_description }
+		:param      func:        The function
+		:type       func:        { type_description }
+		:param      call_every:  The call every
+		:type       call_every:  int
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		meas = self.rack.add_measurement(key, func, call_every=call_every)
 		return func
 
 
 	async def add_task(self, task):
+		"""
+		Add a task to the end of the task queue
+
+		:param      task:  The task
+		:type       task:  { type_description }
+		"""
 		await self.task_queue.put(task)
 		self.scribe.log(f'{task.string()}', stem='Task Added')
 
 
 	async def get_task(self):
+		"""
+		Get and return the next task from the queue
+
+		:returns:   The task.
+		:rtype:     { return_type_description }
+		"""
 		task = await self.task_queue.get()
 		self.scribe.log(f'{task.string()}', stem='Task Retrieved')
 		return task
 
 
 	def remove_task(self, index):
+		"""
+		Removes a task from the queue at provided index
+
+		:param      index:  The index
+		:type       index:  { type_description }
+		"""
 		task = self.task_queue.remove(index)
 		self.scribe.log(f'{task.string()} ({index})', stem='Task Removed')
 
 
 	def insert_task(self, task, index):
+		"""
+		Insert a task into the queue at the provided index
+
+		:param      task:   The task
+		:type       task:   { type_description }
+		:param      index:  The index
+		:type       index:  { type_description }
+		"""
 		task = self.task_queue.insert(task, index)
 		self.scribe.log(f'{task.string()} ({index})', stem="Task Inserted")
 
 
 	def list_tasks(self):
+		"""
+		Return a list of task descriptions (not the objects themselves)
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		return [t.string() for t in self.task_queue.inspect()]
 
 
 	def clear_tasks(self):
+		"""
+		Clear all tasks from the queue
+		"""
 		self.task_queue.clear()
 		self.scribe.log(f'All tasks cleared', stem='Tasks Cleared')
 
 
 	def pause_task(self):
+		"""
+		Pause the current task
+		"""
 		self.current_task.pause()
 		self.scribe.log('Paused', stem='Experiment')
 
 
 	def resume_task(self):
+		"""
+		Resume the current task
+		"""
 		self.current_task.resume()
 		self.scribe.log('Resumed', stem='Experiment')
 
 
-	def abort_task(self):
-		self.current_task.abort()
-		self.scribe.log('Aborted', stem='Aborted')
-
-
-	def setup(self):
-		""" OVERIDE IN INHERETING CLASS
-
-		Add instruments and measurements in here
+	async def execute_task(self, task):
 		"""
-		pass
+		Execute the provided task handling any exceptions
+		appropriately.
 
-
-	async def execute(self):
-		
-		while self.running:
-
-			self.current_task = None
-			task = await self.get_task()
-			self.current_task = task
-
+		:param      task:  The task
+		:type       task:  { type_description }
+		"""
+		try:
 			if asyncio.iscoroutinefunction(task.coroutine):
 				await task.coroutine()
 
@@ -119,12 +194,42 @@ class Experiment:
 			else:
 				async for _ in task.coroutine():
 					pass
+				self.scribe.log('Task complete', stem='Experiment')
+		except Exception as e:
+			print(f'Exception raised executing task')
+			print(e)
+			self.pause_task()
+
+
+	def abort_task(self):
+		"""
+		Abort the current task and proceed
+		"""
+
+		self.current_task.abort()
+		self.scribe.log('Aborted', stem='Aborted')
+
+
+	async def execute(self):
+		"""
+		The main coroutine to run that handles the execution of
+		tasks from the task_queue.
+		"""
+		
+		while self.running:
+
+			self.current_task = None
+			self.current_task = await self.get_task()
+			await self.execute_task(self.current_task)
 
 
 	def register_endpoints(self):
-		""" OVERIDE IN INHERETING CLASS
+		""" 
+		OVERIDE IN INHERETING CLASS
 
-			CALL SUPER() to keep the below functionality
+		Add endpoints to the FastAPI api.
+
+		CALL SUPER() to keep the below functionality
 		"""
 
 
@@ -179,7 +284,20 @@ class Experiment:
 		self.scribe.register_endpoints(self.api)
 
 
+	def setup(self):
+		"""
+		OVERIDE IN INHERETING CLASS
+
+		Intended to be called prior run()
+		Add instruments and measurements in here
+		"""
+		pass
+
+
 	async def run(self):
+		"""
+		The main entry point for the Experiment class
+		"""
 
 		rack_task = asyncio.create_task(self.rack.run())
 		scribe_task = asyncio.create_task(self.scribe.run())

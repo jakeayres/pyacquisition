@@ -27,6 +27,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 markers = [
+	"asyncio: test requires asyncio",
 	"software: software test, no physical hardware required",
 	"hardware: requires physical hardware",
 	"SR_860: requires SR860 be connected",
