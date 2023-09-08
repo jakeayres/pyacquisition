@@ -42,14 +42,60 @@ class Coroutine:
 		""" 
 		The main entry point to execute the Coroutine.
 		Step through run() generator and check flags at each yield.
-		This is the method that is ultimately called by the Experiment class
+		This is the method that is ultimately called by the Experiment class.
+
 		"""
+		returns = {}
 		async for step in self.run():
+
+			if isinstance(step, dict):
+				returns.update(step)
+
 			if self._abort_event.is_set():
 				return  # or raise an exception
 			self._is_paused = True
 			await self._pause_event.wait()
 			self._is_paused = False
+		return returns
+
+
+	async def execute(self):
+
+		try:
+			return await self.coroutine()
+
+		except Exception as e:
+			print(f'Exception raised executing this coroutine')
+			print(e)
+			raise e
+
+
+	async def execute_another_coroutine(self, coroutine):
+		"""
+		Execute a provided coroutine within this coroutine
+		
+		:param      coroutine:  The coroutine
+		:type       coroutine:  { type_description }
+		"""
+		try:
+			return await coroutine.coroutine()
+
+		except Exception as e:
+			print(f'Exception raised executing child coroutine')
+			print(e)
+			raise e
+
+
+	async def execute_concurrent_coroutines(self, coroutines: list):
+		try:
+			return await asyncio.gather(*[c.coroutine() for c in coroutines])
+
+		except Exception as e:
+			print(f'Exception raised executing concurrent child coroutines')
+			print(e)
+			raise e
+
+
 
 
 	async def run(self):

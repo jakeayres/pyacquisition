@@ -5,8 +5,8 @@ from ..instruments.oxford_instruments.mercury_ips import (
 
 from ..scribe import Scribe
 from ..dataframe import DataFrame
-from ._coroutine import Coroutine
-from .create_new_file import CreateNewFile
+from .coroutine import Coroutine
+
 
 import asyncio
 import numpy as np
@@ -220,10 +220,11 @@ class SweepMagneticField(Coroutine):
 			raise e
 
 
+
 	async def run(self):
 
 		await asyncio.sleep(self.wait_time)
-		yield ''
+		yield None
 
 		try:
 
@@ -231,39 +232,42 @@ class SweepMagneticField(Coroutine):
 
 			# Check system status
 			await self.check_system_normal()
-			yield ''
+			yield None
 
 			# Check activity status
 			await self.check_is_holding()
-			yield ''
+			yield None
 
 			# Turn on switch heater
 			await self.switch_heater_on()
-			yield ''
+			yield None
 
 			await self.dataframe.clear()
-			yield ''
+			yield None
 
 			# Set ramp rate
 			await self.set_ramp_rate(self.ramp_rate)
-			yield ''
+			yield None
 
 			# Go to setpoint
 			await self.sweep_to_setpoint(self.setpoint)
-			yield ''
+			yield None
 
 			self.scribe.next_file(f'Field Sweep to 0T', new_chapter=False)
 
 			# Go to zero
 			await self.sweep_to_zero()
-			yield ''
+			yield None
 
 			await self.dataframe.update()
-			yield ''
+			yield {'data', self.dataframe.data}
+
+			self.process_dataframe()
+			yield None
 
 			# Turn off switch heater
 			await self.switch_heater_off()
-			yield ''
+			
 
 		except Exception as e:
 			self.scribe.log('Error during field sweep', level='error', stem='SweepMagneticField')
@@ -273,7 +277,8 @@ class SweepMagneticField(Coroutine):
 		finally:
 			# Raise exception if magnet status isn't normal (eg quenched, fault)
 			await self.check_system_normal()
-			yield ''
+			yield None
+
 
 		
 

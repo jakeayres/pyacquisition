@@ -6,11 +6,13 @@ from rich.console import Console
 from rich.text import Text
 
 
-# WINDOWS SPECIFIC REQUIREMENT
-#colorama.init(convert=True)
 
 
 class Scribe(Consumer):
+	"""
+	A class to manage writing data to files and logging
+	to stdout.
+	"""
 
 	LEVEL_CHAR = {
 		'info': ('>  ', 'bold green'),
@@ -23,13 +25,14 @@ class Scribe(Consumer):
 		super().__init__()
 
 		self._root = root
-		self._chapter = 1
+		self._chapter = 0
 		self._section = 0
-		self._title = 'Start up'
+		self._label = 'Start up'
 		self._data_extension = '.data'
 		self._meta_extension = '.meta'
 		self._log_extension = '.log'
 		self._console = Console()
+		self._n_to_skip = 0
 
 		self._make_root_directory()
 		self._increment_to_non_existant_chapter()
@@ -37,36 +40,72 @@ class Scribe(Consumer):
 
 
 	@property
-	def current_data_filename(self):
+	def current_data_file(self):
+		"""
+		Name of the current data file
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		chapter = f'{self._chapter:0{2}}'
 		section = f'{self._section:0{2}}'
-		return f'{chapter}.{section} {self._title}{self._data_extension}'
+		return f'{chapter}.{section} {self._label}{self._data_extension}'
 
 
 	@property
-	def current_meta_filename(self):
+	def current_meta_file(self):
+		"""
+		Name of the current meta file
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		chapter = f'{self._chapter:0{2}}'
 		section = f'{self._section:0{2}}'
-		return f'{chapter}.{section} {self._title}{self._meta_extension}'
+		return f'{chapter}.{section} {self._label}{self._meta_extension}'
 
 
 	@property
-	def full_data_filepath(self):
-		return f'{self._root}{self.current_data_filename}'
+	def current_data_path(self):
+		"""
+		The full path to the current data file
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
+		return f'{self._root}{self.current_data_file}'
 
 
 	@property
-	def full_meta_filepath(self):
-		return f'{self._root}{self.current_meta_filename}'
+	def current_meta_path(self):
+		"""
+		The full path to the current meta file
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
+		return f'{self._root}{self.current_meta_file}'
 
 
 	@property
-	def full_filelog_filepath(self):
+	def current_filelog_path(self):
+		"""
+		The full path to the log of files
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		return f'{self._root}files{self._log_extension}'
 
 
 	@property 
-	def full_log_filepath(self):
+	def current_log_path(self):
+		"""
+		The full path to the log file
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		return f'{self._root}log{self._log_extension}'
 
 
@@ -76,62 +115,98 @@ class Scribe(Consumer):
 
 
 	def _increment_to_non_existant_chapter(self):
-		largest = 0
+		largest = None
 		for filename in os.listdir(self._root):
 			if os.path.isfile(os.path.join(self._root, filename)):
 				if filename[:2].isdigit():
 					number = int(filename[:2])
 					if number > largest:
 						largest = number
-		self._chapter = largest+1
+		if largest is None:
+			self._chapter = 0
+		else:
+			self._chapter = largest+1
 
 
-	def next_section(self):
+	def _increment_section(self):
 		self._section += 1
 
 
-	def next_chapter(self):
+	def _increment_chapter(self):
 		self._chapter += 1
-		self._section = 1
+		self._section = 0
 
 
-	def next_file(self, title, new_chapter=False):
+	def increment_file(self, label, new_chapter=False):
+		"""
+		Increment the current file names.
+
+		:param      label:        The label
+		:type       label:        { type_description }
+		:param      new_chapter:  The new chapter
+		:type       new_chapter:  bool
+		"""
 		if new_chapter:
-			self.next_chapter()
+			self._increment_chapter()
 		else:
-			self.next_section()
-		self._title = title
+			self._increment_section()
+		self._label = label
 		self._log_new_file()
+
+
+	def next_file(self, *args, **kwargs):
+		"""
+		Alias for increment_file
+
+		:param      args:    The arguments
+		:type       args:    list
+		:param      kwargs:  The keywords arguments
+		:type       kwargs:  dictionary
+		"""
+		self.increment_file(*args, **kwargs)
+
 
 
 	def _write(self, data):
 		df = pd.DataFrame({k: [v] for k, v in data.items()})
-		df.to_csv(self.full_data_filepath, mode='w', header=True, index=False)
+		df.to_csv(self.current_data_path, mode='w', header=True, index=False)
 
 
 	def _append(self, data):
 		df = pd.DataFrame({k: [v] for k, v in data.items()})
-		df.to_csv(self.full_data_filepath, mode='a', header=False, index=False)
+		df.to_csv(self.current_data_path, mode='a', header=False, index=False)
 
 
-	def record(self, data):
-		if not os.path.exists(self.full_data_filepath):
+	def record(self, data: dict):
+		"""
+		Save data to the current data file
+		
+		:param      data:  The data
+		:type       data:  dict
+		"""
+		if not os.path.exists(self.current_data_path):
 			self._write(data)
 		else:
 			self._append(data)
 
 
 	def save_meta(self, data):
-		with open(self.full_meta_filepath, 'w') as file:
+		"""
+		Saves data to the current meta file.
+
+		:param      data:  The data
+		:type       data:  { type_description }
+		"""
+		with open(self.current_meta_path, 'w') as file:
 			json.dump(data, file, indent=4, sort_keys=True)
 
 
 	def log(self, entry, stem='', level='info'):
-		if not os.path.exists(self.full_log_filepath):
+		if not os.path.exists(self.current_log_path):
 			mode = 'w'
 		else:
 			mode = 'a'
-		with open(self.full_log_filepath, mode) as file:
+		with open(self.current_log_path, mode) as file:
 			file.write(f'{self._formatted_date} {self._formatted_time} : {entry}\n')
 
 			text = Text.assemble(
@@ -145,13 +220,16 @@ class Scribe(Consumer):
 
 
 	def _log_new_file(self):
-		if not os.path.exists(self.full_filelog_filepath):
+		"""
+		Appends an entry to the log of files
+		"""
+		if not os.path.exists(self.current_filelog_path):
 			mode = 'w'
 		else:
 			mode = 'a'
-		with open(self.full_filelog_filepath, mode) as file:
-			file.write(f'{self._formatted_date} {self._formatted_time} : {self.current_data_filename}\n')
-			self.log(f'{self.current_data_filename}', stem='New File')
+		with open(self.current_filelog_path, mode) as file:
+			file.write(f'{self._formatted_date} {self._formatted_time} : {self.current_data_file}\n')
+			self.log(f'{self.current_data_file}', stem='New File')
 
 
 	@property
@@ -173,20 +251,20 @@ class Scribe(Consumer):
 			Returns:
 			    str: Current filename
 			"""
-			return self.current_data_filename
+			return self.current_data_file
 
-		@app.get('/scribe/next_file/{title}/{next_chapter}', tags=['Scribe'])
-		def next_file(title: str, next_chapter: bool = False) -> int:
+		@app.get('/scribe/next_file/{label}/{next_chapter}', tags=['Scribe'])
+		def next_file(label: str, next_chapter: bool = False) -> int:
 			"""Create a new file.
 			
 			Args:
-			    title (str): File title
+			    label (str): File label
 			    next_chapter (bool, optional): Increment chapter
 			
 			Returns:
 			    int: Description
 			"""
-			self.next_file(title, new_chapter=next_chapter)
+			self.increment_file(label, new_chapter=next_chapter)
 			return 0
 
 		@app.get('/scribe/log/{entry}', tags=['Scribe'])

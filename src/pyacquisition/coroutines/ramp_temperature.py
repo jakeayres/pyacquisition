@@ -3,7 +3,7 @@ from ..instruments.lakeshore.lakeshore_340 import OutputChannel as OC340
 from ..instruments.lakeshore.lakeshore_350 import OutputChannel as OC350
 from ..instruments.lakeshore.lakeshore_350 import State
 from ..scribe import Scribe
-from ._coroutine import Coroutine
+from .coroutine import Coroutine
 
 
 import asyncio

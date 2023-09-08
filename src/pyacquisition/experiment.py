@@ -29,16 +29,34 @@ class Experiment:
 
 	@property
 	def rack(self):
+		"""
+		Rack instance handling instruments and measurements
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		return self._rack
 
 
 	@property
 	def scribe(self):
+		"""
+		Scribe instance handling file io
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		return self._scribe
 
 
 	@property
 	def api(self):
+		"""
+		API instance running the FastAPI webserver
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
 		return self._api.app
 
 
@@ -192,23 +210,13 @@ class Experiment:
 
 	async def execute_task(self, task):
 		"""
-		Execute the provided task handling any exceptions
-		appropriately.
+		Execute the provided task
 
 		:param      task:  The task
 		:type       task:  { type_description }
 		"""
 		try:
-			if asyncio.iscoroutinefunction(task.coroutine):
-				await task.coroutine()
-
-			elif asyncio.iscoroutine(task.coroutine):
-				await task.coroutine
-
-			else:
-				async for _ in task.coroutine():
-					pass
-				self.scribe.log('Task complete', stem='Experiment')
+			await task.execute()
 		except Exception as e:
 			print(f'Exception raised executing task')
 			print(e)

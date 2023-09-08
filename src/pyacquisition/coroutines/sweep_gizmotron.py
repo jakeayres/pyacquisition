@@ -1,6 +1,6 @@
 from ..instruments import Gizmotron
 from ..scribe import Scribe
-from ._coroutine import Coroutine
+from .coroutine import Coroutine
 
 
 import asyncio

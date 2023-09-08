@@ -3,7 +3,7 @@ import asyncio
 from dataclasses import dataclass
 
 from pyacquisition import Experiment
-from pyacquisition.coroutines._coroutine import Coroutine
+from pyacquisition.coroutines.coroutine import Coroutine
 
 pytestmark = pytest.mark.software
 

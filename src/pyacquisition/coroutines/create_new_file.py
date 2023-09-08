@@ -1,5 +1,5 @@
 from ..scribe import Scribe
-from ._coroutine import Coroutine
+from .coroutine import Coroutine
 
 import asyncio
 import numpy as np

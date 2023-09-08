@@ -4,7 +4,7 @@ from ..instruments.lakeshore.lakeshore_350 import InputChannel as IC350
 from ..instruments.lakeshore.lakeshore_340 import OutputChannel as OC340
 from ..instruments.lakeshore.lakeshore_350 import OutputChannel as OC350
 from ..scribe import Scribe
-from ._coroutine import Coroutine
+from .coroutine import Coroutine
 from .ramp_temperature import RampTemperature
 
 
