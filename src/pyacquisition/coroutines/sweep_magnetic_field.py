@@ -15,6 +15,13 @@ from dataclasses import dataclass
 
 @dataclass
 class SweepMagneticField(Coroutine):
+	"""
+	Yields:
+
+	{
+		'data': pd.DataFrame
+	}
+	"""
 
 	scribe: Scribe
 	dataframe: DataFrame
@@ -260,7 +267,7 @@ class SweepMagneticField(Coroutine):
 			yield None
 
 			await self.dataframe.update()
-			yield {'data', self.dataframe.data}
+			yield {'data': self.dataframe.data}
 
 			self.process_dataframe()
 			yield None

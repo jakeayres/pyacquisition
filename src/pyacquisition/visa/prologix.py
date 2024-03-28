@@ -57,7 +57,7 @@ class PrologixResourceManager(object):
 		return self._resources
 
 
-	def open_resource(self, gpib_resource_string):
+	def open_resource(self, gpib_resource_string, *args, **kwargs):
 		return PrologixResource(self._serial_object, gpib_resource_string)
 
 
@@ -67,18 +67,26 @@ class PrologixResource(object):
 	function. Public methods are .write() and .query()
 	"""
 
-	def __init__(self, serial_object, gpib_resource_string):
+	def __init__(
+		self, 
+		serial_object, 
+		gpib_resource_string,
+		read_termination='\n',
+		write_termination='\n',
+		):
 		self._serial_object = serial_object
 		self._gpib_address = int(gpib_resource_string.split('::')[1])
+		self._read_termination = read_termination
+		self._write_termination = write_termination
 
 
 	def _write(self, command):
-		command = command+'\n'
+		command = command+self._write_termination
 		self._serial_object.write(command.encode('utf-8'))
 
 
 	def _read(self):
-		response = self._serial_object.readline();
+		response = self._serial_object.readline()
 		return response.decode('utf-8')
 
 

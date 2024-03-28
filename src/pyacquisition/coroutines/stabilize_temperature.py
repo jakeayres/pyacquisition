@@ -24,9 +24,9 @@ class StabilizeTemperature(Coroutine):
 	ramp_rate: float
 	input_channel: IC340|IC350 = IC350.INPUT_A
 	output_channel: OC340|OC350 = OC350.OUTPUT_1
-	mean_tolerance: float = 10e-3
+	mean_tolerance: float = 5e-3
 	maximum_drift: float = 5e-4
-	stability_time: float = 10
+	stability_time: float = 60
 	log_every: float = None
 	wait_time: float = 1
 	from_cache: bool = False
@@ -56,13 +56,17 @@ class StabilizeTemperature(Coroutine):
 			return True
 		else:
 			popt, _ = curve_fit(
-				lambda x, a, b: a + b*x,
+				lambda x, a, b, c: a + b*x, c*x*x,
 				[point[0] for point in points],
 				[point[1] for point in points],
 				)
 			if log:
 				self.scribe.log(f"Drift: {popt[1]:.4f}", stem='Stab. Temperature')
-			return True if abs(popt[1]) <= self.maximum_drift else False
+
+			if (abs(popt[1]) <= self.maximum_drift) and (abs(popt[2]) <= self.maximum_drift/10):
+				return True
+			else:
+				return False
 
 
 
@@ -147,7 +151,7 @@ class StabilizeTemperature(Coroutine):
 			ramp_rate: float,
 			mean_tolerance: float = 10e-3,
 			maximum_drift: float = 1e-3,
-			stability_time: float = 10,
+			stability_time: float = 60,
 			log_every: int = -1,
 			new_file: bool = True,
 			new_chapter: bool = False,
@@ -163,6 +167,7 @@ class StabilizeTemperature(Coroutine):
 					output_channel=output_channel,
 					mean_tolerance=mean_tolerance,
 					maximum_drift=mean_tolerance,
+					stability_time=stability_time,
 					log_every=log_every,
 					new_file=new_file,
 					new_chapter=new_chapter,
