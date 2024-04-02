@@ -94,22 +94,24 @@ class WaveformGenerator(SoftInstrument):
 		def get_amplitude() -> float:
 			return self.get_amplitude()
 
-		@app.get(f'/{self._uid}/'+'amplitude/set/{value}', tags=[self._uid])
-		def set_amplitude(value: float) -> int:
-			return self.set_amplitude(value)
+		@app.get(f'/{self._uid}/'+'amplitude/set/{amplitude}', tags=[self._uid])
+		def set_amplitude(amplitude: float) -> int:
+			return self.set_amplitude(amplitude)
 
 		@app.get(f'/{self._uid}/'+'frequency/get/', tags=[self._uid])
 		def get_frequency() -> float:
 			return self.get_frequency()
 
-		@app.get(f'/{self._uid}/'+'frequency/set/{value}', tags=[self._uid])
-		def set_frequency(value: float) -> int:
-			return self.set_frequency(value)
+		@app.get(f'/{self._uid}/'+'frequency/set/{frequency}', tags=[self._uid])
+		def set_frequency(frequency: float) -> int:
+			""" Set waveform frequency
+			"""
+			return self.set_frequency(frequency)
 
 		@app.get(f'/{self._uid}/'+'shape/get/', tags=[self._uid])
 		def get_shape() -> WaveformShapeModel:
 			return WaveformShapeModel[self.get_shape().name]
 
-		@app.get(f'/{self._uid}/'+'shape/set/{value}', tags=[self._uid])
-		def set_shape(value: WaveformShapeModel) -> int:
-			return self.set_shape(WaveformShape[value.name])
+		@app.get(f'/{self._uid}/'+'shape/set/{shape}', tags=[self._uid])
+		def set_shape(shape: WaveformShapeModel) -> int:
+			return self.set_shape(WaveformShape[shape.name])

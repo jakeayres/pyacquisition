@@ -8,6 +8,8 @@ from .api import API
 from .coroutines import WaitFor
 from .dataframe import DataFrame
 
+from .ui.ui import UI
+
 
 class Experiment:
 
@@ -17,6 +19,8 @@ class Experiment:
 		self._scribe.subscribe_to(self.rack)
 		self._api = API(allowed_cors_origins=['http://localhost:3000'])
 		self._api.subscribe_to(self.rack)
+
+		#self._ui = UI()
 
 		self.running = True
 		self.current_task = None
@@ -325,6 +329,7 @@ class Experiment:
 		scribe_task = asyncio.create_task(self.scribe.run())
 		main_task = asyncio.create_task(self.execute())
 		fast_api_server_task = self._api.coroutine()
+		ui_task = asyncio.create_task(UI().run())
 
 		self.scribe.log('Started', stem='Experiment')
 		
@@ -335,6 +340,7 @@ class Experiment:
 			#ws_task,
 			main_task,
 			fast_api_server_task,
+			ui_task,
 			],
 			return_when=asyncio.FIRST_COMPLETED,
 		)

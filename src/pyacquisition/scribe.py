@@ -120,7 +120,7 @@ class Scribe(Consumer):
 			if os.path.isfile(os.path.join(self._root, filename)):
 				if filename[:2].isdigit():
 					number = int(filename[:2])
-					if number > largest:
+					if (largest is not None) and (number > largest):
 						largest = number
 		if largest is None:
 			self._chapter = 0

@@ -4,8 +4,8 @@ import websockets
 import aiohttp
 import json
 
-from src.broadcaster import Broadcaster
-from src.consumer import Consumer
+from pyacquisition.broadcaster import Broadcaster
+from pyacquisition.consumer import Consumer
 
 
 async def render_loop():

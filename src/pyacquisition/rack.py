@@ -55,8 +55,7 @@ class Rack(Broadcaster):
 		self._instruments = {}
 		self._measurements = {}
 		self._last_datapoint = {}
-
-		self._period = 1.0
+		self._period = period
 
 
 	@property
@@ -147,9 +146,10 @@ class Rack(Broadcaster):
 		def instruments() -> list[str]:
 			return [k for k, v in self._instruments.items()]
 
+
 		@app.get('/rack/measurements', tags=['Rack'])
 		def measurements() -> list[str]:
-			return self._measurement_keys
+			return self.measurement_keys
 
 
 		@app.get('/rack/period/get', tags=['Rack'])

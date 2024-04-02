@@ -1,7 +1,5 @@
+
 import asyncio
-import websockets
-import random
-import json
 from functools import partial
 
 from pyacquisition.experiment import Experiment
@@ -16,6 +14,9 @@ from pyacquisition.visa import resource_manager
 
 
 from pyacquisition.instruments.lakeshore.lakeshore_350 import OutputChannel, InputChannel
+
+
+
 
 class SoftExperiment(Experiment):
 
@@ -99,9 +100,9 @@ class HardExperiment(Experiment):
 		CreateNewFile.register_endpoints(self)
 
 
-async def main():
-	exp = SoftExperiment("/data/")
-	await asyncio.create_task(exp.run())
 
+if __name__ == "__main__":
 
-asyncio.run(main())
+	exp = SoftExperiment("data/")
+	asyncio.run(exp.run())
+
