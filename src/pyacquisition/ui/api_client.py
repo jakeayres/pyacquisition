@@ -45,9 +45,9 @@ class ApiClient(Broadcaster):
 		:type       period:    int
 		"""
 		async with aiohttp.ClientSession() as session:
-			async with session.get(endpoint) as resp:
-				while True:
-					await asyncio.sleep(period)
+			while True:
+				await asyncio.sleep(period)
+				async with session.get(endpoint) as resp:
 					response = await resp.text()
 					if callback is not None:
 						callback(json.loads(response))

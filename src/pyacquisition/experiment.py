@@ -222,9 +222,12 @@ class Experiment:
 		try:
 			await task.execute()
 		except Exception as e:
+			self.scribe.log(e, level='error', stem='Task')
 			print(f'Exception raised executing task')
 			print(e)
 			self.pause_task()
+		finally:
+			self.scribe.log(f'{task.string()}', stem='Task Finished')
 
 
 	def abort_task(self):
