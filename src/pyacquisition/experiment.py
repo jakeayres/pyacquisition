@@ -20,7 +20,7 @@ class Experiment:
 		self._api = API(allowed_cors_origins=['http://localhost:3000'])
 		self._api.subscribe_to(self.rack)
 
-		#self._ui = UI()
+		self._ui = UI()
 
 		self.running = True
 		self.current_task = None
@@ -329,7 +329,7 @@ class Experiment:
 		scribe_task = asyncio.create_task(self.scribe.run())
 		main_task = asyncio.create_task(self.execute())
 		fast_api_server_task = self._api.coroutine()
-		ui_task = asyncio.create_task(UI().run())
+		ui_task = asyncio.create_task(self._ui.run())
 
 		self.scribe.log('Started', stem='Experiment')
 		

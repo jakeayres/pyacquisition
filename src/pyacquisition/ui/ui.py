@@ -1,5 +1,5 @@
 import asyncio
-import dearpygui.dearpygui as dpg
+import dearpygui.dearpygui as gui
 import aiohttp
 import requests
 import json
@@ -7,6 +7,11 @@ from functools import partial
 
 from ..broadcaster import Broadcaster
 from ..consumer import Consumer
+
+from .openapi import Schema
+from .api_client import ApiClient
+from .live_data_window import LiveDataWindow
+from .live_plot_window import LivePlotWindow
 
 import pandas as pd
 import numpy as np
@@ -21,13 +26,12 @@ class Endpoint(object):
 		self._path = endpoint
 		self._params = self._make_parameter_dictionary(schema, endpoint)
 		self._callbacks = []
-		self._session = session
 
 		if display:
-			dpg.add_text(schema['paths'][endpoint]['get']['summary'], tag=f'{endpoint}_tooltip_parent')
+			gui.add_text(schema['paths'][endpoint]['get']['summary'], tag=f'{endpoint}_tooltip_parent')
 
-			with dpg.tooltip(f"{endpoint}_tooltip_parent"):
-				dpg.add_text(schema['paths'][endpoint]['get']['description'])
+			with gui.tooltip(f"{endpoint}_tooltip_parent"):
+				gui.add_text(schema['paths'][endpoint]['get']['description'])
 
 			if 'parameters' in schema['paths'][endpoint]['get']:
 				for param in schema['paths'][endpoint]['get']['parameters']:
@@ -38,7 +42,7 @@ class Endpoint(object):
 					else:
 						self._add_text_input(param)
 
-			dpg.add_button(label='SEND', callback=self.request)
+			gui.add_button(label='SEND', callback=self.request)
 
 
 	def _make_parameter_dictionary(self, schema, endpoint):
@@ -61,7 +65,7 @@ class Endpoint(object):
 
 	def _add_text_input(self, param):
 		_id = self._make_parameter_uuid(param)
-		dpg.add_input_text(
+		gui.add_input_text(
 			tag=_id,
 			label=param['name'],
 			callback=self._set_parameter, 
@@ -71,7 +75,7 @@ class Endpoint(object):
 
 	def _add_boolean_input(self, param):
 		_id = self._make_parameter_uuid(param)
-		dpg.add_checkbox(
+		gui.add_checkbox(
 			tag=_id,
 			label=param['name'],
 			callback=self._set_parameter,
@@ -80,7 +84,7 @@ class Endpoint(object):
 
 
 	def _set_parameter(self, sender, app_data, user_data):
-		self._params[user_data['key']] = dpg.get_value(user_data['uuid'])
+		self._params[user_data['key']] = gui.get_value(user_data['uuid'])
 
 
 	def register_callback(self, f, **kwargs):
@@ -96,7 +100,7 @@ class Endpoint(object):
 
 	async def set_fetched_value(self, item):
 		value = await self.get()
-		dpg.set_value(item=item, value=value)
+		gui.set_value(item=item, value=value)
 
 
 	async def get(self):
@@ -118,116 +122,19 @@ class Endpoint(object):
 
 
 
-
-class LivePlotWindow(Consumer):
-
-	def __init__(self, x_key, y_keys):
-		super().__init__()
-
-		self._uuid = str(dpg.generate_uuid())
-		self._x_key = x_key
-		self._y_keys = y_keys
-		self._data = None
-
-		with dpg.window(label='Live Plot', tag=self._uuid+'_window'):
-
-			with dpg.plot(label='Data', height=600, width=600):
-				dpg.add_plot_axis(dpg.mvXAxis, label=self._x_key)
-				dpg.add_plot_axis(dpg.mvYAxis, label=self._y_keys[0], tag=self._uuid+'y_axis')
-				dpg.add_plot_legend()
-
-				for y_key in self._y_keys:
-					self.start_line(self._uuid+'series_tag_'+str(y_key), self._x_key, y_key)
-
-
-			dpg.add_radio_button(tag=self._uuid+'_x_radio', items=self._y_keys, callback=self._update_x_key, user_data=self._uuid+'_x_radio')
-
-
-	def start_line(self, line_tag, x_key, y_key):
-		dpg.add_scatter_series(
-			[0], 
-			[0], 
-			parent=self._uuid+'y_axis', 
-			tag=line_tag,
-			label=y_key,
-			)
-
-
-	def update_line(self, line_tag, x_key, y_key):
-		dpg.set_value(
-			line_tag, 
-			[self._data[self._x_key].tolist(), self._data[y_key].tolist()],
-			)
-
-
-	def _set_x_key(self, x_key):
-		self._x_key = x_key
-
-
-	def _update_x_key(self, sender, app_data, user_data):
-		new_key = dpg.get_value(user_data)
-		self._set_x_key(new_key)
-
-
-	async def run(self):
-
-		while True:
-
-			try:
-				data = await self._queue.get()
-				data = json.loads(data)
-
-				if self._data is None:
-					self._data = pd.DataFrame(data=data, index=[0])
-
-				else:
-					self._data = pd.concat([self._data, pd.DataFrame(data=data, index=[0])])
-
-					for y_key in self._y_keys:
-						self.update_line(self._uuid+'series_tag_'+str(y_key), self._x_key, y_key)
-
-			except Exception as e:
-				print(e)
-
-
-class LiveDataWindow(Consumer):
-
-	def __init__(self):
-		super().__init__()
-
-		with dpg.window(label="Raw Data Stream", tag='data_window'):
-			dpg.add_text("Hello, world", tag='data_string')
-
-
-	async def run(self):
-
-		while True:
-			data = await self._queue.get()
-			data = json.loads(data)
-			dpg.set_value('data_string', json.dumps(data, indent=4))
-
-
 class UI(Broadcaster):
 
 
 	def __init__(self):
 		super().__init__()
 
-		self._schema = None
-		self._tasks = []
-		self._session = aiohttp.ClientSession('http://localhost:8000')
-
-		dpg.create_context()		
-		dpg.create_viewport(title='pyAcquisition', width=1200, height=800)
-
-		self.register_window(LiveDataWindow(), subscribe=True)
-		self.register_window(LivePlotWindow('time', ['time', 'field', 'signal_1']), subscribe=True)
+		self._setup_dearpygui()
 
 
-
-		dpg.setup_dearpygui()
-		dpg.show_viewport()
-
+	def _setup_dearpygui(self):
+		gui.create_context()		
+		gui.create_viewport(title='pyAcquisition', width=1400, height=1000, x_pos=10, y_pos=10)
+		gui.setup_dearpygui()
 
 
 	def register_window(self, window, subscribe:bool=False):
@@ -239,90 +146,98 @@ class UI(Broadcaster):
 		return window
 
 
+	def make_popup(self, sender, app_data, user_data):
 
-	async def get(self, path):
-
-		async with aiohttp.ClientSession('http://localhost:8000') as session:
-			async with session.get(path) as resp:
-				x = json.loads(await resp.text())
-				return x
-
-
-	async def _get_openapi_schema(self):
-
-		async with aiohttp.ClientSession() as session:
-			async with session.get('http://localhost:8000/openapi.json') as resp:
-				schema = json.loads(await resp.text())
-				return schema
-
-
-	async def _parse_schema(self):
-
-		schema = await self._get_openapi_schema()
-		await self._parse_scribe_schema()
-
-
-	def current_filename(self):
-		x = asyncio.run(self.get('/scribe/current_filename'))
-		print(x)
-
-
-	async def _parse_scribe_schema(self):
-
-		with dpg.viewport_menu_bar():
-
-			with dpg.menu(label='File'):
-
-				dpg.add_menu_item(label='Next File', callback=self.current_filename)
-
+		with gui.window(label=user_data['path']):
+			gui.add_text(user_data['path'])
 
 
 	async def _render(self):
 
-		while dpg.is_dearpygui_running():
-			dpg.render_dearpygui_frame()
+		while gui.is_dearpygui_running():
+			gui.render_dearpygui_frame()
 			await asyncio.sleep(0.001)
 		else:
-			dpg.destroy_context()
+			gui.destroy_context()
 
 
-	async def _emit(self):
-		async with aiohttp.ClientSession() as session:
-			async with session.ws_connect('ws://localhost:8000/stream') as ws:
-				while True:
-					message = await ws.receive()
-					self.emit(message.data)
+	async def setup(self):
+
+		self.api_client = ApiClient()
+		self.live_data_window = LiveDataWindow()
+		self.live_data_window.subscribe_to(self.api_client)
+
+
+		data_keys = await self.api_client.get('http://localhost:8000/rack/measurements')
+		self.live_plot_window = LivePlotWindow(data_keys[0], data_keys)
+		self.live_plot_window.subscribe_to(self.api_client)
+
+
+		schema = Schema(await self.api_client.get('http://localhost:8000/openapi.json'))
+		instruments = await self.api_client.get('http://localhost:8000/rack/instruments')
+		
+		with gui.viewport_menu_bar():
+			with gui.menu(label='Instruments'):
+
+				for instrument in instruments:
+
+					with gui.menu(label=instrument):
+
+						paths = schema.paths_with_tag(instrument)
+						
+						for key, value in paths.items():
+							gui.add_button(
+								label=path,
+								callback=self.make_popup,
+								user_data={
+									'path': key,
+									'data': value,
+									},
+								)
+
 
 
 	async def run(self):
 
-		self._schema = await self._get_openapi_schema()
+		await self.setup()
 
-		window = dpg.window(label='Data files', width=350, height=300, no_close=True, no_move=False)
+		gui.show_viewport()
 
-		with window:
-			dpg.add_text('---', tag='current_filename', show_label=True, label='Current Filename')
-			dpg.add_separator()
-			e = Endpoint(self._session, self._schema, '/scribe/next_file/{label}/{next_chapter}')
-			dpg.add_separator()
+		# self._schema = await self._get_openapi_schema()
+
+		# window = gui.window(label='Data files', width=350, height=300, no_close=True, no_move=False)
+
+		# with window:
+		# 	gui.add_text('---', tag='current_filename', show_label=True, label='Current Filename')
+		# 	gui.add_separator()
+		# 	e = Endpoint(self._session, self._schema, '/scribe/next_file/{label}/{next_chapter}')
+		# 	gui.add_separator()
 			
-			e = Endpoint(self._session, self._schema, '/scribe/current_filename', display=False)
-			e.register_callback(e.set_fetched_value, item='current_filename')
-			self._tasks.append(e.run())
+		# 	e = Endpoint(self._session, self._schema, '/scribe/current_filename', display=False)
+		# 	e.register_callback(e.set_fetched_value, item='current_filename')
+		# 	self._tasks.append(e.run())
 			
-			e = Endpoint(self._session, self._schema, '/Wave1/frequency/set/{frequency}')
+		# 	e = Endpoint(self._session, self._schema, '/Wave1/frequency/set/{frequency}')
+		await asyncio.sleep(1)
 
+		render_task = asyncio.create_task(self._render())
 
 		done, pending = await asyncio.wait(
 			[
-				asyncio.create_task(self._render()),
-				asyncio.create_task(self._emit()),
-				*self._tasks,
+				render_task,
+				asyncio.create_task(self.api_client.broadcast_websocket('ws://localhost:8000/stream')),
+				asyncio.create_task(self.live_data_window.run()),
+				asyncio.create_task(self.live_plot_window.run()),
+				asyncio.create_task(self.api_client.poll_endpoint('http://localhost:8000/scribe/current_filename'))
+
+				# *self._tasks,
 			],
 			return_when=asyncio.FIRST_EXCEPTION,
 		)
 
+		print(done)
+
 		for task in pending:
 			task.cancel()
 
-		dpg.destroy_context()
+		gui.destroy_context()
