@@ -157,6 +157,7 @@ class UI(Broadcaster):
 						)
 
 			with gui.menu(label='Plots'):
+				gui.add_text('x-axis')
 				for key in data_keys:
 					gui.add_button(
 						label=key,
@@ -174,9 +175,10 @@ class UI(Broadcaster):
 			no_resize=True,
 			no_collapse=True,
 			no_close=True,
+			no_bring_to_front_on_focus=True,
 			):
 			self._current_task_uuid = gui.generate_uuid()
-			gui.add_text(json.dumps('', indent=4), tag=self._current_task_uuid, color=(40,200,40))
+			gui.add_text('Current task: '+json.dumps('', indent=4), tag=self._current_task_uuid, color=(40,200,40))
 			self._task_queue_uuid = gui.generate_uuid()
 			gui.add_text(json.dumps([], indent=4), tag=self._task_queue_uuid)
 

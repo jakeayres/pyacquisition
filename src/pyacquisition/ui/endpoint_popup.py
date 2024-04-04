@@ -1,5 +1,6 @@
 import dearpygui.dearpygui as gui
 import requests
+import json
 
 
 class EndpointPopup:
@@ -28,6 +29,8 @@ class EndpointPopup:
 						self._add_text_input(param)
 
 			gui.add_button(label='Execute', callback=self.request, width=150)
+
+			gui.add_input_text(hint='response', tag=self._uuid+'response_input', width=150)
 
 
 	def _make_parameter_uuid(self, param_name):
@@ -118,5 +121,6 @@ class EndpointPopup:
 	def request(self):
 		endpoint = 'http://localhost:8000'+self._make_endpoint()
 		value = requests.get(endpoint, timeout=1)
-		value = value.content.decode('utf-8')
+		value = json.loads(value.content.decode('utf-8'))
+		gui.set_value(self._uuid+'response_input', json.dumps(value))
 		return value

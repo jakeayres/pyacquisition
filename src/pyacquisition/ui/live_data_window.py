@@ -26,6 +26,7 @@ class LiveDataWindow(Consumer):
 			no_resize=True,
 			no_collapse=True,
 			no_close=True,
+			no_bring_to_front_on_focus=True,
 			):
 			gui.add_text(json.dumps({}), tag='data_string')
 			gui.add_text('Loop time:', tag='loop_time')
