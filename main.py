@@ -1,5 +1,4 @@
 
-import asyncio
 from functools import partial
 
 from pyacquisition.experiment import Experiment
@@ -104,4 +103,4 @@ class HardExperiment(Experiment):
 if __name__ == "__main__":
 
 	exp = SoftExperiment('./data/')
-	asyncio.run(exp.run())
+	exp.run()

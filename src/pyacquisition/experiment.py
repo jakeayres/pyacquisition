@@ -322,9 +322,16 @@ class Experiment:
 		pass
 
 
-	async def run(self):
+	def run(self):
 		"""
 		The main entry point for the Experiment class
+		"""
+		asyncio.run(self._async_run())
+
+
+	async def _async_run(self):
+		"""
+		The main asyncio method
 		"""
 
 		rack_task = asyncio.create_task(self.rack.run())
