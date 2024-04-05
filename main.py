@@ -103,6 +103,5 @@ class HardExperiment(Experiment):
 
 if __name__ == "__main__":
 
-	exp = SoftExperiment("data/")
+	exp = SoftExperiment('./data/')
 	asyncio.run(exp.run())
-

@@ -145,7 +145,7 @@ class StabilizeTemperature(Coroutine):
 		output_channel,
 		):
 
-		@experiment.api.get('/experiment/stabilize_temperature/', tags=['Experiment'])
+		@experiment.api.get('/experiment/stabilize_temperature/', tags=['Routines'])
 		async def stabilize_temperature(
 			setpoint: float, 
 			ramp_rate: float,

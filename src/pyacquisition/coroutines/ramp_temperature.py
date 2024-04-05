@@ -72,7 +72,7 @@ class RampTemperature(Coroutine):
 		path: str = '/experiment/ramp_temperature/',
 		):
 
-		@experiment.api.get(path, tags=['Experiment'])
+		@experiment.api.get(path, tags=['Routines'])
 		async def ramp_temperature(
 			setpoint: float,
 			ramp_rate: float,

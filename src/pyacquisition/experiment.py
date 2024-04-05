@@ -19,7 +19,6 @@ class Experiment:
 		self._scribe.subscribe_to(self.rack)
 		self._api = API(allowed_cors_origins=['http://localhost:3000'])
 		self._api.subscribe_to(self.rack)
-
 		self._ui = UI()
 
 		self.running = True
@@ -262,7 +261,7 @@ class Experiment:
 		"""
 
 
-		@self.api.get('/experiment/current_task', tags=['Tasks'])
+		@self.api.get('/experiment/current_task', tags=['Experiment'])
 		async def current_task() -> str:
 			try:
 				return self.current_task.string()
@@ -270,36 +269,36 @@ class Experiment:
 				return 'None'
 
 
-		@self.api.get('/experiment/pause/', tags=['Tasks'])
+		@self.api.get('/experiment/pause_task/', tags=['Experiment'])
 		async def pause_task() -> int:
 			self.pause_task()
 			return 0
 
 
-		@self.api.get('/experiment/resume/', tags=['Tasks'])
+		@self.api.get('/experiment/resume_task/', tags=['Experiment'])
 		async def resume_task() -> int:
 			self.resume_task()
 			return 0
 
 
-		@self.api.get('/experiment/abort/', tags=['Tasks'])
+		@self.api.get('/experiment/abort_task/', tags=['Experiment'])
 		async def abort_task() -> int:
 			self.abort_task()
 			return 0
 
 
-		@self.api.get('/experiment/queued_tasks/', tags=['Tasks'])
+		@self.api.get('/experiment/queued_tasks/', tags=['Experiment'])
 		async def queued_tasks() -> list[str]:
 			return self.list_tasks()
 
 
-		@self.api.get('/experiment/remove_task/{index}/', tags=['Tasks'])
+		@self.api.get('/experiment/remove_task/{index}/', tags=['Experiment'])
 		async def remove_task(index: int) -> int :
 			self.remove_task(index)
 			return 0
 
 
-		@self.api.get('/experiment/clear_tasks/', tags=['Tasks'])
+		@self.api.get('/experiment/clear_tasks/', tags=['Experiment'])
 		async def clear_tasks() -> int:
 			self.clear_tasks()
 			return 0
@@ -332,24 +331,24 @@ class Experiment:
 		scribe_task = asyncio.create_task(self.scribe.run())
 		main_task = asyncio.create_task(self.execute())
 		fast_api_server_task = self._api.coroutine()
-		ui_task = asyncio.create_task(self._ui.run())
 
 		self.scribe.log('Started', stem='Experiment')
+
+		ui_process = self._ui.run_in_new_process()
 		
 		done, pending = await asyncio.wait(
 			[
 			scribe_task,
 			rack_task,
-			#ws_task,
 			main_task,
 			fast_api_server_task,
-			ui_task,
 			],
 			return_when=asyncio.FIRST_COMPLETED,
 		)
 
 		for task in pending:
 			task.cancel()
+		ui_process.join()
+
 
 		self.scribe.log('Ended', stem='Experiment')
-

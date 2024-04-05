@@ -43,7 +43,7 @@ class CreateNewFile(Coroutine):
 		experiment,
 		):
 
-		@experiment.api.get('/experiment/create_new_file/', tags=['Experiment'])
+		@experiment.api.get('/experiment/create_new_file/', tags=['Routines'])
 		async def create_new_file(
 			filename: str,
 			new_chapter: bool,

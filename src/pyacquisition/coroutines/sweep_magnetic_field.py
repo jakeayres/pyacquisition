@@ -298,7 +298,7 @@ class SweepMagneticField(Coroutine):
 		magnet_psu,
 		):
 
-		@experiment.api.get('/experiment/sweep_magnetic_field/one_polarity/', tags=['Experiment'])
+		@experiment.api.get('/experiment/sweep_magnetic_field/one_polarity/', tags=['Routines'])
 		async def sweep_field_one_polarity(
 			setpoint: float,
 			ramp_rate: float,
@@ -317,7 +317,7 @@ class SweepMagneticField(Coroutine):
 			return 0
 
 
-		@experiment.api.get('/experiment/sweep_magnetic_field/both_polarities/', tags=['Experiment'])
+		@experiment.api.get('/experiment/sweep_magnetic_field/both_polarities/', tags=['Routines'])
 		async def sweep_field_both_polarities(
 			setpoint: float,
 			ramp_rate: float,

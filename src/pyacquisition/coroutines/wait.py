@@ -42,7 +42,7 @@ class WaitFor(Coroutine):
 	@classmethod
 	def register_endpoints(cls, experiment):
 
-		@experiment.api.get('/experiment/wait_for/', tags=['Experiment'])
+		@experiment.api.get('/experiment/wait_for/', tags=['Routines'])
 		async def wait_for(duration: WaitDuration = Depends()) -> int:
 			""" Wait for given time """
 			await experiment.add_task(cls(experiment.scribe, **duration.dict()))

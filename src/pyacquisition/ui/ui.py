@@ -3,6 +3,7 @@ import dearpygui.dearpygui as gui
 import aiohttp
 import requests
 import json
+from multiprocessing import Process
 from functools import partial
 
 from ..broadcaster import Broadcaster
@@ -27,7 +28,6 @@ class UI(Broadcaster):
 		super().__init__()
 
 		self._runnables = []
-		self._setup_dearpygui()
 
 
 	def _setup_dearpygui(self):
@@ -131,9 +131,10 @@ class UI(Broadcaster):
 									'data': schema,
 									},
 								)
+							
 
-			with gui.menu(label='Tasks'):
-				paths = schema.paths_with_tag('Tasks')
+			with gui.menu(label='Experiment'):
+				paths = schema.paths_with_tag('Experiment')
 				for key, value in paths.items():
 					gui.add_button(
 						label=key,
@@ -144,8 +145,9 @@ class UI(Broadcaster):
 							},
 						)
 
-			with gui.menu(label='Experiment'):
-				paths = schema.paths_with_tag('Experiment')
+
+			with gui.menu(label='Routines'):
+				paths = schema.paths_with_tag('Routines')
 				for key, value in paths.items():
 					gui.add_button(
 						label=key,
@@ -185,8 +187,22 @@ class UI(Broadcaster):
 			# Find a nice pattern for registering the callback and updating etc
 
 
+	def run_in_new_process(self):
+
+		process = Process(target=self._process_run)
+		process.start()
+
+		return process
+
+
+
+	def _process_run(self):
+		asyncio.run(self.run())
+
+
 	async def run(self):
 
+		self._setup_dearpygui()
 		await self.setup()
 		gui.show_viewport()
 		await asyncio.sleep(1)
