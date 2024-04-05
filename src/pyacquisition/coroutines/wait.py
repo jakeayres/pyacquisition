@@ -61,9 +61,9 @@ class WaitUntil(Coroutine):
 
 
 	async def run(self):
-		self.scribe.log(self.string(), stem='WaitUnit')
+		self.scribe.log(self.string(), stem='WaitUntil')
 		while datetime.now() < self.date_time:
-			await asyncio.sleep(2)
+			await asyncio.sleep(1)
 		yield ''
 
 

@@ -269,6 +269,14 @@ class Experiment:
 				return 'None'
 
 
+		# @self.api.get('/experiment/current_task_status', tags=['Experiment'])
+		# async def current_task() -> str:
+		# 	try:
+		# 		return self.current_task.status()
+		# 	except:
+		# 		return 'None'
+
+
 		@self.api.get('/experiment/pause_task/', tags=['Experiment'])
 		async def pause_task() -> int:
 			self.pause_task()

@@ -6,14 +6,28 @@ import json
 class EndpointPopup:
 
 
-	def __init__(self, path, schema):
+	_window_uuid_suffix = '_window'
+	_response_input_uuid_suffix = '_response'
+
+
+	def __init__(
+		self, 
+		path, 
+		schema,
+		pos=[150, 150],
+		):
 
 		self._uuid = str(gui.generate_uuid())
 		self._path = path
 		self._path_params = self._make_path_parameter_dictionary(schema, path)
 		self._query_params = self._make_query_parameter_dictionary(schema, path)
 
-		with gui.window(label=schema.path_display_name(path), width=300):
+		with gui.window(
+			tag=self.window_uuid,
+			label=schema.path_display_name(path), 
+			width=300,
+			pos=pos,
+			):
 			gui.add_text(path, color=(100,100,100))
 
 			if schema.has_parameters(path):
@@ -30,7 +44,35 @@ class EndpointPopup:
 
 			gui.add_button(label='Execute', callback=self.request, width=150)
 
-			gui.add_input_text(hint='response', tag=self._uuid+'response_input', width=150)
+			gui.add_input_text(hint='response', tag=self.response_uuid, width=280)
+
+
+	@classmethod
+	def from_config(cls, config, schema):
+		return cls(
+			config['path'],
+			schema,
+			config['pos'],
+			)
+
+
+	def config(self):
+		data = {
+			'path': self._path,
+			'pos': gui.get_item_pos(self.window_uuid),
+		}
+		return data
+
+
+	@property
+	def window_uuid(self):
+		return self._uuid + self._window_uuid_suffix
+	
+
+	@property
+	def response_uuid(self):
+		return self._uuid + self._response_input_uuid_suffix
+
 
 
 	def _make_parameter_uuid(self, param_name):

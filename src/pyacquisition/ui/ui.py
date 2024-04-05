@@ -28,6 +28,7 @@ class UI(Broadcaster):
 		super().__init__()
 
 		self._runnables = []
+		self._active_popups = []
 
 
 	def _setup_dearpygui(self):
@@ -36,15 +37,43 @@ class UI(Broadcaster):
 		gui.setup_dearpygui()
 
 
+	def _save_interface(self):
+		with open('ui_config.json', 'w') as f:
+
+			data = {
+				'plots': [r.config() for r in self._runnables],
+				'popups': [p.config() for p in self._active_popups],
+			}
+
+			json.dump(data, f, indent=4)
+
+
+
+	def _load_interface(self):
+		with open('ui_config.json', 'r') as f:
+			data = json.load(f)
+
+			for plot_data in data['plots']:
+				self.add_live_plot_from_config(plot_data)
+
+			for popup_data in data['popups']:
+				self.make_endpoint_from_config(popup_data)
+
+
+
+
 	def add_live_plot(self, sender, app_data, user_data):
 		"""
 		"""
 		window = LivePlotWindow(
 			**user_data, 
-			width=600, 
-			height=600,
-			pos=(150, 150),
 			)
+		window.subscribe_to(self.api_client)
+		self._runnables.append(window)
+
+
+	def add_live_plot_from_config(self, config):
+		window = LivePlotWindow.from_config(config)
 		window.subscribe_to(self.api_client)
 		self._runnables.append(window)
 
@@ -52,6 +81,19 @@ class UI(Broadcaster):
 
 	def make_endpoint_popup(self, sender, app_data, user_data):
 		p = EndpointPopup(user_data['path'], user_data['data'])
+		self._active_popups.append(p)
+
+
+	# NEED A WAY TO REMOVE ENDPOINT
+	# PRESUMABLY NEED TO PASS THE OBJECT A CALLBACK THAT
+	# POPS ITSELF FROM THE _active_popups LIST.
+
+
+	def make_endpoint_from_config(self, config):
+		p = EndpointPopup.from_config(config, self._schema)
+		self._active_popups.append(p)
+		return p
+
 
 
 	async def _render(self):
@@ -80,18 +122,11 @@ class UI(Broadcaster):
 
 
 		data_keys = await self.api_client.get('http://localhost:8000/rack/measurements')
-		self.live_plot_window = LivePlotWindow(
-			data_keys[0], 
-			data_keys,
-			width=1050, 
-			height=700,
-			pos=(320, 30),
-			)
-		self.live_plot_window.subscribe_to(self.api_client)
-
-
 		schema = Schema(await self.api_client.get('http://localhost:8000/openapi.json'))
 		instruments = await self.api_client.get('http://localhost:8000/rack/instruments')
+
+		self._schema = schema
+		# FIX MIXED USE OF self._schema and schema
 		
 		with gui.viewport_menu_bar():
 			with gui.menu(label='Scribe'):
@@ -131,7 +166,7 @@ class UI(Broadcaster):
 									'data': schema,
 									},
 								)
-							
+
 
 			with gui.menu(label='Experiment'):
 				paths = schema.paths_with_tag('Experiment')
@@ -168,8 +203,21 @@ class UI(Broadcaster):
 					)
 
 
+			with gui.menu(label='Interface'):
+				gui.add_button(
+					label='Save interface',
+					callback=self._save_interface,
+				)
+				gui.add_button(
+					label='Load interface',
+					callback=self._load_interface,
+				)
+
+
 		with gui.window(
-			label='Task Queue',
+			label='task_queue_window',
+			tag='task_queue_window',
+			use_internal_label=False,
 			pos=(10, 190),
 			width=300,
 			height=150,
@@ -185,6 +233,8 @@ class UI(Broadcaster):
 			gui.add_text(json.dumps([], indent=4), tag=self._task_queue_uuid)
 
 			# Find a nice pattern for registering the callback and updating etc
+
+
 
 
 	def run_in_new_process(self):
@@ -214,7 +264,6 @@ class UI(Broadcaster):
 				asyncio.create_task(self._run()),
 				asyncio.create_task(self.api_client.broadcast_websocket('ws://localhost:8000/stream')),
 				asyncio.create_task(self.live_data_window.run()),
-				asyncio.create_task(self.live_plot_window.run()),
 				asyncio.create_task(self.api_client.poll_endpoint('http://localhost:8000/experiment/current_task', callback=lambda x: gui.set_value(self._current_task_uuid, json.dumps(x, indent=4)))),
 				asyncio.create_task(self.api_client.poll_endpoint('http://localhost:8000/experiment/queued_tasks', callback=lambda x: gui.set_value(self._task_queue_uuid, json.dumps(x, indent=4)))),
 			],
