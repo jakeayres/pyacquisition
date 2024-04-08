@@ -2,6 +2,7 @@ import asyncio
 import json
 import dearpygui.dearpygui as gui
 import pandas as pd
+from functools import partial
 from ..consumer import Consumer
 
 
@@ -21,15 +22,30 @@ PLOT_KEYS = [
 ]
 
 X_AXIS_KEYS = [
-	'label',
+	'no_gridlines',
+	'no_tick_marks',
+	'no_tick_labels',
+	'log_scale',
+	'invert',
+	'lock_min',
+	'lock_max',
 ]
 
 Y_AXIS_KEYS = [
-	'label',
+	'no_gridlines',
+	'no_tick_marks',
+	'no_tick_labels',
+	'log_scale',
+	'invert',
+	'lock_min',
+	'lock_max',
 ]
 
 LEGEND_KEYS = [
 	'label',
+	'location',
+	'horizontal',
+	'outside',
 ]
 
 
@@ -46,6 +62,7 @@ class LivePlotWindow(Consumer):
 
 	def __init__(
 		self,
+		all_keys,
 		x_key, 
 		y_keys,
 		pos=[150, 150],
@@ -59,6 +76,7 @@ class LivePlotWindow(Consumer):
 		super().__init__()
 
 		self._uuid = str(gui.generate_uuid())
+		self._all_keys = all_keys
 		self._x_key = x_key
 		self._y_keys = y_keys
 		self._data = None
@@ -69,21 +87,42 @@ class LivePlotWindow(Consumer):
 			**window_config,
 			):
 
+
+			with gui.menu_bar():
+
+				with gui.menu(label='Clear'):
+					gui.add_button(
+						label='All',
+						callback=self.clear_data,
+					)
+
+
+				with gui.menu(label='x-axis'):
+					for key in self._all_keys:
+						gui.add_button(
+							label=f'{key}',
+							callback=self._update_x_key,
+							user_data=key
+						)
+
+
 			with gui.plot(
 				tag=self.plot_uuid,
 				**plot_config,
 				):
-				gui.add_plot_axis(gui.mvXAxis, label=self._x_key, tag=self.x_axis_uuid)
-				gui.add_plot_axis(gui.mvYAxis, label=self._y_keys[0], tag=self.y_axis_uuid)
-				gui.add_plot_legend(tag=self.legend_uuid)
+				gui.add_plot_axis(gui.mvXAxis, label=self._x_key, tag=self.x_axis_uuid, **x_axis_config)
+				gui.add_plot_axis(gui.mvYAxis, label='', tag=self.y_axis_uuid, **y_axis_config)
+				gui.add_plot_legend(tag=self.legend_uuid, **legend_config)
 
 				for y_key in self._y_keys:
 					self.add_scatter_series(self._uuid+'series_tag_'+str(y_key), self._x_key, y_key)
+
 
 	@classmethod
 	def from_config(cls, config):
 
 		return cls(
+			config['all_keys'],
 			config['x_key'],
 			config['y_keys'],
 			config['pos'],
@@ -97,6 +136,7 @@ class LivePlotWindow(Consumer):
 
 	def config(self):
 		data = {
+			'all_keys': self._all_keys,
 			'x_key': self._x_key,
 			'y_keys': self._y_keys,
 			'pos': gui.get_item_pos(self.window_uuid),
@@ -135,6 +175,9 @@ class LivePlotWindow(Consumer):
 		return self._uuid + self._y_axis_uuid_suffix
 	
 
+	def clear_data(self):
+		self._data = None
+
 
 	def add_scatter_series(self, line_tag, x_key, y_key):
 		gui.add_scatter_series(
@@ -168,8 +211,8 @@ class LivePlotWindow(Consumer):
 
 
 	def _update_x_key(self, sender, app_data, user_data):
-		new_key = gui.get_value(user_data)
-		self._set_x_key(new_key)
+		gui.configure_item(self.x_axis_uuid, label=user_data)
+		self._set_x_key(user_data)
 
 
 	async def run_once(self):

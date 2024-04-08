@@ -164,5 +164,5 @@ class EndpointPopup:
 		endpoint = 'http://localhost:8000'+self._make_endpoint()
 		value = requests.get(endpoint, timeout=1)
 		value = json.loads(value.content.decode('utf-8'))
-		gui.set_value(self._uuid+'response_input', json.dumps(value))
+		gui.set_value(self.response_uuid, json.dumps(value))
 		return value

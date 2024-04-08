@@ -37,8 +37,37 @@ class UI(Broadcaster):
 		gui.setup_dearpygui()
 
 
-	def _save_interface(self):
-		with open('ui_config.json', 'w') as f:
+	def _save_interface_dialog(self):
+
+		with gui.file_dialog(
+			width=700,
+			height=500,
+			show=True,
+			default_filename='interface_config',
+			directory_selector=False,
+			callback=self._save_interface,
+		):
+			gui.add_file_extension(".json", color=(0, 255, 0, 255), custom_text="[JSON]")
+
+
+	def _load_interface_dialog(self):
+
+		with gui.file_dialog(
+			width=700,
+			height=500,
+			show=True,
+			directory_selector=False,
+			callback=self._load_interface,
+		):
+
+			gui.add_file_extension(".json", color=(0, 255, 0, 255), custom_text="[JSON]")
+
+
+	def _save_interface(self, sender, app_data, user_data):
+
+		fpath = app_data['file_path_name']
+
+		with open(fpath, 'w') as f:
 
 			data = {
 				'plots': [r.config() for r in self._runnables],
@@ -49,8 +78,11 @@ class UI(Broadcaster):
 
 
 
-	def _load_interface(self):
-		with open('ui_config.json', 'r') as f:
+	def _load_interface(self, sender, app_data, user_data):
+
+		fpath = app_data['file_path_name']
+
+		with open(fpath, 'r') as f:
 			data = json.load(f)
 
 			for plot_data in data['plots']:
@@ -199,18 +231,18 @@ class UI(Broadcaster):
 					gui.add_button(
 						label=key,
 						callback=self.add_live_plot,
-						user_data={'x_key': key, 'y_keys': data_keys}
+						user_data={'all_keys': data_keys, 'x_key': key, 'y_keys': data_keys}
 					)
 
 
 			with gui.menu(label='Interface'):
 				gui.add_button(
 					label='Save interface',
-					callback=self._save_interface,
+					callback=self._save_interface_dialog,
 				)
 				gui.add_button(
 					label='Load interface',
-					callback=self._load_interface,
+					callback=self._load_interface_dialog,
 				)
 
 
