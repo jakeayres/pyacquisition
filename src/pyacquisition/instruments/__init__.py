@@ -1,4 +1,4 @@
-from .software import Clock, WaveformGenerator, Gizmotron
+from .software import Clock, WaveformGenerator, Gizmotron, Averager
 from .stanford_research import SR_830
 from .stanford_research import SR_860
 from .lakeshore import Lakeshore_340

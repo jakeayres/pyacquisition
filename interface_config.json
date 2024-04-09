@@ -9,12 +9,11 @@
             "x_key": "time",
             "y_keys": [
                 "signal_1",
-                "time",
                 "field"
             ],
             "pos": [
-                489,
-                129
+                388,
+                76
             ],
             "window": {
                 "label": "Live Plot",

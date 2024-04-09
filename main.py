@@ -3,7 +3,7 @@ from functools import partial
 
 from pyacquisition.experiment import Experiment
 from pyacquisition.instruments import (
-	Clock, WaveformGenerator, Gizmotron, 
+	Clock, WaveformGenerator, Gizmotron, Averager,
 	SR_830, SR_860, 
 	Lakeshore_340, Lakeshore_350,
 	Mercury_IPS,
@@ -29,6 +29,9 @@ class SoftExperiment(Experiment):
 
 		wave1 = self.add_software_instrument('Wave1', WaveformGenerator)
 		self.add_measurement('signal_1', wave1.get_signal)
+
+		averager = self.add_software_instrument('Averager', Averager, func=wave1.get_signal, N=10)
+		self.add_measurement('average', averager.moving_average)
 
 
 	def register_endpoints(self):

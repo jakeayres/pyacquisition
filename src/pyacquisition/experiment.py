@@ -1,5 +1,7 @@
 import asyncio
 from datetime import datetime
+from functools import partial
+
 from .rack import Rack
 from .scribe import Scribe
 from .consumer import Consumer
@@ -7,7 +9,6 @@ from .inspectable_queue import InspectableQueue
 from .api import API
 from .coroutines import WaitFor
 from .dataframe import DataFrame
-
 from .ui.ui import UI
 
 
@@ -63,7 +64,7 @@ class Experiment:
 		return self._api.app
 
 
-	def add_software_instrument(self, key: str, instrument_class):
+	def add_software_instrument(self, key: str, instrument_class, *args, **kwargs):
 		"""
 		Adds a software instrument to the Rack.
 
@@ -75,12 +76,12 @@ class Experiment:
 		:returns:   { description_of_the_return_value }
 		:rtype:     { return_type_description }
 		"""
-		inst = self.rack.add_software_instrument(key, instrument_class)
+		inst = self.rack.add_software_instrument(key, instrument_class, *args, **kwargs)
 		inst.register_endpoints(self.api)
 		return inst
 
 
-	def add_hardware_instrument(self, key: str, instrument_class, visa_resource):
+	def add_hardware_instrument(self, key: str, instrument_class, visa_resource, *args, **kwargs):
 		"""
 		Adds a hardware instrument to the rack.
 
@@ -94,12 +95,12 @@ class Experiment:
 		:returns:   { description_of_the_return_value }
 		:rtype:     { return_type_description }
 		"""
-		inst = self.rack.add_instrument(key, instrument_class, visa_resource)
+		inst = self.rack.add_instrument(key, instrument_class, visa_resource, *args, **kwargs)
 		inst.register_endpoints(self.api)
 		return inst
 
 
-	def add_measurement(self, key: str, func: callable, call_every=1):
+	def add_measurement(self, key: str, func: callable, call_every=1, **kwargs):
 		"""
 		Add a measurement (callable) to be polled by the Rack object.
 
@@ -113,8 +114,8 @@ class Experiment:
 		:returns:   { description_of_the_return_value }
 		:rtype:     { return_type_description }
 		"""
-		meas = self.rack.add_measurement(key, func, call_every=call_every)
-		return func
+		meas = self.rack.add_measurement(key, partial(func, **kwargs), call_every=call_every)
+		return partial(func, **kwargs)
 
 
 	def create_dataframe(self):

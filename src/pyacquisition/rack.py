@@ -127,11 +127,11 @@ class Rack(Broadcaster):
 		return inst
 
 
-	def add_software_instrument(self, key, instrument_class, api=None):
+	def add_software_instrument(self, key, instrument_class, api=None, **kwargs):
 		""" 
 		Add software instrument as a property of self
 		"""
-		inst = instrument_class(uid=key)
+		inst = instrument_class(uid=key, **kwargs)
 		self.__dict__[key] = inst
 		self._instruments[key] = inst
 		if api != None:
