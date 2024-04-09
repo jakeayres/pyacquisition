@@ -24,8 +24,8 @@ class SoftExperiment(Experiment):
 		clock = self.add_software_instrument('Clock', Clock)
 		self.add_measurement('time', clock.time)
 
-		magnet = self.add_software_instrument('Magnet', FakeMagnetPSU)
-		self.add_measurement('field', magnet.get_output_field)
+		gizmo = self.add_software_instrument('Gizmo', Gizmotron)
+		self.add_measurement('field', gizmo.get_value)
 
 		wave1 = self.add_software_instrument('Wave1', WaveformGenerator)
 		self.add_measurement('signal_1', wave1.get_signal)
@@ -34,8 +34,9 @@ class SoftExperiment(Experiment):
 	def register_endpoints(self):
 		super().register_endpoints()
 
-		from pyacquisition.coroutines import SweepMagneticField
-		SweepMagneticField.register_endpoints(self, self.rack.Magnet)
+		from pyacquisition.coroutines import SweepGizmotron
+		SweepGizmotron.register_endpoints(self, self.rack.Gizmo)
+
 
 
 class HardExperiment(Experiment):

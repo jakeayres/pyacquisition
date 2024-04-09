@@ -70,5 +70,32 @@ class SweepGizmotron(Coroutine):
 		yield ''
 
 
+	@classmethod
+	def register_endpoints(
+		cls, 
+		experiment,
+		gizmotron,
+		path: str = '/experiment/sweep_gizmotron/',
+		):
+
+		@experiment.api.get(path, tags=['Routines'])
+		async def sweep_gizmotron(
+			max_value: float,
+			wait_time: float,
+			from_cache: bool,
+			) -> int:
+			""" Ramp lakeshore to setpoint at ramp rate """
+			await experiment.add_task(
+				cls(
+					scribe=experiment.scribe, 
+					gizmo=gizmotron,
+					max_value=max_value,
+					wait_time=wait_time,
+					from_cache=from_cache,
+					)
+				)
+			return 0
+
+
 
 

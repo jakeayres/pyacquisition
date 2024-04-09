@@ -57,6 +57,7 @@ class LivePlotWindow(Consumer):
 	_legend_uuid_suffix = '_legend'
 	_x_axis_uuid_suffix = '_x_axis'
 	_y_axis_uuid_suffix = '_y_axis'
+	_series_uuid_suffix = '_series'
 
 
 
@@ -96,14 +97,30 @@ class LivePlotWindow(Consumer):
 						callback=self.clear_data,
 					)
 
-
 				with gui.menu(label='x-axis'):
 					for key in self._all_keys:
 						gui.add_button(
 							label=f'{key}',
-							callback=self._update_x_key,
+							callback=self._update_x_key_callback,
 							user_data=key
 						)
+
+				with gui.menu(label='y-axis'):
+					with gui.menu(label='Add'):
+						for key in self._all_keys:
+							gui.add_button(
+								label=f'{key}',
+								callback=self._add_y_key_callback,
+								user_data=key,
+							)
+
+					with gui.menu(label='Remove'):
+						for key in self._all_keys:
+							gui.add_button(
+								label=f'{key}',
+								callback=self._remove_y_key_callback,
+								user_data=key,
+							)
 
 
 			with gui.plot(
@@ -115,7 +132,7 @@ class LivePlotWindow(Consumer):
 				gui.add_plot_legend(tag=self.legend_uuid, **legend_config)
 
 				for y_key in self._y_keys:
-					self.add_scatter_series(self._uuid+'series_tag_'+str(y_key), self._x_key, y_key)
+					self.add_scatter_series(self.series_uuid(y_key), self._x_key, y_key)
 
 
 	@classmethod
@@ -173,35 +190,43 @@ class LivePlotWindow(Consumer):
 	@property
 	def y_axis_uuid(self):
 		return self._uuid + self._y_axis_uuid_suffix
+
+
+	def series_uuid(self, key):
+		return self._uuid + key + self._series_uuid_suffix
 	
 
 	def clear_data(self):
 		self._data = None
 
 
-	def add_scatter_series(self, line_tag, x_key, y_key):
+	def add_scatter_series(self, series_uuid, x_key, y_key):
 		gui.add_scatter_series(
 			[0], 
 			[0], 
 			parent=self.y_axis_uuid, 
-			tag=line_tag,
+			tag=series_uuid,
 			label=y_key,
 			)
 
 
-	def add_line_series(self, line_tag, x_key, y_key):
+	def add_line_series(self, series_uuid, x_key, y_key):
 		gui.add_line_series(
 			[0], 
 			[0], 
 			parent=self.y_axis_uuid, 
-			tag=line_tag,
+			tag=series_uuid,
 			label=y_key,
 			)
 
 
-	def update_line(self, line_tag, x_key, y_key):
+	def delete_series(self, series_uuid):
+		gui.delete_item(series_uuid)
+
+
+	def update_line(self, series_uuid, x_key, y_key):
 		gui.set_value(
-			line_tag, 
+			series_uuid, 
 			[self._data[self._x_key].tolist(), self._data[y_key].tolist()],
 			)
 
@@ -210,9 +235,23 @@ class LivePlotWindow(Consumer):
 		self._x_key = x_key
 
 
-	def _update_x_key(self, sender, app_data, user_data):
+	def _update_x_key_callback(self, sender, app_data, user_data):
 		gui.configure_item(self.x_axis_uuid, label=user_data)
 		self._set_x_key(user_data)
+
+
+	def _add_y_key_callback(self, sender, app_data, user_data):
+		key = user_data
+		if key not in self._y_keys:
+			self._y_keys.append(key)
+			self.add_scatter_series(self.series_uuid(key), self._x_key, key)
+
+
+	def _remove_y_key_callback(self, sender, app_data, user_data):
+		key = user_data
+		if key in self._y_keys:
+			self._y_keys.remove(key)
+			self.delete_series(self.series_uuid(key))
 
 
 	async def run_once(self):
@@ -223,7 +262,7 @@ class LivePlotWindow(Consumer):
 			else:
 				self._data = pd.concat([self._data, pd.DataFrame(data=data, index=[0])])
 				for y_key in self._y_keys:
-					self.update_line(self._uuid+'series_tag_'+str(y_key), self._x_key, y_key)
+					self.update_line(self.series_uuid(y_key), self._x_key, y_key)
 		except Exception as e:
 			print(e)
 
