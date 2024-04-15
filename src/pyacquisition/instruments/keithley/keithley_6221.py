@@ -103,8 +103,8 @@ class Keithley_6221(Instrument):
 
 
 		@app.get(f'/{self._uid}/'+'wave/ampliude/set', tags=[self._uid])
-		async def set_wave_amplitude(ampliude: float) -> int:
-			return self.set_wave_amplitude(ampliude)
+		async def set_wave_amplitude(amplitude: float) -> int:
+			return self.set_wave_amplitude(amplitude)
 
 
 		@app.get(f'/{self._uid}/'+'wave/ampliude/get', tags=[self._uid])

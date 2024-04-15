@@ -9,7 +9,7 @@ class PrologixResourceManager(object):
 	"""
 
 	GPIB_ADDRESS_RANGE = (1, 30)
-	BUAD_RATE = 19200
+	BUAD_RATE = 115200
 	TIMEOUT = 0.1
 
 
@@ -58,7 +58,7 @@ class PrologixResourceManager(object):
 
 
 	def open_resource(self, gpib_resource_string, *args, **kwargs):
-		return PrologixResource(self._serial_object, gpib_resource_string)
+		return PrologixResource(self._serial_object, gpib_resource_string, *args, **kwargs)
 
 
 class PrologixResource(object):
@@ -73,11 +73,13 @@ class PrologixResource(object):
 		gpib_resource_string,
 		read_termination='\n',
 		write_termination='\n',
+		read_after_write=True,
 		):
 		self._serial_object = serial_object
 		self._gpib_address = int(gpib_resource_string.split('::')[1])
 		self._read_termination = read_termination
 		self._write_termination = write_termination
+		self._read_after_write = read_after_write
 
 
 	def _write(self, command):
@@ -91,6 +93,7 @@ class PrologixResource(object):
 
 
 	def _query(self, command):
+		self._write('++auto 1')
 		self._write(command)
 		return self._read()
 
@@ -99,12 +102,17 @@ class PrologixResource(object):
 		self._write(f'++addr {self._gpib_address}')
 
 
+	def _set_read_after_write(self):
+		self._write(f'++auto {int(self._read_after_write)}')
+
+
 	def address(self):
 		return self._gpib_address()
 
 
 	def write(self, command):
 		self._set_gpib_address()
+		self._set_read_after_write()
 		self._write(command)
 		return 0
 
