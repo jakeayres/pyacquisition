@@ -10,7 +10,7 @@ class Keithley_6221(Instrument):
 
 	@query
 	def get_output_state(self) -> bool:
-		response = self._query('OUTPUT:STATE?')
+		response = self._query(':OUTPUT:STATE?')
 		return bool(response)
 
 
@@ -102,12 +102,22 @@ class Keithley_6221(Instrument):
 			return self.initiate_wave()
 
 
-		@app.get(f'/{self._uid}/'+'wave/ampliude/set', tags=[self._uid])
+		@app.get(f'/{self._uid}/'+'wave/amplitude/set', tags=[self._uid])
 		async def set_wave_amplitude(amplitude: float) -> int:
 			return self.set_wave_amplitude(amplitude)
 
 
-		@app.get(f'/{self._uid}/'+'wave/ampliude/get', tags=[self._uid])
+		@app.get(f'/{self._uid}/'+'wave/amplitude/get', tags=[self._uid])
 		async def get_wave_amplitude() -> float:
 			return self.get_wave_amplitude()
+
+
+		@app.get(f'/{self._uid}/'+'wave/frequency/set', tags=[self._uid])
+		async def set_wave_frequency(frequency: float) -> int:
+			return self.set_wave_frequency(frequency)
+
+
+		@app.get(f'/{self._uid}/'+'wave/frequency/get', tags=[self._uid])
+		async def get_wave_frequency() -> float:
+			return self.get_wave_frequency()
 
