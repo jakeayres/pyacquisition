@@ -6,6 +6,7 @@ from .lakeshore import Lakeshore_350
 from .oxford_instruments import Mercury_IPS
 from .keithley import Keithley_2000, Keithley_6221
 from .fake import FakeMagnetPSU
+from .keysight import Keysight_3458a
 
 
 instruments = {
@@ -19,4 +20,5 @@ instruments = {
 	'Keithley_6221': Keithley_6221,
 	'Mercury_IPS': Mercury_IPS,
 	'Fake_Magnet_PSU': FakeMagnetPSU,
+	'Keysight_3458a': Keysight_3458a,
 }
