@@ -43,16 +43,45 @@ class Keithley_2000(Instrument):
 
 	@query
 	def measure_ac_voltage(self) -> float:
-		reponse = self._query(f'MEASURE:VOLTAGE:AC?')
+		response = self._query(f'MEASURE:VOLTAGE:AC?')
 		return float(response)
 
 
 	@query
 	def measure_dc_voltage(self) -> float:
-		reponse = self._query(f'MEASURE:VOLTAGE:DC?')
+		response = self._query(f'MEASURE:VOLTAGE:DC?')
 		return float(response)
 
 
 	@command
 	def set_continuous_initiation(self) -> int:
 		return self._command(f'INITIATE:CONTINUOUS ON')
+
+
+	def register_endpoints(self, app):
+		super().register_endpoints(app)
+
+
+		@app.get(f'/{self._uid}/'+'query/raw', tags=[self._uid])
+		async def query_raw(string: str) -> str:
+			return self._query(string)
+
+
+		@app.get(f'/{self._uid}/'+'read', tags=[self._uid])
+		async def read_value() -> float:
+			return self.read_value()
+
+
+		@app.get(f'/{self._uid}/'+'configuration/set/ac_voltage', tags=[self._uid])
+		async def set_configuration_ac_voltage() -> int:
+			return self.set_configuration_ac_voltage()
+
+
+		@app.get(f'/{self._uid}/'+'configuration/set/dc_voltage', tags=[self._uid])
+		async def set_configuration_dc_voltage() -> int:
+			return self.set_configuration_dc_voltage()
+
+
+		@app.get(f'/{self._uid}/'+'initiate/continuous', tags=[self._uid])
+		async def set_continuous_initiation() -> int:
+			return self.set_continuous_initiation()
