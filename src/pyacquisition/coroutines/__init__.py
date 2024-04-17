@@ -1,3 +1,4 @@
+from .coroutine import Coroutine
 from .wait import WaitFor
 from .sweep_gizmotron import SweepGizmotron
 from .ramp_temperature import RampTemperature
