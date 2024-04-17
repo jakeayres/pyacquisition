@@ -234,20 +234,29 @@ class Keysight_3458a(Instrument):
 			self.set_memory_mode(MemoryMode.FIFO)
 			await asyncio.sleep(0.1)
 			self.set_delay_time(0.00)
-			#self.set_trigger_arm_event(TriggerArmEvent.AUTO)
-			#self.set_trigger_source(TriggerSource.SYN)
+			await asyncio.sleep(0.1)
+			self.set_trigger_arm_event(TriggerArmEvent.AUTO)
+			await asyncio.sleep(0.1)
+			self.set_trigger_source(TriggerSource.SYN)
 			return 0
 
 
 		@app.get(f'/{self._uid}/'+'configure/ready', tags=[self._uid])
 		async def configure_ready(test: str) -> int:
 			self.set_memory_format(DataFormat.DINT)
+			await asyncio.sleep(0.1)
 			self.set_output_format(DataFormat.ASCII)
+			await asyncio.sleep(0.1)
 			self.set_auto_zero(State.OFF)
+			await asyncio.sleep(0.1)
 			self.set_display(State.OFF)
-			#self.set_memory_mode(MemoryMode.FIFO)
+			await asyncio.sleep(0.1)
+			self.set_memory_mode(MemoryMode.FIFO)
+			await asyncio.sleep(0.1)
 			self.set_delay_time(0)
+			await asyncio.sleep(0.1)
 			self.set_trigger_arm_event(TriggerArmEvent.SGL)
+			await asyncio.sleep(0.1)
 			self.set_trigger_source(TriggerSource.AUTO)
 			return 0
 

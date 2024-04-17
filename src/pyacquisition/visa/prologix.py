@@ -86,9 +86,13 @@ class PrologixResource(object):
 
 
 	def _write(self, command):
-		command = command+self._write_termination
-		print('GPIB', command)
-		self._serial_object.write(command.encode('utf-8'))
+		try:
+			command = command+self._write_termination
+			self._serial_object.write(command.encode('utf-8'))
+		except Exception as e:
+			print(f'Failed to send {command}')
+			print(e)
+			raise(e)
 
 
 	def _read(self):
@@ -120,10 +124,14 @@ class PrologixResource(object):
 
 
 	def write(self, command):
-		self._set_gpib_address()
-		if not self._read_after_write:
-			self._write('++auto 0')
-		self._write(command)
+		try:
+			self._set_gpib_address()
+			if not self._read_after_write:
+				self._write('++auto 0')
+			self._write(command)
+		except Exception as e:
+			print('Exception raised')
+			print(e)
 		return 0
 
 
