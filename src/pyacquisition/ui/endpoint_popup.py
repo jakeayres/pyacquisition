@@ -2,6 +2,12 @@ import dearpygui.dearpygui as gui
 import requests
 import json
 
+"""
+KNOWN BUG:
+
+Enum params as query_params don't work. Must be implemented as path params.
+"""
+
 
 class EndpointPopup:
 
