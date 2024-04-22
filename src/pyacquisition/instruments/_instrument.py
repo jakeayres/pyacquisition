@@ -100,14 +100,14 @@ class Instrument(metaclass=QueryCommandProvider):
 		return {c.__name__: partial(c, self) for c in self._commands}
 
 
-	def _query(self, query_string):
+	def _query(self, query_string, *args, **kwargs):
 		""" Send a query to visa resource """
-		return self._visa_resource.query(query_string)
+		return self._visa_resource.query(query_string, *args, **kwargs)
 
 
-	def _command(self, command_String):
+	def _command(self, command_String, *args, **kwargs):
 		""" Send a command to visa resource """
-		return self._visa_resource.write(command_String)
+		return self._visa_resource.write(command_String, *args, **kwargs)
 
 
 	def register_endpoints(self, app):
