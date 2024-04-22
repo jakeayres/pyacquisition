@@ -31,7 +31,7 @@ class SoftExperiment(Experiment):
 		self.add_measurement('signal_1', wave1.get_signal)
 
 		averager = self.add_software_instrument('Averager', Averager, func=wave1.get_signal, N=10)
-		self.add_measurement('average', averager.moving_average)
+		self.add_measurement('average', averager.simple_moving_average)
 
 
 	def register_endpoints(self):
