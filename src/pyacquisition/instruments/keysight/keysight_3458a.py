@@ -233,7 +233,7 @@ class Keysight_3458a(Instrument):
 			await asyncio.sleep(0.1)
 			self.set_memory_mode(MemoryMode.FIFO)
 			await asyncio.sleep(0.1)
-			self.set_delay_time(0.00)
+			self.set_delay_time(0)
 			await asyncio.sleep(0.1)
 			self.set_trigger_arm_event(TriggerArmEvent.AUTO)
 			await asyncio.sleep(0.1)
