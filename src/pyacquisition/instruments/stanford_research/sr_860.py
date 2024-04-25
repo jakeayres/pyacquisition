@@ -494,6 +494,17 @@ class SR_860(Instrument):
 
 
 	@query
+	def get_r(self) -> float:
+		return float(self._query(f'OUTP? 2'))
+
+
+	@query
+	def get_theta(self) -> float:
+		return float(self._query(f'OUTP? 3'))
+
+
+
+	@query
 	def get_xy(self) -> list[float]:
 		return [float(s) for s in self._query(f'SNAP? 0,1').split(',')]
 
