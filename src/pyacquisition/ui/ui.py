@@ -15,6 +15,9 @@ from .endpoint_popup import EndpointPopup
 from .live_data_window import LiveDataWindow
 from .live_plot_window import LivePlotWindow
 
+
+from .nodes.node import Canvas, Node, NodeInput, NodeOutput
+
 import pandas as pd
 import numpy as np
 
@@ -265,6 +268,13 @@ class UI(Broadcaster):
 			gui.add_text(json.dumps([], indent=4), tag=self._task_queue_uuid)
 
 			# Find a nice pattern for registering the callback and updating etc
+
+
+		window = gui.add_window(label='nodestuff', width=500, height=500, pos=(500,500), tag='test_window')
+		
+		canvas = Canvas.add_to_window(window, 'test_canvas')
+		node = Node.add_to_canvas(canvas, 'new_node')
+
 
 
 
