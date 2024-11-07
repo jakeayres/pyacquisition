@@ -15,16 +15,8 @@ from dataclasses import dataclass
 
 @dataclass
 class SweepMagneticField(Coroutine):
-	"""
-	Yields:
-
-	{
-		'data': pd.DataFrame
-	}
-	"""
 
 	scribe: Scribe
-	dataframe: DataFrame
 	magnet_psu: Mercury_IPS
 	setpoint: float
 	ramp_rate: float
@@ -249,9 +241,6 @@ class SweepMagneticField(Coroutine):
 			await self.switch_heater_on()
 			yield None
 
-			await self.dataframe.clear()
-			yield None
-
 			# Set ramp rate
 			await self.set_ramp_rate(self.ramp_rate)
 			yield None
@@ -265,9 +254,6 @@ class SweepMagneticField(Coroutine):
 			# Go to zero
 			await self.sweep_to_zero()
 			yield None
-
-			await self.dataframe.update()
-			yield {'data': self.dataframe.data}
 
 			self.process_dataframe()
 			yield None
@@ -308,7 +294,6 @@ class SweepMagneticField(Coroutine):
 			await experiment.add_task(
 				cls(
 					scribe=experiment.scribe,
-					dataframe=experiment.create_dataframe(),
 					magnet_psu=magnet_psu, 
 					setpoint=setpoint, 
 					ramp_rate=ramp_rate,
