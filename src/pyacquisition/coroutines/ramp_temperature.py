@@ -1,4 +1,5 @@
 from ..logger import logger
+from ..scribe import scribe
 from ..instruments import Lakeshore_340, Lakeshore_350
 from ..instruments.lakeshore.lakeshore_340 import OutputChannel as OC340
 from ..instruments.lakeshore.lakeshore_350 import OutputChannel as OC350
@@ -16,7 +17,6 @@ from dataclasses import dataclass
 @dataclass
 class RampTemperature(Coroutine):
 
-	scribe: Scribe
 	lakeshore: Lakeshore_340|Lakeshore_350
 	setpoint: float
 	ramp_rate: float
@@ -35,7 +35,7 @@ class RampTemperature(Coroutine):
 	async def run(self):
 
 		if self.new_file:
-			self.scribe.next_file(f'Temperature Sweep to {self.setpoint:.2f}K', new_chapter=self.new_chapter)
+			scribe.next_file(f'Temperature Sweep to {self.setpoint:.2f}K', new_chapter=self.new_chapter)
 
 		await asyncio.sleep(self.wait_time)
 		yield ''
@@ -83,7 +83,6 @@ class RampTemperature(Coroutine):
 			""" Ramp lakeshore to setpoint at ramp rate """
 			await experiment.add_task(
 				cls(
-					scribe=experiment.scribe, 
 					lakeshore=lakeshore, 
 					setpoint=setpoint, 
 					ramp_rate=ramp_rate,

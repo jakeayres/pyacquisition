@@ -1,3 +1,4 @@
+from ..scribe import scribe
 from ..logger import logger
 from ..instruments import Lakeshore_340, Lakeshore_350
 from ..instruments.lakeshore.lakeshore_340 import InputChannel as IC340
@@ -19,7 +20,6 @@ from scipy.optimize import curve_fit
 @dataclass
 class StabilizeTemperature(Coroutine):
 
-	scribe: Scribe
 	lakeshore: Lakeshore_340|Lakeshore_350
 	setpoint: float
 	ramp_rate: float
@@ -79,11 +79,10 @@ class StabilizeTemperature(Coroutine):
 		yield ''
 
 		if self.new_file:
-			self.scribe.next_file(f"Stabilizing {self.setpoint:.2f}K", new_chapter=self.new_chapter)
+			scribe.next_file(f"Stabilizing {self.setpoint:.2f}K", new_chapter=self.new_chapter)
 
 		# Ramp to setpoint
 		ramp_coroutine = RampTemperature(
-			self.scribe,
 			self.lakeshore,
 			self.setpoint,
 			self.ramp_rate,
@@ -160,7 +159,6 @@ class StabilizeTemperature(Coroutine):
 			""" Ramp lakeshore to setpoint at ramp rate """
 			await experiment.add_task(
 				cls(
-					scribe=experiment.scribe, 
 					lakeshore=lakeshore,
 					setpoint=setpoint,
 					ramp_rate=ramp_rate,

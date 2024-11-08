@@ -2,16 +2,12 @@ from .logger import logger
 from .consumer import Consumer
 import asyncio, os, datetime
 import pandas as pd
-import colorama
-from rich.console import Console
-from rich.text import Text
-
 
 
 
 class Scribe(Consumer):
 	"""
-	A class to manage writing data to files and logging
+	A singleton class to manage writing data to files and logging
 	to stdout.
 	"""
 
@@ -20,24 +16,33 @@ class Scribe(Consumer):
 	# 	'warning': ('#  ', 'bold magenta'),
 	# 	'error': ('@! ', 'bold red'),
 	# }
+	
+	_instance = None
+	_initialized = False
 
 
 	def __init__(self, root='./'):
-		super().__init__()
 
-		self._root = root
-		self._chapter = 0
-		self._section = 0
-		self._label = 'Start up'
-		self._data_extension = '.data'
-		self._meta_extension = '.meta'
-		self._log_extension = '.log'
-		self._console = Console()
-		self._n_to_skip = 0
+		if not self._initialized:
+			super().__init__()
+			self.subscribe_to(logger)
 
-		self._make_root_directory()
-		self._increment_to_non_existant_chapter()
-		self._log_new_file()
+			self._root = root
+			self._chapter = 0
+			self._section = 0
+			self._label = 'Start up'
+			self._data_extension = '.data'
+			self._meta_extension = '.meta'
+			self._log_extension = '.log'
+			self._n_to_skip = 0
+
+			self.set_root_directory(self._root)
+
+
+	def __new__(cls, *args, **kwargs):
+		if not cls._instance:
+			cls._instance = super().__new__(cls)
+		return cls._instance
 
 
 	@property
@@ -140,6 +145,23 @@ class Scribe(Consumer):
 		self._section = 0
 
 
+	def set_root_directory(self, root):
+		"""
+		Sets the root.
+		
+		:param      root:  The root
+		:type       root:  { type_description }
+		
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
+		self._root = root
+		logger.info(f'Root directory changed: {self._root}')
+		self._make_root_directory()
+		self._increment_to_non_existant_chapter()
+		self.increment_file(self._label, new_chapter=True)
+
+
 	def increment_file(self, label, new_chapter=False):
 		"""
 		Increment the current file names.
@@ -204,22 +226,13 @@ class Scribe(Consumer):
 			json.dump(data, file, indent=4, sort_keys=True)
 
 
-	# def log(self, entry, stem='', level='info'):
-	# 	if not os.path.exists(self.current_log_path):
-	# 		mode = 'w'
-	# 	else:
-	# 		mode = 'a'
-	# 	with open(self.current_log_path, mode) as file:
-	# 		file.write(f'{self._formatted_date} {self._formatted_time} : {entry}\n')
-
-	# 		text = Text.assemble(
-	# 			(f" {self._formatted_date} ", "blue"),
-	# 			(f"{self._formatted_time}  ", "bold blue"),
-	# 			self.LEVEL_CHAR[level],
-	# 			(f"{stem.ljust(20)} ", "bold white"),
-	# 			(f"{entry}", "dim white")
-	# 		)
-	# 		self._console.print(text)
+	def log(self, entry, stem='', level='info'):
+		if not os.path.exists(self.current_log_path):
+			mode = 'w'
+		else:
+			mode = 'a'
+		with open(self.current_log_path, mode) as file:
+			file.write(f'{entry}\n')
 
 
 	def _log_new_file(self):
@@ -274,4 +287,13 @@ class Scribe(Consumer):
 	async def run(self): 
 		while True:
 			x = await self._queue.get()
-			self.record(x)
+
+			if x['message_type'] == 'data':
+				self.record(x['data'])
+			elif x['message_type'] == 'log':
+				self.log(x['data'])
+			else:
+				logger.error('Message of unknown type received by Scribe')
+
+
+scribe = Scribe()

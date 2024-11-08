@@ -3,7 +3,7 @@ from ..instruments.oxford_instruments.mercury_ips import (
 	ActivityStatus, SystemStatusM, SwitchHeaterStatus, ModeStatusN
 	)
 
-from ..scribe import Scribe
+from ..scribe import scribe
 from ..dataframe import DataFrame
 from .coroutine import Coroutine
 
@@ -16,7 +16,6 @@ from dataclasses import dataclass
 @dataclass
 class SweepMagneticField(Coroutine):
 
-	scribe: Scribe
 	magnet_psu: Mercury_IPS
 	setpoint: float
 	ramp_rate: float
@@ -227,7 +226,7 @@ class SweepMagneticField(Coroutine):
 
 		try:
 
-			self.scribe.next_file(f'Field Sweep to {"p" if self.setpoint>=0 else "n"}{abs(self.setpoint):.1f}T', new_chapter=self.new_chapter)
+			scribe.next_file(f'Field Sweep to {"p" if self.setpoint>=0 else "n"}{abs(self.setpoint):.1f}T', new_chapter=self.new_chapter)
 
 			# Check system status
 			await self.check_system_normal()
@@ -249,7 +248,7 @@ class SweepMagneticField(Coroutine):
 			await self.sweep_to_setpoint(self.setpoint)
 			yield None
 
-			self.scribe.next_file(f'Field Sweep to 0T', new_chapter=False)
+			scribe.next_file(f'Field Sweep to 0T', new_chapter=False)
 
 			# Go to zero
 			await self.sweep_to_zero()
@@ -293,7 +292,6 @@ class SweepMagneticField(Coroutine):
 			""" Field sweep at ramp_rate to setpoint and back to zero"""
 			await experiment.add_task(
 				cls(
-					scribe=experiment.scribe,
 					magnet_psu=magnet_psu, 
 					setpoint=setpoint, 
 					ramp_rate=ramp_rate,
@@ -311,8 +309,6 @@ class SweepMagneticField(Coroutine):
 			""" Field sweep at ramp_rate to setpoint and back to zero in both polarities"""
 			await experiment.add_task(
 				cls(
-					scribe=experiment.scribe,
-					dataframe=experiment.create_dataframe(),
 					magnet_psu=magnet_psu, 
 					setpoint=setpoint, 
 					ramp_rate=ramp_rate,
@@ -321,8 +317,6 @@ class SweepMagneticField(Coroutine):
 				)
 			await experiment.add_task(
 				cls(
-					scribe=experiment.scribe,
-					dataframe=experiment.create_dataframe(),
 					magnet_psu=magnet_psu, 
 					setpoint=-setpoint, 
 					ramp_rate=ramp_rate,

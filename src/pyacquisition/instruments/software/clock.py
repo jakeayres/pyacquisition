@@ -45,11 +45,13 @@ class Clock(SoftInstrument):
 	def register_endpoints(self, app):
 		super().register_endpoints(app)
 
+
 		@app.get(f'/{self._uid}/'+'timestamp/get/', tags=[self._uid])
 		async def timestamp() -> float:
 			"""Get a unix timestamp rounded to ms
 			"""
 			return self.timestamp_ms()
+
 
 		@app.get(f'/{self._uid}/'+'time/get/', tags=[self._uid])
 		async def time() -> float:

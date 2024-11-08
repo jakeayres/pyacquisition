@@ -4,7 +4,7 @@ from functools import partial
 
 from .logger import logger
 from .rack import Rack
-from .scribe import Scribe
+from .scribe import Scribe, scribe
 from .consumer import Consumer
 from .inspectable_queue import InspectableQueue
 from .api import API
@@ -17,9 +17,10 @@ class Experiment:
 
 	def __init__(self, root):
 		#self._logger = logger()
+
 		self._rack = Rack()
-		self._scribe = Scribe(root=root)
-		self._scribe.subscribe_to(self.rack)
+		scribe.set_root_directory(root)
+		scribe.subscribe_to(self.rack)
 		self._api = API(allowed_cors_origins=['http://localhost:3000'])
 		self._api.subscribe_to(self.rack)
 		self._api.subscribe_to(logger)
@@ -334,7 +335,7 @@ class Experiment:
 
 		logger.register_endpoints(self.api)
 		self.rack.register_endpoints(self.api)
-		self.scribe.register_endpoints(self.api)
+		scribe.register_endpoints(self.api)
 
 
 	def setup(self):
@@ -360,7 +361,7 @@ class Experiment:
 		"""
 
 		rack_task = asyncio.create_task(self.rack.run())
-		scribe_task = asyncio.create_task(self.scribe.run())
+		scribe_task = asyncio.create_task(scribe.run())
 		main_task = asyncio.create_task(self.execute())
 		fast_api_server_task = self._api.coroutine()
 
@@ -370,9 +371,9 @@ class Experiment:
 		
 		done, pending = await asyncio.wait(
 			[
-			scribe_task,
 			rack_task,
 			main_task,
+			scribe_task,
 			fast_api_server_task,
 			],
 			return_when=asyncio.FIRST_COMPLETED,

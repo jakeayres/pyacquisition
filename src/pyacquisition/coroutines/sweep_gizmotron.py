@@ -1,6 +1,6 @@
 from ..instruments import Gizmotron
 from ..logger import logger
-from ..scribe import Scribe
+from ..scribe import scribe
 from .coroutine import Coroutine
 
 
@@ -12,7 +12,6 @@ from dataclasses import dataclass
 @dataclass
 class SweepGizmotron(Coroutine):
 
-	scribe: Scribe
 	gizmo: Gizmotron
 	max_value: float
 	wait_time: float = 1
@@ -28,7 +27,7 @@ class SweepGizmotron(Coroutine):
 		yield ''
 
 		await asyncio.sleep(self.wait_time)
-		self.scribe.next_file('Up Positive', new_chapter=True)
+		scribe.next_file('Up Positive', new_chapter=True)
 		await asyncio.sleep(self.wait_time)
 
 		self.gizmo.set_setpoint(self.max_value)
@@ -38,7 +37,7 @@ class SweepGizmotron(Coroutine):
 		yield ''
 
 		await asyncio.sleep(self.wait_time)
-		self.scribe.next_file('Down Positive')
+		scribe.next_file('Down Positive')
 		await asyncio.sleep(self.wait_time)
 
 		self.gizmo.set_setpoint(0)
@@ -48,7 +47,7 @@ class SweepGizmotron(Coroutine):
 		yield ''
 
 		await asyncio.sleep(self.wait_time)
-		self.scribe.next_file('Up Negative')
+		scribe.next_file('Up Negative')
 		await asyncio.sleep(self.wait_time)
 
 		self.gizmo.set_setpoint(-self.max_value)
@@ -58,7 +57,7 @@ class SweepGizmotron(Coroutine):
 		yield ''
 
 		await asyncio.sleep(self.wait_time)
-		self.scribe.next_file('Down Negative')
+		scribe.next_file('Down Negative')
 		await asyncio.sleep(self.wait_time)
 
 		self.gizmo.set_setpoint(0)
@@ -66,7 +65,7 @@ class SweepGizmotron(Coroutine):
 			await asyncio.sleep(self.wait_time)
 
 		await asyncio.sleep(self.wait_time)
-		self.scribe.next_file('Teardown')
+		scribe.next_file('Teardown')
 
 		yield ''
 
@@ -88,7 +87,6 @@ class SweepGizmotron(Coroutine):
 			""" Ramp lakeshore to setpoint at ramp rate """
 			await experiment.add_task(
 				cls(
-					scribe=experiment.scribe, 
 					gizmo=gizmotron,
 					max_value=max_value,
 					wait_time=wait_time,

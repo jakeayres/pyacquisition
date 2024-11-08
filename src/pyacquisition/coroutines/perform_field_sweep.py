@@ -8,7 +8,7 @@ from ..instruments import SR_830, SR_860
 # from ..instruments.lakeshore.lakeshore_350 import OutputChannel as OC350
 
 from ..logger import logger
-from ..scribe import Scribe
+from ..scribe import scribe
 from ..dataframe import DataFrame
 from .coroutine import Coroutine
 
@@ -24,7 +24,6 @@ from dataclasses import dataclass
 @dataclass
 class SweepMagneticField(Coroutine):
 
-	scribe: Scribe
 	dataframe: DataFrame
 	lockins: list[SR_830|SR_860]
 
@@ -74,7 +73,6 @@ class SweepMagneticField(Coroutine):
 
 		data = await self.execute_another_coroutine(
 			SweepMagneticField(
-				scribe=self.scribe,
 				magnet_psu=self.magnet_psu,
 				setpoint=self.field,
 				ramp_rate=self.field_ramp_rate,
