@@ -102,6 +102,11 @@ class Gizmotron(SoftInstrument):
 		self._setpoint_time = time.time()
 
 
+	@command
+	def errorful_command(self) -> None:
+		raise Exception("This is an error message.")
+
+
 	@query
 	def get_setpoint(self) -> float:
 		return self._setpoint
@@ -163,3 +168,9 @@ class Gizmotron(SoftInstrument):
 				self.get_various_types()[2],
 				self.get_various_types()[3],
 			)
+
+
+		@app.get(f'/{self._uid}/'+'error_command/set/', tags=[self._uid])
+		def errorful_command() -> int:
+			self.errorful_command()
+			return 0

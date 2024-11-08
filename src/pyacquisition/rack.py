@@ -178,6 +178,6 @@ class Rack(Broadcaster):
 				dt = time.time() - t0
 				await asyncio.sleep(max(self._period - dt, 0))
 			except Exception as e:
-				print(e)
+				logger.error('Exception raised performing measurement')
 
 
