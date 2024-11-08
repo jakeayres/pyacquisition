@@ -1,3 +1,4 @@
+from ..logger import logger
 from ..instruments import Lakeshore_340, Lakeshore_350
 from ..instruments.lakeshore.lakeshore_340 import InputChannel as IC340
 from ..instruments.lakeshore.lakeshore_350 import InputChannel as IC350
@@ -47,7 +48,7 @@ class StabilizeTemperature(Coroutine):
 	def _acceptable_mean(self, points, log=False):
 		mean = np.mean([point[1] for point in points])
 		if log:
-			self.scribe.log(f"Mean: {mean}", stem='Stab. Temperature')
+			logger.info(f"Mean: {mean}")
 		return True if np.isclose(mean, self.setpoint, atol=self.mean_tolerance) else False
 
 
@@ -61,7 +62,7 @@ class StabilizeTemperature(Coroutine):
 				[point[1] for point in points],
 				)
 			if log:
-				self.scribe.log(f"Drift: {popt[1]:.4f}", stem='Stab. Temperature')
+				logger.info(f"Drift: {popt[1]:.4f}")
 
 			if (abs(popt[1]) <= self.maximum_drift) and (abs(popt[2]) <= self.maximum_drift/10):
 				return True
@@ -73,7 +74,7 @@ class StabilizeTemperature(Coroutine):
 	async def run(self):
 
 		# Start
-		self.scribe.log("Started", stem="Stab. Temperature")
+		logger.info("Started temperature stabilization")
 		await asyncio.sleep(self.wait_time)
 		yield ''
 
@@ -92,7 +93,7 @@ class StabilizeTemperature(Coroutine):
 		yield ''
 
 		# Acquire data to compute mean and drift
-		self.scribe.log(f"Waiting for {self.stability_time}s of data", stem="Stab. Temperature")
+		logger.info(f"Waiting for {self.stability_time}s of data")
 		t0 = time.time()
 		points = []
 		while time.time() - t0 < self.stability_time:
@@ -104,7 +105,7 @@ class StabilizeTemperature(Coroutine):
 			yield ''
 
 		# Check mean and drift
-		self.scribe.log(f"Checking stability. Mean:{self.mean_tolerance}. Drift{self.maximum_drift}", stem="Stab. Temperature")
+		logger.info(f"Checking stability. Mean:{self.mean_tolerance}. Drift{self.maximum_drift}")
 		mean_ok, drift_ok = False, False
 		i = 1
 		while False in [mean_ok, drift_ok]:
@@ -124,7 +125,7 @@ class StabilizeTemperature(Coroutine):
 				mean_ok = self._acceptable_mean(points, log=_log)
 				drift_ok = self._acceptable_drift(points, log=_log)
 			except Exception as e:
-				scribe.log('mean and drift not calculated', level='error', stem='Stab. Temperature')
+				logger.error('mean and drift not calculated')
 				print(e)
 				mean_ok, drift_ok = False, False
 
@@ -132,7 +133,7 @@ class StabilizeTemperature(Coroutine):
 			yield ''
 
 		# Finish
-		self.scribe.log("Finished", stem="Stab. Temperature")
+		logger.info("Temperature stabilization finished")
 
 
 

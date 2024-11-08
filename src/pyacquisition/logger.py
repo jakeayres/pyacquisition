@@ -15,22 +15,34 @@ class Entry(BaseModel):
 
 
 class Logger(Broadcaster):
-	""" A class for handling the broadcasting of logs around the application.
+	""" A SINGLETON class for handling the broadcasting of logs around the application.
 
 	This includes:
 		1. broadcasting logs to the scribe for writing to file.
 		2. broadcasting logs to the web api for retreival by the UI
 	"""
 
+	_instance = None
+	_initialized = False
+
 	LEVEL_CHAR = {
 		'info': ('>  ', 'bold green'),
+		'debug': ('>  ', 'bold cyan'),
 		'warning': ('!  ', 'bold magenta'),
 		'error': ('!! ', 'bold red'),
 	}
 
 	def __init__(self):
-		super().__init__()
-		self._console = Console()
+		if not self._initialized:
+			super().__init__()
+			self._console = Console()
+			self._initialized = True
+
+
+	def __new__(cls, *args, **kwargs):
+		if not cls._instance:
+			cls._instance = super(Logger, cls).__new__(cls)
+		return cls._instance
 
 
 	@property
@@ -66,6 +78,10 @@ class Logger(Broadcaster):
 		self.log(message, level='info')
 
 
+	def debug(self, message):
+		self.log(message, level='debug')
+
+
 	def warning(self, message):
 		self.log(message, level='warning')
 
@@ -89,17 +105,18 @@ class Logger(Broadcaster):
 	def register_endpoints(self, app):
 
 
-		@app.get('/scribe/make_a_log/{entry}', tags=['Scribe'])
-		def make_a_log(entry: str) -> int:
+		@app.get('/logger/log/{entry}', tags=['Scribe'])
+		def log(entry: str) -> int:
 			"""Log some text
 			
 			Args:
-			    entry (str): Message to log
+				entry (str): Message to log
 			
 			Returns:
-			    int: Description
+				int: Description
 			"""
 			self.info(entry)
 			return 0
 
-		
+
+logger = Logger()

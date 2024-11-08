@@ -1,3 +1,4 @@
+from .logger import logger
 from .consumer import Consumer
 import asyncio, os, datetime
 import pandas as pd
@@ -14,11 +15,11 @@ class Scribe(Consumer):
 	to stdout.
 	"""
 
-	LEVEL_CHAR = {
-		'info': ('>  ', 'bold green'),
-		'warning': ('#  ', 'bold magenta'),
-		'error': ('@! ', 'bold red'),
-	}
+	# LEVEL_CHAR = {
+	# 	'info': ('>  ', 'bold green'),
+	# 	'warning': ('#  ', 'bold magenta'),
+	# 	'error': ('@! ', 'bold red'),
+	# }
 
 
 	def __init__(self, root='./'):
@@ -203,22 +204,22 @@ class Scribe(Consumer):
 			json.dump(data, file, indent=4, sort_keys=True)
 
 
-	def log(self, entry, stem='', level='info'):
-		if not os.path.exists(self.current_log_path):
-			mode = 'w'
-		else:
-			mode = 'a'
-		with open(self.current_log_path, mode) as file:
-			file.write(f'{self._formatted_date} {self._formatted_time} : {entry}\n')
+	# def log(self, entry, stem='', level='info'):
+	# 	if not os.path.exists(self.current_log_path):
+	# 		mode = 'w'
+	# 	else:
+	# 		mode = 'a'
+	# 	with open(self.current_log_path, mode) as file:
+	# 		file.write(f'{self._formatted_date} {self._formatted_time} : {entry}\n')
 
-			text = Text.assemble(
-				(f" {self._formatted_date} ", "blue"),
-				(f"{self._formatted_time}  ", "bold blue"),
-				self.LEVEL_CHAR[level],
-				(f"{stem.ljust(20)} ", "bold white"),
-				(f"{entry}", "dim white")
-			)
-			self._console.print(text)
+	# 		text = Text.assemble(
+	# 			(f" {self._formatted_date} ", "blue"),
+	# 			(f"{self._formatted_time}  ", "bold blue"),
+	# 			self.LEVEL_CHAR[level],
+	# 			(f"{stem.ljust(20)} ", "bold white"),
+	# 			(f"{entry}", "dim white")
+	# 		)
+	# 		self._console.print(text)
 
 
 	def _log_new_file(self):
@@ -231,7 +232,7 @@ class Scribe(Consumer):
 			mode = 'a'
 		with open(self.current_filelog_path, mode) as file:
 			file.write(f'{self._formatted_date} {self._formatted_time} : {self.current_data_file}\n')
-			self.log(f'{self.current_data_file}', stem='New File')
+			logger.info(f'New file: {self.current_data_file}')
 
 
 	@property
@@ -267,19 +268,6 @@ class Scribe(Consumer):
 			    int: Description
 			"""
 			self.increment_file(label, new_chapter=next_chapter)
-			return 0
-
-		@app.get('/scribe/log/{entry}', tags=['Scribe'])
-		def log(entry: str) -> int:
-			"""Log some text
-			
-			Args:
-			    entry (str): Message to log
-			
-			Returns:
-			    int: Description
-			"""
-			self.log(entry, stem='User Log')
 			return 0
 
 

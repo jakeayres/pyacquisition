@@ -36,10 +36,10 @@ class SweepMagneticField(Coroutine):
 		try:
 			system_status = self.magnet_psu.get_system_status()
 			await asyncio.sleep(self.wait_time)
-			self.scribe.log(f'Checking magnet system status: {system_status.name}', stem='SweepMagneticField')
+			logger.info(f'Checking magnet system status: {system_status.name}')
 			await asyncio.sleep(self.wait_time)
 		except Exception as e:
-			self.scribe.log('Magnet system status was not retrieved', level='error', stem='SweepMagneticField')
+			logger.error('Magnet system status was not retrieved')
 			print(e)
 			raise e
 
@@ -53,10 +53,10 @@ class SweepMagneticField(Coroutine):
 		try:
 			activity_status = self.magnet_psu.get_activity_status()
 			await asyncio.sleep(self.wait_time)
-			self.scribe.log(f'Checking magnet activity status: {activity_status.name}', stem='SweepMagneticField')
+			logger.info(f'Checking magnet activity status: {activity_status.name}')
 			await asyncio.sleep(self.wait_time)
 		except Exception as e:
-			self.scribe.log('Magnet activity status was not retrieved', level='error', stem='SweepMagneticField')
+			logger.error('Magnet activity status was not retrieved')
 			print(e)
 			raise e
 
@@ -69,10 +69,10 @@ class SweepMagneticField(Coroutine):
 		try:
 			activity_status = self.magnet_psu.get_activity_status()
 			await asyncio.sleep(self.wait_time)
-			self.scribe.log(f'Checking magnet activity status: {activity_status.name}', stem='SweepMagneticField')
+			logger.info(f'Checking magnet activity status: {activity_status.name}')
 			await asyncio.sleep(self.wait_time)
 		except Exception as e:
-			self.scribe.log('Magnet activity status was not retrieved', level='error', stem='SweepMagneticField')
+			logger.error('Magnet activity status was not retrieved')
 			print(e)
 			raise e
 
@@ -85,10 +85,10 @@ class SweepMagneticField(Coroutine):
 		try:
 			activity_status = self.magnet_psu.get_activity_status()
 			await asyncio.sleep(self.wait_time)
-			self.scribe.log(f'Checking magnet activity status: {activity_status.name}', stem='SweepMagneticField')
+			logger.info(f'Checking magnet activity status: {activity_status.name}')
 			await asyncio.sleep(self.wait_time)
 		except Exception as e:
-			self.scribe.log('Magnet activity status was not retrieved', level='error', stem='SweepMagneticField')
+			logger.error('Magnet activity status was not retrieved')
 			print(e)
 			raise e
 
@@ -104,16 +104,16 @@ class SweepMagneticField(Coroutine):
 			ans = self.magnet_psu.set_field_sweep_rate(self.ramp_rate)
 			await asyncio.sleep(self.wait_time)
 		except Exception as e:
-			self.scribe.log('Error setting ramp rate', level='error', stem='SweepMagneticField')
+			logger.error('Error setting ramp rate')
 			raise e
 
 		# Check ramp rate is set to desired value
 		try:
 			rate = self.magnet_psu.get_field_sweep_rate()
 			await asyncio.sleep(self.wait_time)
-			self.scribe.log(f'Ramp rate set to {ramp_rate} T/min OK', stem='SweepMagneticField')
+			logger.info(f'Ramp rate set to {ramp_rate} T/min OK')
 		except Exception as e:
-			self.scribe.log('Error getting ramp rate', level='error', stem='SweepMagneticField')
+			logger.error('Error getting ramp rate')
 			raise e
 
 		if rate != self.ramp_rate:
@@ -126,15 +126,15 @@ class SweepMagneticField(Coroutine):
 			ans = self.magnet_psu.set_target_field(setpoint)
 			await asyncio.sleep(self.wait_time)
 		except Exception as e:
-			self.scribe.log('Error setting target field', level='error', stem='SweepMagneticField')
+			logger.error('Error setting target field')
 			print(e)
 
 		try:
 			retrieved_setpoint = self.magnet_psu.get_setpoint_field()
 			await asyncio.sleep(self.wait_time)
-			self.scribe.log(f'Setpoint set to {setpoint} T', stem='SweepMagneticField')
+			logger.info(f'Setpoint set to {setpoint} T')
 		except Exception as e:
-			self.scribe.log('Error setting field setpoint', level='error', stem='SweepMagneticField')
+			logger.error('Error setting field setpoint')
 			raise e
 
 		if retrieved_setpoint != setpoint:
@@ -144,11 +144,11 @@ class SweepMagneticField(Coroutine):
 	async def switch_heater_on(self):
 
 		try:
-			self.scribe.log('Switching switch heater on', stem='SweepMagneticField')
+			logger.info('Switching switch heater on')
 			self.magnet_psu.heater_on()
 			await asyncio.sleep(15)
 		except Exception as e:
-			self.scribe.log('magnet_psu.heater_on() failed', level='error', stem='SweepMagneticField')
+			logger.error('magnet_psu.heater_on() failed')
 			print(e)
 			raise e
 
@@ -157,9 +157,9 @@ class SweepMagneticField(Coroutine):
 		try:
 			heater_status = self.magnet_psu.get_switch_heater_status()
 			await asyncio.sleep(self.wait_time)
-			self.scribe.log('Switch heater switched on OK.', stem='SweepMagneticField')
+			logger.info('Switch heater switched on OK.')
 		except Exception as e:
-			self.scribe.log('Switch heater status not retrieved', level='error', stem='SweepMagneticField')
+			logger.error('Switch heater status not retrieved')
 			print(e)
 			raise e
 
@@ -167,20 +167,20 @@ class SweepMagneticField(Coroutine):
 	async def switch_heater_off(self):
 
 		try:
-			self.scribe.log('Switching switch heater off', stem='SweepMagneticField')
+			logger.info('Switching switch heater off')
 			self.magnet_psu.heater_off()
 			await asyncio.sleep(15)
 		except Exception as e:
-			self.scribe.log('magnet_psu.heater_off() failed', level='error', stem='SweepMagneticField')
+			logger.error('magnet_psu.heater_off() failed')
 			print(e)
 			raise e
 
 		try:
 			heater_status = self.magnet_psu.get_switch_heater_status()
 			await asyncio.sleep(self.wait_time)
-			self.scribe.log('Switch heater switch off OK.', stem='SweepMagneticField')
+			logger.info('Switch heater switch off OK.')
 		except Exception as e:
-			self.scribe.log('Switch heater status not retrieved', level='error', stem='SweepMagneticField')
+			logger.error('Switch heater status not retrieved')
 			print(e)
 			raise e
 
@@ -194,12 +194,12 @@ class SweepMagneticField(Coroutine):
 			await asyncio.sleep(self.wait_time)
 			await self.check_is_to_setpoint()
 			await asyncio.sleep(self.wait_time)
-			self.scribe.log(f'Sweeping field to {setpoint}', stem='SweepMagneticField')
+			logger.info(f'Sweeping field to {setpoint}')
 			while self.magnet_psu.get_sweep_status() != ModeStatusN.REST:
 				await asyncio.sleep(self.wait_time)
-			self.scribe.log(f'Reached setpoint field of {setpoint} T', stem='SweepMagneticField')
+			logger.info(f'Reached setpoint field of {setpoint} T')
 		except Exception as e:
-			self.scribe.log(f'Error sweeping up to setpoint field', level='error', stem='SweepMagneticField')
+			logger.error(f'Error sweeping up to setpoint field')
 			raise e
 
 
@@ -210,12 +210,12 @@ class SweepMagneticField(Coroutine):
 			await asyncio.sleep(self.wait_time)
 			await self.check_is_to_zero()
 			await asyncio.sleep(self.wait_time)
-			self.scribe.log(f'Sweeping field to 0 T', stem='SweepMagneticField')
+			logger.info(f'Sweeping field to 0 T')
 			while self.magnet_psu.get_sweep_status() != ModeStatusN.REST:
 				await asyncio.sleep(self.wait_time)
-			self.scribe.log(f'Reached zero field', stem='SweepMagneticField')
+			logger.info(f'Reached zero field')
 		except Exception as e:
-			self.scribe.log(f'Error sweeping down to zero field', level='error', stem='SweepMagneticField')
+			logger.error(f'Error sweeping down to zero field')
 			raise e
 
 
@@ -263,7 +263,7 @@ class SweepMagneticField(Coroutine):
 			
 
 		except Exception as e:
-			self.scribe.log('Error during field sweep', level='error', stem='SweepMagneticField')
+			logger.error('Error during field sweep')
 			print(e)
 			raise e
 

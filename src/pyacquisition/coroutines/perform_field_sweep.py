@@ -7,6 +7,7 @@ from ..instruments import SR_830, SR_860
 # from ..instruments.lakeshore.lakeshore_340 import OutputChannel as OC340
 # from ..instruments.lakeshore.lakeshore_350 import OutputChannel as OC350
 
+from ..logger import logger
 from ..scribe import Scribe
 from ..dataframe import DataFrame
 from .coroutine import Coroutine

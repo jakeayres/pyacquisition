@@ -1,4 +1,5 @@
 from ..scribe import Scribe
+from ..logger import logger
 from .coroutine import Coroutine
 
 import asyncio
@@ -19,7 +20,6 @@ class WaitDuration(BaseModel):
 @dataclass
 class WaitFor(Coroutine):
 
-	scribe: Scribe
 	hours: int = 0
 	minutes: int = 0
 	seconds: int = 0
@@ -34,7 +34,7 @@ class WaitFor(Coroutine):
 
 
 	async def run(self):
-		self.scribe.log(self.string(), stem='WaitFor')
+		logger.info(self.string())
 		await asyncio.sleep(self._seconds())
 		yield ''
 
@@ -45,14 +45,13 @@ class WaitFor(Coroutine):
 		@experiment.api.get('/experiment/wait_for/', tags=['Routines'])
 		async def wait_for(duration: WaitDuration = Depends()) -> int:
 			""" Wait for given time """
-			await experiment.add_task(cls(experiment.scribe, **duration.dict()))
+			await experiment.add_task(cls(**duration.dict()))
 			return 0
 
 
 @dataclass
 class WaitUntil(Coroutine):
 
-	scribe: Scribe
 	date_time: datetime
 
 
@@ -61,7 +60,7 @@ class WaitUntil(Coroutine):
 
 
 	async def run(self):
-		self.scribe.log(self.string(), stem='WaitUntil')
+		logger.info(self.string())
 		while datetime.now() < self.date_time:
 			await asyncio.sleep(1)
 		yield ''

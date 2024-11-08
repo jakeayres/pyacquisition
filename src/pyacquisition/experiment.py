@@ -2,7 +2,7 @@ import asyncio
 from datetime import datetime
 from functools import partial
 
-from .logger import Logger
+from .logger import logger
 from .rack import Rack
 from .scribe import Scribe
 from .consumer import Consumer
@@ -16,13 +16,13 @@ from .ui.ui import UI
 class Experiment:
 
 	def __init__(self, root):
-		self._logger = Logger()
+		#self._logger = logger()
 		self._rack = Rack()
 		self._scribe = Scribe(root=root)
 		self._scribe.subscribe_to(self.rack)
 		self._api = API(allowed_cors_origins=['http://localhost:3000'])
 		self._api.subscribe_to(self.rack)
-		self._api.subscribe_to(self.logger)
+		self._api.subscribe_to(logger)
 		self._ui = UI()
 
 		self.running = True
@@ -153,7 +153,7 @@ class Experiment:
 		:type       task:  { type_description }
 		"""
 		await self.task_queue.put(task)
-		self.scribe.log(f'{task.string()}', stem='Task Added')
+		logger.info(f'Task added: {task.string()}')
 
 
 	async def get_task(self):
@@ -164,7 +164,7 @@ class Experiment:
 		:rtype:     { return_type_description }
 		"""
 		task = await self.task_queue.get()
-		self.scribe.log(f'{task.string()}', stem='Task Retrieved')
+		logger.info(f'Task retrieved: {task.string()}')
 		return task
 
 
@@ -176,7 +176,7 @@ class Experiment:
 		:type       index:  { type_description }
 		"""
 		task = self.task_queue.remove(index)
-		self.scribe.log(f'{task.string()} ({index})', stem='Task Removed')
+		logger.info(f'Task removed: {task.string()}')
 
 
 	def insert_task(self, task, index):
@@ -189,7 +189,7 @@ class Experiment:
 		:type       index:  { type_description }
 		"""
 		task = self.task_queue.insert(task, index)
-		self.scribe.log(f'{task.string()} ({index})', stem="Task Inserted")
+		logger.info(f'Task inserted: {task.string()} to {index}')
 
 
 	def list_tasks(self):
@@ -207,7 +207,7 @@ class Experiment:
 		Clear all tasks from the queue
 		"""
 		self.task_queue.clear()
-		self.scribe.log(f'All tasks cleared', stem='Tasks Cleared')
+		logger.info(f'All tasks cleared')
 
 
 	def pause_task(self):
@@ -215,7 +215,7 @@ class Experiment:
 		Pause the current task
 		"""
 		self.current_task.pause()
-		self.scribe.log('Paused', stem='Experiment')
+		logger.info(f'Experiment paused')
 
 
 	def resume_task(self):
@@ -223,7 +223,7 @@ class Experiment:
 		Resume the current task
 		"""
 		self.current_task.resume()
-		self.scribe.log('Resumed', stem='Experiment')
+		logger.info(f'Experiment resumed')
 
 
 	async def execute_task(self, task):
@@ -236,12 +236,13 @@ class Experiment:
 		try:
 			await task.execute()
 		except Exception as e:
-			self.scribe.log(e, level='error', stem='Task')
+			logger.error(f'Error in task: {task.string()}')
+			logger.error(f'Exception raised executing task')
 			print(f'Exception raised executing task')
 			print(e)
 			self.pause_task()
 		finally:
-			self.scribe.log(f'{task.string()}', stem='Task Finished')
+			logger.info(f'Task finished: {task.string()}')
 
 
 	def abort_task(self):
@@ -250,7 +251,7 @@ class Experiment:
 		"""
 
 		self.current_task.abort()
-		self.scribe.log('Aborted', stem='Aborted')
+		logger.info(f'Current task aborted')
 
 
 	async def execute(self):
@@ -331,7 +332,7 @@ class Experiment:
 		WaitFor.register_endpoints(self)
 
 
-		self.logger.register_endpoints(self.api)
+		logger.register_endpoints(self.api)
 		self.rack.register_endpoints(self.api)
 		self.scribe.register_endpoints(self.api)
 
@@ -363,7 +364,7 @@ class Experiment:
 		main_task = asyncio.create_task(self.execute())
 		fast_api_server_task = self._api.coroutine()
 
-		self.scribe.log('Started', stem='Experiment')
+		logger.info('Experiment started')
 
 		ui_process = self._ui.run_in_new_process()
 		
@@ -381,5 +382,4 @@ class Experiment:
 			task.cancel()
 		ui_process.join()
 
-
-		self.scribe.log('Ended', stem='Experiment')
+		logger.info('Experiment ended')

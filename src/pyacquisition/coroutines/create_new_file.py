@@ -1,3 +1,4 @@
+from ..logger import logger
 from ..scribe import Scribe
 from .coroutine import Coroutine
 
@@ -28,7 +29,7 @@ class CreateNewFile(Coroutine):
 			self.scribe.next_file(self.filename, new_chapter=self.new_chapter)
 
 		except Exception as e:
-			self.scribe.log('Error creating new file', level='error', stem='SweepMagneticField')
+			logger.error('Error creating new file')
 			print(e)
 			raise e
 

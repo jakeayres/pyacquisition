@@ -1,3 +1,4 @@
+from .logger import logger
 from .broadcaster import Broadcaster
 import asyncio, os, json, time
 from .instruments import instruments
@@ -38,6 +39,8 @@ class Measurement:
 			return self._last_result
 			
 		except Exception as e:
+			logger.error(f'Function call failed: {self._name}')
+			logger.error(f'Returning last result:\t {self._last_result}')
 			print(f'Failed to run measurement func:\t{self._name}')
 			print(f'Returning last result:\t {self._last_result}')
 			print(e)

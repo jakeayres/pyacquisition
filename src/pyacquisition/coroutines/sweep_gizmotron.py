@@ -1,4 +1,5 @@
 from ..instruments import Gizmotron
+from ..logger import logger
 from ..scribe import Scribe
 from .coroutine import Coroutine
 

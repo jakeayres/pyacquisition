@@ -1,3 +1,4 @@
+from ..logger import logger
 from ..instruments import Lakeshore_340, Lakeshore_350
 from ..instruments.lakeshore.lakeshore_340 import OutputChannel as OC340
 from ..instruments.lakeshore.lakeshore_350 import OutputChannel as OC350
@@ -40,12 +41,12 @@ class RampTemperature(Coroutine):
 		yield ''
 
 		self.lakeshore.set_ramp(self.output_channel, State.ON, self.ramp_rate)
-		self.scribe.log(f'Ramp Rate set: {self.ramp_rate}', stem='RampTemperature')
+		logger.info(f'Ramp Rate set: {self.ramp_rate}')
 		await asyncio.sleep(self.wait_time)
 		yield ''
 
 		self.lakeshore.set_setpoint(self.output_channel, self.setpoint)
-		self.scribe.log(f'Setpoint set: {self.setpoint}', stem='RampTemperature')
+		logger.info(f'Setpoint set: {self.setpoint}')
 		await asyncio.sleep(self.wait_time)
 
 		while not np.isclose(
@@ -58,7 +59,7 @@ class RampTemperature(Coroutine):
 			await asyncio.sleep(self.wait_time)
 			yield ''
 
-		self.scribe.log('Finished', stem='RampTemperature')
+		logger.info('Temperature ramp finished')
 
 		yield ''
 
