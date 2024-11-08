@@ -15,6 +15,8 @@ from .endpoint_popup import EndpointPopup
 from .live_data_window import LiveDataWindow
 from .live_plot_window import LivePlotWindow
 
+from .components.log_window import LogWindow
+
 
 from .nodes.node import Canvas, Node, NodeInput, NodeOutput
 
@@ -103,13 +105,13 @@ class UI(Broadcaster):
 		window = LivePlotWindow(
 			**user_data, 
 			)
-		window.subscribe_to(self.api_client)
+		window.subscribe_to(self.api_client.data_broadcaster)
 		self._runnables.append(window)
 
 
 	def add_live_plot_from_config(self, config):
 		window = LivePlotWindow.from_config(config)
-		window.subscribe_to(self.api_client)
+		window.subscribe_to(self.api_client.data_broadcaster)
 		self._runnables.append(window)
 
 
@@ -153,7 +155,10 @@ class UI(Broadcaster):
 
 		self.api_client = ApiClient()
 		self.live_data_window = LiveDataWindow()
-		self.live_data_window.subscribe_to(self.api_client)
+		self.live_data_window.subscribe_to(self.api_client.data_broadcaster)
+
+		self.log_window = LogWindow()
+		self.log_window.subscribe_to(self.api_client.log_broadcaster)
 
 
 		data_keys = await self.api_client.get('http://localhost:8000/rack/measurements')
@@ -253,9 +258,9 @@ class UI(Broadcaster):
 			label='task_queue_window',
 			tag='task_queue_window',
 			use_internal_label=False,
-			pos=(10, 190),
-			width=300,
-			height=150,
+			pos=(10, 290),
+			width=400,
+			height=250,
 			no_move=True,
 			no_resize=True,
 			no_collapse=True,
@@ -306,6 +311,7 @@ class UI(Broadcaster):
 				asyncio.create_task(self._run()),
 				asyncio.create_task(self.api_client.broadcast_websocket('ws://localhost:8000/stream')),
 				asyncio.create_task(self.live_data_window.run()),
+				asyncio.create_task(self.log_window.run()),
 				asyncio.create_task(self.api_client.poll_endpoint('http://localhost:8000/experiment/current_task', callback=lambda x: gui.set_value(self._current_task_uuid, json.dumps(x, indent=4)))),
 				asyncio.create_task(self.api_client.poll_endpoint('http://localhost:8000/experiment/queued_tasks', callback=lambda x: gui.set_value(self._task_queue_uuid, json.dumps(x, indent=4)))),
 			],

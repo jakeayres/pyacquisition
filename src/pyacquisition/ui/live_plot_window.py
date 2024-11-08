@@ -227,7 +227,8 @@ class LivePlotWindow(Consumer):
 	def update_line(self, series_uuid, x_key, y_key):
 		gui.set_value(
 			series_uuid, 
-			[self._data[self._x_key].tolist(), self._data[y_key].tolist()],
+			#[self._data[self._x_key].tolist(), self._data[y_key].tolist()],
+			[self._data[self._x_key], self._data[y_key]],
 			)
 
 
@@ -258,9 +259,12 @@ class LivePlotWindow(Consumer):
 		try:
 			data = await self._queue.get()
 			if self._data is None:
-				self._data = pd.DataFrame(data=data, index=[0])
+				#self._data = pd.DataFrame(data=data, index=[0])
+				self._data = {k: [v] for k, v in data.items()}
 			else:
-				self._data = pd.concat([self._data, pd.DataFrame(data=data, index=[0])])
+				#self._data = pd.concat([self._data, pd.DataFrame(data=data, index=[0])])
+				for k, v in data.items():
+					self._data[k].append(v)
 				for y_key in self._y_keys:
 					self.update_line(self.series_uuid(y_key), self._x_key, y_key)
 		except Exception as e:

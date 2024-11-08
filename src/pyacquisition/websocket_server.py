@@ -12,7 +12,6 @@ class WebSocketServer(Consumer):
 	from it's Consumer (inhereted class) queue to it.
 	"""
 
-
 	def __init__(self, host, port):
 		super().__init__()
 		self.host = host
@@ -70,7 +69,7 @@ class WebSocketServer(Consumer):
 		"""
 		while True:
 			# Generate real-time data here
-			x = json.dumps(await self._queue.get())
+			x = json.dumps(await self.get_from_queue())
 			await self.send(x)
 
 

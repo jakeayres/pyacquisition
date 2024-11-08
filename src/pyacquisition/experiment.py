@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 from functools import partial
 
+from .logger import Logger
 from .rack import Rack
 from .scribe import Scribe
 from .consumer import Consumer
@@ -15,11 +16,13 @@ from .ui.ui import UI
 class Experiment:
 
 	def __init__(self, root):
+		self._logger = Logger()
 		self._rack = Rack()
 		self._scribe = Scribe(root=root)
 		self._scribe.subscribe_to(self.rack)
 		self._api = API(allowed_cors_origins=['http://localhost:3000'])
 		self._api.subscribe_to(self.rack)
+		self._api.subscribe_to(self.logger)
 		self._ui = UI()
 
 		self.running = True
@@ -29,6 +32,17 @@ class Experiment:
 
 		self.setup()
 		self.register_endpoints()
+
+
+	@property
+	def logger(self):
+		"""
+		Logger instance handling instruments and measurements
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
+		return self._logger
 
 
 	@property
@@ -118,16 +132,16 @@ class Experiment:
 		return partial(func, **kwargs)
 
 
-	def create_dataframe(self):
-		"""
-		Instantiate a dataframe (consumer) object that is subscribed to the rack.
+	# def create_dataframe(self):
+	# 	"""
+	# 	Instantiate a dataframe (consumer) object that is subscribed to the rack.
 		
-		:returns:   the dataframe
-		:rtype:     DataFrame
-		"""
-		dataframe = DataFrame(self.rack.measurement_keys)
-		dataframe.subscribe_to(self.rack)
-		return dataframe
+	# 	:returns:   the dataframe
+	# 	:rtype:     DataFrame
+	# 	"""
+	# 	dataframe = DataFrame(self.rack.measurement_keys)
+	# 	dataframe.subscribe_to(self.rack)
+	# 	return dataframe
 
 
 
@@ -317,6 +331,7 @@ class Experiment:
 		WaitFor.register_endpoints(self)
 
 
+		self.logger.register_endpoints(self.api)
 		self.rack.register_endpoints(self.api)
 		self.scribe.register_endpoints(self.api)
 

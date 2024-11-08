@@ -25,3 +25,10 @@ class Consumer:
 			broadcaster (Broadcaster): The broadcaster to unsubscribe from.
 		"""
 		broadcaster.unsubscribe(self)
+
+
+	async def get_from_queue(self):
+		"""Get result from queue
+
+		"""
+		return await self._queue.get()

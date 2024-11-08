@@ -48,7 +48,7 @@ class API(Consumer):
 				allow_headers=["*"],
 			)
 
-		self.add_websocket_endpoint('/stream', self._queue.get)
+		self.add_websocket_endpoint('/stream', self.get_from_queue)
 
 
 

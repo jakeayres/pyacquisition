@@ -1,5 +1,6 @@
 from .broadcaster import Broadcaster
 import asyncio, os, json, time
+from .instruments import instruments
 
 
 
@@ -112,7 +113,7 @@ class Rack(Broadcaster):
 		"""
 		result = {k: v.run() for k, v in self._measurements.items()}
 		self._last_datapoint = result
-		self.emit(self._last_datapoint)
+		self.emit({'message_type': 'data', 'data': self._last_datapoint})
 
 
 	def add_instrument(self, key, instrument_class, visa_resource, api=None):
@@ -137,7 +138,6 @@ class Rack(Broadcaster):
 		if api != None:
 			inst.register_endpoints(app)
 		return inst
-
 
 
 	def register_endpoints(self, app):
