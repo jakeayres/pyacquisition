@@ -1,31 +1,35 @@
-[tool.poetry]
+[project]
 name = "pyacquisition"
 version = "0.1.0"
 description = "Python driven data acquisition"
-authors = ["Jake Ayres <jake_ayres@hotmail.co.uk>"]
+authors = [
+    {name = "Jake Ayres", email = "jake_ayres@hotmail.co.uk"},
+]
+requires-python = "<4.0,>=3.12"
+dependencies = [
+    "pyserial<4.0,>=3.5",
+    "pyvisa<2.0.0,>=1.13.0",
+    "pyvisa-py<1.0.0,>=0.7.0",
+    "websockets<12.0.0,>=11.0.3",
+    "fastapi<1.0.0,>=0.101.1",
+    "uvicorn<1.0.0,>=0.23.2",
+    "scipy<2.0.0,>=1.14.1",
+    "pandas<3.0.0,>=2.0.3",
+    "rich<14.0.0,>=13.5.2",
+    "dearpygui<2.0.0,>=1.11.1",
+    "aiohttp==3.9.3",
+    "requests>=2.32.3",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-pyserial = "^3.5"
-pyvisa = "^1.13.0"
-pyvisa-py = "^0.7.0"
-websockets = "^11.0.3"
-fastapi = "^0.101.1"
-uvicorn = "^0.23.2"
-scipy = "^1.11.1"
-pandas = "^2.0.3"
-rich = "^13.5.2"
-dearpygui = "^1.11.1"
-aiohttp = "3.9.3"
+[dependency-groups]
+dev = [
+    "pytest<7.0.0,>=6.2.2",
+    "pytest-mock<4.0.0,>=3.6.1",
+    "pytest-asyncio<1.0.0,>=0.15.1",
+]
 
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.2"
-pytest-mock = "^3.6.1"
-pytest-asyncio = "^0.15.1"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.uv]
+default-groups = []
 
 [tool.pytest.ini_options]
 markers = [
