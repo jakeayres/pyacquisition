@@ -275,13 +275,6 @@ class UI(Broadcaster):
 			# Find a nice pattern for registering the callback and updating etc
 
 
-		window = gui.add_window(label='nodestuff', width=500, height=500, pos=(500,500), tag='test_window')
-		
-		canvas = Canvas.add_to_window(window, 'test_canvas')
-		node = Node.add_to_canvas(canvas, 'new_node')
-
-
-
 
 
 	def run_in_new_process(self):
