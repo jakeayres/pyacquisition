@@ -42,11 +42,20 @@ class EndpointPopup:
 					if isinstance(param_type, dict):
 						self._add_enum_input(param, param_type)
 					elif param_type == 'string':
-						self._add_text_input(param)
+						self._add_text_input(
+							param,
+							default=param['schema'].get('default', ''),
+							)
 					elif param_type == 'boolean':
-						self._add_boolean_input(param)
+						self._add_boolean_input(
+							param,
+							default=param['schema'].get('default', False),
+							)
 					else:
-						self._add_text_input(param)
+						self._add_text_input(
+							param,
+							default=param['schema'].get('default', ''),
+							)
 
 			gui.add_button(label='Execute', callback=self.request, width=150)
 
@@ -87,14 +96,17 @@ class EndpointPopup:
 
 	def _make_path_parameter_dictionary(self, schema, path):
 		if schema.has_parameters(path):
-			return {param['name']:'' for param in schema.endpoint_path_parameters(path)}
+			print('PATH')
+			return {param['name']: '' for param in schema.endpoint_path_parameters(path)}
 		else:
 			return {}
 
 
 	def _make_query_parameter_dictionary(self, schema, path):
 		if schema.has_parameters(path):
-			return {param['name']:'' for param in schema.endpoint_query_parameters(path)}
+			print('QUERY')
+			print(schema.endpoint_query_parameters(path))
+			return {param['name']: param['schema'].get('default', '') for param in schema.endpoint_query_parameters(path)}
 		else:
 			return {}
 
@@ -118,7 +130,7 @@ class EndpointPopup:
 		self._query_params[user_data['key']] = gui.get_value(user_data['uuid'])
 
 
-	def _add_text_input(self, param):
+	def _add_text_input(self, param, default=''):
 		_id = self._make_parameter_uuid(param['name'])
 		gui.add_input_text(
 			tag=_id,
@@ -126,10 +138,11 @@ class EndpointPopup:
 			callback=self._get_callback(param), 
 			user_data={'key': param['name'], 'uuid': _id},
 			width=150,
+			default_value=default,
 			)
 
 
-	def _add_boolean_input(self, param):
+	def _add_boolean_input(self, param, default=False):
 		_id = self._make_parameter_uuid(param['name'])
 		gui.add_checkbox(
 			tag=_id,
@@ -137,6 +150,7 @@ class EndpointPopup:
 			callback=self._get_callback(param),
 			user_data={'key': param['name'], 'uuid': _id},
 			indent=130,
+			default_value=default,
 			)
 
 
