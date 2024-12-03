@@ -3,6 +3,10 @@ from .consumer import Consumer
 import asyncio, os, datetime
 import pandas as pd
 
+from dataclasses import dataclass
+from pydantic import BaseModel
+from fastapi import Depends
+
 
 
 class Scribe(Consumer):
@@ -271,7 +275,7 @@ class Scribe(Consumer):
 			"""
 			return self.current_data_file
 
-		@app.get('/scribe/next_file/{label}/{next_chapter}', tags=['Scribe'])
+		@app.get('/scribe/next_file/', tags=['Scribe'])
 		def next_file(
 			label: str, 
 			next_chapter: bool = False,

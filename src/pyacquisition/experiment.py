@@ -363,7 +363,7 @@ class Experiment:
 		The main asyncio method
 		"""
 
-		print('TESTSTESTSE')
+		logger.debug('Entered main async task')
 
 		rack_task = asyncio.create_task(self.rack.run())
 		scribe_task = asyncio.create_task(scribe.run())
@@ -373,6 +373,8 @@ class Experiment:
 		logger.info('Experiment started')
 
 		ui_process = self._ui.run_in_new_process()
+
+		logger.debug('UI started in new process')
 		
 		done, pending = await asyncio.wait(
 			[
@@ -383,6 +385,8 @@ class Experiment:
 			],
 			return_when=asyncio.FIRST_COMPLETED,
 		)
+
+		logger.debug('Ending tasks and joining processes')
 
 		for task in pending:
 			task.cancel()

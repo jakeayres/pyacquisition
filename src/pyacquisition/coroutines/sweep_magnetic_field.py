@@ -4,7 +4,6 @@ from ..instruments.oxford_instruments.mercury_ips import (
 	)
 
 from ..scribe import scribe
-from ..dataframe import DataFrame
 from .coroutine import Coroutine
 
 
@@ -218,6 +217,11 @@ class SweepMagneticField(Coroutine):
 			raise e
 
 
+	def log_magnet_status(self):
+		status = self.magnet_psu.get_activity_status()
+		logger.info(f'Magnet status: {status.name}')
+
+
 
 	async def run(self):
 
@@ -254,15 +258,13 @@ class SweepMagneticField(Coroutine):
 			await self.sweep_to_zero()
 			yield None
 
-			self.process_dataframe()
-			yield None
-
 			# Turn off switch heater
 			await self.switch_heater_off()
 			
 
 		except Exception as e:
 			logger.error('Error during field sweep')
+			self.log_magnet_status()
 			print(e)
 			raise e
 

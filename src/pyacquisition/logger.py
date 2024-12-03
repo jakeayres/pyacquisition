@@ -105,7 +105,7 @@ class Logger(Broadcaster):
 	def register_endpoints(self, app):
 
 
-		@app.get('/logger/log/{entry}', tags=['Scribe'])
+		@app.get('/logger/log/', tags=['Scribe'])
 		def log(entry: str) -> int:
 			"""Log some text
 			

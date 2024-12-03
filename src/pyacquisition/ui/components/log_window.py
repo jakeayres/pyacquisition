@@ -23,7 +23,13 @@ class LogEntry:
 
 			gui.add_text(self.time, color=(154, 208, 194))
 
-			level_color = (255, 0, 0) if self.level == "error" else (255, 255, 255) if self.level == "info" else (255, 255, 255)
+			level_colors = {
+				'error': (255, 0, 0),
+				'info': (255, 255, 255),
+				'debug': (100, 100, 100),
+			}
+
+			level_color = level_colors[self.level]
 			gui.add_text(self.message, color=level_color)
 
 
@@ -60,6 +66,6 @@ class LogWindow(Consumer):
 			data = await self.get_from_queue()
 			#self.vstack.add_string(data['message'])
 
-			# PYDANTIC-IFY THIS import from LOGGER class
+			# PYDANTIC-IFY THIS: import from LOGGER class
 			entry = LogEntry(date=data['date'], time=data['time'], level=data['level'], message=data['message'])
 			entry.display(self._uuid)

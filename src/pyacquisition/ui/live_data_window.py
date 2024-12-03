@@ -28,36 +28,28 @@ class LiveDataWindow(Consumer):
 			)
 
 
-		self.draw(data={})
+		self.draw(data={}, t0=time.time())
 
 
 
-	def draw(self, data):
+	def draw(self, data, t0):
 		for k, v in data.items():
 			with gui.group(horizontal=True, parent=self._uuid):
 				gui.add_text(k.ljust(18), color=(154, 208, 194))
 				gui.add_text(str(v), color=(255, 255, 255))
+
+		with gui.group(horizontal=True, parent=self._uuid):
+			loop_time = time.time() - t0
+			gui.add_text('Loop time'.ljust(18), color=(45, 149, 150))
+			gui.add_text(f'{loop_time:.3f}'.ljust(8), color=(255, 255, 255))
+			gui.add_text(f'seconds', color=(150, 150, 150))
 
 
 	async def run(self):
 		while True:
 			t0 = time.time()
 			data = await self.get_from_queue()
-
 			gui.delete_item(self._uuid, children_only=True)
-			self.draw(data)
-			# gui.clear_item(self._uuid)
-
-			# for k, v in data.items():
-			# 	with gui.group(horizontal=True, parent=self._uuid):
-			# 		gui.add_text(k, color=(45, 149, 150))
-			# 		gui.add_text(v, color=(154, 208, 194))
-
-
-			#gui.set_value('data_string', json.dumps(data, indent=4))
-			#t1 = time.time() - t0
-			#gui.set_value('loop_time', f'Loop time:  {t1:.3f} s')
-
-
+			self.draw(data, t0)
 
 			

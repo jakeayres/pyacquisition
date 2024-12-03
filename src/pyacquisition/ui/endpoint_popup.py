@@ -96,7 +96,6 @@ class EndpointPopup:
 
 	def _make_path_parameter_dictionary(self, schema, path):
 		if schema.has_parameters(path):
-			print('PATH')
 			return {param['name']: '' for param in schema.endpoint_path_parameters(path)}
 		else:
 			return {}
@@ -104,8 +103,6 @@ class EndpointPopup:
 
 	def _make_query_parameter_dictionary(self, schema, path):
 		if schema.has_parameters(path):
-			print('QUERY')
-			print(schema.endpoint_query_parameters(path))
 			return {param['name']: param['schema'].get('default', '') for param in schema.endpoint_query_parameters(path)}
 		else:
 			return {}
