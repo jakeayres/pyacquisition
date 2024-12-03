@@ -1,10 +1,9 @@
-from ..scribe import Scribe
+from ..scribe import scribe
 from ..logger import logger
 from .coroutine import Coroutine
 
 import asyncio
 from datetime import datetime
-from dataclasses import dataclass
 from dataclasses import dataclass
 from pydantic import BaseModel
 from fastapi import Depends

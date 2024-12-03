@@ -259,6 +259,8 @@ class Scribe(Consumer):
 
 
 	def register_endpoints(self, app):
+		""" Register endpoints to the FastAPI app.
+		"""
 
 		@app.get('/scribe/current_filename', tags=['Scribe'])
 		def current_filename() -> str:
@@ -270,15 +272,11 @@ class Scribe(Consumer):
 			return self.current_data_file
 
 		@app.get('/scribe/next_file/{label}/{next_chapter}', tags=['Scribe'])
-		def next_file(label: str, next_chapter: bool = False) -> int:
+		def next_file(
+			label: str, 
+			next_chapter: bool = False,
+			) -> int:
 			"""Create a new file.
-			
-			Args:
-			    label (str): File label
-			    next_chapter (bool, optional): Increment chapter
-			
-			Returns:
-			    int: Description
 			"""
 			self.increment_file(label, new_chapter=next_chapter)
 			return 0

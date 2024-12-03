@@ -332,6 +332,9 @@ class Experiment:
 		from .coroutines import WaitFor
 		WaitFor.register_endpoints(self)
 
+		from .coroutines import CreateNewFile
+		CreateNewFile.register_endpoints(self)
+
 
 		logger.register_endpoints(self.api)
 		self.rack.register_endpoints(self.api)

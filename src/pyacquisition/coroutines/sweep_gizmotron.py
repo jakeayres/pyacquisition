@@ -82,7 +82,7 @@ class SweepGizmotron(Coroutine):
 		async def sweep_gizmotron(
 			max_value: float,
 			wait_time: float,
-			from_cache: bool,
+			from_cache: bool = False,
 			) -> int:
 			""" Ramp lakeshore to setpoint at ramp rate """
 			await experiment.add_task(
