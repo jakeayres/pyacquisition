@@ -162,18 +162,18 @@ class PrologixResource(object):
 	def _write(self, command):
 		try:
 			command = command+self._write_termination
-			print(f'->   {command}')
+			#print(f'->   {command}')
 			self._serial_object.write(command.encode(self._decoder))
 			time.sleep(0.005)
 		except Exception as e:
-			print(f'Failed to send {command}')
-			print(e)
+			#print(f'Failed to send {command}')
+			#print(e)
 			raise(e)
 
 
 	def _read(self):
 		response = self._serial_object.readline()
-		print(f'<-   {response}')
+		#print(f'<-   {response}')
 		return response.decode(self._decoder)
 
 
@@ -185,7 +185,7 @@ class PrologixResource(object):
 		:rtype:     { return_type_description }
 		"""
 		response = self._serial_object.readline()
-		print(f'<-   {response}')
+		#print(f'<-   {response}')
 		return response.decode(self._decoder)
 
 

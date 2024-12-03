@@ -360,6 +360,8 @@ class Experiment:
 		The main asyncio method
 		"""
 
+		print('TESTSTESTSE')
+
 		rack_task = asyncio.create_task(self.rack.run())
 		scribe_task = asyncio.create_task(scribe.run())
 		main_task = asyncio.create_task(self.execute())
