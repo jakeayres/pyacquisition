@@ -44,6 +44,7 @@ class Measurement:
 			print(f'Failed to run measurement func:\t{self._name}')
 			print(f'Returning last result:\t {self._last_result}')
 			print(e)
+			self._call_counter = self._call_every
 			return self._last_result
 
 

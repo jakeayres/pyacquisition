@@ -4,6 +4,7 @@ from ..instruments.oxford_instruments.mercury_ips import (
 	)
 
 from ..scribe import scribe
+from ..logger import logger
 from .coroutine import Coroutine
 
 
@@ -44,6 +45,17 @@ class SweepMagneticField(Coroutine):
 		if system_status != SystemStatusM.NORMAL:
 			raise ValueError(f'Magnet system status {system_status}. Expected {SystemStatusM.NORMAL}')
 
+
+	async def hold(self):
+
+		try:
+			logger.info('Setting magnet to "hold"')
+			self.magnet_psu.hold()
+			await asyncio.sleep(self.wait_time)
+		except Exception as e:
+			logger.error('Error setting magnet to "hold"')
+			print(e)
+			raise e
 
 
 	async def check_is_holding(self):
@@ -231,6 +243,10 @@ class SweepMagneticField(Coroutine):
 		try:
 
 			scribe.next_file(f'Field Sweep to {"p" if self.setpoint>=0 else "n"}{abs(self.setpoint):.1f}T', new_chapter=self.new_chapter)
+
+			# Set magnet to 'HOLD' (in case clamped)
+			await self.hold()
+			yield None
 
 			# Check system status
 			await self.check_system_normal()

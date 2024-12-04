@@ -124,6 +124,21 @@ class Mercury_IPS(Instrument):
 
 
 	@query
+	def remote_and_locked(self) -> str:
+		return self._query('C1')
+
+
+	@query
+	def local_and_unlocked(self) -> str:
+		return self._query('C2')
+
+
+	@query
+	def remote_and_unlocked(self) -> str:
+		return self._query('C3')
+
+
+	@query
 	def get_output_current(self) -> float:
 		return float(self._query("R0")[1:])
 
@@ -361,6 +376,21 @@ class Mercury_IPS(Instrument):
 		@app.get(f'/{self._uid}/identify', tags=[self._uid])
 		async def identify() -> str:
 			return self.identify()
+
+
+		@app.get(f'/{self._uid}/set/remote_and_locked', tags=[self._uid])
+		async def set_remote_and_locked() -> str:
+			return self.remote_and_locked()
+
+
+		@app.get(f'/{self._uid}/set/local_and_unlocked', tags=[self._uid])
+		async def set_remote_and_locked() -> str:
+			return self.local_and_unlocked()
+
+
+		@app.get(f'/{self._uid}/set/remote_and_unlocked', tags=[self._uid])
+		async def set_remote_and_locked() -> str:
+			return self.remote_and_unlocked()
 
 
 		@app.get(f'/{self._uid}/get/output_current', tags=[self._uid])
