@@ -8,6 +8,13 @@ from ...consumer import Consumer
 
 class LogEntry:
 	"""A class to represent a single log entry with different colors for each part."""
+
+
+	level_colors = {
+		'error': (255, 0, 0),
+		'info': (255, 255, 255),
+		'debug': (100, 100, 100),
+	}
 	
 	def __init__(self, date, time, level, message):
 		self.date = date
@@ -20,16 +27,8 @@ class LogEntry:
 
 		with gui.group(horizontal=True, parent=parent):
 			gui.add_text(self.date, color=(45, 149, 150))
-
 			gui.add_text(self.time, color=(154, 208, 194))
-
-			level_colors = {
-				'error': (255, 0, 0),
-				'info': (255, 255, 255),
-				'debug': (100, 100, 100),
-			}
-
-			level_color = level_colors[self.level]
+			level_color = self.level_colors[self.level]
 			gui.add_text(self.message, color=level_color)
 
 
@@ -43,8 +42,15 @@ class LogWindow(Consumer):
 		self.draw()
 
 
+	def clear(self):
+		""" Clear the list of logs
+		"""
+		gui.delete_item(self._uuid, children_only=True)
+
 
 	def draw(self):
+		""" Draw the empty window
+		"""
 		with gui.window(
 			label="Logs", 
 			tag=self._uuid,
