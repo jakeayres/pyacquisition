@@ -57,14 +57,14 @@ class StabilizeTemperature(Coroutine):
 			return True
 		else:
 			popt, _ = curve_fit(
-				lambda x, a, b, c: a + b*x, c*x*x,
+				lambda x, a, b: a + b*x,
 				[point[0] for point in points],
 				[point[1] for point in points],
 				)
 			if log:
 				logger.info(f"Drift: {popt[1]:.4f}")
 
-			if (abs(popt[1]) <= self.maximum_drift) and (abs(popt[2]) <= self.maximum_drift/10):
+			if (abs(popt[1]) <= self.maximum_drift):
 				return True
 			else:
 				return False
