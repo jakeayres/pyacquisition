@@ -3,6 +3,7 @@ import dearpygui.dearpygui as gui
 import aiohttp
 import requests
 import json
+import uuid
 from multiprocessing import Process
 from functools import partial
 
@@ -32,7 +33,7 @@ class UI(Broadcaster):
 	def __init__(self):
 		super().__init__()
 
-		self._runnables = []
+		self._runnables = {}
 		self._active_popups = []
 
 
@@ -102,11 +103,21 @@ class UI(Broadcaster):
 	def add_live_plot(self, sender, app_data, user_data):
 		"""
 		"""
+		plot_key = uuid.uuid4()
 		window = LivePlotWindow(
-			**user_data, 
+			**user_data,
+			on_close_callback=partial(self.remove_runnable, plot_key)
 			)
 		window.subscribe_to(self.api_client.data_broadcaster)
-		self._runnables.append(window)
+		self.add_runnable(plot_key, window)
+
+
+	def add_runnable(self, plot_key, runnable):
+		self._runnables[plot_key] = runnable
+
+
+	def remove_runnable(self, plot_key):
+		del self._runnables[plot_key]
 
 
 	def add_live_plot_from_config(self, config):
@@ -143,9 +154,10 @@ class UI(Broadcaster):
 
 	async def _run(self):
 		while True:
+			print('UI RUN LOOP')
 			if len(self._runnables) > 0:
 				done, pending = await asyncio.wait(
-					[asyncio.create_task(r.run_once()) for r in self._runnables],
+					[asyncio.create_task(r.run_once()) for k, r in self._runnables.items()],
 				)
 			else:
 				await asyncio.sleep(1)

@@ -72,6 +72,7 @@ class LivePlotWindow(Consumer):
 		legend_config={},
 		x_axis_config={},
 		y_axis_config={},
+		on_close_callback=lambda *args: None,
 		**kwargs
 		):
 		super().__init__()
@@ -81,10 +82,12 @@ class LivePlotWindow(Consumer):
 		self._x_key = x_key
 		self._y_keys = y_keys
 		self._data = None
+		self._on_close_callback = on_close_callback
 
 		with gui.window(
 			tag=self.window_uuid,
 			pos=pos,
+			on_close=self.close,
 			**window_config,
 			):
 
@@ -133,6 +136,15 @@ class LivePlotWindow(Consumer):
 
 				for y_key in self._y_keys:
 					self.add_scatter_series(self.series_uuid(y_key), self._x_key, y_key)
+
+
+	def close(self, data):
+		self.clear_data()
+		gui.delete_item(self.window_uuid, children_only=True)
+		gui.delete_item(self.window_uuid)
+		self._on_close_callback()
+
+
 
 
 	@classmethod
@@ -257,6 +269,7 @@ class LivePlotWindow(Consumer):
 
 	async def run_once(self):
 		try:
+			print('PLOT LOOP')
 			data = await self._queue.get()
 			if self._data is None:
 				#self._data = pd.DataFrame(data=data, index=[0])
@@ -268,6 +281,7 @@ class LivePlotWindow(Consumer):
 				for y_key in self._y_keys:
 					self.update_line(self.series_uuid(y_key), self._x_key, y_key)
 		except Exception as e:
+			print('EXCEPTION IN PLOT LOOP')
 			print(e)
 
 
