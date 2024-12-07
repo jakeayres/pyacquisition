@@ -269,13 +269,10 @@ class LivePlotWindow(Consumer):
 
 	async def run_once(self):
 		try:
-			print('PLOT LOOP')
 			data = await self._queue.get()
 			if self._data is None:
-				#self._data = pd.DataFrame(data=data, index=[0])
 				self._data = {k: [v] for k, v in data.items()}
 			else:
-				#self._data = pd.concat([self._data, pd.DataFrame(data=data, index=[0])])
 				for k, v in data.items():
 					self._data[k].append(v)
 				for y_key in self._y_keys:

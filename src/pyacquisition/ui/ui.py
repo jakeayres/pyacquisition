@@ -154,7 +154,6 @@ class UI(Broadcaster):
 
 	async def _run(self):
 		while True:
-			print('UI RUN LOOP')
 			if len(self._runnables) > 0:
 				done, pending = await asyncio.wait(
 					[asyncio.create_task(r.run_once()) for k, r in self._runnables.items()],
