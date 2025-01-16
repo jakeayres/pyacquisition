@@ -118,7 +118,7 @@ class Lakeshore_340(Instrument):
 
 	name = 'Lakeshore_340'
 
-	""" COMMANDS AS LISTED IN 350 MANUAL (ALPHABETICALLY)
+	""" COMMANDS AS LISTED IN 340 MANUAL (ALPHABETICALLY)
 	"""
 
 	@query
