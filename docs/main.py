@@ -6,9 +6,11 @@ st.write('Welcome to the PyAcquisition documentation! PyAcquisition is a Python 
 
 st.write('''A modest level of proficiency with `Python` is presumed. `PyAcquisition` is not a program that is simply executed, but a python package 
 	that facilitates the rapid assembly of your own measurement software. Importing it into your python project will allow you to interface with
-	instruments, collect, record and visualize live data by writing only a handful of lines of code. If you are not familiar with concepts such 
-	as class inheretence, do not fear. Following the "Getting Started" walk-through will explain how to use the core functionality of 
-	`PyAcquisition` in accessible terms.''')
+	instruments, collect, record and visualize live data by writing only a handful of lines of code.''')
+
+st.write('''If you're not familiar with concepts like object-oriented programming, class inheritance, methods or asynchronous code execution
+	, do not fear. Following the "Getting Started" walk-through will explain how to use the core functionality of `PyAcquisition` in accessible terms.
+	I hope it is sufficient to get a lot out of `PyAcquisition` without needing a deep programming knowledge.''')
 
 st.header('Contributing')
 

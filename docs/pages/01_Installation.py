@@ -32,4 +32,5 @@ st.subheader('`uv` - An extremely fast Python package and project manager')
 st.write('''I have no association with `uv` or its developer Astral. I am, however, going to give you a short sales pitch as I have
 	found `uv` to be a remarkably simply package management solution that replaces `pip`, `pip-tools`, `poetry`, `pyenv` and `virtualenv`.''')
 
-st.markdown('Visit the [uv github repository](https://github.com/astral-sh/uv) for more information on `uv`.')
+st.markdown('''Visit the [uv github repository](https://github.com/astral-sh/uv) for more information on `uv`. The API is extremely simple and
+	abstracts away most of the finiky aspects of package and virtual environment management very effectively.''')
