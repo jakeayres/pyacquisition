@@ -1,5 +1,11 @@
 import streamlit as st
 
+st.set_page_config(
+	page_title='PyAcquisition Documentation',
+	layout="centered",
+)
+
+
 st.title('PyAcquisition Documentation')
 
 st.write('Welcome to the PyAcquisition documentation! PyAcquisition is a Python package designed to facilitate seamless interfacing with measurement hardware for performing scientific measurements. This guide will help you get started and explore its capabilities.')
