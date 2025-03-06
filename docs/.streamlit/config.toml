@@ -1,0 +1,5 @@
+[theme]
+primaryColor = "#F63366"
+
+[global]
+pageTitle = "Home"  # This changes the title shown for main.py
