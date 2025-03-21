@@ -10,7 +10,9 @@ from .inspectable_queue import InspectableQueue
 from .api import API
 from .coroutines import WaitFor
 from .dataframe import DataFrame
+from .task_manager import TaskManager
 from .ui.ui import UI
+
 
 
 class Experiment:
@@ -25,6 +27,8 @@ class Experiment:
 		self._api.subscribe_to(self.rack)
 		self._api.subscribe_to(logger)
 		self._ui = UI()
+
+		self.task_manager = TaskManager()
 
 		self.running = True
 		self.current_task = None
@@ -147,125 +151,48 @@ class Experiment:
 
 
 	async def add_task(self, task):
-		"""
-		Add a task to the end of the task queue
-
-		:param      task:  The task
-		:type       task:  { type_description }
-		"""
-		await self.task_queue.put(task)
-		logger.info(f'Task added: {task.string()}')
+		self.task_manager.add_task(task)
 
 
 	async def get_task(self):
-		"""
-		Get and return the next task from the queue
-
-		:returns:   The task.
-		:rtype:     { return_type_description }
-		"""
-		task = await self.task_queue.get()
-		logger.info(f'Task retrieved: {task.string()}')
+		task = self.task_manager.get_task()
 		return task
 
 
 	def remove_task(self, index):
-		"""
-		Removes a task from the queue at provided index
-
-		:param      index:  The index
-		:type       index:  { type_description }
-		"""
-		task = self.task_queue.remove(index)
-		logger.info(f'Task removed: {task.string()}')
+		self.task_manager.remove_task(index)
 
 
 	def insert_task(self, task, index):
-		"""
-		Insert a task into the queue at the provided index
-
-		:param      task:   The task
-		:type       task:   { type_description }
-		:param      index:  The index
-		:type       index:  { type_description }
-		"""
-		task = self.task_queue.insert(task, index)
-		logger.info(f'Task inserted: {task.string()} to {index}')
+		self.task_manager.insert_task(task, index)
 
 
 	def list_tasks(self):
-		"""
-		Return a list of task descriptions (not the objects themselves)
-
-		:returns:   { description_of_the_return_value }
-		:rtype:     { return_type_description }
-		"""
-		return [t.string() for t in self.task_queue.inspect()]
+		return self.task_manager.list_tasks()
 
 
 	def clear_tasks(self):
-		"""
-		Clear all tasks from the queue
-		"""
-		self.task_queue.clear()
-		logger.info(f'All tasks cleared')
+		self.task_manager.clear_tasks()
 
 
 	def pause_task(self):
-		"""
-		Pause the current task
-		"""
-		self.current_task.pause()
-		logger.info(f'Experiment paused')
+		self.task_manager.pause_task()
 
 
 	def resume_task(self):
-		"""
-		Resume the current task
-		"""
-		self.current_task.resume()
-		logger.info(f'Experiment resumed')
+		self.task_manager.resume_task()
 
 
 	async def execute_task(self, task):
-		"""
-		Execute the provided task
-
-		:param      task:  The task
-		:type       task:  { type_description }
-		"""
-		try:
-			await task.execute()
-		except Exception as e:
-			logger.error(f'Error in task: {task.string()}')
-			logger.error(f'Exception raised executing task')
-			print(f'Exception raised executing task')
-			print(e)
-			self.pause_task()
-		finally:
-			logger.info(f'Task finished: {task.string()}')
+		self.task_manager.execute_task(task)
 
 
 	def abort_task(self):
-		"""
-		Abort the current task and proceed
-		"""
-
-		self.current_task.abort()
-		logger.info(f'Current task aborted')
+		self.task_manager.abort_task()
 
 
 	async def execute(self):
-		"""
-		The main coroutine to run that handles the execution of
-		tasks from the task_queue.
-		"""
-		
-		while self.running:
-
-			self.current_task = None
-			self.current_task = await self.get_task()
-			await self.execute_task(self.current_task)
+		self.task_manager.execute()
 
 
 	def register_endpoints(self):
