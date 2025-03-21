@@ -6,6 +6,31 @@ from .instruments import instruments
 
 
 class Measurement:
+	"""
+	A class to represent a measurement that can be periodically called.
+	Attributes
+	----------
+	name : str
+		The name of the measurement.
+	func : callable
+		The function to be called for the measurement.
+	call_every : int, optional
+		The interval at which the function should be called (default is 1).
+	_call_counter : int
+		Counter to keep track of calls.
+	_last_result : any
+		The last result returned by the function.
+	Methods
+	-------
+	name:
+		Returns the name of the measurement.
+	func:
+		Returns the function of the measurement.
+	call():
+		Calls the measurement function and updates the last result.
+	run():
+		Runs the measurement function based on the call interval and returns the last result.
+	"""
 
 	def __init__(self, name, func, call_every=1):
 
@@ -27,10 +52,29 @@ class Measurement:
 
 
 	def call(self):
+		"""
+		Calls the function stored in the 'func' attribute and stores the result in the '_last_result' attribute.
+
+		This method executes the function assigned to the 'func' attribute of the instance and saves the result
+		of the function call to the '_last_result' attribute for later use.
+
+		Returns:
+			None
+		"""
 		self._last_result = self.func()
 
 
 	def run(self):
+		"""
+		Executes a function call and manages the call counter.
+		This method decreases the call counter by one and checks if it has reached zero or if the last result is None.
+		If either condition is met, it calls the `call` method and resets the call counter to its initial value.
+		The method returns the last result of the function call.
+		If an exception occurs during the function call, it logs the error, prints the error message, resets the call counter,
+		and returns the last result.
+		Returns:
+			The last result of the function call.
+		"""
 		try:
 			self._call_counter -= 1
 			if (self._call_counter == 0) or (self._last_result == None):
@@ -169,9 +213,13 @@ class Rack(Broadcaster):
 
 	async def run(self):
 		"""
-		Main entry point to run the rack object
+		Main entry point to run the rack object.
+		This method runs an infinite loop where it performs measurements and ensures
+		that the measurements are taken at regular intervals defined by the period
+		attribute. If an exception occurs during the measurement, it logs an error.
+		Raises:
+			Exception: If an error occurs during the measurement process."
 		"""
-
 		while True:
 			try:
 				t0 = time.time()
