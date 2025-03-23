@@ -60,6 +60,13 @@ class Logger(Broadcaster):
 
 
 	def _to_console(self, entry):
+		"""
+		Outputs a log entry to the console.
+		Args:
+			entry (LogEntry): The log entry object containing the date, time, level, and message to be logged.
+		Returns:
+			None
+		"""
 		
 		text = Text.assemble(
 			(f" {entry.date} ", "blue"),
@@ -71,26 +78,70 @@ class Logger(Broadcaster):
 
 
 	def _to_queue(self, entry):
+		"""
+		Sends a log entry to the queue.
+
+		This method takes a log entry, converts it to a dictionary, and emits it
+		with a message type of 'log'.
+
+		Args:
+			entry (LogEntry): The log entry to be sent to the queue. It should have
+							  a method `dict()` that converts it to a dictionary.
+		"""
 		self.emit({'message_type': 'log', 'data': entry.dict()})
 
 
 	def info(self, message):
+		"""
+		Logs a message with the 'info' level.
+
+		Parameters:
+		message (str): The message to be logged.
+		"""
 		self.log(message, level='info')
 
 
 	def debug(self, message):
+		"""
+		Logs a debug message.
+
+		Parameters:
+		message (str): The debug message to log.
+		"""
 		self.log(message, level='debug')
 
 
 	def warning(self, message):
+		"""
+		Logs a warning message.
+
+		Parameters:
+		message (str): The warning message to be logged.
+		"""
 		self.log(message, level='warning')
 
 
 	def error(self, message):
+		"""
+		Logs an error message.
+
+		Parameters:
+		message (str): The error message to log.
+		"""
 		self.log(message, level='error')
 
 
 	def log(self, message, level='info'):
+		"""
+		Logs a message with a specified level.
+
+		Parameters:
+		message (str): The message to log.
+		level (str): The level of the log entry. Default is 'info'.
+
+		Returns:
+		None
+		"""
 		entry = Entry(
 			date=self._formatted_date,
 			time=self._formatted_time,
