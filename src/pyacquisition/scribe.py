@@ -266,7 +266,7 @@ class Scribe(Consumer):
 		""" Register endpoints to the FastAPI app.
 		"""
 
-		@app.get('/scribe/current_filename', tags=['Scribe'])
+		@app.get('/scribe/get_current_filename', tags=['Scribe'])
 		def current_filename() -> str:
 			"""Get current filename
 			
@@ -275,7 +275,8 @@ class Scribe(Consumer):
 			"""
 			return self.current_data_file
 
-		@app.get('/scribe/next_file/', tags=['Scribe'])
+
+		@app.get('/scribe/start_next_file/', tags=['Scribe'])
 		def next_file(
 			label: str, 
 			next_chapter: bool = False,
@@ -283,6 +284,20 @@ class Scribe(Consumer):
 			"""Create a new file.
 			"""
 			self.increment_file(label, new_chapter=next_chapter)
+			return 0
+		
+
+		@app.get('/scribe/set_root_directory/', tags=['Scribe'])
+		def set_root_directory(root: str) -> str:
+			"""Set a new root directory.
+			
+			Args:
+				root (str): The new root directory.
+			
+			Returns:
+				str: Confirmation message.
+			"""
+			self.set_root_directory(root)
 			return 0
 
 
