@@ -11,6 +11,7 @@ from .api import API
 from .coroutines import WaitFor
 from .dataframe import DataFrame
 from .task_manager import TaskManager
+from .dataframe import DataFrameManager
 from .ui.ui import UI
 
 
@@ -29,6 +30,7 @@ class Experiment:
 		self._ui = UI()
 
 		self.task_manager = TaskManager()
+		self.dataframe_manager = DataFrameManager()
 
 		self.setup()
 		self.register_endpoints()
@@ -203,6 +205,7 @@ class Experiment:
 		CreateNewFile.register_endpoints(self)
 
 		self.task_manager.register_endpoints(self.api)
+		self.dataframe_manager.register_endpoints(self.api)
 		logger.register_endpoints(self.api)
 		self.rack.register_endpoints(self.api)
 		scribe.register_endpoints(self.api)
@@ -235,6 +238,7 @@ class Experiment:
 		rack_task = asyncio.create_task(self.rack.run())
 		scribe_task = asyncio.create_task(scribe.run())
 		main_task = asyncio.create_task(self.task_manager.execute())
+		dataframe_task = asyncio.create_task(self.dataframe_manager.run())
 		fast_api_server_task = self._api.coroutine()
 
 		logger.info('Experiment started')
@@ -247,6 +251,7 @@ class Experiment:
 			[
 			rack_task,
 			main_task,
+			dataframe_task,
 			scribe_task,
 			fast_api_server_task,
 			],

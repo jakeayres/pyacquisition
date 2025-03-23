@@ -230,6 +230,19 @@ class UI(Broadcaster):
 							'data': schema,
 							},
 						)
+					
+
+			with gui.menu(label='Dataframes'):
+				paths = schema.paths_with_tag('DataFrames')
+				for key, value in paths.items():
+					gui.add_button(
+						label=key,
+						callback=self.make_endpoint_popup,
+						user_data={
+							'path': key,
+							'data': schema,
+							},
+						)
 
 
 			with gui.menu(label='Routines'):
