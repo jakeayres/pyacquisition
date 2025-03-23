@@ -138,3 +138,61 @@ class TaskManager:
             self.current_task = None
             self.current_task = await self.get_task()
             await self.execute_task(self.current_task)
+
+
+    
+    def register_endpoints(self, app):
+        """ Register endpoints to the FastAPI app.
+        """
+
+        @app.get('/experiment/current_task', tags=['Experiment'])
+        async def current_task() -> str:
+            try:
+                if self.current_task is None:
+                    return 'None'
+                return self.current_task.string()
+            except Exception as e:
+                raise e
+
+
+        # @app.get('/experiment/current_task_status', tags=['Experiment'])
+        # async def current_task() -> str:
+        #     try:
+        #         return self.current_task.status()
+        #     except:
+        #         return 'None'
+
+
+        @app.get('/experiment/pause_task/', tags=['Experiment'])
+        async def pause_task() -> int:
+            self.pause_task()
+            return 0
+
+
+        @app.get('/experiment/resume_task/', tags=['Experiment'])
+        async def resume_task() -> int:
+            self.resume_task()
+            return 0
+
+
+        @app.get('/experiment/abort_task/', tags=['Experiment'])
+        async def abort_task() -> int:
+            self.abort_task()
+            return 0
+
+
+        @app.get('/experiment/queued_tasks/', tags=['Experiment'])
+        async def queued_tasks() -> list[str]:
+            return self.list_tasks()
+
+
+        @app.get('/experiment/remove_task/{index}/', tags=['Experiment'])
+        async def remove_task(index: int) -> int :
+            self.remove_task(index)
+            return 0
+
+
+        @app.get('/experiment/clear_tasks/', tags=['Experiment'])
+        async def clear_tasks() -> int:
+            self.clear_tasks()
+            return 0

@@ -196,66 +196,13 @@ class Experiment:
 		"""
 
 
-		@self.api.get('/experiment/current_task', tags=['Experiment'])
-		async def current_task() -> str:
-			try:
-				if self.task_manager.current_task is None:
-					return 'None'
-				return self.task_manager.current_task.string()
-			except Exception as e:
-				raise e
-
-
-		# @self.api.get('/experiment/current_task_status', tags=['Experiment'])
-		# async def current_task() -> str:
-		# 	try:
-		# 		return self.current_task.status()
-		# 	except:
-		# 		return 'None'
-
-
-		@self.api.get('/experiment/pause_task/', tags=['Experiment'])
-		async def pause_task() -> int:
-			self.pause_task()
-			return 0
-
-
-		@self.api.get('/experiment/resume_task/', tags=['Experiment'])
-		async def resume_task() -> int:
-			self.resume_task()
-			return 0
-
-
-		@self.api.get('/experiment/abort_task/', tags=['Experiment'])
-		async def abort_task() -> int:
-			self.abort_task()
-			return 0
-
-
-		@self.api.get('/experiment/queued_tasks/', tags=['Experiment'])
-		async def queued_tasks() -> list[str]:
-			return self.list_tasks()
-
-
-		@self.api.get('/experiment/remove_task/{index}/', tags=['Experiment'])
-		async def remove_task(index: int) -> int :
-			self.remove_task(index)
-			return 0
-
-
-		@self.api.get('/experiment/clear_tasks/', tags=['Experiment'])
-		async def clear_tasks() -> int:
-			self.clear_tasks()
-			return 0
-
-
 		from .coroutines import WaitFor
 		WaitFor.register_endpoints(self)
 
 		from .coroutines import CreateNewFile
 		CreateNewFile.register_endpoints(self)
 
-
+		self.task_manager.register_endpoints(self.api)
 		logger.register_endpoints(self.api)
 		self.rack.register_endpoints(self.api)
 		scribe.register_endpoints(self.api)
