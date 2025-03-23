@@ -30,11 +30,6 @@ class Experiment:
 
 		self.task_manager = TaskManager()
 
-		self.running = True
-		self.current_task = None
-		self.current_task_string = None
-		self.task_queue = InspectableQueue()
-
 		self.setup()
 		self.register_endpoints()
 
@@ -151,11 +146,11 @@ class Experiment:
 
 
 	async def add_task(self, task):
-		self.task_manager.add_task(task)
+		await self.task_manager.add_task(task)
 
 
 	async def get_task(self):
-		task = self.task_manager.get_task()
+		task = await self.task_manager.get_task()
 		return task
 
 
@@ -191,10 +186,6 @@ class Experiment:
 		self.task_manager.abort_task()
 
 
-	async def execute(self):
-		self.task_manager.execute()
-
-
 	def register_endpoints(self):
 		""" 
 		OVERIDE IN INHERETING CLASS
@@ -208,9 +199,11 @@ class Experiment:
 		@self.api.get('/experiment/current_task', tags=['Experiment'])
 		async def current_task() -> str:
 			try:
-				return self.current_task.string()
-			except:
-				return 'None'
+				if self.task_manager.current_task is None:
+					return 'None'
+				return self.task_manager.current_task.string()
+			except Exception as e:
+				raise e
 
 
 		# @self.api.get('/experiment/current_task_status', tags=['Experiment'])
@@ -294,7 +287,7 @@ class Experiment:
 
 		rack_task = asyncio.create_task(self.rack.run())
 		scribe_task = asyncio.create_task(scribe.run())
-		main_task = asyncio.create_task(self.execute())
+		main_task = asyncio.create_task(self.task_manager.execute())
 		fast_api_server_task = self._api.coroutine()
 
 		logger.info('Experiment started')

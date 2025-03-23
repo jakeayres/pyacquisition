@@ -34,8 +34,10 @@ class WaitFor(Coroutine):
 
 	async def run(self):
 		logger.info(self.string())
-		await asyncio.sleep(self._seconds())
-		yield ''
+		end_time = datetime.now().timestamp() + self._seconds()
+		while datetime.now().timestamp() < end_time:
+			await asyncio.sleep(0.2)
+			yield ''
 
 
 	@classmethod
@@ -61,7 +63,7 @@ class WaitUntil(Coroutine):
 	async def run(self):
 		logger.info(self.string())
 		while datetime.now() < self.date_time:
-			await asyncio.sleep(1)
+			await asyncio.sleep(0.2)
 		yield ''
 
 

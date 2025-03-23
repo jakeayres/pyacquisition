@@ -13,7 +13,7 @@ class TaskManager:
 
     def __init__(self):
 
-        self._current_task = None
+        self.current_task = None
         self._task_queue = InspectableQueue()
         self._running = True
 
@@ -88,7 +88,7 @@ class TaskManager:
         """
         Pause the current task
         """
-        self._current_task.pause()
+        self.current_task.pause()
         logger.info(f'Experiment paused')
 
 
@@ -96,7 +96,7 @@ class TaskManager:
         """
         Resume the current task
         """
-        self._current_task.resume()
+        self.current_task.resume()
         logger.info(f'Experiment resumed')
 
 
@@ -123,7 +123,7 @@ class TaskManager:
         """
         Abort the current task and proceed
         """
-        self._current_task.abort()
+        self.current_task.abort()
         logger.info(f'Current task aborted')
 
 
@@ -135,6 +135,6 @@ class TaskManager:
         
         while self._running:
 
-            self._current_task = None
-            self._current_task = await self.get_task()
-            await self.execute_task(self._current_task)
+            self.current_task = None
+            self.current_task = await self.get_task()
+            await self.execute_task(self.current_task)
