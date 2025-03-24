@@ -31,6 +31,7 @@ class Experiment:
 
 		self.task_manager = TaskManager()
 		self.dataframe_manager = DataFrameManager()
+		self.dataframe_manager.subscribe_to(self.rack)
 
 		self.setup()
 		self.register_endpoints()
@@ -203,6 +204,11 @@ class Experiment:
 
 		from .coroutines import CreateNewFile
 		CreateNewFile.register_endpoints(self)
+
+		from .coroutines import StartDataFrame, CloseDataFrame, PlotDataFrame
+		StartDataFrame.register_endpoints(self)
+		CloseDataFrame.register_endpoints(self)
+		PlotDataFrame.register_endpoints(self)
 
 		self.task_manager.register_endpoints(self.api)
 		self.dataframe_manager.register_endpoints(self.api)

@@ -47,6 +47,17 @@ class Scribe(Consumer):
 		if not cls._instance:
 			cls._instance = super().__new__(cls)
 		return cls._instance
+	
+
+	@property
+	def root(self):
+		"""
+		The root directory
+
+		:returns:   { description_of_the_return_value }
+		:rtype:     { return_type_description }
+		"""
+		return self._root
 
 
 	@property
