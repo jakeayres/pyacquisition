@@ -2,6 +2,7 @@ from .logger import logger
 from .consumer import Consumer
 import asyncio, os, datetime
 import pandas as pd
+import json
 
 from dataclasses import dataclass
 from pydantic import BaseModel
