@@ -57,6 +57,7 @@ class Logger:
             level=file_level,
             format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
         )
+        self.info(f"Logging configured: console level={console_level}, file level={file_level}, file name={file_name}") 
         
         
     def info(self, message: str) -> None:

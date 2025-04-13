@@ -4,6 +4,11 @@ root_path = "."
 [data]
 path = "."
 
+[api_server]
+host = "localhost"
+port = 8005
+allowed_cors_origins = ["http://localhost:3000"]
+
 [logging]
 console_level = "DEBUG"
 file_level = "DEBUG"
