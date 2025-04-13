@@ -2,25 +2,38 @@ import asyncio
 
 class Consumer:
     """
-    A class responsible for consuming messages from a broadcaster.
+    A consumer class that can subscribe and unsubscribe to a Broadcaster.
     """
 
     def __init__(self):
+        """
+        Initialize the Consumer.
+        """
         self.queue = asyncio.Queue()
 
-    def subscribe_to(self, broadcaster):
-        """
-        Subscribe to a broadcaster.
 
-        :param broadcaster: The broadcaster to subscribe to.
+    def subscribe(self, broadcaster):
         """
-        broadcaster.subscribe(self)
+        Subscribe to a Broadcaster.
 
-    async def consume(self):
+        Args:
+            broadcaster (Broadcaster): The broadcaster to subscribe to.
         """
-        Consume messages from the queue.
+        broadcaster.subscribe_to(self)
+
+
+    async def consume(self, timeout=None):
         """
-        while True:
-            message = await self.queue.get()
-            # Process the message (implementation to be added)
-            self.queue.task_done()
+        Consume a single message from the queue with a timeout.
+
+        Args:
+            timeout (float or None): The maximum time (in seconds) to wait for a message. Defaults to None (no timeout).
+
+        Returns:
+            Any: The message from the queue, or None if the timeout is reached.
+        """
+        try:
+            message = await asyncio.wait_for(self.queue.get(), timeout=timeout)
+            return message
+        except asyncio.TimeoutError:
+            return None
