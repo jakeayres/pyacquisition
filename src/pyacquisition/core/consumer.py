@@ -19,7 +19,17 @@ class Consumer:
         Args:
             broadcaster (Broadcaster): The broadcaster to subscribe to.
         """
-        broadcaster.subscribe_to(self)
+        broadcaster.subscribe(self)
+        
+        
+    def unsubscribe(self, broadcaster):
+        """
+        Unsubscribe from a Broadcaster.
+
+        Args:
+            broadcaster (Broadcaster): The broadcaster to unsubscribe from.
+        """
+        broadcaster.unsubscribe(self)   
 
 
     async def consume(self, timeout=None):
