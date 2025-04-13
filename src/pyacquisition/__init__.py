@@ -1,2 +1,1 @@
-def hello() -> str:
-    return "Hello from pyacquisition!"
+from .core import Experiment
