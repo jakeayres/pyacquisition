@@ -1,0 +1,4 @@
+[logging]
+console_level = "DEBUG"
+file_level = "DEBUG"
+log_file = "debug.log"
