@@ -1,7 +1,5 @@
 import tomllib
-from loguru import logger
-import sys
-import os
+from .logging import logger
 
 
 class Experiment:
@@ -9,32 +7,31 @@ class Experiment:
     Class representing an experiment.
     """
 
-    def __init__(self, config: dict = None) -> None:
+    def __init__(
+        self,
+        root_path: str = ".",
+        console_log_level: str = "DEBUG",
+        file_log_level: str = "DEBUG",  
+        log_file_name: str = "debug.log",
+    ) -> None:
         """
         Initializes the Experiment instance with an optional configuration.
 
         Args:
             config (dict, optional): A dictionary containing experiment configuration.
         """
-        self.config = config or {}
         
-        # Main config
-        main_config = self.config.get("main", {})
-        root_path = main_config.get("root_path", os.getcwd())
-
-        # Configure the logger
-        logging_config = self.config.get("logging", {})
-        console_level = logging_config.get("console_level", "DEBUG")
-        file_level = logging_config.get("file_level", "DEBUG")
-        log_file = logging_config.get("log_file", "debug.log")
-
-        self.configure_logger(
-            root_path=os.getcwd(),
-            console_level=console_level,
-            file_level=file_level,
-            file_name=log_file,
+        self.root_path = root_path
+        
+        # configure logging
+        logger.configure(
+            root_path=root_path,
+            console_level=console_log_level,
+            file_level=file_log_level,
+            file_name=log_file_name,
         )
-
+        
+        
     @classmethod
     def from_config(cls, toml_file: str) -> "Experiment":
         """
@@ -52,38 +49,15 @@ class Experiment:
         try:
             with open(toml_file, "rb") as file:
                 config = tomllib.load(file)
-            return cls(config=config)
+            return cls(
+                root_path=config.get("root_path", "."),
+                console_log_level=config.get("logging", {}).get("console_level", "DEBUG"),
+                file_log_level=config.get("logging", {}).get("file_level", "DEBUG"),
+                log_file_name=config.get("logging", {}).get("file_name", "debug.log"),
+            )
         except Exception as e:
             raise ValueError(f"Failed to load configuration from {toml_file}: {e}")
 
-    def configure_logger(
-        self,
-        root_path: str,
-        console_level: str = "DEBUG",
-        file_level: str = "DEBUG",
-        file_name: str = "debug.log",
-    ) -> None:
-        """
-        Configures the logger for the application.
-
-        Args:
-            root_path (str): The root path where the log file will be stored.
-            console_level (str, optional): Logging level for console output. Defaults to "DEBUG".
-            file_level (str, optional): Logging level for file output. Defaults to "DEBUG".
-            file_name (str, optional): Name of the log file. Defaults to "debug.log".
-        """
-        logger.remove()
-        logger.add(
-            sink=sys.stdout,
-            level=console_level,
-            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
-        )
-        log_file_path = os.path.join(root_path, file_name)
-        logger.add(
-            sink=log_file_path,
-            level=file_level,
-            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
-        )
 
     def run(self) -> None:
         """

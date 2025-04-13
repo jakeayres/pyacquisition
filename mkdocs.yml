@@ -4,6 +4,7 @@ nav:
   - Basics:
       - Installation: basics/installation.md
       - Getting Started: basics/getting_started.md
+      - Configuration: basics/configuration.md
 theme:
   name: material
 plugins:

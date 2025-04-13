@@ -1,4 +1,10 @@
+
+root_path = "."
+
+[data]
+path = "."
+
 [logging]
 console_level = "DEBUG"
 file_level = "DEBUG"
-log_file = "debug.log"
+file_name = "debug.log"
