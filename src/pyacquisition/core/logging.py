@@ -57,6 +57,56 @@ class Logger:
             level=file_level,
             format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
         )
+        
+        
+    def info(self, message: str) -> None:
+        """
+        Logs an info message.
+
+        Args:
+            message (str): The message to log.
+        """
+        loguru_logger.info(message)
+        
+        
+    def debug(self, message: str) -> None:
+        """
+        Logs a debug message.
+
+        Args:
+            message (str): The message to log.
+        """
+        loguru_logger.debug(message)
+        
+    
+    def warning(self, message: str) -> None:
+        """
+        Logs a warning message.
+
+        Args:
+            message (str): The message to log.
+        """
+        loguru_logger.warning(message)
+        
+        
+    def error(self, message: str) -> None:
+        """
+        Logs an error message.
+
+        Args:
+            message (str): The message to log.
+        """
+        loguru_logger.error(message)
+        
+        
+    def exception(self, message: str) -> None:
+        """
+        Logs an exception message.
+
+        Args:
+            message (str): The message to log.
+        """
+        loguru_logger.exception(message)
 
 
 # Singleton instance
