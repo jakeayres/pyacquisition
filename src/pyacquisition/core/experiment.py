@@ -63,4 +63,16 @@ class Experiment:
         """
         Runs the experiment.
         """
-        pass
+
+        async def _run():
+            try:
+                # Run tasks in an async task group
+                async with asyncio.TaskGroup() as tg:
+                    pass
+                    # tg.create_task(task1())
+                    # tg.create_task(task2())
+                    # tg.create_task(task3())
+            except Exception as e:
+                print(f"Task group terminated due to: {e}")
+
+        asyncio.run(_run()) 

@@ -78,6 +78,24 @@ def test_logger_info(temp_log_dir, logger_instance):
     with open(log_file_path, "r") as log_file:
         log_contents = log_file.read()
         assert "This is an info message" in log_contents, "Info message was not logged"
+        
+        
+def test_logger_debug_when_info(temp_log_dir, logger_instance):
+    """ Test that the debugger does not log debug messages when the console level is set to INFO """
+    log_file_name = "test_debug_when_info.log"
+    logger_instance.configure(
+        root_path=temp_log_dir,
+        console_level="INFO",
+        file_level="INFO",
+        file_name=log_file_name,
+    )
+    
+    logger_instance.debug("This is a debug message")
+    
+    log_file_path = os.path.join(temp_log_dir, log_file_name)
+    with open(log_file_path, "r") as log_file:
+        log_contents = log_file.read()
+        assert "This is a debug message" not in log_contents, "Debug message was logged when it shouldn't have been"
 
 def test_logger_warning(temp_log_dir, logger_instance):
     """Test that Logger logs warning messages correctly."""
