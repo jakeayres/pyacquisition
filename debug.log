@@ -64,3 +64,1807 @@
 2025-04-13 at 21:51:47 | DEBUG | All experiment tasks started
 2025-04-13 at 21:54:42 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
 2025-04-13 at 21:54:42 | DEBUG | APIServer initialized
+2025-04-15 at 18:26:26 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 18:26:26 | DEBUG | APIServer initialized
+2025-04-15 at 18:26:26 | DEBUG | Experiment started
+2025-04-15 at 18:26:26 | DEBUG | Experiment setup started
+2025-04-15 at 18:26:26 | DEBUG | Experiment setup completed
+2025-04-15 at 18:26:26 | DEBUG | API server started
+2025-04-15 at 18:26:26 | DEBUG | All experiment tasks started
+2025-04-15 at 18:26:36 | DEBUG | Experiment teardown started
+2025-04-15 at 18:26:36 | DEBUG | Experiment teardown completed
+2025-04-15 at 18:29:14 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 18:29:14 | DEBUG | APIServer initialized
+2025-04-15 at 18:29:14 | DEBUG | Experiment started
+2025-04-15 at 18:29:14 | DEBUG | Experiment setup started
+2025-04-15 at 18:29:14 | DEBUG | Experiment setup completed
+2025-04-15 at 18:29:14 | DEBUG | API server started
+2025-04-15 at 18:29:14 | DEBUG | All experiment tasks started
+2025-04-15 at 18:29:15 | DEBUG | Experiment teardown started
+2025-04-15 at 18:29:15 | DEBUG | Experiment teardown completed
+2025-04-15 at 18:29:15 | INFO | Experiment interrupted by user
+2025-04-15 at 18:29:15 | DEBUG | Experiment teardown started
+2025-04-15 at 18:29:15 | DEBUG | Experiment teardown completed
+2025-04-15 at 18:29:15 | DEBUG | Experiment ended
+2025-04-15 at 18:29:44 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 18:29:44 | DEBUG | APIServer initialized
+2025-04-15 at 18:29:44 | INFO | Experiment started
+2025-04-15 at 18:29:44 | DEBUG | Experiment setup started
+2025-04-15 at 18:29:44 | DEBUG | Experiment setup completed
+2025-04-15 at 18:29:44 | DEBUG | API server started
+2025-04-15 at 18:29:44 | DEBUG | All experiment tasks started
+2025-04-15 at 18:32:30 | DEBUG | Experiment teardown started
+2025-04-15 at 18:32:30 | DEBUG | Experiment teardown completed
+2025-04-15 at 18:32:30 | INFO | Experiment interrupted by user
+2025-04-15 at 18:32:30 | DEBUG | Experiment teardown started
+2025-04-15 at 18:32:30 | DEBUG | Experiment teardown completed
+2025-04-15 at 18:32:30 | INFO | Experiment ended
+2025-04-15 at 18:32:31 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 18:32:31 | DEBUG | APIServer initialized
+2025-04-15 at 18:32:31 | INFO | Experiment started
+2025-04-15 at 18:32:31 | DEBUG | Experiment setup started
+2025-04-15 at 18:32:31 | DEBUG | Experiment setup completed
+2025-04-15 at 18:32:31 | DEBUG | API server started
+2025-04-15 at 18:32:31 | DEBUG | All experiment tasks started
+2025-04-15 at 20:15:38 | DEBUG | Experiment teardown started
+2025-04-15 at 20:15:38 | DEBUG | Experiment teardown completed
+2025-04-15 at 20:15:38 | INFO | Experiment interrupted by user
+2025-04-15 at 20:15:38 | DEBUG | Experiment teardown started
+2025-04-15 at 20:15:38 | DEBUG | Experiment teardown completed
+2025-04-15 at 20:15:38 | INFO | Experiment ended
+2025-04-15 at 20:15:39 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 20:15:39 | DEBUG | APIServer initialized
+2025-04-15 at 20:15:39 | INFO | Experiment started
+2025-04-15 at 20:15:39 | DEBUG | Experiment setup started
+2025-04-15 at 20:15:39 | DEBUG | Experiment setup completed
+2025-04-15 at 20:15:39 | DEBUG | API server started
+2025-04-15 at 20:15:39 | DEBUG | All experiment tasks started
+2025-04-15 at 20:15:41 | DEBUG | Experiment teardown started
+2025-04-15 at 20:15:41 | DEBUG | Experiment teardown completed
+2025-04-15 at 20:15:41 | INFO | Experiment interrupted by user
+2025-04-15 at 20:15:41 | DEBUG | Experiment teardown started
+2025-04-15 at 20:15:41 | DEBUG | Experiment teardown completed
+2025-04-15 at 20:15:41 | INFO | Experiment ended
+2025-04-15 at 22:06:50 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 22:06:50 | DEBUG | APIServer initialized
+2025-04-15 at 22:06:50 | INFO | Experiment started
+2025-04-15 at 22:06:50 | DEBUG | Experiment setup started
+2025-04-15 at 22:06:50 | DEBUG | Experiment setup completed
+2025-04-15 at 22:06:50 | DEBUG | API server started
+2025-04-15 at 22:06:50 | DEBUG | All experiment tasks started
+2025-04-15 at 22:44:52 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 22:44:52 | DEBUG | APIServer initialized
+2025-04-15 at 22:45:05 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 22:45:05 | DEBUG | APIServer initialized
+2025-04-15 at 22:45:16 | DEBUG | Experiment teardown started
+2025-04-15 at 22:45:16 | DEBUG | Experiment teardown completed
+2025-04-15 at 22:45:16 | INFO | Experiment interrupted by user
+2025-04-15 at 22:45:16 | DEBUG | Experiment teardown started
+2025-04-15 at 22:45:16 | DEBUG | Experiment teardown completed
+2025-04-15 at 22:45:16 | INFO | Experiment ended
+2025-04-15 at 22:45:19 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 22:45:19 | DEBUG | APIServer initialized
+2025-04-15 at 22:45:19 | INFO | Experiment started
+2025-04-15 at 22:45:19 | DEBUG | Experiment setup started
+2025-04-15 at 22:45:19 | DEBUG | Experiment setup completed
+2025-04-15 at 22:45:19 | DEBUG | API server started
+2025-04-15 at 22:45:19 | DEBUG | Rack started
+2025-04-15 at 22:45:19 | DEBUG | All experiment tasks started
+2025-04-15 at 22:45:20 | ERROR | Error in rack run loop: name 'time' is not defined
+2025-04-15 at 22:45:20 | ERROR | Task group terminated due to an error: unhandled errors in a TaskGroup (1 sub-exception)
+2025-04-15 at 22:45:20 | DEBUG | Experiment teardown started
+2025-04-15 at 22:45:20 | DEBUG | Experiment teardown completed
+2025-04-15 at 22:45:20 | DEBUG | Experiment teardown started
+2025-04-15 at 22:45:20 | DEBUG | Experiment teardown completed
+2025-04-15 at 22:45:20 | INFO | Experiment ended
+2025-04-15 at 22:46:06 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 22:46:06 | DEBUG | APIServer initialized
+2025-04-15 at 22:46:06 | INFO | Experiment started
+2025-04-15 at 22:46:06 | DEBUG | Experiment setup started
+2025-04-15 at 22:46:06 | DEBUG | Experiment setup completed
+2025-04-15 at 22:46:06 | DEBUG | API server started
+2025-04-15 at 22:46:06 | DEBUG | Rack started
+2025-04-15 at 22:46:06 | DEBUG | All experiment tasks started
+2025-04-15 at 22:46:06 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:06 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:06 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:07 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:07 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:07 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:07 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:08 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:08 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:08 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:08 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:09 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:09 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:09 | ERROR | Error in rack run loop: 'Rack' object has no attribute '_measurements'
+2025-04-15 at 22:46:09 | DEBUG | Experiment teardown started
+2025-04-15 at 22:46:09 | DEBUG | Experiment teardown completed
+2025-04-15 at 22:46:09 | INFO | Experiment interrupted by user
+2025-04-15 at 22:46:09 | DEBUG | Experiment teardown started
+2025-04-15 at 22:46:09 | DEBUG | Experiment teardown completed
+2025-04-15 at 22:46:09 | INFO | Experiment ended
+2025-04-15 at 22:46:20 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 22:46:20 | DEBUG | APIServer initialized
+2025-04-15 at 22:46:20 | INFO | Experiment started
+2025-04-15 at 22:46:20 | DEBUG | Experiment setup started
+2025-04-15 at 22:46:20 | DEBUG | Experiment setup completed
+2025-04-15 at 22:46:20 | DEBUG | API server started
+2025-04-15 at 22:46:20 | DEBUG | Rack started
+2025-04-15 at 22:46:20 | DEBUG | All experiment tasks started
+2025-04-15 at 22:46:20 | ERROR | Error in rack run loop: 'list' object has no attribute 'items'
+2025-04-15 at 22:46:21 | ERROR | Error in rack run loop: 'list' object has no attribute 'items'
+2025-04-15 at 22:46:21 | ERROR | Error in rack run loop: 'list' object has no attribute 'items'
+2025-04-15 at 22:46:21 | ERROR | Error in rack run loop: 'list' object has no attribute 'items'
+2025-04-15 at 22:46:21 | ERROR | Error in rack run loop: 'list' object has no attribute 'items'
+2025-04-15 at 22:46:22 | ERROR | Error in rack run loop: 'list' object has no attribute 'items'
+2025-04-15 at 22:46:22 | ERROR | Error in rack run loop: 'list' object has no attribute 'items'
+2025-04-15 at 22:46:22 | ERROR | Error in rack run loop: 'list' object has no attribute 'items'
+2025-04-15 at 22:46:22 | ERROR | Error in rack run loop: 'list' object has no attribute 'items'
+2025-04-15 at 22:46:23 | DEBUG | Experiment teardown started
+2025-04-15 at 22:46:23 | DEBUG | Experiment teardown completed
+2025-04-15 at 22:46:23 | INFO | Experiment interrupted by user
+2025-04-15 at 22:46:23 | DEBUG | Experiment teardown started
+2025-04-15 at 22:46:23 | DEBUG | Experiment teardown completed
+2025-04-15 at 22:46:23 | INFO | Experiment ended
+2025-04-15 at 22:46:30 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 22:46:30 | DEBUG | APIServer initialized
+2025-04-15 at 22:46:30 | INFO | Experiment started
+2025-04-15 at 22:46:30 | DEBUG | Experiment setup started
+2025-04-15 at 22:46:30 | DEBUG | Experiment setup completed
+2025-04-15 at 22:46:30 | DEBUG | API server started
+2025-04-15 at 22:46:30 | DEBUG | Rack started
+2025-04-15 at 22:46:30 | DEBUG | All experiment tasks started
+2025-04-15 at 22:46:36 | DEBUG | Experiment teardown started
+2025-04-15 at 22:46:36 | DEBUG | Experiment teardown completed
+2025-04-15 at 22:46:36 | INFO | Experiment interrupted by user
+2025-04-15 at 22:46:36 | DEBUG | Experiment teardown started
+2025-04-15 at 22:46:36 | DEBUG | Experiment teardown completed
+2025-04-15 at 22:46:36 | INFO | Experiment ended
+2025-04-15 at 23:02:14 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:02:14 | DEBUG | APIServer initialized
+2025-04-15 at 23:02:14 | INFO | Experiment started
+2025-04-15 at 23:02:14 | DEBUG | Experiment setup started
+2025-04-15 at 23:02:14 | DEBUG | Experiment setup completed
+2025-04-15 at 23:02:14 | DEBUG | API server started
+2025-04-15 at 23:02:14 | DEBUG | Rack started
+2025-04-15 at 23:02:14 | DEBUG | All experiment tasks started
+2025-04-15 at 23:03:40 | DEBUG | Experiment teardown started
+2025-04-15 at 23:03:40 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:03:40 | INFO | Experiment interrupted by user
+2025-04-15 at 23:03:40 | DEBUG | Experiment teardown started
+2025-04-15 at 23:03:40 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:03:40 | INFO | Experiment ended
+2025-04-15 at 23:03:41 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:03:41 | DEBUG | APIServer initialized
+2025-04-15 at 23:03:41 | INFO | Experiment started
+2025-04-15 at 23:03:41 | DEBUG | Experiment setup started
+2025-04-15 at 23:03:41 | DEBUG | Experiment setup completed
+2025-04-15 at 23:03:41 | DEBUG | API server started
+2025-04-15 at 23:03:41 | DEBUG | Rack started
+2025-04-15 at 23:03:41 | DEBUG | All experiment tasks started
+2025-04-15 at 23:05:19 | DEBUG | Experiment teardown started
+2025-04-15 at 23:05:19 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:05:19 | INFO | Experiment interrupted by user
+2025-04-15 at 23:05:19 | DEBUG | Experiment teardown started
+2025-04-15 at 23:05:19 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:05:19 | INFO | Experiment ended
+2025-04-15 at 23:05:20 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:05:20 | DEBUG | APIServer initialized
+2025-04-15 at 23:05:20 | INFO | Experiment started
+2025-04-15 at 23:05:20 | DEBUG | Experiment setup started
+2025-04-15 at 23:05:20 | DEBUG | Experiment setup completed
+2025-04-15 at 23:05:20 | DEBUG | API server started
+2025-04-15 at 23:05:20 | DEBUG | Rack started
+2025-04-15 at 23:05:20 | DEBUG | All experiment tasks started
+2025-04-15 at 23:20:32 | DEBUG | Experiment teardown started
+2025-04-15 at 23:20:32 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:20:32 | INFO | Experiment interrupted by user
+2025-04-15 at 23:20:32 | DEBUG | Experiment teardown started
+2025-04-15 at 23:20:32 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:20:32 | INFO | Experiment ended
+2025-04-15 at 23:20:33 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:20:33 | DEBUG | APIServer initialized
+2025-04-15 at 23:20:33 | INFO | Experiment started
+2025-04-15 at 23:20:33 | DEBUG | Experiment setup started
+2025-04-15 at 23:20:33 | DEBUG | Experiment setup completed
+2025-04-15 at 23:20:33 | DEBUG | API server started
+2025-04-15 at 23:20:33 | DEBUG | Rack started
+2025-04-15 at 23:20:33 | DEBUG | All experiment tasks started
+2025-04-15 at 23:21:26 | DEBUG | Rack period set to 1.0 seconds
+2025-04-15 at 23:27:18 | DEBUG | Experiment teardown started
+2025-04-15 at 23:27:18 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:27:18 | INFO | Experiment interrupted by user
+2025-04-15 at 23:27:18 | DEBUG | Experiment teardown started
+2025-04-15 at 23:27:18 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:27:18 | INFO | Experiment ended
+2025-04-15 at 23:27:21 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:27:21 | DEBUG | APIServer initialized
+2025-04-15 at 23:27:21 | INFO | Experiment started
+2025-04-15 at 23:27:21 | DEBUG | Experiment setup started
+2025-04-15 at 23:27:21 | DEBUG | Experiment setup completed
+2025-04-15 at 23:27:21 | DEBUG | API server started
+2025-04-15 at 23:27:21 | DEBUG | Rack started
+2025-04-15 at 23:27:21 | DEBUG | All experiment tasks started
+2025-04-15 at 23:27:34 | INFO | Measurement period set to 1.0 seconds.
+2025-04-15 at 23:29:22 | DEBUG | Experiment teardown started
+2025-04-15 at 23:29:22 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:29:22 | INFO | Experiment interrupted by user
+2025-04-15 at 23:29:22 | DEBUG | Experiment teardown started
+2025-04-15 at 23:29:22 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:29:22 | INFO | Experiment ended
+2025-04-15 at 23:29:23 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:29:23 | DEBUG | APIServer initialized
+2025-04-15 at 23:29:23 | INFO | Experiment started
+2025-04-15 at 23:29:23 | DEBUG | Experiment setup started
+2025-04-15 at 23:29:23 | DEBUG | Experiment setup completed
+2025-04-15 at 23:29:23 | DEBUG | API server started
+2025-04-15 at 23:29:23 | DEBUG | Rack started
+2025-04-15 at 23:29:23 | DEBUG | All experiment tasks started
+2025-04-15 at 23:29:34 | INFO | Measurement period set to 1.0 seconds.
+2025-04-15 at 23:29:34 | INFO | Measurement period set to 1.0 seconds.
+2025-04-15 at 23:29:34 | INFO | Measurement period set to 1.0 seconds.
+2025-04-15 at 23:31:10 | DEBUG | Experiment teardown started
+2025-04-15 at 23:31:10 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:31:10 | INFO | Experiment interrupted by user
+2025-04-15 at 23:31:10 | DEBUG | Experiment teardown started
+2025-04-15 at 23:31:10 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:31:10 | INFO | Experiment ended
+2025-04-15 at 23:31:11 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:31:11 | DEBUG | APIServer initialized
+2025-04-15 at 23:31:11 | INFO | Experiment started
+2025-04-15 at 23:31:11 | DEBUG | Experiment setup started
+2025-04-15 at 23:31:11 | DEBUG | Experiment setup completed
+2025-04-15 at 23:31:11 | ERROR | An error occurred while running the server: 'WARNING'
+2025-04-15 at 23:31:11 | ERROR | Task group terminated due to an error: unhandled errors in a TaskGroup (1 sub-exception)
+2025-04-15 at 23:31:11 | DEBUG | Experiment teardown started
+2025-04-15 at 23:31:11 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:31:11 | DEBUG | Experiment teardown started
+2025-04-15 at 23:31:11 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:31:11 | INFO | Experiment ended
+2025-04-15 at 23:32:47 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:32:47 | DEBUG | APIServer initialized
+2025-04-15 at 23:32:47 | INFO | Experiment started
+2025-04-15 at 23:32:47 | DEBUG | Experiment setup started
+2025-04-15 at 23:32:47 | DEBUG | Experiment setup completed
+2025-04-15 at 23:32:47 | DEBUG | API server started
+2025-04-15 at 23:32:47 | DEBUG | Rack started
+2025-04-15 at 23:32:47 | DEBUG | All experiment tasks started
+2025-04-15 at 23:33:18 | INFO | Measurement period set to 1.0 seconds.
+2025-04-15 at 23:33:18 | INFO | Measurement period set to 1.0 seconds.
+2025-04-15 at 23:39:29 | DEBUG | Experiment teardown started
+2025-04-15 at 23:39:29 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:39:29 | INFO | Experiment interrupted by user
+2025-04-15 at 23:39:29 | DEBUG | Experiment teardown started
+2025-04-15 at 23:39:29 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:39:29 | INFO | Experiment ended
+2025-04-15 at 23:39:31 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:39:31 | DEBUG | APIServer initialized
+2025-04-15 at 23:39:31 | INFO | Experiment started
+2025-04-15 at 23:39:31 | DEBUG | Experiment setup started
+2025-04-15 at 23:39:31 | DEBUG | Experiment setup completed
+2025-04-15 at 23:39:31 | DEBUG | API server started
+2025-04-15 at 23:39:31 | DEBUG | Rack started
+2025-04-15 at 23:39:31 | DEBUG | All experiment tasks started
+2025-04-15 at 23:39:41 | INFO | Measurements paused.
+2025-04-15 at 23:47:13 | DEBUG | Experiment teardown started
+2025-04-15 at 23:47:13 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:47:14 | INFO | Experiment interrupted by user
+2025-04-15 at 23:47:14 | DEBUG | Experiment teardown started
+2025-04-15 at 23:47:14 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:47:14 | INFO | Experiment ended
+2025-04-15 at 23:47:19 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:47:19 | DEBUG | APIServer initialized
+2025-04-15 at 23:47:19 | INFO | Experiment started
+2025-04-15 at 23:47:19 | DEBUG | Experiment setup started
+2025-04-15 at 23:47:19 | DEBUG | Experiment setup completed
+2025-04-15 at 23:47:19 | DEBUG | API server started
+2025-04-15 at 23:47:19 | DEBUG | Rack started
+2025-04-15 at 23:47:19 | DEBUG | All experiment tasks started
+2025-04-15 at 23:48:51 | DEBUG | Experiment teardown started
+2025-04-15 at 23:48:51 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:48:51 | INFO | Experiment interrupted by user
+2025-04-15 at 23:48:51 | DEBUG | Experiment teardown started
+2025-04-15 at 23:48:51 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:48:51 | INFO | Experiment ended
+2025-04-15 at 23:48:52 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:48:52 | DEBUG | APIServer initialized
+2025-04-15 at 23:48:52 | INFO | Experiment started
+2025-04-15 at 23:48:52 | DEBUG | Experiment setup started
+2025-04-15 at 23:48:52 | DEBUG | Experiment setup completed
+2025-04-15 at 23:48:52 | DEBUG | API server started
+2025-04-15 at 23:48:52 | DEBUG | Rack started
+2025-04-15 at 23:48:52 | DEBUG | All experiment tasks started
+2025-04-15 at 23:49:19 | DEBUG | Experiment teardown started
+2025-04-15 at 23:49:19 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:49:19 | INFO | Experiment interrupted by user
+2025-04-15 at 23:49:19 | DEBUG | Experiment teardown started
+2025-04-15 at 23:49:19 | DEBUG | Experiment teardown completed
+2025-04-15 at 23:49:19 | INFO | Experiment ended
+2025-04-15 at 23:49:21 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-15 at 23:49:21 | DEBUG | APIServer initialized
+2025-04-15 at 23:49:21 | INFO | Experiment started
+2025-04-15 at 23:49:21 | DEBUG | Experiment setup started
+2025-04-15 at 23:49:21 | DEBUG | Experiment setup completed
+2025-04-15 at 23:49:21 | DEBUG | API server started
+2025-04-15 at 23:49:21 | DEBUG | Rack started
+2025-04-15 at 23:49:21 | DEBUG | All experiment tasks started
+2025-04-17 at 00:08:48 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 00:08:48 | DEBUG | APIServer initialized
+2025-04-17 at 00:08:48 | INFO | Experiment started
+2025-04-17 at 00:08:49 | DEBUG | Experiment setup started
+2025-04-17 at 00:08:49 | DEBUG | Experiment setup completed
+2025-04-17 at 00:08:49 | DEBUG | API server started
+2025-04-17 at 00:08:49 | DEBUG | Rack started
+2025-04-17 at 00:08:49 | DEBUG | All experiment tasks started
+2025-04-17 at 00:09:39 | DEBUG | Experiment teardown started
+2025-04-17 at 00:09:39 | DEBUG | Experiment teardown completed
+2025-04-17 at 00:09:39 | INFO | Experiment interrupted by user
+2025-04-17 at 00:09:39 | DEBUG | Experiment teardown started
+2025-04-17 at 00:09:39 | DEBUG | Experiment teardown completed
+2025-04-17 at 00:09:39 | INFO | Experiment ended
+2025-04-17 at 00:09:41 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 00:09:41 | DEBUG | APIServer initialized
+2025-04-17 at 00:09:41 | INFO | Experiment started
+2025-04-17 at 00:09:41 | DEBUG | Experiment setup started
+2025-04-17 at 00:09:41 | DEBUG | Experiment setup completed
+2025-04-17 at 00:09:41 | DEBUG | API server started
+2025-04-17 at 00:09:41 | DEBUG | Rack started
+2025-04-17 at 00:09:41 | DEBUG | Task manager started
+2025-04-17 at 00:09:41 | DEBUG | All experiment tasks started
+2025-04-17 at 00:10:58 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 00:10:58 | DEBUG | APIServer initialized
+2025-04-17 at 00:10:58 | INFO | Experiment started
+2025-04-17 at 00:10:58 | DEBUG | Experiment setup started
+2025-04-17 at 00:10:58 | DEBUG | Experiment setup completed
+2025-04-17 at 00:10:58 | DEBUG | API server started
+2025-04-17 at 00:10:58 | DEBUG | Rack started
+2025-04-17 at 00:10:58 | DEBUG | Task manager started
+2025-04-17 at 00:10:58 | DEBUG | All experiment tasks started
+2025-04-17 at 00:11:35 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 00:11:35 | DEBUG | APIServer initialized
+2025-04-17 at 00:11:35 | INFO | Experiment started
+2025-04-17 at 00:11:35 | DEBUG | Experiment setup started
+2025-04-17 at 00:11:35 | DEBUG | Experiment setup completed
+2025-04-17 at 00:11:35 | DEBUG | API server started
+2025-04-17 at 00:11:35 | DEBUG | Rack started
+2025-04-17 at 00:11:35 | DEBUG | All experiment tasks started
+2025-04-17 at 00:11:36 | DEBUG | Experiment teardown started
+2025-04-17 at 00:11:36 | DEBUG | Experiment teardown completed
+2025-04-17 at 00:11:36 | INFO | Experiment interrupted by user
+2025-04-17 at 00:11:36 | DEBUG | Experiment teardown started
+2025-04-17 at 00:11:36 | DEBUG | Experiment teardown completed
+2025-04-17 at 00:11:36 | INFO | Experiment ended
+2025-04-17 at 00:12:38 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 00:12:38 | DEBUG | APIServer initialized
+2025-04-17 at 00:12:38 | INFO | Experiment started
+2025-04-17 at 00:12:38 | DEBUG | Experiment setup started
+2025-04-17 at 00:12:38 | DEBUG | Experiment setup completed
+2025-04-17 at 00:12:38 | DEBUG | API server started
+2025-04-17 at 00:12:38 | DEBUG | Rack started
+2025-04-17 at 00:12:38 | DEBUG | All experiment tasks started
+2025-04-17 at 00:12:40 | DEBUG | Experiment teardown started
+2025-04-17 at 00:12:40 | DEBUG | Experiment teardown completed
+2025-04-17 at 00:12:40 | INFO | Experiment interrupted by user
+2025-04-17 at 00:12:40 | DEBUG | Experiment teardown started
+2025-04-17 at 00:12:40 | DEBUG | Experiment teardown completed
+2025-04-17 at 00:12:40 | INFO | Experiment ended
+2025-04-17 at 00:12:42 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 00:12:42 | DEBUG | APIServer initialized
+2025-04-17 at 00:12:42 | INFO | Experiment started
+2025-04-17 at 00:12:42 | DEBUG | Experiment setup started
+2025-04-17 at 00:12:42 | DEBUG | Experiment setup completed
+2025-04-17 at 00:12:42 | DEBUG | API server started
+2025-04-17 at 00:12:42 | DEBUG | Rack started
+2025-04-17 at 00:12:42 | DEBUG | All experiment tasks started
+2025-04-17 at 00:12:44 | DEBUG | Experiment teardown started
+2025-04-17 at 00:12:44 | DEBUG | Experiment teardown completed
+2025-04-17 at 00:12:44 | INFO | Experiment interrupted by user
+2025-04-17 at 00:12:44 | DEBUG | Experiment teardown started
+2025-04-17 at 00:12:44 | DEBUG | Experiment teardown completed
+2025-04-17 at 00:12:44 | INFO | Experiment ended
+2025-04-17 at 00:13:01 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 00:13:01 | DEBUG | APIServer initialized
+2025-04-17 at 00:13:01 | INFO | Experiment started
+2025-04-17 at 00:13:01 | DEBUG | Experiment setup started
+2025-04-17 at 00:13:01 | DEBUG | Experiment setup completed
+2025-04-17 at 00:13:01 | DEBUG | API server started
+2025-04-17 at 00:13:01 | DEBUG | Rack started
+2025-04-17 at 00:13:01 | DEBUG | Task manager started
+2025-04-17 at 00:13:01 | DEBUG | All experiment tasks started
+2025-04-17 at 00:13:31 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 00:13:31 | DEBUG | APIServer initialized
+2025-04-17 at 00:13:31 | INFO | Experiment started
+2025-04-17 at 00:13:31 | DEBUG | Experiment setup started
+2025-04-17 at 00:13:31 | DEBUG | Experiment setup completed
+2025-04-17 at 00:13:31 | DEBUG | API server started
+2025-04-17 at 00:13:31 | DEBUG | Rack started
+2025-04-17 at 00:13:31 | DEBUG | Task manager started
+2025-04-17 at 00:13:31 | DEBUG | All experiment tasks started
+2025-04-17 at 00:13:32 | DEBUG | Experiment teardown started
+2025-04-17 at 00:13:32 | DEBUG | Experiment teardown completed
+2025-04-17 at 00:13:32 | INFO | Experiment interrupted by user
+2025-04-17 at 00:13:32 | DEBUG | Experiment teardown started
+2025-04-17 at 00:13:32 | DEBUG | Experiment teardown completed
+2025-04-17 at 00:13:32 | INFO | Experiment ended
+2025-04-17 at 20:27:03 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 20:27:03 | DEBUG | APIServer initialized
+2025-04-17 at 20:27:03 | INFO | Experiment started
+2025-04-17 at 20:27:03 | DEBUG | Experiment setup started
+2025-04-17 at 20:27:03 | DEBUG | Experiment setup completed
+2025-04-17 at 20:27:03 | DEBUG | API server started
+2025-04-17 at 20:27:03 | DEBUG | Rack started
+2025-04-17 at 20:27:03 | DEBUG | Task manager started
+2025-04-17 at 20:27:03 | DEBUG | All experiment tasks started
+2025-04-17 at 20:28:50 | DEBUG | Experiment teardown started
+2025-04-17 at 20:28:50 | DEBUG | Experiment teardown completed
+2025-04-17 at 20:28:50 | INFO | Experiment interrupted by user
+2025-04-17 at 20:28:50 | DEBUG | Experiment teardown started
+2025-04-17 at 20:28:50 | DEBUG | Experiment teardown completed
+2025-04-17 at 20:28:50 | INFO | Experiment ended
+2025-04-17 at 20:48:49 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 20:48:49 | DEBUG | APIServer initialized
+2025-04-17 at 20:48:49 | INFO | Experiment started
+2025-04-17 at 20:48:49 | DEBUG | Experiment setup started
+2025-04-17 at 20:48:49 | DEBUG | Experiment setup completed
+2025-04-17 at 20:48:49 | DEBUG | API server started
+2025-04-17 at 20:48:49 | DEBUG | Rack started
+2025-04-17 at 20:48:49 | DEBUG | Task manager started
+2025-04-17 at 20:48:49 | DEBUG | GUI started
+2025-04-17 at 20:48:49 | DEBUG | All experiment tasks started
+2025-04-17 at 20:49:27 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 20:49:27 | DEBUG | APIServer initialized
+2025-04-17 at 20:49:27 | INFO | Experiment started
+2025-04-17 at 20:49:27 | DEBUG | Experiment setup started
+2025-04-17 at 20:49:27 | DEBUG | Experiment setup completed
+2025-04-17 at 20:49:27 | DEBUG | API server started
+2025-04-17 at 20:49:27 | DEBUG | Rack started
+2025-04-17 at 20:49:27 | DEBUG | Task manager started
+2025-04-17 at 20:49:27 | DEBUG | All experiment tasks started
+2025-04-17 at 20:49:35 | DEBUG | Experiment teardown started
+2025-04-17 at 20:49:35 | DEBUG | Experiment teardown completed
+2025-04-17 at 20:49:35 | INFO | Experiment interrupted by user
+2025-04-17 at 20:49:35 | DEBUG | Experiment teardown started
+2025-04-17 at 20:49:35 | DEBUG | Experiment teardown completed
+2025-04-17 at 20:49:35 | INFO | Experiment ended
+2025-04-17 at 20:51:02 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 20:51:02 | DEBUG | APIServer initialized
+2025-04-17 at 20:51:02 | INFO | Experiment started
+2025-04-17 at 20:51:02 | DEBUG | Experiment setup started
+2025-04-17 at 20:51:02 | DEBUG | Experiment setup completed
+2025-04-17 at 20:51:02 | DEBUG | API server started
+2025-04-17 at 20:51:02 | DEBUG | Rack started
+2025-04-17 at 20:51:02 | DEBUG | Task manager started
+2025-04-17 at 20:51:02 | DEBUG | GUI started
+2025-04-17 at 20:51:02 | DEBUG | All experiment tasks started
+2025-04-17 at 20:51:08 | DEBUG | Experiment teardown started
+2025-04-17 at 20:51:08 | DEBUG | Experiment teardown completed
+2025-04-17 at 20:51:08 | INFO | Experiment interrupted by user
+2025-04-17 at 20:51:08 | DEBUG | Experiment teardown started
+2025-04-17 at 20:51:08 | DEBUG | Experiment teardown completed
+2025-04-17 at 20:51:08 | INFO | Experiment ended
+2025-04-17 at 21:03:44 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:03:44 | DEBUG | APIServer initialized
+2025-04-17 at 21:03:44 | INFO | Experiment started
+2025-04-17 at 21:03:44 | DEBUG | Experiment setup started
+2025-04-17 at 21:03:44 | DEBUG | Experiment setup completed
+2025-04-17 at 21:03:44 | DEBUG | API server started
+2025-04-17 at 21:03:44 | DEBUG | Rack started
+2025-04-17 at 21:03:44 | DEBUG | Task manager started
+2025-04-17 at 21:03:44 | DEBUG | GUI started
+2025-04-17 at 21:03:44 | DEBUG | All experiment tasks started
+2025-04-17 at 21:03:44 | DEBUG | GUI context created
+2025-04-17 at 21:03:48 | DEBUG | GUI context destroyed
+2025-04-17 at 21:03:55 | DEBUG | Experiment teardown started
+2025-04-17 at 21:03:55 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:03:55 | INFO | Experiment interrupted by user
+2025-04-17 at 21:03:55 | DEBUG | Experiment teardown started
+2025-04-17 at 21:03:55 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:03:55 | INFO | Experiment ended
+2025-04-17 at 21:03:58 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:03:58 | DEBUG | APIServer initialized
+2025-04-17 at 21:03:58 | INFO | Experiment started
+2025-04-17 at 21:03:58 | DEBUG | Experiment setup started
+2025-04-17 at 21:03:58 | DEBUG | Experiment setup completed
+2025-04-17 at 21:03:58 | DEBUG | API server started
+2025-04-17 at 21:03:58 | DEBUG | Rack started
+2025-04-17 at 21:03:58 | DEBUG | Task manager started
+2025-04-17 at 21:03:58 | DEBUG | GUI started
+2025-04-17 at 21:03:58 | DEBUG | All experiment tasks started
+2025-04-17 at 21:03:58 | DEBUG | GUI context created
+2025-04-17 at 21:04:03 | DEBUG | GUI context destroyed
+2025-04-17 at 21:04:03 | DEBUG | Experiment teardown started
+2025-04-17 at 21:04:03 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:04:03 | INFO | Experiment interrupted by user
+2025-04-17 at 21:04:03 | DEBUG | Experiment teardown started
+2025-04-17 at 21:04:03 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:04:03 | INFO | Experiment ended
+2025-04-17 at 21:18:51 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:18:51 | DEBUG | APIServer initialized
+2025-04-17 at 21:18:51 | INFO | Experiment started
+2025-04-17 at 21:18:51 | DEBUG | Experiment setup started
+2025-04-17 at 21:18:51 | DEBUG | Experiment setup completed
+2025-04-17 at 21:18:51 | DEBUG | API server started
+2025-04-17 at 21:18:51 | DEBUG | Rack started
+2025-04-17 at 21:18:51 | DEBUG | Task manager started
+2025-04-17 at 21:18:51 | DEBUG | All experiment tasks started
+2025-04-17 at 21:18:53 | DEBUG | Task manager teardown started
+2025-04-17 at 21:18:53 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:18:53 | DEBUG | Experiment teardown started
+2025-04-17 at 21:18:53 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:18:53 | INFO | Experiment interrupted by user
+2025-04-17 at 21:18:53 | DEBUG | Experiment teardown started
+2025-04-17 at 21:18:53 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:18:53 | INFO | Experiment ended
+2025-04-17 at 21:22:12 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:22:12 | DEBUG | APIServer initialized
+2025-04-17 at 21:22:12 | INFO | Experiment started
+2025-04-17 at 21:22:12 | DEBUG | Experiment setup started
+2025-04-17 at 21:22:12 | DEBUG | Experiment setup completed
+2025-04-17 at 21:22:12 | DEBUG | API server started
+2025-04-17 at 21:22:12 | DEBUG | Rack started
+2025-04-17 at 21:22:12 | DEBUG | Task manager started
+2025-04-17 at 21:22:12 | DEBUG | All experiment tasks started
+2025-04-17 at 21:22:12 | DEBUG | Task manager setup started
+2025-04-17 at 21:22:12 | DEBUG | Task manager setup completed
+2025-04-17 at 21:22:12 | DEBUG | Running TaskManager
+2025-04-17 at 21:22:22 | DEBUG | Task manager teardown started
+2025-04-17 at 21:22:22 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:22:22 | DEBUG | Experiment teardown started
+2025-04-17 at 21:22:22 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:22:22 | INFO | Experiment interrupted by user
+2025-04-17 at 21:22:22 | DEBUG | Experiment teardown started
+2025-04-17 at 21:22:22 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:22:22 | INFO | Experiment ended
+2025-04-17 at 21:23:44 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:23:44 | DEBUG | APIServer initialized
+2025-04-17 at 21:23:44 | INFO | Experiment started
+2025-04-17 at 21:23:44 | DEBUG | Experiment setup started
+2025-04-17 at 21:23:44 | DEBUG | Experiment setup completed
+2025-04-17 at 21:23:44 | DEBUG | API server started
+2025-04-17 at 21:23:44 | DEBUG | All experiment tasks started
+2025-04-17 at 21:23:44 | DEBUG | Rack setup started
+2025-04-17 at 21:23:44 | DEBUG | Rack setup completed
+2025-04-17 at 21:23:44 | DEBUG | Running Rack
+2025-04-17 at 21:23:44 | DEBUG | Task manager setup started
+2025-04-17 at 21:23:44 | DEBUG | Task manager setup completed
+2025-04-17 at 21:23:44 | DEBUG | Running TaskManager
+2025-04-17 at 21:23:51 | DEBUG | Task manager teardown started
+2025-04-17 at 21:23:51 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:23:51 | DEBUG | Rack teardown started
+2025-04-17 at 21:23:51 | DEBUG | Rack teardown completed
+2025-04-17 at 21:23:51 | DEBUG | Experiment teardown started
+2025-04-17 at 21:23:51 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:23:51 | INFO | Experiment interrupted by user
+2025-04-17 at 21:23:51 | DEBUG | Experiment teardown started
+2025-04-17 at 21:23:51 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:23:51 | INFO | Experiment ended
+2025-04-17 at 21:26:08 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:26:08 | DEBUG | APIServer initialized
+2025-04-17 at 21:26:08 | INFO | Experiment started
+2025-04-17 at 21:26:08 | DEBUG | Experiment setup started
+2025-04-17 at 21:26:08 | DEBUG | Experiment setup completed
+2025-04-17 at 21:26:08 | DEBUG | All experiment tasks started
+2025-04-17 at 21:26:08 | DEBUG | API server setup started
+2025-04-17 at 21:26:08 | DEBUG | API server setup completed
+2025-04-17 at 21:26:08 | DEBUG | Running APIServer
+2025-04-17 at 21:26:08 | DEBUG | Rack setup started
+2025-04-17 at 21:26:08 | DEBUG | Rack setup completed
+2025-04-17 at 21:26:08 | DEBUG | Running Rack
+2025-04-17 at 21:26:08 | DEBUG | Task manager setup started
+2025-04-17 at 21:26:08 | DEBUG | Task manager setup completed
+2025-04-17 at 21:26:08 | DEBUG | Running TaskManager
+2025-04-17 at 21:26:14 | DEBUG | API server teardown started
+2025-04-17 at 21:26:14 | DEBUG | API server teardown completed
+2025-04-17 at 21:26:14 | DEBUG | Task manager teardown started
+2025-04-17 at 21:26:14 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:26:14 | DEBUG | Rack teardown started
+2025-04-17 at 21:26:14 | DEBUG | Rack teardown completed
+2025-04-17 at 21:26:14 | DEBUG | Experiment teardown started
+2025-04-17 at 21:26:14 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:26:14 | INFO | Experiment interrupted by user
+2025-04-17 at 21:26:14 | DEBUG | Experiment teardown started
+2025-04-17 at 21:26:14 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:26:14 | INFO | Experiment ended
+2025-04-17 at 21:33:48 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:33:48 | DEBUG | APIServer initialized
+2025-04-17 at 21:33:48 | INFO | Experiment started
+2025-04-17 at 21:33:48 | DEBUG | Experiment setup started
+2025-04-17 at 21:33:48 | DEBUG | Experiment setup completed
+2025-04-17 at 21:33:48 | DEBUG | All experiment tasks started
+2025-04-17 at 21:33:48 | DEBUG | API server setup started
+2025-04-17 at 21:33:48 | DEBUG | API server setup completed
+2025-04-17 at 21:33:48 | DEBUG | Running APIServer
+2025-04-17 at 21:33:48 | DEBUG | Rack setup started
+2025-04-17 at 21:33:48 | DEBUG | Rack setup completed
+2025-04-17 at 21:33:48 | DEBUG | Running Rack
+2025-04-17 at 21:33:48 | DEBUG | Task manager setup started
+2025-04-17 at 21:33:48 | DEBUG | Task manager setup completed
+2025-04-17 at 21:33:48 | DEBUG | Running TaskManager
+2025-04-17 at 21:33:48 | DEBUG | GUI setup started
+2025-04-17 at 21:33:48 | DEBUG | GUI setup completed
+2025-04-17 at 21:33:48 | DEBUG | Running Gui
+2025-04-17 at 21:33:48 | DEBUG | GUI run started
+2025-04-17 at 21:33:51 | DEBUG | GUI teardown started
+2025-04-17 at 21:33:51 | DEBUG | GUI teardown completed
+2025-04-17 at 21:33:55 | DEBUG | API server teardown started
+2025-04-17 at 21:33:55 | DEBUG | API server teardown completed
+2025-04-17 at 21:33:55 | DEBUG | Task manager teardown started
+2025-04-17 at 21:33:55 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:33:55 | DEBUG | Rack teardown started
+2025-04-17 at 21:33:55 | DEBUG | Rack teardown completed
+2025-04-17 at 21:33:55 | DEBUG | Experiment teardown started
+2025-04-17 at 21:33:55 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:33:55 | INFO | Experiment interrupted by user
+2025-04-17 at 21:33:55 | DEBUG | Experiment teardown started
+2025-04-17 at 21:33:55 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:33:55 | INFO | Experiment ended
+2025-04-17 at 21:34:12 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:34:12 | DEBUG | APIServer initialized
+2025-04-17 at 21:34:12 | INFO | Experiment started
+2025-04-17 at 21:34:12 | DEBUG | Experiment setup started
+2025-04-17 at 21:34:12 | DEBUG | Experiment setup completed
+2025-04-17 at 21:34:12 | DEBUG | All experiment tasks started
+2025-04-17 at 21:34:12 | DEBUG | API server setup started
+2025-04-17 at 21:34:12 | DEBUG | API server setup completed
+2025-04-17 at 21:34:12 | DEBUG | Running APIServer
+2025-04-17 at 21:34:12 | DEBUG | Rack setup started
+2025-04-17 at 21:34:12 | DEBUG | Rack setup completed
+2025-04-17 at 21:34:12 | DEBUG | Running Rack
+2025-04-17 at 21:34:12 | DEBUG | Task manager setup started
+2025-04-17 at 21:34:12 | DEBUG | Task manager setup completed
+2025-04-17 at 21:34:12 | DEBUG | Running TaskManager
+2025-04-17 at 21:34:12 | DEBUG | GUI setup started
+2025-04-17 at 21:34:12 | DEBUG | GUI setup completed
+2025-04-17 at 21:34:12 | DEBUG | Running Gui
+2025-04-17 at 21:34:12 | DEBUG | GUI run started
+2025-04-17 at 21:34:18 | DEBUG | GUI teardown started
+2025-04-17 at 21:34:18 | DEBUG | GUI teardown completed
+2025-04-17 at 21:34:18 | DEBUG | API server teardown started
+2025-04-17 at 21:34:18 | DEBUG | API server teardown completed
+2025-04-17 at 21:34:18 | DEBUG | Rack teardown started
+2025-04-17 at 21:34:18 | DEBUG | Rack teardown completed
+2025-04-17 at 21:34:18 | DEBUG | Task manager teardown started
+2025-04-17 at 21:34:18 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:34:18 | DEBUG | Experiment teardown started
+2025-04-17 at 21:34:18 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:34:18 | INFO | Experiment interrupted by user
+2025-04-17 at 21:34:18 | DEBUG | Experiment teardown started
+2025-04-17 at 21:34:18 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:34:18 | INFO | Experiment ended
+2025-04-17 at 21:42:19 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:42:19 | DEBUG | APIServer initialized
+2025-04-17 at 21:42:19 | INFO | Experiment started
+2025-04-17 at 21:42:19 | DEBUG | Experiment setup started
+2025-04-17 at 21:42:19 | DEBUG | Experiment setup completed
+2025-04-17 at 21:42:19 | DEBUG | All experiment tasks started
+2025-04-17 at 21:42:19 | DEBUG | API server setup started
+2025-04-17 at 21:42:19 | DEBUG | API server setup completed
+2025-04-17 at 21:42:19 | DEBUG | Running APIServer
+2025-04-17 at 21:42:19 | DEBUG | Rack setup started
+2025-04-17 at 21:42:19 | DEBUG | Rack setup completed
+2025-04-17 at 21:42:19 | DEBUG | Running Rack
+2025-04-17 at 21:42:19 | DEBUG | Task manager setup started
+2025-04-17 at 21:42:19 | DEBUG | Task manager setup completed
+2025-04-17 at 21:42:19 | DEBUG | Running TaskManager
+2025-04-17 at 21:42:24 | DEBUG | API server teardown started
+2025-04-17 at 21:42:24 | DEBUG | API server teardown completed
+2025-04-17 at 21:42:24 | DEBUG | Task manager teardown started
+2025-04-17 at 21:42:24 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:42:24 | DEBUG | Rack teardown started
+2025-04-17 at 21:42:24 | DEBUG | Rack teardown completed
+2025-04-17 at 21:42:24 | DEBUG | Experiment teardown started
+2025-04-17 at 21:42:24 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:42:24 | INFO | Experiment interrupted by user
+2025-04-17 at 21:42:24 | DEBUG | Experiment teardown started
+2025-04-17 at 21:42:24 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:42:24 | INFO | Experiment ended
+2025-04-17 at 21:46:00 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:46:00 | DEBUG | APIServer initialized
+2025-04-17 at 21:46:00 | INFO | Experiment started
+2025-04-17 at 21:46:00 | DEBUG | Experiment setup started
+2025-04-17 at 21:46:00 | DEBUG | Experiment setup completed
+2025-04-17 at 21:46:00 | DEBUG | All experiment tasks started
+2025-04-17 at 21:46:00 | DEBUG | API server setup started
+2025-04-17 at 21:46:00 | DEBUG | API server setup completed
+2025-04-17 at 21:46:00 | DEBUG | Running APIServer
+2025-04-17 at 21:46:00 | DEBUG | Rack setup started
+2025-04-17 at 21:46:00 | DEBUG | Rack setup completed
+2025-04-17 at 21:46:00 | DEBUG | Running Rack
+2025-04-17 at 21:46:00 | DEBUG | Task manager setup started
+2025-04-17 at 21:46:00 | DEBUG | Task manager setup completed
+2025-04-17 at 21:46:00 | DEBUG | Running TaskManager
+2025-04-17 at 21:46:12 | DEBUG | API server teardown started
+2025-04-17 at 21:46:12 | DEBUG | API server teardown completed
+2025-04-17 at 21:46:12 | DEBUG | Task manager teardown started
+2025-04-17 at 21:46:12 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:46:12 | DEBUG | Rack teardown started
+2025-04-17 at 21:46:12 | DEBUG | Rack teardown completed
+2025-04-17 at 21:46:12 | DEBUG | Experiment teardown started
+2025-04-17 at 21:46:12 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:46:12 | INFO | Experiment interrupted by user
+2025-04-17 at 21:46:12 | DEBUG | Experiment teardown started
+2025-04-17 at 21:46:12 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:46:12 | INFO | Experiment ended
+2025-04-17 at 21:48:35 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:48:35 | DEBUG | APIServer initialized
+2025-04-17 at 21:48:35 | INFO | Experiment started
+2025-04-17 at 21:48:35 | DEBUG | Experiment setup started
+2025-04-17 at 21:48:35 | DEBUG | Experiment setup completed
+2025-04-17 at 21:48:35 | DEBUG | All experiment tasks started
+2025-04-17 at 21:48:35 | DEBUG | API server setup started
+2025-04-17 at 21:48:35 | DEBUG | API server setup completed
+2025-04-17 at 21:48:35 | DEBUG | Running APIServer
+2025-04-17 at 21:48:35 | DEBUG | Rack setup started
+2025-04-17 at 21:48:35 | DEBUG | Rack setup completed
+2025-04-17 at 21:48:35 | DEBUG | Running Rack
+2025-04-17 at 21:48:35 | DEBUG | Task manager setup started
+2025-04-17 at 21:48:35 | DEBUG | Task manager setup completed
+2025-04-17 at 21:48:35 | DEBUG | Running TaskManager
+2025-04-17 at 21:48:39 | DEBUG | API server teardown started
+2025-04-17 at 21:48:39 | DEBUG | API server teardown completed
+2025-04-17 at 21:48:39 | DEBUG | Task manager teardown started
+2025-04-17 at 21:48:39 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:48:39 | DEBUG | Rack teardown started
+2025-04-17 at 21:48:39 | DEBUG | Rack teardown completed
+2025-04-17 at 21:48:39 | DEBUG | Experiment teardown started
+2025-04-17 at 21:48:39 | DEBUG | Experiment GUI process joined
+2025-04-17 at 21:48:39 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:48:39 | INFO | Experiment interrupted by user
+2025-04-17 at 21:48:39 | DEBUG | Experiment teardown started
+2025-04-17 at 21:48:39 | DEBUG | Experiment GUI process joined
+2025-04-17 at 21:48:39 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:48:39 | INFO | Experiment ended
+2025-04-17 at 21:50:11 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:50:11 | DEBUG | APIServer initialized
+2025-04-17 at 21:50:11 | INFO | Experiment started
+2025-04-17 at 21:50:11 | DEBUG | Experiment setup started
+2025-04-17 at 21:50:11 | DEBUG | Experiment setup completed
+2025-04-17 at 21:50:11 | DEBUG | All experiment tasks started
+2025-04-17 at 21:50:11 | DEBUG | API server setup started
+2025-04-17 at 21:50:11 | DEBUG | API server setup completed
+2025-04-17 at 21:50:11 | DEBUG | Running APIServer
+2025-04-17 at 21:50:11 | DEBUG | Rack setup started
+2025-04-17 at 21:50:11 | DEBUG | Rack setup completed
+2025-04-17 at 21:50:11 | DEBUG | Running Rack
+2025-04-17 at 21:50:11 | DEBUG | Task manager setup started
+2025-04-17 at 21:50:11 | DEBUG | Task manager setup completed
+2025-04-17 at 21:50:11 | DEBUG | Running TaskManager
+2025-04-17 at 21:51:25 | DEBUG | API server teardown started
+2025-04-17 at 21:51:25 | DEBUG | API server teardown completed
+2025-04-17 at 21:51:25 | DEBUG | Task manager teardown started
+2025-04-17 at 21:51:25 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:51:25 | DEBUG | Rack teardown started
+2025-04-17 at 21:51:25 | DEBUG | Rack teardown completed
+2025-04-17 at 21:51:25 | DEBUG | Experiment teardown started
+2025-04-17 at 21:51:25 | DEBUG | Experiment GUI process joined
+2025-04-17 at 21:51:25 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:51:25 | INFO | Experiment interrupted by user
+2025-04-17 at 21:51:25 | INFO | Experiment ended
+2025-04-17 at 21:52:13 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:52:13 | DEBUG | APIServer initialized
+2025-04-17 at 21:52:13 | INFO | Experiment started
+2025-04-17 at 21:52:13 | DEBUG | Experiment setup started
+2025-04-17 at 21:52:13 | DEBUG | Experiment setup completed
+2025-04-17 at 21:52:13 | DEBUG | All experiment tasks started
+2025-04-17 at 21:52:13 | DEBUG | API server setup started
+2025-04-17 at 21:52:13 | DEBUG | API server setup completed
+2025-04-17 at 21:52:13 | DEBUG | Running APIServer
+2025-04-17 at 21:52:13 | DEBUG | Rack setup started
+2025-04-17 at 21:52:13 | DEBUG | Rack setup completed
+2025-04-17 at 21:52:13 | DEBUG | Running Rack
+2025-04-17 at 21:52:13 | DEBUG | Task manager setup started
+2025-04-17 at 21:52:13 | DEBUG | Task manager setup completed
+2025-04-17 at 21:52:13 | DEBUG | Running TaskManager
+2025-04-17 at 21:52:13 | DEBUG | GUI setup started
+2025-04-17 at 21:52:13 | DEBUG | GUI setup completed
+2025-04-17 at 21:52:13 | DEBUG | Running Gui
+2025-04-17 at 21:52:13 | DEBUG | Running GUI
+2025-04-17 at 21:52:17 | DEBUG | GUI teardown started
+2025-04-17 at 21:52:17 | DEBUG | GUI teardown completed
+2025-04-17 at 21:52:21 | DEBUG | API server teardown started
+2025-04-17 at 21:52:21 | DEBUG | API server teardown completed
+2025-04-17 at 21:52:21 | DEBUG | Task manager teardown started
+2025-04-17 at 21:52:21 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:52:21 | DEBUG | Rack teardown started
+2025-04-17 at 21:52:21 | DEBUG | Rack teardown completed
+2025-04-17 at 21:52:21 | DEBUG | Experiment teardown started
+2025-04-17 at 21:52:21 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:52:21 | INFO | Experiment interrupted by user
+2025-04-17 at 21:52:21 | INFO | Experiment ended
+2025-04-17 at 21:52:26 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:52:26 | DEBUG | APIServer initialized
+2025-04-17 at 21:52:26 | INFO | Experiment started
+2025-04-17 at 21:52:26 | DEBUG | Experiment setup started
+2025-04-17 at 21:52:26 | DEBUG | Experiment setup completed
+2025-04-17 at 21:52:26 | DEBUG | All experiment tasks started
+2025-04-17 at 21:52:26 | DEBUG | API server setup started
+2025-04-17 at 21:52:26 | DEBUG | API server setup completed
+2025-04-17 at 21:52:26 | DEBUG | Running APIServer
+2025-04-17 at 21:52:26 | DEBUG | Rack setup started
+2025-04-17 at 21:52:26 | DEBUG | Rack setup completed
+2025-04-17 at 21:52:26 | DEBUG | Running Rack
+2025-04-17 at 21:52:26 | DEBUG | Task manager setup started
+2025-04-17 at 21:52:26 | DEBUG | Task manager setup completed
+2025-04-17 at 21:52:26 | DEBUG | Running TaskManager
+2025-04-17 at 21:52:26 | DEBUG | GUI setup started
+2025-04-17 at 21:52:26 | DEBUG | GUI setup completed
+2025-04-17 at 21:52:26 | DEBUG | Running Gui
+2025-04-17 at 21:52:26 | DEBUG | Running GUI
+2025-04-17 at 21:52:31 | DEBUG | GUI teardown started
+2025-04-17 at 21:52:31 | DEBUG | GUI teardown completed
+2025-04-17 at 21:52:31 | DEBUG | API server teardown started
+2025-04-17 at 21:52:31 | DEBUG | API server teardown completed
+2025-04-17 at 21:52:31 | DEBUG | Task manager teardown started
+2025-04-17 at 21:52:31 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:52:31 | DEBUG | Rack teardown started
+2025-04-17 at 21:52:31 | DEBUG | Rack teardown completed
+2025-04-17 at 21:52:31 | DEBUG | Experiment teardown started
+2025-04-17 at 21:52:31 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:52:31 | INFO | Experiment interrupted by user
+2025-04-17 at 21:52:31 | INFO | Experiment ended
+2025-04-17 at 21:53:09 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:53:09 | DEBUG | APIServer initialized
+2025-04-17 at 21:53:09 | INFO | Experiment started
+2025-04-17 at 21:53:09 | DEBUG | Experiment setup started
+2025-04-17 at 21:53:09 | DEBUG | Experiment setup completed
+2025-04-17 at 21:53:09 | DEBUG | All experiment tasks started
+2025-04-17 at 21:53:09 | DEBUG | API server setup started
+2025-04-17 at 21:53:09 | DEBUG | API server setup completed
+2025-04-17 at 21:53:09 | DEBUG | Running APIServer
+2025-04-17 at 21:53:09 | DEBUG | Rack setup started
+2025-04-17 at 21:53:09 | DEBUG | Rack setup completed
+2025-04-17 at 21:53:09 | DEBUG | Running Rack
+2025-04-17 at 21:53:09 | DEBUG | Task manager setup started
+2025-04-17 at 21:53:09 | DEBUG | Task manager setup completed
+2025-04-17 at 21:53:09 | DEBUG | Running TaskManager
+2025-04-17 at 21:53:09 | DEBUG | GUI setup started
+2025-04-17 at 21:53:09 | DEBUG | GUI setup completed
+2025-04-17 at 21:53:09 | DEBUG | Running Gui
+2025-04-17 at 21:53:09 | DEBUG | Running GUI
+2025-04-17 at 21:53:11 | DEBUG | GUI teardown started
+2025-04-17 at 21:53:11 | DEBUG | GUI teardown completed
+2025-04-17 at 21:53:12 | DEBUG | API server teardown started
+2025-04-17 at 21:53:12 | DEBUG | API server teardown completed
+2025-04-17 at 21:53:12 | DEBUG | Rack teardown started
+2025-04-17 at 21:53:12 | DEBUG | Rack teardown completed
+2025-04-17 at 21:53:12 | DEBUG | Task manager teardown started
+2025-04-17 at 21:53:12 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:53:12 | DEBUG | Experiment teardown started
+2025-04-17 at 21:53:12 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:53:12 | INFO | Experiment interrupted by user
+2025-04-17 at 21:53:12 | INFO | Experiment ended
+2025-04-17 at 21:55:29 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:55:29 | DEBUG | APIServer initialized
+2025-04-17 at 21:55:29 | INFO | Experiment started
+2025-04-17 at 21:55:29 | DEBUG | Experiment setup started
+2025-04-17 at 21:55:29 | DEBUG | Experiment setup completed
+2025-04-17 at 21:55:29 | ERROR | Task group terminated due to an error: 'TaskManager' object has no attribute 'run_in_new_process'
+2025-04-17 at 21:55:29 | DEBUG | Experiment teardown started
+2025-04-17 at 21:55:29 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:55:29 | INFO | Experiment ended
+2025-04-17 at 21:55:41 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 21:55:41 | DEBUG | APIServer initialized
+2025-04-17 at 21:55:41 | INFO | Experiment started
+2025-04-17 at 21:55:41 | DEBUG | Experiment setup started
+2025-04-17 at 21:55:41 | DEBUG | Experiment setup completed
+2025-04-17 at 21:55:41 | DEBUG | All experiment tasks started
+2025-04-17 at 21:55:41 | DEBUG | API server setup started
+2025-04-17 at 21:55:41 | DEBUG | API server setup completed
+2025-04-17 at 21:55:41 | DEBUG | Running APIServer
+2025-04-17 at 21:55:41 | DEBUG | Rack setup started
+2025-04-17 at 21:55:41 | DEBUG | Rack setup completed
+2025-04-17 at 21:55:41 | DEBUG | Running Rack
+2025-04-17 at 21:55:41 | DEBUG | Task manager setup started
+2025-04-17 at 21:55:41 | DEBUG | Task manager setup completed
+2025-04-17 at 21:55:41 | DEBUG | Running TaskManager
+2025-04-17 at 21:55:45 | DEBUG | API server teardown started
+2025-04-17 at 21:55:45 | DEBUG | API server teardown completed
+2025-04-17 at 21:55:45 | DEBUG | Task manager teardown started
+2025-04-17 at 21:55:45 | DEBUG | Task manager teardown completed
+2025-04-17 at 21:55:45 | DEBUG | Rack teardown started
+2025-04-17 at 21:55:45 | DEBUG | Rack teardown completed
+2025-04-17 at 21:55:45 | DEBUG | Experiment teardown started
+2025-04-17 at 21:55:45 | DEBUG | Experiment teardown completed
+2025-04-17 at 21:55:45 | INFO | Experiment interrupted by user
+2025-04-17 at 21:55:45 | INFO | Experiment ended
+2025-04-17 at 22:02:08 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:02:08 | DEBUG | APIServer initialized
+2025-04-17 at 22:02:08 | INFO | Experiment started
+2025-04-17 at 22:02:08 | DEBUG | Experiment setup started
+2025-04-17 at 22:02:08 | DEBUG | Experiment setup completed
+2025-04-17 at 22:02:08 | DEBUG | All experiment tasks started
+2025-04-17 at 22:02:08 | DEBUG | API server setup started
+2025-04-17 at 22:02:08 | DEBUG | API server setup completed
+2025-04-17 at 22:02:08 | DEBUG | Running APIServer
+2025-04-17 at 22:02:08 | DEBUG | Rack setup started
+2025-04-17 at 22:02:08 | DEBUG | Rack setup completed
+2025-04-17 at 22:02:08 | DEBUG | Running Rack
+2025-04-17 at 22:02:08 | DEBUG | Task manager setup started
+2025-04-17 at 22:02:08 | DEBUG | Task manager setup completed
+2025-04-17 at 22:02:08 | DEBUG | Running TaskManager
+2025-04-17 at 22:02:15 | DEBUG | API server teardown started
+2025-04-17 at 22:02:15 | DEBUG | API server teardown completed
+2025-04-17 at 22:02:15 | DEBUG | Task manager teardown started
+2025-04-17 at 22:02:15 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:02:15 | DEBUG | Rack teardown started
+2025-04-17 at 22:02:15 | DEBUG | Rack teardown completed
+2025-04-17 at 22:02:15 | DEBUG | Experiment teardown started
+2025-04-17 at 22:02:15 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:02:15 | INFO | Experiment interrupted by user
+2025-04-17 at 22:02:15 | INFO | Experiment ended
+2025-04-17 at 22:03:41 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:03:41 | DEBUG | APIServer initialized
+2025-04-17 at 22:03:41 | INFO | Experiment started
+2025-04-17 at 22:03:41 | DEBUG | Experiment setup started
+2025-04-17 at 22:03:41 | DEBUG | Experiment setup completed
+2025-04-17 at 22:03:41 | DEBUG | All experiment tasks started
+2025-04-17 at 22:03:41 | DEBUG | API server setup started
+2025-04-17 at 22:03:41 | DEBUG | API server setup completed
+2025-04-17 at 22:03:41 | DEBUG | Running APIServer
+2025-04-17 at 22:03:41 | DEBUG | Rack setup started
+2025-04-17 at 22:03:41 | DEBUG | Rack setup completed
+2025-04-17 at 22:03:41 | DEBUG | Running Rack
+2025-04-17 at 22:03:41 | DEBUG | Task manager setup started
+2025-04-17 at 22:03:41 | DEBUG | Task manager setup completed
+2025-04-17 at 22:03:41 | DEBUG | Running TaskManager
+2025-04-17 at 22:03:46 | DEBUG | API server teardown started
+2025-04-17 at 22:03:46 | DEBUG | API server teardown completed
+2025-04-17 at 22:03:46 | DEBUG | Task manager teardown started
+2025-04-17 at 22:03:46 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:03:46 | DEBUG | Rack teardown started
+2025-04-17 at 22:03:46 | DEBUG | Rack teardown completed
+2025-04-17 at 22:03:46 | DEBUG | Experiment teardown started
+2025-04-17 at 22:03:46 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:03:46 | INFO | Experiment interrupted by user
+2025-04-17 at 22:03:46 | INFO | Experiment ended
+2025-04-17 at 22:03:53 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:03:53 | DEBUG | APIServer initialized
+2025-04-17 at 22:03:53 | INFO | Experiment started
+2025-04-17 at 22:03:53 | DEBUG | Experiment setup started
+2025-04-17 at 22:03:53 | DEBUG | Experiment setup completed
+2025-04-17 at 22:03:53 | DEBUG | All experiment tasks started
+2025-04-17 at 22:03:53 | DEBUG | API server setup started
+2025-04-17 at 22:03:53 | DEBUG | API server setup completed
+2025-04-17 at 22:03:53 | DEBUG | Running APIServer
+2025-04-17 at 22:03:53 | DEBUG | Rack setup started
+2025-04-17 at 22:03:53 | DEBUG | Rack setup completed
+2025-04-17 at 22:03:53 | DEBUG | Running Rack
+2025-04-17 at 22:03:53 | DEBUG | Task manager setup started
+2025-04-17 at 22:03:53 | DEBUG | Task manager setup completed
+2025-04-17 at 22:03:53 | DEBUG | Running TaskManager
+2025-04-17 at 22:04:02 | DEBUG | API server teardown started
+2025-04-17 at 22:04:02 | DEBUG | API server teardown completed
+2025-04-17 at 22:04:02 | DEBUG | Task manager teardown started
+2025-04-17 at 22:04:02 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:04:02 | DEBUG | Rack teardown started
+2025-04-17 at 22:04:02 | DEBUG | Rack teardown completed
+2025-04-17 at 22:04:02 | DEBUG | Experiment teardown started
+2025-04-17 at 22:04:02 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:04:02 | INFO | Experiment interrupted by user
+2025-04-17 at 22:04:02 | INFO | Experiment ended
+2025-04-17 at 22:05:06 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:05:06 | DEBUG | APIServer initialized
+2025-04-17 at 22:05:06 | INFO | Experiment started
+2025-04-17 at 22:05:06 | DEBUG | Experiment setup started
+2025-04-17 at 22:05:06 | DEBUG | Experiment setup completed
+2025-04-17 at 22:05:06 | DEBUG | All experiment tasks started
+2025-04-17 at 22:05:06 | DEBUG | API server setup started
+2025-04-17 at 22:05:06 | DEBUG | API server setup completed
+2025-04-17 at 22:05:06 | DEBUG | Running APIServer
+2025-04-17 at 22:05:06 | DEBUG | Rack setup started
+2025-04-17 at 22:05:06 | DEBUG | Rack setup completed
+2025-04-17 at 22:05:06 | DEBUG | Running Rack
+2025-04-17 at 22:05:06 | DEBUG | Task manager setup started
+2025-04-17 at 22:05:06 | DEBUG | Task manager setup completed
+2025-04-17 at 22:05:06 | DEBUG | Running TaskManager
+2025-04-17 at 22:05:12 | DEBUG | API server teardown started
+2025-04-17 at 22:05:12 | DEBUG | API server teardown completed
+2025-04-17 at 22:05:12 | DEBUG | Task manager teardown started
+2025-04-17 at 22:05:12 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:05:12 | DEBUG | Rack teardown started
+2025-04-17 at 22:05:12 | DEBUG | Rack teardown completed
+2025-04-17 at 22:05:12 | DEBUG | Experiment teardown started
+2025-04-17 at 22:05:12 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:05:12 | INFO | Experiment interrupted by user
+2025-04-17 at 22:05:12 | INFO | Experiment ended
+2025-04-17 at 22:13:56 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:13:56 | DEBUG | APIServer initialized
+2025-04-17 at 22:13:56 | INFO | Experiment started
+2025-04-17 at 22:13:56 | DEBUG | Experiment setup started
+2025-04-17 at 22:13:56 | DEBUG | Experiment setup completed
+2025-04-17 at 22:13:56 | DEBUG | All experiment tasks started
+2025-04-17 at 22:13:56 | DEBUG | API server setup started
+2025-04-17 at 22:13:56 | DEBUG | API server setup completed
+2025-04-17 at 22:13:56 | DEBUG | Running APIServer
+2025-04-17 at 22:13:56 | DEBUG | Rack setup started
+2025-04-17 at 22:13:56 | DEBUG | Rack setup completed
+2025-04-17 at 22:13:56 | DEBUG | Running Rack
+2025-04-17 at 22:13:56 | DEBUG | Task manager setup started
+2025-04-17 at 22:13:56 | DEBUG | Task manager setup completed
+2025-04-17 at 22:13:56 | DEBUG | Running TaskManager
+2025-04-17 at 22:14:01 | DEBUG | API server teardown started
+2025-04-17 at 22:14:01 | DEBUG | API server teardown completed
+2025-04-17 at 22:14:01 | DEBUG | Task manager teardown started
+2025-04-17 at 22:14:01 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:14:01 | DEBUG | Rack teardown started
+2025-04-17 at 22:14:01 | DEBUG | Rack teardown completed
+2025-04-17 at 22:14:01 | DEBUG | Experiment teardown started
+2025-04-17 at 22:14:01 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:14:01 | INFO | Experiment interrupted by user
+2025-04-17 at 22:14:01 | INFO | Experiment ended
+2025-04-17 at 22:16:49 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:16:49 | DEBUG | APIServer initialized
+2025-04-17 at 22:16:49 | INFO | Experiment started
+2025-04-17 at 22:16:49 | DEBUG | Experiment setup started
+2025-04-17 at 22:16:49 | DEBUG | Experiment setup completed
+2025-04-17 at 22:16:49 | DEBUG | All experiment tasks started
+2025-04-17 at 22:16:49 | DEBUG | API server setup started
+2025-04-17 at 22:16:49 | DEBUG | API server setup completed
+2025-04-17 at 22:16:49 | DEBUG | Running APIServer
+2025-04-17 at 22:16:49 | DEBUG | Rack setup started
+2025-04-17 at 22:16:49 | DEBUG | Rack setup completed
+2025-04-17 at 22:16:49 | DEBUG | Running Rack
+2025-04-17 at 22:16:49 | DEBUG | Task manager setup started
+2025-04-17 at 22:16:49 | DEBUG | Task manager setup completed
+2025-04-17 at 22:16:49 | DEBUG | Running TaskManager
+2025-04-17 at 22:17:40 | DEBUG | API server teardown started
+2025-04-17 at 22:17:40 | DEBUG | API server teardown completed
+2025-04-17 at 22:17:40 | DEBUG | Task manager teardown started
+2025-04-17 at 22:17:40 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:17:40 | DEBUG | Rack teardown started
+2025-04-17 at 22:17:40 | DEBUG | Rack teardown completed
+2025-04-17 at 22:17:40 | DEBUG | Experiment teardown started
+2025-04-17 at 22:17:40 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:17:40 | INFO | Experiment interrupted by user
+2025-04-17 at 22:17:40 | INFO | Experiment ended
+2025-04-17 at 22:17:42 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:17:42 | DEBUG | APIServer initialized
+2025-04-17 at 22:17:42 | INFO | Experiment started
+2025-04-17 at 22:17:42 | DEBUG | Experiment setup started
+2025-04-17 at 22:17:42 | DEBUG | Experiment setup completed
+2025-04-17 at 22:17:42 | DEBUG | All experiment tasks started
+2025-04-17 at 22:17:42 | DEBUG | API server setup started
+2025-04-17 at 22:17:42 | DEBUG | API server setup completed
+2025-04-17 at 22:17:42 | ERROR | Error running APIServer: 'APIServer' object has no attribute 'register_endpoints'
+2025-04-17 at 22:17:42 | DEBUG | API server teardown started
+2025-04-17 at 22:17:42 | DEBUG | API server teardown completed
+2025-04-17 at 22:17:42 | DEBUG | Rack setup started
+2025-04-17 at 22:17:42 | DEBUG | Rack setup completed
+2025-04-17 at 22:17:42 | DEBUG | Running Rack
+2025-04-17 at 22:17:42 | DEBUG | Task manager setup started
+2025-04-17 at 22:17:42 | DEBUG | Task manager setup completed
+2025-04-17 at 22:17:42 | ERROR | Error running TaskManager: 'FastAPI' object has no attribute 'app'
+2025-04-17 at 22:17:42 | DEBUG | Task manager teardown started
+2025-04-17 at 22:17:42 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:17:42 | DEBUG | Rack teardown started
+2025-04-17 at 22:17:42 | DEBUG | Rack teardown completed
+2025-04-17 at 22:17:42 | ERROR | Task group terminated due to an error: unhandled errors in a TaskGroup (2 sub-exceptions)
+2025-04-17 at 22:17:42 | DEBUG | Experiment teardown started
+2025-04-17 at 22:17:46 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:17:46 | INFO | Experiment ended
+2025-04-17 at 22:18:12 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:18:12 | DEBUG | APIServer initialized
+2025-04-17 at 22:18:12 | INFO | Experiment started
+2025-04-17 at 22:18:12 | DEBUG | Experiment setup started
+2025-04-17 at 22:18:12 | DEBUG | Experiment setup completed
+2025-04-17 at 22:18:12 | DEBUG | All experiment tasks started
+2025-04-17 at 22:18:12 | DEBUG | API server setup started
+2025-04-17 at 22:18:12 | DEBUG | API server setup completed
+2025-04-17 at 22:18:12 | ERROR | Error running APIServer: 'APIServer' object has no attribute 'register_endpoints'
+2025-04-17 at 22:18:12 | DEBUG | API server teardown started
+2025-04-17 at 22:18:12 | DEBUG | API server teardown completed
+2025-04-17 at 22:18:12 | DEBUG | Rack setup started
+2025-04-17 at 22:18:12 | DEBUG | Rack setup completed
+2025-04-17 at 22:18:12 | ERROR | Error running Rack: 'APIServer' object has no attribute 'get'
+2025-04-17 at 22:18:12 | DEBUG | Rack teardown started
+2025-04-17 at 22:18:12 | DEBUG | Rack teardown completed
+2025-04-17 at 22:18:12 | DEBUG | Task manager setup started
+2025-04-17 at 22:18:12 | DEBUG | Task manager setup completed
+2025-04-17 at 22:18:12 | DEBUG | Running TaskManager
+2025-04-17 at 22:18:12 | DEBUG | Task manager teardown started
+2025-04-17 at 22:18:12 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:18:12 | ERROR | Task group terminated due to an error: unhandled errors in a TaskGroup (2 sub-exceptions)
+2025-04-17 at 22:18:12 | DEBUG | Experiment teardown started
+2025-04-17 at 22:18:15 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:18:15 | INFO | Experiment ended
+2025-04-17 at 22:19:00 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:19:00 | DEBUG | APIServer initialized
+2025-04-17 at 22:19:00 | INFO | Experiment started
+2025-04-17 at 22:19:00 | DEBUG | Experiment setup started
+2025-04-17 at 22:19:00 | DEBUG | Experiment setup completed
+2025-04-17 at 22:19:00 | DEBUG | All experiment tasks started
+2025-04-17 at 22:19:00 | DEBUG | API server setup started
+2025-04-17 at 22:19:00 | DEBUG | API server setup completed
+2025-04-17 at 22:19:00 | ERROR | Error running APIServer: 'APIServer' object has no attribute 'register_endpoints'
+2025-04-17 at 22:19:00 | DEBUG | API server teardown started
+2025-04-17 at 22:19:00 | DEBUG | API server teardown completed
+2025-04-17 at 22:19:00 | DEBUG | Rack setup started
+2025-04-17 at 22:19:00 | DEBUG | Rack setup completed
+2025-04-17 at 22:19:00 | ERROR | Error running Rack: 'APIServer' object has no attribute 'get'
+2025-04-17 at 22:19:00 | DEBUG | Rack teardown started
+2025-04-17 at 22:19:00 | DEBUG | Rack teardown completed
+2025-04-17 at 22:19:00 | DEBUG | Task manager setup started
+2025-04-17 at 22:19:00 | DEBUG | Task manager setup completed
+2025-04-17 at 22:19:00 | DEBUG | Running TaskManager
+2025-04-17 at 22:19:00 | DEBUG | Task manager teardown started
+2025-04-17 at 22:19:00 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:19:00 | ERROR | Task group terminated due to an error: unhandled errors in a TaskGroup (2 sub-exceptions)
+2025-04-17 at 22:19:00 | DEBUG | Experiment teardown started
+2025-04-17 at 22:19:03 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:19:03 | INFO | Experiment ended
+2025-04-17 at 22:20:55 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:20:55 | DEBUG | APIServer initialized
+2025-04-17 at 22:20:55 | INFO | Experiment started
+2025-04-17 at 22:20:55 | ERROR | Task group terminated due to an error: 'FastAPI' object has no attribute 'app'
+2025-04-17 at 22:20:55 | DEBUG | Experiment teardown started
+2025-04-17 at 22:20:55 | ERROR | An error occurred while running the experiment: 'Experiment' object has no attribute '_ui_process'
+2025-04-17 at 22:20:55 | INFO | Experiment ended
+2025-04-17 at 22:22:02 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:22:02 | DEBUG | APIServer initialized
+2025-04-17 at 22:22:02 | INFO | Experiment started
+2025-04-17 at 22:22:02 | ERROR | Task group terminated due to an error: 'FastAPI' object has no attribute 'app'
+2025-04-17 at 22:22:02 | DEBUG | Experiment teardown started
+2025-04-17 at 22:22:02 | ERROR | An error occurred while running the experiment: 'Experiment' object has no attribute '_ui_process'
+2025-04-17 at 22:22:02 | INFO | Experiment ended
+2025-04-17 at 22:22:56 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:22:56 | DEBUG | APIServer initialized
+2025-04-17 at 22:22:56 | INFO | Experiment started
+2025-04-17 at 22:22:56 | ERROR | Task group terminated due to an error: 'FastAPI' object has no attribute 'app'
+2025-04-17 at 22:22:56 | DEBUG | Experiment teardown started
+2025-04-17 at 22:22:56 | ERROR | An error occurred while running the experiment: 'Experiment' object has no attribute '_ui_process'
+2025-04-17 at 22:22:56 | INFO | Experiment ended
+2025-04-17 at 22:23:21 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:23:21 | DEBUG | APIServer initialized
+2025-04-17 at 22:23:21 | INFO | Experiment started
+2025-04-17 at 22:23:21 | ERROR | Task group terminated due to an error: 'FastAPI' object has no attribute 'app'
+2025-04-17 at 22:23:21 | DEBUG | Experiment teardown started
+2025-04-17 at 22:23:21 | ERROR | An error occurred while running the experiment: 'Experiment' object has no attribute '_ui_process'
+2025-04-17 at 22:23:21 | INFO | Experiment ended
+2025-04-17 at 22:24:28 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:24:28 | DEBUG | APIServer initialized
+2025-04-17 at 22:24:28 | INFO | Experiment started
+2025-04-17 at 22:24:28 | ERROR | Task group terminated due to an error: 'FastAPI' object has no attribute 'app'
+2025-04-17 at 22:24:28 | DEBUG | Experiment teardown started
+2025-04-17 at 22:24:28 | ERROR | An error occurred while running the experiment: 'Experiment' object has no attribute '_ui_process'
+2025-04-17 at 22:24:28 | INFO | Experiment ended
+2025-04-17 at 22:25:22 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:25:22 | DEBUG | APIServer initialized
+2025-04-17 at 22:25:22 | INFO | Experiment started
+2025-04-17 at 22:25:22 | DEBUG | Experiment setup started
+2025-04-17 at 22:25:22 | DEBUG | Experiment setup completed
+2025-04-17 at 22:25:22 | DEBUG | All experiment tasks started
+2025-04-17 at 22:25:22 | DEBUG | API server setup started
+2025-04-17 at 22:25:22 | DEBUG | API server setup completed
+2025-04-17 at 22:25:22 | DEBUG | Running APIServer
+2025-04-17 at 22:25:22 | DEBUG | Rack setup started
+2025-04-17 at 22:25:22 | DEBUG | Rack setup completed
+2025-04-17 at 22:25:22 | DEBUG | Running Rack
+2025-04-17 at 22:25:22 | DEBUG | Task manager setup started
+2025-04-17 at 22:25:22 | DEBUG | Task manager setup completed
+2025-04-17 at 22:25:22 | DEBUG | Running TaskManager
+2025-04-17 at 22:25:25 | DEBUG | API server teardown started
+2025-04-17 at 22:25:25 | DEBUG | API server teardown completed
+2025-04-17 at 22:25:25 | DEBUG | Task manager teardown started
+2025-04-17 at 22:25:25 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:25:25 | DEBUG | Rack teardown started
+2025-04-17 at 22:25:25 | DEBUG | Rack teardown completed
+2025-04-17 at 22:25:25 | DEBUG | Experiment teardown started
+2025-04-17 at 22:25:25 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:25:25 | INFO | Experiment interrupted by user
+2025-04-17 at 22:25:25 | INFO | Experiment ended
+2025-04-17 at 22:26:34 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:26:34 | DEBUG | APIServer initialized
+2025-04-17 at 22:26:34 | INFO | Experiment started
+2025-04-17 at 22:26:34 | DEBUG | Experiment setup started
+2025-04-17 at 22:26:34 | DEBUG | Experiment setup completed
+2025-04-17 at 22:26:34 | DEBUG | All experiment tasks started
+2025-04-17 at 22:26:34 | ERROR | Error running APIServer: 'APIServer' object has no attribute 'register_endpoints'
+2025-04-17 at 22:26:34 | DEBUG | API server teardown started
+2025-04-17 at 22:26:34 | DEBUG | API server teardown completed
+2025-04-17 at 22:26:34 | DEBUG | Rack setup started
+2025-04-17 at 22:26:34 | DEBUG | Rack setup completed
+2025-04-17 at 22:26:34 | DEBUG | Running Rack
+2025-04-17 at 22:26:34 | DEBUG | Task manager setup started
+2025-04-17 at 22:26:34 | DEBUG | Task manager setup completed
+2025-04-17 at 22:26:34 | DEBUG | Running TaskManager
+2025-04-17 at 22:26:34 | DEBUG | Task manager teardown started
+2025-04-17 at 22:26:34 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:26:34 | DEBUG | Rack teardown started
+2025-04-17 at 22:26:34 | DEBUG | Rack teardown completed
+2025-04-17 at 22:26:34 | ERROR | Task group terminated due to an error: unhandled errors in a TaskGroup (1 sub-exception)
+2025-04-17 at 22:26:34 | DEBUG | Experiment teardown started
+2025-04-17 at 22:26:37 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:26:37 | INFO | Experiment ended
+2025-04-17 at 22:27:21 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:27:21 | DEBUG | APIServer initialized
+2025-04-17 at 22:27:21 | INFO | Experiment started
+2025-04-17 at 22:27:21 | DEBUG | Experiment setup started
+2025-04-17 at 22:27:21 | DEBUG | Experiment setup completed
+2025-04-17 at 22:27:21 | DEBUG | All experiment tasks started
+2025-04-17 at 22:27:21 | DEBUG | API server setup started
+2025-04-17 at 22:27:21 | DEBUG | API server setup completed
+2025-04-17 at 22:27:21 | DEBUG | Running APIServer
+2025-04-17 at 22:27:21 | DEBUG | Rack setup started
+2025-04-17 at 22:27:21 | DEBUG | Rack setup completed
+2025-04-17 at 22:27:21 | DEBUG | Running Rack
+2025-04-17 at 22:27:21 | DEBUG | Task manager setup started
+2025-04-17 at 22:27:21 | DEBUG | Task manager setup completed
+2025-04-17 at 22:27:21 | DEBUG | Running TaskManager
+2025-04-17 at 22:27:57 | DEBUG | API server teardown started
+2025-04-17 at 22:27:57 | DEBUG | API server teardown completed
+2025-04-17 at 22:27:57 | DEBUG | Task manager teardown started
+2025-04-17 at 22:27:57 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:27:57 | DEBUG | Rack teardown started
+2025-04-17 at 22:27:57 | DEBUG | Rack teardown completed
+2025-04-17 at 22:27:57 | DEBUG | Experiment teardown started
+2025-04-17 at 22:27:57 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:27:57 | INFO | Experiment interrupted by user
+2025-04-17 at 22:27:57 | INFO | Experiment ended
+2025-04-17 at 22:27:59 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:27:59 | DEBUG | APIServer initialized
+2025-04-17 at 22:27:59 | INFO | Experiment started
+2025-04-17 at 22:27:59 | DEBUG | Experiment setup started
+2025-04-17 at 22:27:59 | DEBUG | Experiment setup completed
+2025-04-17 at 22:27:59 | DEBUG | All experiment tasks started
+2025-04-17 at 22:27:59 | DEBUG | API server setup started at localhost:8005
+2025-04-17 at 22:27:59 | DEBUG | API server setup completed
+2025-04-17 at 22:27:59 | DEBUG | Running APIServer
+2025-04-17 at 22:27:59 | DEBUG | Rack setup started
+2025-04-17 at 22:27:59 | DEBUG | Rack setup completed
+2025-04-17 at 22:27:59 | DEBUG | Running Rack
+2025-04-17 at 22:27:59 | DEBUG | Task manager setup started
+2025-04-17 at 22:27:59 | DEBUG | Task manager setup completed
+2025-04-17 at 22:27:59 | DEBUG | Running TaskManager
+2025-04-17 at 22:28:51 | INFO | Adding task to queue
+2025-04-17 at 22:28:56 | DEBUG | API server teardown started
+2025-04-17 at 22:28:56 | DEBUG | API server teardown completed
+2025-04-17 at 22:28:56 | DEBUG | Task manager teardown started
+2025-04-17 at 22:28:56 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:28:56 | DEBUG | Rack teardown started
+2025-04-17 at 22:28:56 | DEBUG | Rack teardown completed
+2025-04-17 at 22:28:56 | DEBUG | Experiment teardown started
+2025-04-17 at 22:28:56 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:28:56 | INFO | Experiment interrupted by user
+2025-04-17 at 22:28:56 | INFO | Experiment ended
+2025-04-17 at 22:29:26 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:29:26 | DEBUG | APIServer initialized
+2025-04-17 at 22:29:26 | INFO | Experiment started
+2025-04-17 at 22:29:26 | DEBUG | Experiment setup started
+2025-04-17 at 22:29:26 | DEBUG | Experiment setup completed
+2025-04-17 at 22:29:26 | DEBUG | All experiment tasks started
+2025-04-17 at 22:29:26 | DEBUG | API server setup started at localhost:8005
+2025-04-17 at 22:29:26 | DEBUG | API server setup completed
+2025-04-17 at 22:29:26 | DEBUG | Running APIServer
+2025-04-17 at 22:29:26 | DEBUG | Rack setup started
+2025-04-17 at 22:29:26 | DEBUG | Rack setup completed
+2025-04-17 at 22:29:26 | DEBUG | Running Rack
+2025-04-17 at 22:29:26 | DEBUG | Task manager setup started
+2025-04-17 at 22:29:26 | DEBUG | Task manager setup completed
+2025-04-17 at 22:29:26 | DEBUG | Running TaskManager
+2025-04-17 at 22:29:37 | INFO | Measurements paused.
+2025-04-17 at 22:29:46 | INFO | Measurements paused.
+2025-04-17 at 22:29:46 | INFO | Measurements paused.
+2025-04-17 at 22:29:53 | INFO | Measurements resumed.
+2025-04-17 at 22:29:54 | INFO | Measurements resumed.
+2025-04-17 at 22:29:55 | INFO | Measurements resumed.
+2025-04-17 at 22:43:48 | DEBUG | API server teardown started
+2025-04-17 at 22:43:48 | DEBUG | API server teardown completed
+2025-04-17 at 22:43:48 | DEBUG | Task manager teardown started
+2025-04-17 at 22:43:48 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:43:48 | DEBUG | Rack teardown started
+2025-04-17 at 22:43:48 | DEBUG | Rack teardown completed
+2025-04-17 at 22:43:48 | DEBUG | Experiment teardown started
+2025-04-17 at 22:43:48 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:43:48 | INFO | Experiment interrupted by user
+2025-04-17 at 22:43:48 | INFO | Experiment ended
+2025-04-17 at 22:43:49 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:43:49 | DEBUG | APIServer initialized
+2025-04-17 at 22:43:49 | INFO | Experiment started
+2025-04-17 at 22:43:49 | DEBUG | Experiment setup started
+2025-04-17 at 22:43:49 | DEBUG | Experiment setup completed
+2025-04-17 at 22:43:49 | DEBUG | All experiment tasks started
+2025-04-17 at 22:43:49 | DEBUG | API server setup started at localhost:8005
+2025-04-17 at 22:43:49 | DEBUG | API server setup completed
+2025-04-17 at 22:43:49 | DEBUG | Running APIServer
+2025-04-17 at 22:43:49 | DEBUG | Rack setup started
+2025-04-17 at 22:43:49 | DEBUG | Rack setup completed
+2025-04-17 at 22:43:49 | DEBUG | Running Rack
+2025-04-17 at 22:43:49 | DEBUG | Task manager setup started
+2025-04-17 at 22:43:49 | DEBUG | Task manager setup completed
+2025-04-17 at 22:43:49 | DEBUG | Running TaskManager
+2025-04-17 at 22:45:48 | DEBUG | API server teardown started
+2025-04-17 at 22:45:48 | DEBUG | API server teardown completed
+2025-04-17 at 22:45:48 | DEBUG | Task manager teardown started
+2025-04-17 at 22:45:48 | DEBUG | Task manager teardown completed
+2025-04-17 at 22:45:48 | DEBUG | Rack teardown started
+2025-04-17 at 22:45:48 | DEBUG | Rack teardown completed
+2025-04-17 at 22:45:48 | DEBUG | Experiment teardown started
+2025-04-17 at 22:45:48 | DEBUG | Experiment teardown completed
+2025-04-17 at 22:45:48 | INFO | Experiment interrupted by user
+2025-04-17 at 22:45:48 | INFO | Experiment ended
+2025-04-17 at 22:45:49 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 22:45:49 | DEBUG | APIServer initialized
+2025-04-17 at 22:45:49 | INFO | Experiment started
+2025-04-17 at 22:45:49 | DEBUG | Experiment setup started
+2025-04-17 at 22:45:49 | DEBUG | Experiment setup completed
+2025-04-17 at 22:45:49 | DEBUG | All experiment tasks started
+2025-04-17 at 22:45:49 | DEBUG | API server setup started at localhost:8005
+2025-04-17 at 22:45:49 | DEBUG | API server setup completed
+2025-04-17 at 22:45:49 | DEBUG | Running APIServer
+2025-04-17 at 22:45:49 | DEBUG | Rack setup started
+2025-04-17 at 22:45:49 | DEBUG | Rack setup completed
+2025-04-17 at 22:45:49 | DEBUG | Running Rack
+2025-04-17 at 22:45:49 | DEBUG | Task manager setup started
+2025-04-17 at 22:45:49 | DEBUG | Task manager setup completed
+2025-04-17 at 22:45:49 | DEBUG | Running TaskManager
+2025-04-17 at 23:40:08 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 23:40:08 | DEBUG | APIServer initialized
+2025-04-17 at 23:40:28 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 23:40:28 | DEBUG | APIServer initialized
+2025-04-17 at 23:49:39 | DEBUG | API server teardown started
+2025-04-17 at 23:49:39 | DEBUG | API server teardown completed
+2025-04-17 at 23:49:39 | DEBUG | Task manager teardown started
+2025-04-17 at 23:49:39 | DEBUG | Task manager teardown completed
+2025-04-17 at 23:49:39 | DEBUG | Rack teardown started
+2025-04-17 at 23:49:39 | DEBUG | Rack teardown completed
+2025-04-17 at 23:49:39 | DEBUG | Experiment teardown started
+2025-04-17 at 23:49:39 | DEBUG | Experiment teardown completed
+2025-04-17 at 23:49:39 | INFO | Experiment interrupted by user
+2025-04-17 at 23:49:39 | INFO | Experiment ended
+2025-04-17 at 23:51:00 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-17 at 23:51:00 | DEBUG | APIServer initialized
+2025-04-17 at 23:51:00 | INFO | Experiment started
+2025-04-17 at 23:51:00 | DEBUG | Experiment setup started
+2025-04-17 at 23:51:00 | DEBUG | Experiment setup completed
+2025-04-17 at 23:51:00 | DEBUG | All experiment tasks started
+2025-04-17 at 23:51:00 | DEBUG | API server setup started at localhost:8005
+2025-04-17 at 23:51:00 | DEBUG | API server setup completed
+2025-04-17 at 23:51:00 | DEBUG | Running APIServer
+2025-04-17 at 23:51:00 | DEBUG | Rack setup started
+2025-04-17 at 23:51:00 | DEBUG | Rack setup completed
+2025-04-17 at 23:51:00 | DEBUG | Running Rack
+2025-04-17 at 23:51:00 | DEBUG | Task manager setup started
+2025-04-17 at 23:51:00 | DEBUG | Task manager setup completed
+2025-04-17 at 23:51:00 | DEBUG | Running TaskManager
+2025-04-18 at 00:15:13 | INFO | Adding task to queue
+2025-04-18 at 00:19:04 | DEBUG | API server teardown started
+2025-04-18 at 00:19:04 | DEBUG | API server teardown completed
+2025-04-18 at 00:19:04 | DEBUG | Task manager teardown started
+2025-04-18 at 00:19:04 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:19:04 | DEBUG | Rack teardown started
+2025-04-18 at 00:19:04 | DEBUG | Rack teardown completed
+2025-04-18 at 00:19:04 | DEBUG | Experiment teardown started
+2025-04-18 at 00:19:04 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:19:04 | INFO | Experiment interrupted by user
+2025-04-18 at 00:19:04 | INFO | Experiment ended
+2025-04-18 at 00:19:14 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:19:14 | DEBUG | APIServer initialized
+2025-04-18 at 00:19:14 | INFO | Experiment started
+2025-04-18 at 00:19:14 | DEBUG | Experiment setup started
+2025-04-18 at 00:19:14 | DEBUG | Experiment setup completed
+2025-04-18 at 00:19:14 | DEBUG | All experiment tasks started
+2025-04-18 at 00:19:14 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:19:14 | DEBUG | API server setup completed
+2025-04-18 at 00:19:14 | DEBUG | Running APIServer
+2025-04-18 at 00:19:14 | DEBUG | Rack setup started
+2025-04-18 at 00:19:14 | DEBUG | Rack setup completed
+2025-04-18 at 00:19:14 | DEBUG | Running Rack
+2025-04-18 at 00:19:14 | DEBUG | Task manager setup started
+2025-04-18 at 00:19:14 | DEBUG | Task manager setup completed
+2025-04-18 at 00:19:14 | DEBUG | Running TaskManager
+2025-04-18 at 00:19:14 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:19:23 | INFO | Adding task to queue
+2025-04-18 at 00:19:23 | INFO | Adding task to queue: <pyacquisition.tasks.TestTask object at 0x000001C09484A7E0>
+2025-04-18 at 00:19:23 | DEBUG | Task fetched from queue: <pyacquisition.tasks.TestTask object at 0x000001C09484A7E0>
+2025-04-18 at 00:19:23 | ERROR | Error running task <pyacquisition.tasks.TestTask object at 0x000001C09484A7E0>: name 'asyncio' is not defined
+2025-04-18 at 00:19:23 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:20:07 | DEBUG | API server teardown started
+2025-04-18 at 00:20:07 | DEBUG | API server teardown completed
+2025-04-18 at 00:20:07 | DEBUG | Task manager teardown started
+2025-04-18 at 00:20:07 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:20:07 | DEBUG | Rack teardown started
+2025-04-18 at 00:20:07 | DEBUG | Rack teardown completed
+2025-04-18 at 00:20:07 | DEBUG | Experiment teardown started
+2025-04-18 at 00:20:07 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:20:07 | INFO | Experiment interrupted by user
+2025-04-18 at 00:20:07 | INFO | Experiment ended
+2025-04-18 at 00:20:09 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:20:09 | DEBUG | APIServer initialized
+2025-04-18 at 00:20:09 | INFO | Experiment started
+2025-04-18 at 00:20:09 | DEBUG | Experiment setup started
+2025-04-18 at 00:20:09 | DEBUG | Experiment setup completed
+2025-04-18 at 00:20:09 | DEBUG | All experiment tasks started
+2025-04-18 at 00:20:09 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:20:09 | DEBUG | API server setup completed
+2025-04-18 at 00:20:09 | DEBUG | Running APIServer
+2025-04-18 at 00:20:09 | DEBUG | Rack setup started
+2025-04-18 at 00:20:09 | DEBUG | Rack setup completed
+2025-04-18 at 00:20:09 | DEBUG | Running Rack
+2025-04-18 at 00:20:09 | DEBUG | Task manager setup started
+2025-04-18 at 00:20:09 | DEBUG | Task manager setup completed
+2025-04-18 at 00:20:09 | DEBUG | Running TaskManager
+2025-04-18 at 00:20:09 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:20:13 | INFO | Adding task to queue
+2025-04-18 at 00:20:13 | INFO | Adding task to queue: <pyacquisition.tasks.TestTask object at 0x0000016344472630>
+2025-04-18 at 00:20:13 | DEBUG | Task fetched from queue: <pyacquisition.tasks.TestTask object at 0x0000016344472630>
+2025-04-18 at 00:20:14 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:31:51 | DEBUG | API server teardown started
+2025-04-18 at 00:31:51 | DEBUG | API server teardown completed
+2025-04-18 at 00:31:51 | DEBUG | Task manager teardown started
+2025-04-18 at 00:31:51 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:31:51 | DEBUG | Rack teardown started
+2025-04-18 at 00:31:51 | DEBUG | Rack teardown completed
+2025-04-18 at 00:31:51 | DEBUG | Experiment teardown started
+2025-04-18 at 00:31:51 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:31:51 | INFO | Experiment interrupted by user
+2025-04-18 at 00:31:51 | INFO | Experiment ended
+2025-04-18 at 00:31:52 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:31:52 | DEBUG | APIServer initialized
+2025-04-18 at 00:31:52 | INFO | Experiment started
+2025-04-18 at 00:31:52 | DEBUG | Experiment setup started
+2025-04-18 at 00:31:53 | DEBUG | Experiment setup completed
+2025-04-18 at 00:31:53 | DEBUG | All experiment tasks started
+2025-04-18 at 00:31:53 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:31:53 | DEBUG | API server setup completed
+2025-04-18 at 00:31:53 | DEBUG | Running APIServer
+2025-04-18 at 00:31:53 | DEBUG | Rack setup started
+2025-04-18 at 00:31:53 | DEBUG | Rack setup completed
+2025-04-18 at 00:31:53 | DEBUG | Running Rack
+2025-04-18 at 00:31:53 | DEBUG | Task manager setup started
+2025-04-18 at 00:31:53 | DEBUG | Task manager setup completed
+2025-04-18 at 00:31:53 | DEBUG | Running TaskManager
+2025-04-18 at 00:31:53 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:31:59 | INFO | Adding task to queue
+2025-04-18 at 00:31:59 | INFO | Adding task to queue: <pyacquisition.tasks.TestTask object at 0x000001E0AE30A780>
+2025-04-18 at 00:31:59 | DEBUG | Task fetched from queue: <pyacquisition.tasks.TestTask object at 0x000001E0AE30A780>
+2025-04-18 at 00:31:59 | ERROR | Error running task <pyacquisition.tasks.TestTask object at 0x000001E0AE30A780>: 'TestTask' object has no attribute '_abort_event'
+2025-04-18 at 00:31:59 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:32:43 | DEBUG | API server teardown started
+2025-04-18 at 00:32:43 | DEBUG | API server teardown completed
+2025-04-18 at 00:32:43 | DEBUG | Task manager teardown started
+2025-04-18 at 00:32:43 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:32:43 | DEBUG | Rack teardown started
+2025-04-18 at 00:32:43 | DEBUG | Rack teardown completed
+2025-04-18 at 00:32:43 | DEBUG | Experiment teardown started
+2025-04-18 at 00:32:43 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:32:43 | INFO | Experiment interrupted by user
+2025-04-18 at 00:32:43 | INFO | Experiment ended
+2025-04-18 at 00:32:45 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:32:45 | DEBUG | APIServer initialized
+2025-04-18 at 00:32:45 | INFO | Experiment started
+2025-04-18 at 00:32:45 | DEBUG | Experiment setup started
+2025-04-18 at 00:32:45 | DEBUG | Experiment setup completed
+2025-04-18 at 00:32:45 | DEBUG | All experiment tasks started
+2025-04-18 at 00:32:45 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:32:45 | DEBUG | API server setup completed
+2025-04-18 at 00:32:45 | DEBUG | Running APIServer
+2025-04-18 at 00:32:45 | DEBUG | Rack setup started
+2025-04-18 at 00:32:45 | DEBUG | Rack setup completed
+2025-04-18 at 00:32:45 | DEBUG | Running Rack
+2025-04-18 at 00:32:45 | DEBUG | Task manager setup started
+2025-04-18 at 00:32:45 | DEBUG | Task manager setup completed
+2025-04-18 at 00:32:45 | DEBUG | Running TaskManager
+2025-04-18 at 00:32:45 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:32:58 | INFO | Adding task to queue
+2025-04-18 at 00:32:58 | INFO | Adding task to queue: <pyacquisition.tasks.TestTask object at 0x00000206C98427E0>
+2025-04-18 at 00:32:58 | DEBUG | Task fetched from queue: <pyacquisition.tasks.TestTask object at 0x00000206C98427E0>
+2025-04-18 at 00:32:59 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:34:01 | DEBUG | API server teardown started
+2025-04-18 at 00:34:01 | DEBUG | API server teardown completed
+2025-04-18 at 00:34:01 | DEBUG | Rack teardown started
+2025-04-18 at 00:34:01 | DEBUG | Rack teardown completed
+2025-04-18 at 00:34:01 | DEBUG | Task manager teardown started
+2025-04-18 at 00:34:01 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:34:01 | DEBUG | Experiment teardown started
+2025-04-18 at 00:34:01 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:34:01 | INFO | Experiment interrupted by user
+2025-04-18 at 00:34:01 | INFO | Experiment ended
+2025-04-18 at 00:34:03 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:34:03 | DEBUG | APIServer initialized
+2025-04-18 at 00:34:03 | INFO | Experiment started
+2025-04-18 at 00:34:03 | DEBUG | Experiment setup started
+2025-04-18 at 00:34:03 | DEBUG | Experiment setup completed
+2025-04-18 at 00:34:03 | DEBUG | All experiment tasks started
+2025-04-18 at 00:34:03 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:34:03 | DEBUG | API server setup completed
+2025-04-18 at 00:34:03 | DEBUG | Running APIServer
+2025-04-18 at 00:34:03 | DEBUG | Rack setup started
+2025-04-18 at 00:34:03 | DEBUG | Rack setup completed
+2025-04-18 at 00:34:03 | DEBUG | Running Rack
+2025-04-18 at 00:34:03 | DEBUG | Task manager setup started
+2025-04-18 at 00:34:03 | DEBUG | Task manager setup completed
+2025-04-18 at 00:34:03 | DEBUG | Running TaskManager
+2025-04-18 at 00:34:03 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:34:07 | INFO | Adding task to queue
+2025-04-18 at 00:34:07 | INFO | Adding task to queue: <pyacquisition.tasks.TestTask object at 0x00000230054927E0>
+2025-04-18 at 00:34:07 | DEBUG | Task fetched from queue: <pyacquisition.tasks.TestTask object at 0x00000230054927E0>
+2025-04-18 at 00:34:07 | ERROR | Error running task <pyacquisition.tasks.TestTask object at 0x00000230054927E0>: 'TestTask' object has no attribute '_abort_event'
+2025-04-18 at 00:34:07 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:35:39 | DEBUG | API server teardown started
+2025-04-18 at 00:35:39 | DEBUG | API server teardown completed
+2025-04-18 at 00:35:39 | DEBUG | Rack teardown started
+2025-04-18 at 00:35:39 | DEBUG | Rack teardown completed
+2025-04-18 at 00:35:39 | DEBUG | Task manager teardown started
+2025-04-18 at 00:35:39 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:35:39 | DEBUG | Experiment teardown started
+2025-04-18 at 00:35:39 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:35:39 | INFO | Experiment interrupted by user
+2025-04-18 at 00:35:39 | INFO | Experiment ended
+2025-04-18 at 00:35:41 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:35:41 | DEBUG | APIServer initialized
+2025-04-18 at 00:35:41 | INFO | Experiment started
+2025-04-18 at 00:35:41 | DEBUG | Experiment setup started
+2025-04-18 at 00:35:41 | DEBUG | Experiment setup completed
+2025-04-18 at 00:35:41 | DEBUG | All experiment tasks started
+2025-04-18 at 00:35:41 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:35:41 | DEBUG | API server setup completed
+2025-04-18 at 00:35:41 | DEBUG | Running APIServer
+2025-04-18 at 00:35:41 | DEBUG | Rack setup started
+2025-04-18 at 00:35:41 | DEBUG | Rack setup completed
+2025-04-18 at 00:35:41 | DEBUG | Running Rack
+2025-04-18 at 00:35:41 | DEBUG | Task manager setup started
+2025-04-18 at 00:35:41 | DEBUG | Task manager setup completed
+2025-04-18 at 00:35:41 | DEBUG | Running TaskManager
+2025-04-18 at 00:35:41 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:35:47 | INFO | Adding task to queue
+2025-04-18 at 00:35:47 | INFO | Adding task to queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x00000215C499E900 [unset]>, _abort_event=<asyncio.locks.Event object at 0x00000215C499E870 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:35:47 | DEBUG | Task fetched from queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x00000215C499E900 [unset]>, _abort_event=<asyncio.locks.Event object at 0x00000215C499E870 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:35:48 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:37:45 | DEBUG | API server teardown started
+2025-04-18 at 00:37:45 | DEBUG | API server teardown completed
+2025-04-18 at 00:37:45 | DEBUG | Task manager teardown started
+2025-04-18 at 00:37:45 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:37:45 | DEBUG | Rack teardown started
+2025-04-18 at 00:37:45 | DEBUG | Rack teardown completed
+2025-04-18 at 00:37:45 | DEBUG | Experiment teardown started
+2025-04-18 at 00:37:45 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:37:45 | INFO | Experiment interrupted by user
+2025-04-18 at 00:37:45 | INFO | Experiment ended
+2025-04-18 at 00:37:46 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:37:46 | DEBUG | APIServer initialized
+2025-04-18 at 00:37:46 | INFO | Experiment started
+2025-04-18 at 00:37:46 | DEBUG | Experiment setup started
+2025-04-18 at 00:37:46 | DEBUG | Experiment setup completed
+2025-04-18 at 00:37:46 | DEBUG | All experiment tasks started
+2025-04-18 at 00:37:46 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:37:46 | DEBUG | API server setup completed
+2025-04-18 at 00:37:46 | DEBUG | Running APIServer
+2025-04-18 at 00:37:46 | DEBUG | Rack setup started
+2025-04-18 at 00:37:46 | DEBUG | Rack setup completed
+2025-04-18 at 00:37:46 | DEBUG | Running Rack
+2025-04-18 at 00:37:46 | DEBUG | Task manager setup started
+2025-04-18 at 00:37:46 | DEBUG | Task manager setup completed
+2025-04-18 at 00:37:46 | DEBUG | Running TaskManager
+2025-04-18 at 00:37:46 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:37:51 | INFO | Adding task to queue
+2025-04-18 at 00:37:51 | INFO | Adding task to queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000002CB0C58E8D0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x000002CB0C58EA50 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:37:51 | DEBUG | Task fetched from queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000002CB0C58E8D0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x000002CB0C58EA50 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:37:51 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:39:07 | DEBUG | API server teardown started
+2025-04-18 at 00:39:07 | DEBUG | API server teardown completed
+2025-04-18 at 00:39:07 | DEBUG | Task manager teardown started
+2025-04-18 at 00:39:07 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:39:07 | DEBUG | Rack teardown started
+2025-04-18 at 00:39:07 | DEBUG | Rack teardown completed
+2025-04-18 at 00:39:07 | DEBUG | Experiment teardown started
+2025-04-18 at 00:39:07 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:39:07 | INFO | Experiment interrupted by user
+2025-04-18 at 00:39:07 | INFO | Experiment ended
+2025-04-18 at 00:39:08 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:39:08 | DEBUG | APIServer initialized
+2025-04-18 at 00:39:08 | INFO | Experiment started
+2025-04-18 at 00:39:08 | DEBUG | Experiment setup started
+2025-04-18 at 00:39:08 | DEBUG | Experiment setup completed
+2025-04-18 at 00:39:08 | DEBUG | All experiment tasks started
+2025-04-18 at 00:39:08 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:39:08 | DEBUG | API server setup completed
+2025-04-18 at 00:39:08 | DEBUG | Running APIServer
+2025-04-18 at 00:39:08 | DEBUG | Rack setup started
+2025-04-18 at 00:39:08 | DEBUG | Rack setup completed
+2025-04-18 at 00:39:08 | DEBUG | Running Rack
+2025-04-18 at 00:39:08 | DEBUG | Task manager setup started
+2025-04-18 at 00:39:08 | DEBUG | Task manager setup completed
+2025-04-18 at 00:39:08 | DEBUG | Running TaskManager
+2025-04-18 at 00:39:08 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:39:14 | INFO | Adding task to queue
+2025-04-18 at 00:39:14 | INFO | Adding task to queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000002083DE5E7B0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x000002083DE5E6F0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:39:14 | DEBUG | Task fetched from queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000002083DE5E7B0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x000002083DE5E6F0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:39:14 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:40:04 | DEBUG | API server teardown started
+2025-04-18 at 00:40:04 | DEBUG | API server teardown completed
+2025-04-18 at 00:40:04 | DEBUG | Task manager teardown started
+2025-04-18 at 00:40:04 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:40:04 | DEBUG | Rack teardown started
+2025-04-18 at 00:40:04 | DEBUG | Rack teardown completed
+2025-04-18 at 00:40:04 | DEBUG | Experiment teardown started
+2025-04-18 at 00:40:04 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:40:04 | INFO | Experiment interrupted by user
+2025-04-18 at 00:40:04 | INFO | Experiment ended
+2025-04-18 at 00:40:06 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:40:06 | DEBUG | APIServer initialized
+2025-04-18 at 00:40:06 | INFO | Experiment started
+2025-04-18 at 00:40:06 | DEBUG | Experiment setup started
+2025-04-18 at 00:40:06 | DEBUG | Experiment setup completed
+2025-04-18 at 00:40:06 | DEBUG | All experiment tasks started
+2025-04-18 at 00:40:06 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:40:06 | DEBUG | API server setup completed
+2025-04-18 at 00:40:06 | DEBUG | Running APIServer
+2025-04-18 at 00:40:06 | DEBUG | Rack setup started
+2025-04-18 at 00:40:06 | DEBUG | Rack setup completed
+2025-04-18 at 00:40:06 | DEBUG | Running Rack
+2025-04-18 at 00:40:06 | DEBUG | Task manager setup started
+2025-04-18 at 00:40:06 | DEBUG | Task manager setup completed
+2025-04-18 at 00:40:06 | DEBUG | Running TaskManager
+2025-04-18 at 00:40:06 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:40:18 | INFO | Adding task to queue
+2025-04-18 at 00:40:18 | INFO | Adding task to queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000001A28C6FE7B0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x000001A28C6FE8A0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:40:18 | DEBUG | Task fetched from queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000001A28C6FE7B0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x000001A28C6FE8A0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:43:12 | DEBUG | API server teardown started
+2025-04-18 at 00:43:12 | DEBUG | API server teardown completed
+2025-04-18 at 00:43:12 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:43:12 | DEBUG | Rack teardown started
+2025-04-18 at 00:43:12 | DEBUG | Rack teardown completed
+2025-04-18 at 00:43:13 | DEBUG | Task manager teardown started
+2025-04-18 at 00:43:13 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:43:13 | DEBUG | Experiment teardown started
+2025-04-18 at 00:43:13 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:43:13 | INFO | Experiment interrupted by user
+2025-04-18 at 00:43:13 | INFO | Experiment ended
+2025-04-18 at 00:43:15 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:43:15 | DEBUG | APIServer initialized
+2025-04-18 at 00:43:15 | INFO | Experiment started
+2025-04-18 at 00:43:15 | DEBUG | Experiment setup started
+2025-04-18 at 00:43:15 | DEBUG | Experiment setup completed
+2025-04-18 at 00:43:15 | DEBUG | All experiment tasks started
+2025-04-18 at 00:43:15 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:43:15 | DEBUG | API server setup completed
+2025-04-18 at 00:43:15 | DEBUG | Running APIServer
+2025-04-18 at 00:43:15 | DEBUG | Rack setup started
+2025-04-18 at 00:43:15 | DEBUG | Rack setup completed
+2025-04-18 at 00:43:15 | DEBUG | Running Rack
+2025-04-18 at 00:43:15 | DEBUG | Task manager setup started
+2025-04-18 at 00:43:15 | DEBUG | Task manager setup completed
+2025-04-18 at 00:43:15 | DEBUG | Running TaskManager
+2025-04-18 at 00:43:15 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:43:29 | INFO | Adding task to queue
+2025-04-18 at 00:43:29 | INFO | Adding task to queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000001C153D8E9C0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x000001C153D8DFA0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:43:29 | DEBUG | Task fetched from queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000001C153D8E9C0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x000001C153D8DFA0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:46:19 | DEBUG | API server teardown started
+2025-04-18 at 00:46:19 | DEBUG | API server teardown completed
+2025-04-18 at 00:46:19 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:46:19 | DEBUG | Rack teardown started
+2025-04-18 at 00:46:19 | DEBUG | Rack teardown completed
+2025-04-18 at 00:46:19 | DEBUG | Task manager teardown started
+2025-04-18 at 00:46:19 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:46:19 | DEBUG | Experiment teardown started
+2025-04-18 at 00:46:19 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:46:19 | INFO | Experiment interrupted by user
+2025-04-18 at 00:46:19 | INFO | Experiment ended
+2025-04-18 at 00:46:20 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:46:20 | DEBUG | APIServer initialized
+2025-04-18 at 00:46:20 | INFO | Experiment started
+2025-04-18 at 00:46:20 | DEBUG | Experiment setup started
+2025-04-18 at 00:46:20 | DEBUG | Experiment setup completed
+2025-04-18 at 00:46:20 | DEBUG | All experiment tasks started
+2025-04-18 at 00:46:20 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:46:20 | DEBUG | API server setup completed
+2025-04-18 at 00:46:20 | DEBUG | Running APIServer
+2025-04-18 at 00:46:20 | DEBUG | Rack setup started
+2025-04-18 at 00:46:20 | DEBUG | Rack setup completed
+2025-04-18 at 00:46:20 | DEBUG | Running Rack
+2025-04-18 at 00:46:20 | DEBUG | Task manager setup started
+2025-04-18 at 00:46:20 | DEBUG | Task manager setup completed
+2025-04-18 at 00:46:20 | DEBUG | Running TaskManager
+2025-04-18 at 00:46:20 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:46:27 | INFO | Adding task to queue
+2025-04-18 at 00:46:27 | INFO | Adding task to queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x0000024D3F3525A0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x0000024D3F352720 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:46:27 | DEBUG | Task fetched from queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x0000024D3F3525A0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x0000024D3F352720 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:46:28 | DEBUG | Task TestTask step: Step 1 completed
+2025-04-18 at 00:47:19 | DEBUG | API server teardown started
+2025-04-18 at 00:47:19 | DEBUG | API server teardown completed
+2025-04-18 at 00:47:19 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:47:19 | DEBUG | Rack teardown started
+2025-04-18 at 00:47:19 | DEBUG | Rack teardown completed
+2025-04-18 at 00:47:19 | DEBUG | Task manager teardown started
+2025-04-18 at 00:47:19 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:47:19 | DEBUG | Experiment teardown started
+2025-04-18 at 00:47:19 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:47:19 | INFO | Experiment interrupted by user
+2025-04-18 at 00:47:19 | INFO | Experiment ended
+2025-04-18 at 00:47:20 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:47:20 | DEBUG | APIServer initialized
+2025-04-18 at 00:47:20 | INFO | Experiment started
+2025-04-18 at 00:47:20 | DEBUG | Experiment setup started
+2025-04-18 at 00:47:20 | DEBUG | Experiment setup completed
+2025-04-18 at 00:47:20 | DEBUG | All experiment tasks started
+2025-04-18 at 00:47:20 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:47:20 | DEBUG | API server setup completed
+2025-04-18 at 00:47:20 | DEBUG | Running APIServer
+2025-04-18 at 00:47:20 | DEBUG | Rack setup started
+2025-04-18 at 00:47:20 | DEBUG | Rack setup completed
+2025-04-18 at 00:47:20 | DEBUG | Running Rack
+2025-04-18 at 00:47:20 | DEBUG | Task manager setup started
+2025-04-18 at 00:47:20 | DEBUG | Task manager setup completed
+2025-04-18 at 00:47:20 | DEBUG | Running TaskManager
+2025-04-18 at 00:47:20 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:47:25 | INFO | Adding task to queue
+2025-04-18 at 00:47:25 | INFO | Adding task to queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000001BBDC6CE7B0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x000001BBDC6CE720 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:47:25 | DEBUG | Task fetched from queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000001BBDC6CE7B0 [unset]>, _abort_event=<asyncio.locks.Event object at 0x000001BBDC6CE720 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:47:26 | DEBUG | Task TestTask step: Step 1 completed
+2025-04-18 at 00:47:27 | DEBUG | Task TestTask step: Step 2 completed
+2025-04-18 at 00:47:27 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:48:37 | DEBUG | API server teardown started
+2025-04-18 at 00:48:37 | DEBUG | API server teardown completed
+2025-04-18 at 00:48:37 | DEBUG | Task manager teardown started
+2025-04-18 at 00:48:37 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:48:37 | DEBUG | Rack teardown started
+2025-04-18 at 00:48:37 | DEBUG | Rack teardown completed
+2025-04-18 at 00:48:37 | DEBUG | Experiment teardown started
+2025-04-18 at 00:48:37 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:48:37 | INFO | Experiment interrupted by user
+2025-04-18 at 00:48:37 | INFO | Experiment ended
+2025-04-18 at 00:48:39 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:48:39 | DEBUG | APIServer initialized
+2025-04-18 at 00:48:39 | INFO | Experiment started
+2025-04-18 at 00:48:39 | DEBUG | Experiment setup started
+2025-04-18 at 00:48:39 | DEBUG | Experiment setup completed
+2025-04-18 at 00:48:39 | DEBUG | All experiment tasks started
+2025-04-18 at 00:48:39 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:48:39 | DEBUG | API server setup completed
+2025-04-18 at 00:48:39 | DEBUG | Running APIServer
+2025-04-18 at 00:48:39 | DEBUG | Rack setup started
+2025-04-18 at 00:48:39 | DEBUG | Rack setup completed
+2025-04-18 at 00:48:39 | DEBUG | Running Rack
+2025-04-18 at 00:48:39 | DEBUG | Task manager setup started
+2025-04-18 at 00:48:39 | DEBUG | Task manager setup completed
+2025-04-18 at 00:48:39 | DEBUG | Running TaskManager
+2025-04-18 at 00:48:39 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:48:52 | INFO | Adding task to queue
+2025-04-18 at 00:48:52 | INFO | Adding task to queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000002534F5CE540 [set]>, _abort_event=<asyncio.locks.Event object at 0x000002534FA5EBD0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:48:52 | DEBUG | Task fetched from queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000002534F5CE540 [set]>, _abort_event=<asyncio.locks.Event object at 0x000002534FA5EBD0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:48:53 | DEBUG | Task TestTask step: Step 1 completed
+2025-04-18 at 00:48:54 | DEBUG | Task TestTask step: Step 2 completed
+2025-04-18 at 00:48:54 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:49:11 | INFO | Adding task to queue
+2025-04-18 at 00:49:11 | INFO | Adding task to queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000002534FA5F320 [set]>, _abort_event=<asyncio.locks.Event object at 0x000002534FA5F2F0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:49:11 | DEBUG | Task fetched from queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000002534FA5F320 [set]>, _abort_event=<asyncio.locks.Event object at 0x000002534FA5F2F0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:49:12 | DEBUG | Task TestTask step: Step 1 completed
+2025-04-18 at 00:49:13 | DEBUG | Task TestTask step: Step 2 completed
+2025-04-18 at 00:49:13 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:49:18 | INFO | Adding task to queue
+2025-04-18 at 00:49:18 | INFO | Adding task to queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000002534FA2E8D0 [set]>, _abort_event=<asyncio.locks.Event object at 0x000002534FA5EAE0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:49:18 | DEBUG | Task fetched from queue: TestTask(_pause_event=<asyncio.locks.Event object at 0x000002534FA2E8D0 [set]>, _abort_event=<asyncio.locks.Event object at 0x000002534FA5EAE0 [unset]>, _is_paused=False, _status='running')
+2025-04-18 at 00:49:19 | INFO | Task manager paused.
+2025-04-18 at 00:49:19 | DEBUG | Task TestTask step: Step 1 completed
+2025-04-18 at 00:49:28 | INFO | Task manager resumed.
+2025-04-18 at 00:49:29 | DEBUG | Task TestTask step: Step 2 completed
+2025-04-18 at 00:49:29 | DEBUG | Waiting for task to appear on queue
+2025-04-18 at 00:49:51 | INFO | Task manager paused.
+2025-04-18 at 00:51:38 | DEBUG | API server teardown started
+2025-04-18 at 00:51:38 | DEBUG | API server teardown completed
+2025-04-18 at 00:51:38 | DEBUG | Task manager teardown started
+2025-04-18 at 00:51:38 | DEBUG | Task manager teardown completed
+2025-04-18 at 00:51:38 | DEBUG | Rack teardown started
+2025-04-18 at 00:51:38 | DEBUG | Rack teardown completed
+2025-04-18 at 00:51:38 | DEBUG | Experiment teardown started
+2025-04-18 at 00:51:38 | DEBUG | Experiment teardown completed
+2025-04-18 at 00:51:38 | INFO | Experiment interrupted by user
+2025-04-18 at 00:51:38 | INFO | Experiment ended
+2025-04-18 at 00:51:41 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log
+2025-04-18 at 00:51:41 | DEBUG | APIServer initialized
+2025-04-18 at 00:51:41 | INFO | Experiment started
+2025-04-18 at 00:51:41 | DEBUG | Experiment setup started
+2025-04-18 at 00:51:41 | DEBUG | Experiment setup completed
+2025-04-18 at 00:51:41 | DEBUG | All experiment tasks started
+2025-04-18 at 00:51:41 | DEBUG | API server setup started at localhost:8005
+2025-04-18 at 00:51:41 | DEBUG | API server setup completed
+2025-04-18 at 00:51:41 | DEBUG | Running APIServer
+2025-04-18 at 00:51:41 | DEBUG | Rack setup started
+2025-04-18 at 00:51:41 | DEBUG | Rack setup completed
+2025-04-18 at 00:51:41 | DEBUG | Running Rack
+2025-04-18 at 00:51:41 | DEBUG | Task manager setup started
+2025-04-18 at 00:51:41 | DEBUG | Task manager setup completed
+2025-04-18 at 00:51:41 | DEBUG | Running TaskManager
+2025-04-18 at 00:51:41 | DEBUG | Waiting for task to appear on queue

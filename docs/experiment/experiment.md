@@ -1,0 +1,2 @@
+
+::: pyacquisition.core.experiment.Experiment

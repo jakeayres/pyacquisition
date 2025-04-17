@@ -48,8 +48,9 @@ class Logger:
         loguru_logger.remove()
         loguru_logger.add(
             sink=sys.stdout,
+            colorize=True,
             level=console_level,
-            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+            #format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
         )
         log_file_path = os.path.join(root_path, file_name)
         loguru_logger.add(

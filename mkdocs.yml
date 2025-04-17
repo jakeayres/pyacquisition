@@ -2,9 +2,13 @@ site_name: PyAquisition
 nav:
   - Home: index.md
   - Basics:
-      - Installation: basics/installation.md
-      - Getting Started: basics/getting_started.md
-      - Configuration: basics/configuration.md
+    - Installation: basics/installation.md
+    - Getting Started: basics/getting_started.md
+    - Configuration: basics/configuration.md
+  - Experiment:
+    - Experiment: experiment/experiment.md
+  - Instruments:
+    - Clock: instruments/clock.md
 theme:
   name: material
 plugins:

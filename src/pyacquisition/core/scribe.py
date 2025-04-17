@@ -13,10 +13,23 @@ class Scribe(Consumer):
         """
         Initialize the Scribe.
         """
-        super().__init__():
+        super().__init__()
         
         self.root_path = root_path
         
         
         # Ensure the root_path exists, create it if it doesn't
         self.root_path.mkdir(parents=True, exist_ok=True)
+        
+        
+    def register_endpoints(self, api_server):
+        """
+        Register the Scribe endpoints with the API server.
+        """
+        
+        @api_server.app.get("/scribe/ping")
+        async def ping():
+            """
+            Endpoint to check if the Scribe is running.
+            """
+            return {"status": "success", "message": "Scribe is running."}

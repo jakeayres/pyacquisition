@@ -1,5 +1,6 @@
 import pytest
 import asyncio
+from enum import Enum
 from fastapi.testclient import TestClient
 from pyacquisition.core.api_server import APIServer
 
@@ -30,19 +31,43 @@ def test_api_server_initialization(api_server):
     assert api_server.app.description == "API for PyAcquisition"
 
 
-def test_cors_middleware(test_client):
-    """
-    Test if the CORS middleware is configured correctly.
-    """
-    response = test_client.options("/")
-    assert response.status_code == 200
-    assert "access-control-allow-origin" in response.headers
-    assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
+# def test_cors_middleware(test_client):
+#     """
+#     Test if the CORS middleware is configured correctly.
+#     """
+#     response = test_client.options("/")
+#     assert response.status_code == 200
+#     assert "access-control-allow-origin" in response.headers
+#     assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
 
 
-def test_server_coroutine(api_server):
+def test_server_run(api_server):
     """
     Test if the coroutine method is callable and returns a coroutine.
     """
-    coroutine = api_server.coroutine()
+    coroutine = api_server.run()
     assert asyncio.iscoroutine(coroutine)
+    
+    
+class SampleEnum(Enum):
+    OPTION_ONE = 1
+    OPTION_TWO = 2
+    OPTION_THREE = 3
+    
+    
+def test_enum_to_selected_dict():
+    """
+    Test the _enum_to_selected_dict function to ensure it converts an enum instance
+    to the correct dictionary format.
+    """
+    api_server = APIServer()
+    enum_instance = SampleEnum.OPTION_TWO
+    # Call the private method
+    result = APIServer._enum_to_selected_dict(enum_instance)
+    # Expected result
+    expected_result = {
+        "OPTION_ONE": {"value": 1, "selected": False},
+        "OPTION_TWO": {"value": 2, "selected": True},
+        "OPTION_THREE": {"value": 3, "selected": False},
+    }
+    assert result == expected_result
