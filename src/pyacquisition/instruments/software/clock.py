@@ -1,4 +1,4 @@
-from ..instruments import SoftwareInstrument, mark_query, mark_command
+from ...core.instrument import SoftwareInstrument, mark_query, mark_command
 import time
 
 
@@ -6,6 +6,8 @@ class Clock(SoftwareInstrument):
     """
     A class representing a software clock instrument.
     """
+    
+    name = 'Clock'
     
     
     def __init__(self, *args, **kwargs):
@@ -28,7 +30,7 @@ class Clock(SoftwareInstrument):
     @mark_query
     def timestamp_ms(self) -> int:
         """
-        Returns the current timestamp in milliseconds since the clock was initialized.
+        Returns the current timestamp in milliseconds since the epoch.
         
         Returns:
             int: Current timestamp in milliseconds.
@@ -49,6 +51,17 @@ class Clock(SoftwareInstrument):
     
     
     @mark_query
+    def list_timers(self) -> list[str]:
+        """
+        Lists all active timers.
+        
+        Returns:
+            list[str]: List of active timer names.
+        """
+        return list(self._named_timers.keys())
+    
+    
+    @mark_query
     def read_timer(self, name: str) -> float:
         """
         Reads the elapsed time for the given timer.
@@ -63,3 +76,38 @@ class Clock(SoftwareInstrument):
             raise ValueError(f"Timer '{name}' not found.")
         
         return time.time() - self._named_timers[name]
+    
+    
+    def register_endpoints(self, api_server):
+        super().register_endpoints(api_server)
+        
+        
+        @api_server.app.get("/clock/time")
+        async def get_time():
+            """Time since clock started in seconds."""
+            return {"status": 200, "data": self.time()}
+        
+        
+        @api_server.app.get("/clock/timestamp")
+        async def get_timestamp():
+            """Current timestamp in milliseconds."""
+            return {"status": 200, "data": self.timestamp_ms()}
+        
+        
+        @api_server.app.get("/clock/timer/start")
+        async def start_timer(name: str):
+            """Start a timer with the given name."""
+            self.start_timer(name)
+            return {"status": 200, "data": f"Timer '{name}' started."}
+        
+        
+        @api_server.app.get("/clock/timer/list")
+        async def list_timers():
+            """List all active timers."""
+            return {"status": 200, "data": self.list_timers()}
+        
+        
+        @api_server.app.get("/clock/timer/read")
+        async def read_timer(name: str):
+            """Read the elapsed time for the given timer."""
+            return {"status": 200, "data": self.read_timer(name)}

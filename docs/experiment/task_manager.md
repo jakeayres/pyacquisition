@@ -1,0 +1,1 @@
+::: pyacquisition.core.task_manager.TaskManager

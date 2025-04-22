@@ -5,6 +5,8 @@ from .api_server import APIServer
 from .rack import Rack
 from .task_manager import TaskManager
 from ..gui import Gui
+from ..instruments import instrument_map
+from .measurement import Measurement
 
 
 class Experiment:
@@ -58,19 +60,42 @@ class Experiment:
             file_name=log_file_name,
         )
 
-        self.api_server = APIServer(
+        self._api_server = APIServer(
             host=api_server_host,
             port=api_server_port,
             allowed_cors_origins=allowed_cors_origins,
         )
         
-        self.rack = Rack(
+        self._rack = Rack(
             period = measurement_period,
         )
         
-        self.task_manager = TaskManager()
+        self._task_manager = TaskManager()
         
-        self.gui = Gui()
+        self._gui = Gui(host=api_server_host, port=api_server_port)
+        
+        
+    @property
+    def rack(self) -> Rack:
+        """
+        Returns the rack associated with the experiment.
+
+        Returns:
+            Rack: The rack instance.
+        """
+        return self._rack
+    
+    
+    @property
+    def task_manager(self) -> TaskManager:
+        """
+        Returns the task manager associated with the experiment.
+
+        Returns:
+            TaskManager: The task manager instance.
+        """
+        return self._task_manager
+    
 
     @classmethod
     def from_config(cls, toml_file: str) -> "Experiment":
@@ -90,7 +115,7 @@ class Experiment:
             with open(toml_file, "rb") as file:
                 config = tomllib.load(file)
                 print(config)
-            return cls(
+            experiment = cls(
                 root_path=config.get("root_path", "."),
                 console_log_level=config.get("logging", {}).get("console_level", "DEBUG"),
                 file_log_level=config.get("logging", {}).get("file_level", "DEBUG"),
@@ -100,6 +125,19 @@ class Experiment:
                 allowed_cors_origins=config.get("api_server", {}).get("allowed_cors_origins", ["http://localhost:3000"]),
                 measurement_period=config.get("rack", {}).get("period", 0.25),
             )
+            
+            instruments = config.get("instruments", {})
+            for name, instrument in instruments.items():
+                instrument_class = instrument_map.get(instrument['instrument'])
+                experiment.rack.add_instrument(name, instrument_class(name))
+            
+            measurements = config.get("measurements", {})
+            for name, measurement in measurements.items():
+                instrument = experiment.rack.instruments[measurement['instrument']]
+                method = instrument.queries[measurement['method']]
+                experiment.rack.add_measurement(name, Measurement(name, method))
+
+            return experiment
         except Exception as e:
             raise ValueError(f"Failed to load configuration from {toml_file}: {e}")
 
@@ -111,9 +149,13 @@ class Experiment:
         This method is responsible for preparing the experiment environment, such as
         initializing resources or configuring dependencies.
         """
-        logger.debug("Experiment setup started")
-        self._ui_process = self.gui.run_in_new_process()
-        logger.debug("Experiment setup completed")
+        try:
+            logger.debug("Experiment setup started")
+            self._ui_process = self._gui.run_in_new_process()
+            logger.debug("Experiment setup completed")
+        except Exception as e:
+            logger.error(f"Error during experiment setup: {e}")
+            raise
 
 
     def teardown(self) -> None:
@@ -123,9 +165,13 @@ class Experiment:
         This method is responsible for releasing resources or performing any necessary cleanup
         after the experiment has run.
         """
-        logger.debug("Experiment teardown started")
-        self._ui_process.join()
-        logger.debug("Experiment teardown completed")
+        try:
+            logger.debug("Experiment teardown started")
+            self._ui_process.join()
+            logger.debug("Experiment teardown completed")
+        except Exception as e:
+            logger.error(f"Error during experiment teardown: {e}")
+            raise
 
 
     async def _run_component(self, component) -> None:
@@ -136,7 +182,7 @@ class Experiment:
             component: The component to run (e.g., API server, rack, task manager, GUI).
         """
         try:
-            component.register_endpoints(self.api_server)
+            component.register_endpoints(self._api_server)
             component.setup()
             logger.debug(f"Running {component.__class__.__name__}")
             await component.run()
@@ -158,9 +204,9 @@ class Experiment:
             self.setup()
             # Run tasks in an async task group
             async with asyncio.TaskGroup() as tg:
-                tg.create_task(self._run_component(self.api_server))
-                tg.create_task(self._run_component(self.rack))
-                tg.create_task(self._run_component(self.task_manager))
+                tg.create_task(self._run_component(self._api_server))
+                tg.create_task(self._run_component(self._rack))
+                tg.create_task(self._run_component(self._task_manager))
                 logger.debug("All experiment tasks started")
         except Exception as e:
             logger.error(f"Task group terminated due to an error: {e}")
@@ -186,4 +232,4 @@ class Experiment:
         
     def register_endpoints(self) -> None:
         
-        self.rack.register_endpoints(self.api_server)
+        self._rack.register_endpoints(self._api_server)

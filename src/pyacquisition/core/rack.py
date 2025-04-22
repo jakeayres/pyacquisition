@@ -3,6 +3,7 @@ import asyncio
 from .logging import logger
 from .measurement import Measurement
 from .broadcaster import Broadcaster
+from .instrument import Instrument
 
 
 class Rack(Broadcaster):
@@ -18,33 +19,7 @@ class Rack(Broadcaster):
         self.measurements = {}
         self._pause_event = asyncio.Event()
         self._pause_event.set()
-        
-        
-    @property
-    def period(self) -> float:
-        """
-        Returns the period for the measurements.
-        
-        Returns:
-            float: The period for the measurements.
-        """
-        return self._period
-        
-        
-    @period.setter
-    def period(self, value: float) -> None:
-        """
-        Sets the period for the measurements.
-        
-        Args:
-            value (float): The new period for the measurements.
-        """
-        if value <= 0:
-            raise ValueError("Period must be a positive number.")
-        self._period = value
-        logger.info(f"Measurement period set to {self._period} seconds.")
-        
-        
+         
         
     async def measure(self):
         """
@@ -105,13 +80,115 @@ class Rack(Broadcaster):
         """
         self._pause_event.set()
         logger.info("Measurements resumed.")
-                
+        
+        
+    @property
+    def period(self) -> float:
+        """
+        Returns the period for the measurements.
+        
+        Returns:
+            float: The period for the measurements.
+            
+        Examples:
+            >>> rack = Rack()
+            >>> print(rack.period)  # Access the period property
+            >>> rack.period = 0.5  # Set a new period
+        """
+        return self._period
+        
+        
+    @period.setter
+    def period(self, value: float) -> None:
+        """
+        Sets the period for the measurements.
+        
+        Args:
+            value (float): The new period for the measurements.
+        """
+        if value <= 0:
+            raise ValueError("Period must be a positive number.")
+        self._period = value
+        logger.info(f"Measurement period set to {self._period} seconds.")
+        
+        
+    def add_instrument(self, name: str, instrument) -> None:
+        """
+        Adds an instrument to the rack.
+        
+        Args:
+            name (str): The name of the instrument.
+            instrument (Instrument): The instrument to be added.
+        """
+        self.instruments[name] = instrument
+        logger.info(f"Instrument {name} added to the rack.")
+        
+        
+    def remove_instrument(self, name) -> None:
+        """
+        Removes an instrument from the rack.
+        
+        Args:
+            name (str): The name of the instrument to be removed.
+        """
+        if name in self.instruments:
+            del self.instruments[name]
+            logger.info(f"Instrument {name} removed from the rack.")
+        else:
+            logger.warning(f"Instrument {name} not found in the rack.")
+            
+            
+    def add_measurement(self, name: str, measurement: Measurement) -> None:
+        """
+        Adds a measurement to the rack.
+        
+        Args:
+            name (str): The name of the measurement.
+            measurement (Measurement): The measurement to be added.
+        """
+        if not isinstance(measurement, Measurement):
+            raise TypeError("Expected an instance of Measurement.")
+        self.measurements[name] = measurement
+        logger.info(f"Measurement {name} added to the rack.")
+        
+        
+    def remove_measurement(self, name: str) -> None:
+        """
+        Removes a measurement from the rack.
+        
+        Args:
+            name (str): The name of the measurement to be removed.
+        """
+        if name in self.measurements:
+            del self.measurements[name]
+            logger.info(f"Measurement {name} removed from the rack.")
+        else:
+            logger.warning(f"Measurement {name} not found in the rack.")
                 
                 
     def register_endpoints(self, api_server):
         """
         Registers endpoints to the FastAPI app. 
         """
+        
+        for instrument in self.instruments.values():
+            instrument.register_endpoints(api_server)
+        
+        @api_server.app.get("/rack/list_instruments")
+        async def list_instruments():
+            return {
+                "status": "success",
+                "instruments": {name: instrument.name for name, instrument in self.instruments.items()},
+            }
+            
+    
+        @api_server.app.get("/rack/list_measurements")
+        async def list_measurements():
+            return {
+                "status": "success",
+                "measurements": {name: measurement.name for name, measurement in self.measurements.items()},
+            }
+        
         
         @api_server.app.get("/rack/pause/")
         async def pause():

@@ -6,13 +6,9 @@ period = 0.25
 
 [instruments]
 clock = {instrument = "clock"}
-lockin1 = {instrument = "sr830", method = "GPIB", address = 11}
 
-[measurements.set_one]
-time = {instrument = "clock"}
-
-[measurements.set_two]
-ijwjafpjpaw = {instrument = "clock"}
+[measurements]
+time = {instrument = "clock", method = "timestamp_ms"}
 
 [data]
 path = "."

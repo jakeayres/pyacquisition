@@ -4,8 +4,17 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import asyncio
 from .logging import logger
+from .response import StringResponse, DictResponse
 from enum import Enum
 
+
+class TestEnum(Enum):
+    """
+    Test enum for demonstration purposes.
+    """
+    OPTION_A = "A"
+    OPTION_B = "B"
+    OPTION_C = "C"
 
 
 class APIServer:
@@ -127,8 +136,15 @@ class APIServer:
         """
         
         @api_server.app.get("/ping")
-        async def ping():
+        async def ping(test_int: int, test_float: float, test_enum: TestEnum) -> DictResponse:
             """
             Endpoint to check if the API server is running.
             """
-            return {"status": "success", "message": "pong"}
+            data = {
+                "test_int": test_int,
+                "test_float": test_float,
+                "test_enum": test_enum.name,
+            }
+            return DictResponse(status=200, data=data)
+        
+    

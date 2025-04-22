@@ -3,5 +3,6 @@ from enum import Enum
 
 
 
-class Instruments(str, Enum):
-    CLOCK = Clock
+instrument_map = {
+    'clock': Clock,
+}

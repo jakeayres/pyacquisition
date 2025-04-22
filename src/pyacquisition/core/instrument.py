@@ -132,13 +132,13 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
 
 
 	@property
-	def queries(self):
+	def queries(self) -> dict[str, callable]:
 		""" return dictionary of registered queries as externally executable partials """
 		return {q.__name__: partial(q, self) for q in self._queries}
 
 
 	@property
-	def commands(self):
+	def commands(self) -> dict[str, callable]:
 		""" return dictionary of registered commands as externally executable partials """
 		return {c.__name__: partial(c, self) for c in self._commands}
 
@@ -148,21 +148,24 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
 		return self.name
 
 
-	def register_endpoints(self, app):
+	def register_endpoints(self, api_server):
 
 		
-		@app.get(f'/{self._uid}/'+'queries/', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'queries/', tags=[self._uid])
 		def queries() -> list[str]:
+			""" Return a list of available queries """
 			return [name for name, _ in self.queries.items()]
 
 
-		@app.get(f'/{self._uid}/'+'commands/', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'commands/', tags=[self._uid])
 		def commands() -> list[str]:
+			""" Return a list of available commands """
 			return [name for name, _ in self.commands.items()]
 
 
-		@app.get(f'/{self._uid}/'+'ask/{query_name}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'ask/{query_name}', tags=[self._uid])
 		def query(query_name: str):
+			""" Execute a query by name """
 			return self.queries[query_name]()
 
 
