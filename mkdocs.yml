@@ -1,5 +1,5 @@
-site_name: PyAquisition
-repo_url: https://github.com/jakeayres/pyaquisition
+site_name: PyAcquisition
+repo_url: https://github.com/jakeayres/pyacquisition
 repo_name: pyacquisition
 nav:
   - Home: index.md
@@ -37,3 +37,7 @@ plugins:
             show_symbol_type_toc: true
             show_docstring_examples: true
             modernize_annotations: true
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences

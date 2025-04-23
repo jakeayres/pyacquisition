@@ -25,42 +25,64 @@ The `.toml` file is used to define the configuration for your experiment. Detail
 
 Below is a breakdown of the sections and parameters available in the file:
 
-### General Parameters
+## General Parameters
+
+General parameters for the experiment.
 
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
 | `root_path`    | Root directory for the experiment.   | `.`           |
 
 
-### `[rack]` Section
+## `[rack]` Section
+
+Configuration of the rack 
 
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
 | `period`       | Time period for rack operations.     | `0.25`        |
 
 
-### `[instruments]` Section
+## `[instruments]` Section
 
-| Parameter Name | Description                          | Example Line |
+Software and hardware instruments to configure. 
+
+An example `SoftwareInstrument` is given:
+
+| Insrument Name | Description                          | Example Configuration |
 |----------------|--------------------------------------|---------------|
-| `clock`        | Defines the clock instrument.        | `{instrument = "clock"}` |
+| `my_clock`        | Defines the clock instrument.        | `{instrument = "clock"}` |
 
 
-### `[measurements]` Section
+## `[measurements]` Section
 
-| Parameter Name | Description                          | Example Line |
-|----------------|--------------------------------------|---------------|
-| `time`         | Measurement using the clock.         | `{instrument = "clock", method = "timestamp_ms"}` |
+Define the instrument methods to poll. The key is the label assigned to the measurement (e.g. 'time', 'voltage', 'temperature'). The value is a dictionary with the following parameters:
+
+| Parameter Name | Description                          | Example Value    |
+|----------------|--------------------------------------|------------------|
+| `instrument`   | The name of the instrument           | `my_clock`       |
+| `method`       | The method to poll                   | `timestamp_ms`   |
+
+!!! Note
+    The value assigned to `instrument` **must** be present as a parameter in the `[instruments]` section. 
 
 
-### `[data]` Section
+??? Example
+    ```
+    [measurements]
+    time = {instrument = "clock", method = "timestamp_ms"}
+    voltage = {instrument = "lockin_1", method = "get_x"} 
+    ```
+
+
+## `[data]` Section
 
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
 | `path`         | Directory for storing data.          | `.`           |
 
 
-### `[api_server]` Section
+## `[api_server]` Section
 
 | Parameter Name         | Description                          | Default Value          |
 |------------------------|--------------------------------------|------------------------|
@@ -69,7 +91,7 @@ Below is a breakdown of the sections and parameters available in the file:
 | `allowed_cors_origins` | List of allowed CORS origins.        | `["http://localhost:3000"]` |
 
 
-### `[logging]` Section
+## `[logging]` Section
 
 | Parameter Name  | Description                          | Default Value |
 |-----------------|--------------------------------------|---------------|
