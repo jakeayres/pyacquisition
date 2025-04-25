@@ -3,6 +3,7 @@ import asyncio
 import json
 from .inputs.integer_input import IntegerInput
 from .inputs.string_input import StringInput
+from .inputs.boolean_input import BooleanInput
 from .inputs.float_input import FloatInput
 from .inputs.enum_input import EnumInput
 from .inputs.base_input import BaseInput
@@ -32,6 +33,8 @@ class EndpointPopup:
             return StringInput(param.name, default_value="")
         elif param.type_ == "number":
             return FloatInput(param.name, default_value=0.0)
+        elif param.type_ == "boolean":
+            return BooleanInput(param.name, default_value=False)
         elif param.type_ == "enum":
             return EnumInput(param.name, options=param.enum_values, default_value=param.enum_values[0])
         else:

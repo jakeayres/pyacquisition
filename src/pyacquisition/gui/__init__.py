@@ -95,6 +95,24 @@ class Gui:
         )
         self.popups.append(popup)
         popup.draw()
+
+
+    async def _populate_scribe(self, schema: Schema):
+        """
+        Populate the scribe in the GUI.
+        """
+        logger.debug("Populating scribe")
+     
+        with dpg.viewport_menu_bar():
+             with dpg.menu(label="Scribe"):
+                for name, path in schema.paths.items():
+                    if name.startswith(f"/scribe"):
+                        dpg.add_menu_item(
+                            label=path.get.summary, 
+                            callback=self._draw_popup,
+                            user_data={"path": path},
+                            )
+                               
         
         
     async def _populate_instruments(self, schema: Schema):
@@ -121,9 +139,6 @@ class Gui:
                                     user_data={"path": path},
                                     )
                                 
-                                
-    
-    
     
     async def setup(self):
         """
@@ -140,6 +155,7 @@ class Gui:
         
         schema = await self._fetch_openapi_schema()
         
+        await self._populate_scribe(schema)
         await self._populate_instruments(schema)
         
         measurements = await self._fetch_measurements()

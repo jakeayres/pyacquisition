@@ -150,24 +150,30 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
 
 	def register_endpoints(self, api_server):
 
+
+		@api_server.app.get(f'/{self._uid}/'+'identify', tags=[self._uid])
+		def identify() -> dict:
+			""" Return the name of the instrument """
+			return {
+				"status": 200,
+				"data": f"{self._uid} ({self.name})",
+			}
 		
 		@api_server.app.get(f'/{self._uid}/'+'queries/', tags=[self._uid])
-		def queries() -> list[str]:
+		def list_queries() -> list[str]:
 			""" Return a list of available queries """
-			return [name for name, _ in self.queries.items()]
-
+			return {
+				"status": 200,
+				"data": [name for name, _ in self.queries.items()],
+			}
 
 		@api_server.app.get(f'/{self._uid}/'+'commands/', tags=[self._uid])
-		def commands() -> list[str]:
+		def list_commands() -> list[str]:
 			""" Return a list of available commands """
-			return [name for name, _ in self.commands.items()]
-
-
-		@api_server.app.get(f'/{self._uid}/'+'ask/{query_name}', tags=[self._uid])
-		def query(query_name: str):
-			""" Execute a query by name """
-			return self.queries[query_name]()
-
+			return {
+				"status": 200,
+				"data": [name for name, _ in self.commands.items()],
+			}
 
 
 

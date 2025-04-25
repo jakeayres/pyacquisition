@@ -2,6 +2,7 @@ from loguru import logger as loguru_logger
 from threading import Lock
 import sys
 import os
+from pathlib import Path
 
 
 class Logger:
@@ -27,14 +28,15 @@ class Logger:
         if hasattr(self, "_initialized") and self._initialized:
             return
         self._initialized = True
+        self.log_path: Path = Path()
         
         
     def configure(
         self,
-        root_path: str,
+        root_path: Path,
         console_level: str = "DEBUG",
         file_level: str = "DEBUG",
-        file_name: str = "debug.log",
+        file_name: Path = Path("debug.log"),
     ) -> None:
         """
         Configures the logger for the application.
@@ -52,13 +54,14 @@ class Logger:
             level=console_level,
             #format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
         )
-        log_file_path = os.path.join(root_path, file_name)
+        log_file_path = root_path / file_name
+        self.debug(f"Log file path: {log_file_path}")
         loguru_logger.add(
             sink=log_file_path,
             level=file_level,
             format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
         )
-        self.info(f"Logging configured: console level={console_level}, file level={file_level}, file name={file_name}") 
+        self.info(f"Logging configured: console level={console_level}, file level={file_level}, file name={log_file_path}") 
         
         
     def info(self, message: str) -> None:

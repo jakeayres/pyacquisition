@@ -1,9 +1,11 @@
 import tomllib
 import asyncio
+from pathlib import Path
 from .logging import logger
 from .api_server import APIServer
 from .rack import Rack
 from .task_manager import TaskManager
+from .scribe import Scribe
 from ..gui import Gui
 from ..instruments import instrument_map
 from .measurement import Measurement
@@ -30,6 +32,8 @@ class Experiment:
     def __init__(
         self,
         root_path: str = ".",
+        data_path: str = ".",
+        log_path: str = ".",
         console_log_level: str = "DEBUG",
         file_log_level: str = "DEBUG",
         log_file_name: str = "debug.log",
@@ -50,14 +54,17 @@ class Experiment:
             api_server_port (int): The port number for the API server. Defaults to 8000.
             allowed_cors_origins (list): A list of allowed CORS origins for the API server. Defaults to ["http://localhost:3000"].
         """
-        self.root_path = root_path
+        self.root_path: Path = Path(root_path)
+        self.data_path: Path = self.root_path / Path(data_path)
+        self.log_path: Path = self.root_path / Path(log_path)
+        self.log_file_name: Path = Path(log_file_name)
 
         # configure logging
         logger.configure(
-            root_path=root_path,
+            root_path=self.log_path,
             console_level=console_log_level,
             file_level=file_log_level,
-            file_name=log_file_name,
+            file_name=self.log_file_name,
         )
 
         self._api_server = APIServer(
@@ -73,6 +80,11 @@ class Experiment:
         self._task_manager = TaskManager()
         
         self._gui = Gui(host=api_server_host, port=api_server_port)
+
+
+        self._scribe = Scribe(root_path=self.data_path)
+
+        self._scribe.subscribe(self._rack)
         
         
     @property
@@ -117,6 +129,8 @@ class Experiment:
                 print(config)
             experiment = cls(
                 root_path=config.get("root_path", "."),
+                data_path=config.get("data", {}).get("path", "."),
+                log_path=config.get("logging", {}).get("path", "."),
                 console_log_level=config.get("logging", {}).get("console_level", "DEBUG"),
                 file_log_level=config.get("logging", {}).get("file_level", "DEBUG"),
                 log_file_name=config.get("logging", {}).get("file_name", "debug.log"),
@@ -207,6 +221,7 @@ class Experiment:
                 tg.create_task(self._run_component(self._api_server))
                 tg.create_task(self._run_component(self._rack))
                 tg.create_task(self._run_component(self._task_manager))
+                tg.create_task(self._run_component(self._scribe))
                 logger.debug("All experiment tasks started")
         except Exception as e:
             logger.error(f"Task group terminated due to an error: {e}")

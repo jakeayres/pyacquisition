@@ -11,7 +11,7 @@ class TaskManager:
 
     def __init__(self):
 
-        self.current_task = None
+        self.current_task: Task = None
         self._task_queue = asyncio.Queue()
         self._pause_event = asyncio.Event()
         self._pause_event.set()
@@ -43,6 +43,8 @@ class TaskManager:
                     self.current_task = None
             except Exception as e:
                 logger.error(f"Error running task manager: {e}")
+
+
 
 
     def teardown(self):

@@ -1,4 +1,6 @@
 import asyncio
+from .logging import logger
+
 
 class Consumer:
     """
@@ -20,7 +22,7 @@ class Consumer:
             broadcaster (Broadcaster): The broadcaster to subscribe to.
         """
         broadcaster.subscribe(self)
-        
+
         
     def unsubscribe(self, broadcaster):
         """
@@ -46,4 +48,7 @@ class Consumer:
             message = await asyncio.wait_for(self.queue.get(), timeout=timeout)
             return message
         except asyncio.TimeoutError:
+            return None
+        except Exception as e:
+            logger.error(f"Error consuming message: {e}")
             return None

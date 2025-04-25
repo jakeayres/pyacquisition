@@ -1,5 +1,5 @@
 
-root_path = "."
+root_path = "./data"
 
 [rack]
 period = 0.25
@@ -8,10 +8,11 @@ period = 0.25
 clock = {instrument = "clock"}
 
 [measurements]
-time = {instrument = "clock", method = "timestamp_ms"}
+timestamp = {instrument = "clock", method = "timestamp_ms"}
+time = {instrument = "clock", method = "time"}
 
 [data]
-path = "."
+path = "data_sub"
 
 [api_server]
 host = "localhost"
@@ -19,6 +20,7 @@ port = 8005
 allowed_cors_origins = ["http://localhost:3000"]
 
 [logging]
+path = "logs"
 console_level = "DEBUG"
 file_level = "DEBUG"
 file_name = "debug.log"

@@ -16,6 +16,7 @@ dependencies = [
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.6.11",
     "mkdocstrings[python]>=0.29.1",
+    "pandas>=2.2.3",
     "pyserial>=3.5",
     "pytest>=8.3.5",
     "pytest-asyncio>=0.26.0",
