@@ -55,6 +55,10 @@ class Scribe(Consumer):
     def next_file(self, title: str, next_block: bool = False) -> None:
         """
         Set the next file to be written to.
+
+        Args:
+            title (str): The title of the file.
+            next_block (bool): If True, increment the block number. Defaults to False.
         """
         self.title = title
         if next_block:
@@ -66,6 +70,9 @@ class Scribe(Consumer):
     def current_path(self) -> Path:
         """
         Get the current path for the data file.
+
+        Returns:
+            Path: The path of the current datafile.
         """
         return self.root_path / f"{self.block}.{self.step} {self.title}.{self.extension}"
 
@@ -104,9 +111,9 @@ class Scribe(Consumer):
         try:
             if not self.current_path().exists():
                 logger.debug(f"[Scribe] File {self.current_path()} does not exist. Creating new file.")
-                data.to_csv(self.current_path(), index=False, mode='w')
+                self.write_line(data)
             else:
-                data.to_csv(self.current_path(), index=False, mode='a', header=False)
+                self.append_line(data)
         except Exception as e:
             logger.error(f"[Scribe] Error processing data: {e}")
 
@@ -115,12 +122,14 @@ class Scribe(Consumer):
         """
         Write a line of data to a file.
         """
-        
+        data.to_csv(self.current_path(), index=False, mode='w')
+
 
     def append_line(self, data: pd.DataFrame) -> None:
         """
         Append a line of data to a file.
         """
+        data.to_csv(self.current_path(), index=False, mode='a', header=False)
 
 
     def setup(self):

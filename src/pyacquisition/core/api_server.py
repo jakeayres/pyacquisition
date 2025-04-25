@@ -4,17 +4,30 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import asyncio
 from .logging import logger
+from .consumer import Consumer
 from .response import StringResponse, DictResponse
 from enum import Enum
 
 
-class TestEnum(Enum):
+class WebsocketEndpoint(Consumer):
     """
-    Test enum for demonstration purposes.
+    A class that handles WebSocket connections and data streaming.
     """
-    OPTION_A = "A"
-    OPTION_B = "B"
-    OPTION_C = "C"
+    
+    def __init__(self, url: str, function: callable):
+        """
+        Initialize the WebSocket endpoint.
+
+        Args:
+            url (str): The URL path for the WebSocket endpoint.
+            function (callable): The function to call when data is received.
+        """
+        super().__init__()
+        self.url = url
+        self.function = function
+        
+        logger.debug(f"[SocketEndpoint] Initialized with URL: {url}")
+
 
 
 class APIServer:
@@ -34,6 +47,8 @@ class APIServer:
             title="PyAcquisition API",
             description="API for PyAcquisition",
         )
+
+        self.websocket_endpoints = {}
         
         self.app.add_middleware(
             CORSMiddleware,
@@ -43,7 +58,10 @@ class APIServer:
             allow_headers=["*"],
         )
         
-        logger.debug("APIServer initialized")
+        logger.debug("[FastApi] APIServer initialized")
+
+
+
     
     
     @staticmethod
@@ -67,6 +85,8 @@ class APIServer:
             url (str): The URL path for the WebSocket endpoint.
             function (callable): [MUST BE ASYNC] The result of this function is sent to the client.
         """
+
+        self.websocket_endpoints[url] = WebsocketEndpoint(url, function)
         
         @self.app.websocket(url)
         async def websocket_endpoint(websocket: WebSocket):
@@ -85,9 +105,9 @@ class APIServer:
                             data[key] = APIServer._enum_to_selected_dict(value)
                     await websocket.send_json(data)
             except WebSocketDisconnect:
-                logger.debug("Client disconnected")
+                logger.debug("[FastApi] Client disconnected")
             except ConnectionClosedOK:
-                logger.debug("Connection closed normally")
+                logger.debug("[FastApi] Connection closed normally")
             except Exception as e:
                 logger.error(f"An error occurred: {e}")
                 await websocket.close()
@@ -99,8 +119,8 @@ class APIServer:
         """
         Sets up the API server. This method is called before running the server.
         """
-        logger.debug(f"API server setup started at {self.host}:{self.port}")
-        logger.debug("API server setup completed")
+        logger.debug(f"[FastApi] Server setup started at {self.host}:{self.port}")
+        logger.debug("[FastApi] Server setup completed")
         
         
     def run(self):
@@ -126,8 +146,8 @@ class APIServer:
         """
         Cleans up the API server. This method is called after the server has stopped.
         """
-        logger.debug("API server teardown started")
-        logger.debug("API server teardown completed")
+        logger.debug("[FastApi] Server teardown started")
+        logger.debug("[FastApi] Server teardown completed")
         
         
     def register_endpoints(self, api_server):
@@ -136,15 +156,13 @@ class APIServer:
         """
         
         @api_server.app.get("/ping")
-        async def ping(test_int: int, test_float: float, test_enum: TestEnum) -> DictResponse:
+        async def ping() -> DictResponse:
             """
             Endpoint to check if the API server is running.
             """
-            data = {
-                "test_int": test_int,
-                "test_float": test_float,
-                "test_enum": test_enum.name,
-            }
-            return DictResponse(status=200, data=data)
+            return DictResponse(
+                status=200,
+                data={"message": "Pong!"},
+            )
         
     
