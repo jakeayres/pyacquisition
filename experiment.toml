@@ -6,11 +6,10 @@ period = 0.25
 
 [instruments]
 clock = {instrument = "Clock"}
-lockin = {instrument = "SR_830", adapter="pyvisa", resource="GPIB0::8::INSTR"}
+mock = {instrument = "Mock"}
 
 [measurements]
 time = {instrument = "clock", method = "time"}
-vx = {instrument = "lockin", method = "get_x"}
 
 [data]
 path = "data_sub"

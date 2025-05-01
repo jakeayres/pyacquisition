@@ -21,12 +21,12 @@ class Rack(Broadcaster):
         self._pause_event.set()
          
         
-    async def measure(self):
+    async def measure(self) -> dict:
         """
         Executes all measurements in the rack and broadcasts the results.
         
         Returns:
-            list: A list of results from the measurements.
+            dict: A dictionary of results from the measurements.
         """
         result = {k: v.run() for k, v in self.measurements.items()}
         await self.broadcast(result)
