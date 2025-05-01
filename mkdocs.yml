@@ -3,7 +3,7 @@ repo_url: https://github.com/jakeayres/pyacquisition
 repo_name: pyacquisition
 nav:
   - Home: index.md
-  - Basics:
+  - Basic Usage:
     - Installation: basics/installation.md
     - Getting Started: basics/getting_started.md
     - Configuration: basics/configuration.md
@@ -13,11 +13,14 @@ nav:
     - Scribe: experiment/scribe.md
     - Task Manager: experiment/task_manager.md
   - Instruments:
-    - Overview: instruments/overview.md
     - Clock: instruments/clock.md
+    - SR_830: instruments/sr830.md
+    - SR_860: instruments/sr860.md
+    - Lakeshore_340: instruments/lakeshore_340.md
+    - Lakeshore_350: instruments/lakeshore_350.md
   - Tasks:
-    - Overview: tasks/overview.md
     - WaitFor: tasks/wait_for.md
+    - WaitUntil: tasks/wait_until.md
 theme:
   name: material
   icon:

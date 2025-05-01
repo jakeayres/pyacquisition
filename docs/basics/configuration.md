@@ -25,7 +25,7 @@ The `.toml` file is used to define the configuration for your experiment. Detail
 
 Below is a breakdown of the sections and parameters available in the file:
 
-## General Parameters
+## `[main]` Section
 
 General parameters for the experiment.
 
