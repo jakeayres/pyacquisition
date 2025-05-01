@@ -208,11 +208,30 @@ class Experiment:
         Raises:
             ValueError: If the TOML file cannot be loaded or parsed.
         """
-        
-        config = Experiment._read_toml(toml_file)
-        
+        config = cls._read_toml(toml_file)
+
         try:
-            experiment = cls(
+            experiment = cls._initialize_experiment(config)
+            cls._configure_instruments(experiment, config)
+            cls._configure_measurements(experiment, config)
+            return experiment
+        except Exception as e:
+            raise ValueError(f"Failed to configure instruments or measurements: {e}")
+
+
+    @classmethod
+    def _initialize_experiment(cls, config: dict) -> "Experiment":
+        """
+        Initializes the Experiment instance from the configuration.
+
+        Args:
+            config (dict): The parsed TOML configuration.
+
+        Returns:
+            Experiment: An initialized Experiment instance.
+        """
+        try:
+            return cls(
                 root_path=config.get("experiment", {}).get("root_path", "."),
                 data_path=config.get("data", {}).get("path", "."),
                 log_path=config.get("logging", {}).get("path", "."),
@@ -228,35 +247,54 @@ class Experiment:
             raise ValueError(f"Missing required configuration key: {e}")
         except Exception as e:
             raise ValueError(f"Failed to create Experiment instance: {e}")
-        
-        try:
-            instruments = config.get("instruments", {})
-            for name, instrument in instruments.items():
 
-                instrument_class = cls._get_instrument_class(instrument['instrument'])
 
-                if instrument.get('adapter', None) is None:
+    @classmethod
+    def _configure_instruments(cls, experiment: "Experiment", config: dict) -> None:
+        """
+        Configures the instruments for the experiment.
+
+        Args:
+            experiment (Experiment): The Experiment instance.
+            config (dict): The parsed TOML configuration.
+        """
+        instruments = config.get("instruments", {})
+        for name, instrument in instruments.items():
+            try:
+                instrument_class = cls._get_instrument_class(instrument["instrument"])
+
+                if instrument.get("adapter", None) is None:
                     logger.debug(f"Creating instrument '{name}' without adapter")
                     inst = instrument_class(name)
                     experiment.rack.add_instrument(name, inst)
-
                 else:
                     logger.debug(f"Creating instrument '{name}' with adapter '{instrument['adapter']}'")
-                    adapter_class = cls._get_adapter_class(instrument['adapter'])
-                    resource = cls._open_resource(adapter_class, instrument.get('resource', None), timeout=5000)
+                    adapter_class = cls._get_adapter_class(instrument["adapter"])
+                    resource = cls._open_resource(adapter_class, instrument.get("resource", None), timeout=5000)
                     if resource:
                         inst = instrument_class(name, resource)
                         experiment.rack.add_instrument(name, inst)
                     else:
                         logger.warning(f"Failed to open resource '{instrument.get('resource', None)}' for instrument '{name}'")
-                        continue
+            except Exception as e:
+                logger.warning(f"Failed to configure instrument '{name}': {e}")
 
-            
-            measurements = config.get("measurements", {})
-            for name, measurement in measurements.items():
-                instrument_name = measurement.get('instrument')
-                method_name = measurement.get('method')
-                args = measurement.get('args', None)
+
+    @classmethod
+    def _configure_measurements(cls, experiment: "Experiment", config: dict) -> None:
+        """
+        Configures the measurements for the experiment.
+
+        Args:
+            experiment (Experiment): The Experiment instance.
+            config (dict): The parsed TOML configuration.
+        """
+        measurements = config.get("measurements", {})
+        for name, measurement in measurements.items():
+            try:
+                instrument_name = measurement.get("instrument")
+                method_name = measurement.get("method")
+                args = measurement.get("args", None)
 
                 if instrument_name not in experiment.rack.instruments:
                     logger.warning(f"Instrument '{instrument_name}' not found for measurement '{name}'")
@@ -269,28 +307,37 @@ class Experiment:
                     continue
 
                 method = instrument.queries[method_name]
-                
+
                 if args:
-                    method_hints = inspect.signature(method).parameters
-                    
-                    resolved_args = {}
-                    for arg_name, arg_type in method_hints.items():
-                        if arg_name in args:
-                            arg_value = args[arg_name]
-                            if inspect.isclass(arg_type.annotation) and issubclass(arg_type.annotation, Enum):
-                                resolved_args[arg_name] = arg_type.annotation[arg_value]
-                            else:
-                                resolved_args[arg_name] = arg_value
-                                
-                    method = partial(method, **resolved_args)
-                    
-                
+                    method = cls._resolve_method_args(method, args)
+
                 experiment.rack.add_measurement(name, Measurement(name, method))
+            except Exception as e:
+                logger.warning(f"Failed to configure measurement '{name}': {e}")
 
-            return experiment
-        except Exception as e:
-            raise ValueError(f"Failed to configure instruments or measurements: {e}")
 
+    @staticmethod
+    def _resolve_method_args(method, args: dict):
+        """
+        Resolves method arguments, including Enum types.
+
+        Args:
+            method: The method to resolve arguments for.
+            args (dict): The arguments to resolve.
+
+        Returns:
+            Callable: The method with resolved arguments.
+        """
+        method_hints = inspect.signature(method).parameters
+        resolved_args = {}
+        for arg_name, arg_type in method_hints.items():
+            if arg_name in args:
+                arg_value = args[arg_name]
+                if inspect.isclass(arg_type.annotation) and issubclass(arg_type.annotation, Enum):
+                    resolved_args[arg_name] = arg_type.annotation[arg_value]
+                else:
+                    resolved_args[arg_name] = arg_value
+        return partial(method, **resolved_args)
         
         
     @property
