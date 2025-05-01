@@ -160,7 +160,7 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
 			}
 		
 		@api_server.app.get(f'/{self._uid}/'+'queries/', tags=[self._uid])
-		def list_queries() -> list[str]:
+		def list_queries() -> dict:
 			""" Return a list of available queries """
 			return {
 				"status": 200,
@@ -168,7 +168,7 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
 			}
 
 		@api_server.app.get(f'/{self._uid}/'+'commands/', tags=[self._uid])
-		def list_commands() -> list[str]:
+		def list_commands() -> dict:
 			""" Return a list of available commands """
 			return {
 				"status": 200,

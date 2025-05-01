@@ -1,6 +1,9 @@
 import tomllib
 import asyncio
 from pathlib import Path
+from functools import partial
+import inspect
+from enum import Enum
 from .logging import logger
 from .api_server import APIServer
 from .rack import Rack
@@ -253,6 +256,7 @@ class Experiment:
             for name, measurement in measurements.items():
                 instrument_name = measurement.get('instrument')
                 method_name = measurement.get('method')
+                args = measurement.get('args', None)
 
                 if instrument_name not in experiment.rack.instruments:
                     logger.warning(f"Instrument '{instrument_name}' not found for measurement '{name}'")
@@ -265,6 +269,22 @@ class Experiment:
                     continue
 
                 method = instrument.queries[method_name]
+                
+                if args:
+                    method_hints = inspect.signature(method).parameters
+                    
+                    resolved_args = {}
+                    for arg_name, arg_type in method_hints.items():
+                        if arg_name in args:
+                            arg_value = args[arg_name]
+                            if inspect.isclass(arg_type.annotation) and issubclass(arg_type.annotation, Enum):
+                                resolved_args[arg_name] = arg_type.annotation[arg_value]
+                            else:
+                                resolved_args[arg_name] = arg_value
+                                
+                    method = partial(method, **resolved_args)
+                    
+                
                 experiment.rack.add_measurement(name, Measurement(name, method))
 
             return experiment
