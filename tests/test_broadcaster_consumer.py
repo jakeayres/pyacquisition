@@ -11,7 +11,7 @@ async def test_consumer_subscribe_to_broadcaster():
     broadcaster = Broadcaster()
     consumer = Consumer()
 
-    consumer.subscribe(broadcaster)
+    consumer.subscribe_to(broadcaster)
 
     assert consumer in broadcaster._subscribers
 
@@ -24,7 +24,7 @@ async def test_broadcast_message_to_consumer():
     broadcaster = Broadcaster()
     consumer = Consumer()
 
-    consumer.subscribe(broadcaster)
+    consumer.subscribe_to(broadcaster)
 
     # Broadcast a message
     message = {"key": "value"}
@@ -56,8 +56,8 @@ async def test_broadcast_to_multiple_consumers():
     consumer1 = Consumer()
     consumer2 = Consumer()
 
-    consumer1.subscribe(broadcaster)
-    consumer2.subscribe(broadcaster)
+    consumer1.subscribe_to(broadcaster)
+    consumer2.subscribe_to(broadcaster)
 
     # Broadcast a message
     message = {"key": "value"}
@@ -79,7 +79,7 @@ async def test_unsubscribe_consumer():
     broadcaster = Broadcaster()
     consumer = Consumer()
 
-    consumer.subscribe(broadcaster)
+    consumer.subscribe_to(broadcaster)
     assert consumer in broadcaster._subscribers
 
     broadcaster.unsubscribe(consumer)

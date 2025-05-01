@@ -1,7 +1,7 @@
 from .logging import logger
 from .task import Task
 import asyncio
-
+    
 
 class TaskManager:
     """
@@ -11,7 +11,7 @@ class TaskManager:
 
     def __init__(self):
 
-        self.current_task: Task = None
+        self._current_task: Task = None
         self._task_queue = asyncio.Queue()
         self._pause_event = asyncio.Event()
         self._pause_event.set()
@@ -21,8 +21,8 @@ class TaskManager:
         """
         Setup the task manager.
         """
-        logger.debug("Task manager setup started")
-        logger.debug("Task manager setup completed")
+        logger.debug("[TaskManager] Setup started")
+        logger.debug("[TaskManager] Setup completed")
         
         
     async def run(self):
@@ -32,27 +32,25 @@ class TaskManager:
         while True:
             try:
                 await self._pause_event.wait()
-                logger.debug("Waiting for task to appear on queue")
-                self.current_task = await self._task_queue.get()
-                logger.debug(f"Task fetched from queue: {self.current_task}")
+                logger.info("[TaskManager] Waiting for task to appear on queue")
+                self._current_task = await self._task_queue.get()
+                logger.info(f"[TaskManager] Task fetched from queue: {self._current_task.name}")
                 try:
-                    await self.current_task.start()
+                    await self._current_task.start()
                 except Exception as e:
-                    logger.error(f"Error running task {self.current_task}: {e}")
+                    logger.error(f"Error running task {self._current_task}: {e}")
                 finally:
-                    self.current_task = None
+                    self._current_task = None
             except Exception as e:
                 logger.error(f"Error running task manager: {e}")
-
-
 
 
     def teardown(self):
         """
         Teardown the task manager.
         """
-        logger.debug("Task manager teardown started")
-        logger.debug("Task manager teardown completed")
+        logger.debug("[TaskManager] Teardown started")
+        logger.debug("[TaskManager] Teardown completed")
         
         
     def pause(self):
@@ -60,9 +58,9 @@ class TaskManager:
         Pause the task manager.
         """
         self._pause_event.clear()
-        if self.current_task:
-            self.current_task.pause()
-        logger.info("Task manager paused.")
+        if self._current_task:
+            self._current_task.pause()
+        logger.info("[TaskManager] paused.")
         
         
     def resume(self):
@@ -70,17 +68,45 @@ class TaskManager:
         Resume the task manager.
         """
         self._pause_event.set()
-        if self.current_task:
-            self.current_task.resume()
-        logger.info("Task manager resumed.")
+        if self._current_task:
+            self._current_task.resume()
+        logger.info("[TaskManager] Resumed.")
+        
+        
+    def abort(self):
+        """
+        Abort the current task.
+        """
+        if self._current_task:
+            self._current_task.abort()
+            logger.info("[TaskManager] Task manager aborted current task.")
+            self.pause()
+        else:
+            logger.info("[TaskManager] No task to abort.")
+            
+            
+    def current_task(self) -> Task:
+        """
+        Get the current task.
+        """
+        return self._current_task
         
         
     def add_task(self, task: Task):
         """
         Add a task to the queue.
         """
-        logger.info(f"Adding task to queue: {task}")
+        logger.info(f"[TaskManager] Adding task to queue: {task.name}")
         self._task_queue.put_nowait(task)
+        
+        
+    def register_task(self, task: Task):
+        try:
+            task.register_endpoints(self)
+        except Exception as e:
+            logger.error(f"Error registering endpoints for {task.__class__.__name__}: {e}")
+        
+        
         
         
     def register_endpoints(self, api_server):
@@ -88,8 +114,8 @@ class TaskManager:
         Register the task manager endpoints with the API server.
         """
         
-        @api_server.app.get("/task_manager/pause")
-        async def pause_endpoint():
+        @api_server.app.get("/task_manager/pause", tags=["Task Manager"])
+        async def pause():
             """
             Endpoint to pause the task manager.
             """
@@ -99,8 +125,8 @@ class TaskManager:
             return {"status": "success", "message": "Task manager paused."}
         
         
-        @api_server.app.get("/task_manager/resume")
-        async def resume_endpoint():
+        @api_server.app.get("/task_manager/resume", tags=["Task Manager"])
+        async def resume():
             """
             Endpoint to resume the task manager.
             """
@@ -110,11 +136,70 @@ class TaskManager:
             return {"status": "success", "message": "Task manager resumed."}
         
         
-        @api_server.app.get("/task_manager/add_task")
-        async def add_task_endpoint():
+        @api_server.app.get("/task_manager/abort", tags=["Task Manager"])
+        async def abort():
+            """
+            Endpoint to abort the current task.
+            """
+            if not self._current_task:
+                return {"status": "success", "message": "No task to abort."}
+            self.abort()
+            return {"status": "success", "message": "Task manager aborted current task."}
+        
+        
+        @api_server.app.get("/task_manager/status", tags=["Task Manager"])
+        async def status():
+            """
+            Endpoint to get the status of the task manager.
+            """
+            if self._pause_event.is_set():
+                return {
+                    "status": 200,
+                    "data": "Running",
+                }
+            else:
+                return {
+                    "status": 200,
+                    "data": "Paused",
+                }
+        
+        
+        @api_server.app.get("/task_manager/current_task", tags=["Task Manager"])
+        async def current_task():
+            """
+            Endpoint to get the current task.
+            """
+            if self._current_task:
+                return {
+                    "status": 200,
+                    "data": f"{self._current_task.name}",
+                }
+            else:
+                return {
+                    "status": 200,
+                    "data": None,
+                }
+        
+        
+        @api_server.app.get("/task_manager/add_task", tags=["Task Manager"])
+        async def add_task():
             """
             Endpoint to add a task to the queue.
             """
             from ..tasks import TestTask
             logger.info(f"Adding task to queue")
             self.add_task(TestTask())
+            
+        
+        @api_server.app.get("/task_manager/task_list", tags=["Task Manager"])
+        async def task_list():
+            """
+            Endpoint to get the list of tasks in the queue.
+            """
+            tasks = []
+            for task in self._task_queue._queue:
+                tasks.append(task.display_dict())
+            return {
+                "status": 200,
+                "data": tasks,
+            }

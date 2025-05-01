@@ -10,11 +10,11 @@ class IntegerInput(BaseInput):
         super().__init__(label, default_value)
 
 
-    def draw(self, parent: str) -> None:
+    def draw(self) -> None:
         """Draw the integer input on the specified parent."""
         dpg.add_input_int(
             label=self.label,
             default_value=self.default_value,
+            indent=10,
             tag=self.uuid,
-            parent=parent,
         )

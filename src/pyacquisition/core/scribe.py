@@ -13,13 +13,19 @@ class Scribe(Consumer):
     metadata.
     """
     
-    def __init__(self, root_path: Path, decimal: bool = True) -> None:
+    def __init__(
+        self, 
+        root_path: Path, 
+        #subdirectory: Path | None, 
+        decimal: bool = True
+    ) -> None:
         """
         Initialize the Scribe.
         """
         super().__init__()
         
         self.root_path = root_path
+        #self.subdirectory = subdirectory
         self.block = '00'
         self.step = '00'
         self.title = "start"
@@ -29,7 +35,7 @@ class Scribe(Consumer):
         self._pause_event.set()
 
 
-    def set_next_unused_block(self) -> str:
+    def _set_next_unused_block(self) -> str:
         """
         Check the root directory for existing files and determine the next
         block number.
@@ -62,9 +68,10 @@ class Scribe(Consumer):
         """
         self.title = title
         if next_block:
-            self.increment_block()
+            self._increment_block()
         else:
-            self.increment_step()
+            self._increment_step()
+        logger.info(f"[Scribe] New file: '{self.current_path()}'")
 
 
     def current_path(self) -> Path:
@@ -76,8 +83,27 @@ class Scribe(Consumer):
         """
         return self.root_path / f"{self.block}.{self.step} {self.title}.{self.extension}"
 
+    
+    def current_directory(self) -> str:
+        """
+        Get the current directory for the data file.
 
-    def increment_block(self) -> None:
+        Returns:
+            Path: The path of the current directory.
+        """
+        return f"{self.root_path}"
+    
+    
+    def current_file(self) -> Path:
+        """
+        Get the current file path.
+
+        Returns:
+        """
+        return f"{self.block}.{self.step} {self.title}.{self.extension}"
+    
+
+    def _increment_block(self) -> None:
         """
         Increment the block number.
         """
@@ -85,7 +111,7 @@ class Scribe(Consumer):
         self.step = '00'
 
 
-    def increment_step(self) -> None:
+    def _increment_step(self) -> None:
 
         """
         Increment the step number.
@@ -93,39 +119,39 @@ class Scribe(Consumer):
         self.step = str(int(self.step) + 1).zfill(2)
 
 
-    def make_directory(self, path: Path) -> None:
+    def _make_directory(self, path: Path) -> None:
         """
         Create a directory if it doesn't exist.
         """
         try:
             path.mkdir(parents=True, exist_ok=True)
-            logger.debug(f"[Scribe] Directory created: '{path}'")
+            logger.info(f"[Scribe] Directory created: '{path}'")
         except Exception as e:
             logger.error(f"[Scribe] Error creating directory '{path}': {e}")
 
 
-    def process_line(self, data: pd.DataFrame) -> None:
+    def _process_line(self, data: pd.DataFrame) -> None:
         """
         Process a line of data.
         """
         try:
             if not self.current_path().exists():
                 logger.debug(f"[Scribe] File {self.current_path()} does not exist. Creating new file.")
-                self.write_line(data)
+                self._write_line(data)
             else:
-                self.append_line(data)
+                self._append_line(data)
         except Exception as e:
             logger.error(f"[Scribe] Error processing data: {e}")
 
 
-    def write_line(self, data: pd.DataFrame) -> None:
+    def _write_line(self, data: pd.DataFrame) -> None:
         """
         Write a line of data to a file.
         """
         data.to_csv(self.current_path(), index=False, mode='w')
 
 
-    def append_line(self, data: pd.DataFrame) -> None:
+    def _append_line(self, data: pd.DataFrame) -> None:
         """
         Append a line of data to a file.
         """
@@ -137,8 +163,8 @@ class Scribe(Consumer):
         Setup the Scribe.
         """
         logger.debug("[Scribe] Setup started")
-        self.make_directory(self.root_path)
-        self.set_next_unused_block()
+        self._make_directory(self.root_path)
+        self._set_next_unused_block()
 
         logger.debug("[Scribe] Setup completed")
 
@@ -152,7 +178,7 @@ class Scribe(Consumer):
                 await self._pause_event.wait()
                 data = await self.consume()
                 data = pd.DataFrame(data=data, index=[0])
-                self.process_line(data)
+                self._process_line(data)
                 
             except Exception as e:
                 logger.error(f"[Scribe] Error running main loop: {e}")
@@ -173,15 +199,31 @@ class Scribe(Consumer):
         """
 
         @api_server.app.get('/scribe/current_file', tags=['scribe'])
-        async def current_file_endpoint():
+        async def current_file():
+            """ 
+            Get the current file name.
+            """
             return {
                 "status": 200,
-                "data": f"{self.current_path()}",
+                "data": f"{self.current_file()}",
+            }
+            
+        @api_server.app.get('/scribe/current_directory', tags=['scribe'])
+        async def current_directory():
+            """
+            Get the current directory.
+            """
+            return {
+                "status": 200,
+                "data": f"{self.current_directory()}",
             }
         
 
         @api_server.app.get('/scribe/next_file', tags=['scribe'])
         async def next_file_endpoint(title: str, next_block: bool = False):
+            """
+            Start a new file with the given title.
+            """
             self.next_file(title, next_block)
             return {
                 "status": 200,

@@ -40,4 +40,4 @@ pythonpath = ["src"]
 
 
 [project.scripts]
-runexperiment = "pyacquisition:main"
+pyacquisition = "pyacquisition:main"

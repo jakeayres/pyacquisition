@@ -13,7 +13,11 @@ nav:
     - Scribe: experiment/scribe.md
     - Task Manager: experiment/task_manager.md
   - Instruments:
+    - Overview: instruments/overview.md
     - Clock: instruments/clock.md
+  - Tasks:
+    - Overview: tasks/overview.md
+    - WaitFor: tasks/wait_for.md
 theme:
   name: material
   icon:

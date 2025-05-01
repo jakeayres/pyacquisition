@@ -1,5 +1,5 @@
-
-root_path = "./data"
+[experiment]
+root_path = "."
 
 [rack]
 period = 0.25
@@ -10,6 +10,12 @@ clock = {instrument = "clock"}
 [measurements]
 timestamp = {instrument = "clock", method = "timestamp_ms"}
 time = {instrument = "clock", method = "time"}
+timestamp6 = {instrument = "clock", method = "timestamp_ms"}
+time2 = {instrument = "clock", method = "time"}
+timestamp2 = {instrument = "clock", method = "timestamp_ms"}
+time3 = {instrument = "clock", method = "time"}
+timestamp3 = {instrument = "clock", method = "timestamp_ms"}
+time9 = {instrument = "clock", method = "time"}
 
 [data]
 path = "data_sub"
@@ -17,10 +23,10 @@ path = "data_sub"
 [api_server]
 host = "localhost"
 port = 8005
-allowed_cors_origins = ["http://localhost:3000"]
 
 [logging]
 path = "logs"
 console_level = "DEBUG"
+gui_level = "DEBUG"
 file_level = "DEBUG"
 file_name = "debug.log"

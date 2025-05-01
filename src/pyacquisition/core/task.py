@@ -1,31 +1,27 @@
 import asyncio
 from ..core.logging import logger
-from dataclasses import dataclass, field
-
+from dataclasses import dataclass, fields, asdict
+from inspect import Signature, Parameter
+from functools import wraps
 
 
 @dataclass
-class Task:
+class Task():
     """
     Base class for tasks in the experiment framework.
-    
-    Attributes:
-        _pause_event (asyncio.Event): Event to control pausing of the task.
-        _abort_event (asyncio.Event): Event to control aborting of the task.
-        _is_paused (bool): Flag indicating if the task is paused.
-        _status (str): Current status of the task.
     """
     
-    _pause_event: asyncio.Event = field(init=False, default_factory=asyncio.Event)
-    _abort_event: asyncio.Event = field(init=False, default_factory=asyncio.Event)
-    _is_paused: bool = field(init=False, default=False)
-    _status: str = field(init=False, default="running")
-    
+    name = "Base Task"
+    help = "Generic help message for the task."
     
     def __post_init__(self):
         """
         Initialize the task with default events.
         """
+        self._pause_event: asyncio.Event = asyncio.Event()
+        self._abort_event: asyncio.Event = asyncio.Event()
+        self._is_paused: bool = False
+        self._status: str = "running"
         self._pause_event.set() # Set to allow task to run immediately
         self._abort_event.clear() # Clear to allow task to run immediately
 
@@ -62,8 +58,9 @@ class Task:
         try:
             await self.setup()  # Call setup before running the task
             async for step in self.run():
-                logger.debug(f"Task {self.__class__.__name__} step: {step}")
-                await self.check_control_flags()
+                if step:
+                    logger.info(f"[{self.__class__.__name__}] {step}")
+                await self._check_control_flags()
         except asyncio.CancelledError:
             print("Task was cancelled.")
         except Exception as e:
@@ -72,7 +69,7 @@ class Task:
             await self.teardown()
 
 
-    async def check_control_flags(self):
+    async def _check_control_flags(self):
         """
         Checks for pause or abort signals and handles them.
         Call this method periodically in the user's task logic.
@@ -80,7 +77,37 @@ class Task:
         if self._abort_event.is_set():
             raise asyncio.CancelledError("Task aborted.")
         await self._pause_event.wait()  # Wait if paused
-
+        
+        
+    @property
+    def description(self) -> str:
+        """
+        Returns a description of the task.
+        """
+        None
+    
+    
+    @property
+    def parameters(self) -> dict:
+        """
+        Returns the displayed parameters of the task.
+        """
+        None
+    
+    
+    def display_dict(self) -> dict:
+        """
+        Converts the task to a dictionary representation.
+        
+        Returns:
+            dict: Dictionary representation of the task.
+        """
+        return {
+            "name": self.__class__.__name__,
+            "description": self.description,
+            "parameters": self.parameters,
+        }
+    
 
     def pause(self):
         """
@@ -102,12 +129,50 @@ class Task:
         """
         self._abort_event.set()
         self._pause_event.set()  # Ensure it doesn't stay paused
+        
+    
+    @classmethod
+    def register_endpoints(cls, experiment):
+        """
+        Register the task endpoints with the API server.
+        
+        Manually build the endpoint annotations and signature based on the dataclass fields
+        and add the endpoint functionanlly in order to dynamically create the endpoint with
+        the parameters and type hints.
+        
+        Args:
+            experiment: The experiment instance to register the endpoints with.
+        """
+        
+        fields_dict = {field.name: field.type for field in fields(cls)}
+        params = [
+            Parameter(name, Parameter.POSITIONAL_OR_KEYWORD, annotation=type_)
+            for name, type_ in fields_dict.items()
+        ]
+        
+        async def task_endpoint(**kwargs):
+            """
+            Endpoint to run the task.
+            
+            Returns:
+                dict: The result of the task.
+            """
+            task = cls(**kwargs)
+            print(asdict(task))
+            experiment.task_manager.add_task(task)
+            return {"status": 200, "message": f"{cls.__name__} added"}
+        
+        task_endpoint.__name__ = f"{cls.name}"
+        task_endpoint.__annotations__ = fields_dict
+        task_endpoint.__annotations__["return"] = dict
+        task_endpoint.__signature__ = Signature(parameters=params, return_annotation=dict)
+        task_endpoint.__doc__ = cls.help
+        
+        endpoint_path = f"/tasks/{cls.name.lower().replace(' ', '_')}"
+        experiment._api_server.app.add_api_route(
+            endpoint_path,
+            task_endpoint,
+            methods=["GET"],
+            tags=["tasks"],
+        )
 
-
-# Example subclass
-class ExampleTask(Task):
-    async def run(self):
-        for i in range(10):
-            await self.check_control_flags()  # Automatically handles pause/abort
-            print(f"Running step {i}")
-            await asyncio.sleep(1)  # Simulate work

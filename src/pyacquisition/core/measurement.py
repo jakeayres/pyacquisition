@@ -45,6 +45,7 @@ class Measurement:
 
         for key in kwargs:
             if key not in valid_params:
+                logger.error(f"Invalid keyword argument '{key}' for function '{function.__name__}'.")
                 raise ValueError(f"Invalid keyword argument '{key}' for function '{function.__name__}'.")
 
 

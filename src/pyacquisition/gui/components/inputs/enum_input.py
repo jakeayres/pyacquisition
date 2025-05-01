@@ -21,12 +21,12 @@ class EnumInput(BaseInput):
         super().__init__(label, default_value)
         self.options = options
 
-    def draw(self, parent: str) -> None:
+    def draw(self) -> None:
         """Draw the enum input (dropdown) on the specified parent."""
         dpg.add_combo(
             label=self.label,
             items=self.options,
             default_value=self.default_value,
+            intend=10,
             tag=self.uuid,
-            parent=parent,
         )

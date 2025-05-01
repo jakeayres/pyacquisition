@@ -13,20 +13,42 @@ class WebsocketEndpoint(Consumer):
     """
     A class that handles WebSocket connections and data streaming.
     """
-    
-    def __init__(self, url: str, function: callable):
-        """
-        Initialize the WebSocket endpoint.
 
-        Args:
-            url (str): The URL path for the WebSocket endpoint.
-            function (callable): The function to call when data is received.
-        """
-        super().__init__()
-        self.url = url
-        self.function = function
         
-        logger.debug(f"[SocketEndpoint] Initialized with URL: {url}")
+    @staticmethod
+    def _enum_to_selected_dict(enum_instance):
+        """
+        Converts an enum instance to a dictionary with enum names as keys and their values as values.
+        """
+        return {
+            item.name: {
+                "value": item.value,
+                "selected": item == enum_instance,
+            } for item in enum_instance.__class__
+        }
+    
+        
+    async def run(self, websocket: WebSocket):
+        """
+        Start the WebSocket server and listen for incoming connections.
+        """
+        
+        await websocket.accept()
+        logger.debug("[FastApi] Client connected")
+        try:
+            while True:
+                data = await self.consume()
+                for key, value in data.items():
+                    if isinstance(value, Enum):
+                        data[key] = APIServer._enum_to_selected_dict(value)
+                await websocket.send_json(data)
+        except WebSocketDisconnect:
+            logger.debug("[FastApi] Client disconnected")
+        except ConnectionClosedOK:
+            logger.debug("[FastApi] Connection closed normally")
+        except Exception as e:
+            logger.error(f"[FastApi] An error occurred: {e}")
+            await websocket.close()
 
 
 
@@ -37,7 +59,7 @@ class APIServer:
         self,
         host: str = "localhost",
         port: int = 8000,
-        allowed_cors_origins: list = ["http://localhost:3000"],
+        #allowed_cors_origins: list = ["http://localhost:3000"],
     ):
         
         self.host = host
@@ -50,17 +72,16 @@ class APIServer:
 
         self.websocket_endpoints = {}
         
-        self.app.add_middleware(
-            CORSMiddleware,
-            allow_origins=allowed_cors_origins,
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
+        # self.app.add_middleware(
+        #     CORSMiddleware,
+        #     allow_origins=allowed_cors_origins,
+        #     allow_credentials=True,
+        #     allow_methods=["*"],
+        #     allow_headers=["*"],
+        # )
         
         logger.debug("[FastApi] APIServer initialized")
-
-
+        
 
     
     
@@ -77,16 +98,15 @@ class APIServer:
         }
     
     
-    def add_websocket_endpoint(self, url: str, function: callable):
+    def add_websocket_endpoint(self, url: str):
         """
         Adds a WebSocket endpoint to the FastAPI app.
 
         Args:
             url (str): The URL path for the WebSocket endpoint.
-            function (callable): [MUST BE ASYNC] The result of this function is sent to the client.
         """
 
-        self.websocket_endpoints[url] = WebsocketEndpoint(url, function)
+        self.websocket_endpoints[url] = WebsocketEndpoint()
         
         @self.app.websocket(url)
         async def websocket_endpoint(websocket: WebSocket):
@@ -96,23 +116,9 @@ class APIServer:
 			Args:
 				websocket (WebSocket): WebSocket connection object.
 			"""
-            await websocket.accept()
-            try:
-                while True:
-                    data = await function()
-                    for key, value in data.items():
-                        if isinstance(value, Enum):
-                            data[key] = APIServer._enum_to_selected_dict(value)
-                    await websocket.send_json(data)
-            except WebSocketDisconnect:
-                logger.debug("[FastApi] Client disconnected")
-            except ConnectionClosedOK:
-                logger.debug("[FastApi] Connection closed normally")
-            except Exception as e:
-                logger.error(f"An error occurred: {e}")
-                await websocket.close()
-        
-        logger.debug(f"WebSocket endpoint added at {url}")
+            await self.websocket_endpoints[url].run(websocket)
+            
+        logger.debug(f"[FastApi] WebSocket endpoint added at '{url}'")
             
     
     def setup(self):
@@ -138,7 +144,7 @@ class APIServer:
             return server.serve()
         except Exception as e:
             # Log the exception or handle it as needed
-            logger.error(f"An error occurred while running the server: {e}")
+            logger.error(f"[FastApi] An error occurred while running the server: {e}")
             return None
         
         
@@ -152,8 +158,9 @@ class APIServer:
         
     def register_endpoints(self, api_server):
         """
-        Registers endpoints to the FastAPI app. This method should be called to add any custom endpoints.
+        Registers endpoints to the FastAPI app.
         """
+        
         
         @api_server.app.get("/ping")
         async def ping() -> DictResponse:
@@ -163,6 +170,17 @@ class APIServer:
             return DictResponse(
                 status=200,
                 data={"message": "Pong!"},
+            )
+            
+            
+        @api_server.app.get("/list_websockets")
+        async def list_websockets() -> DictResponse:
+            """
+            Endpoint to list all available WebSocket endpoints.
+            """
+            return DictResponse(
+                status=200,
+                data={"websockets": list(api_server.websocket_endpoints.keys())},
             )
         
     

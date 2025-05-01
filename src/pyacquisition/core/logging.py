@@ -2,13 +2,23 @@ from loguru import logger as loguru_logger
 from threading import Lock
 import sys
 import os
+import time
 from pathlib import Path
+from .broadcaster import Broadcaster
 
 
-class Logger:
+class Logger(Broadcaster):
     """
     Singleton class for configuring and managing logging in the application.
     """
+    
+    LOG_LEVELS = {
+        "DEBUG": 10,
+        "INFO": 20,
+        "WARNING": 30,
+        "ERROR": 40,
+        "EXCEPTION": 50,
+    }
     
     _instance = None
     _lock = Lock()  # To make it thread-safe
@@ -27,8 +37,15 @@ class Logger:
         # Avoid reinitializing if the instance already exists
         if hasattr(self, "_initialized") and self._initialized:
             return
+        super().__init__()
         self._initialized = True
+        self._gui_level = "DEBUG"
         self.log_path: Path = Path()
+        
+    
+    def _should_broadcast(self, level: str) -> bool:
+        return self.LOG_LEVELS[level.upper()] >= self.LOG_LEVELS[self._gui_level.upper()]
+
         
         
     def configure(
@@ -36,6 +53,7 @@ class Logger:
         root_path: Path,
         console_level: str = "DEBUG",
         file_level: str = "DEBUG",
+        gui_level: str = "DEBUG",
         file_name: Path = Path("debug.log"),
     ) -> None:
         """
@@ -47,6 +65,7 @@ class Logger:
             file_level (str, optional): Logging level for file output. Defaults to "DEBUG".
             file_name (str, optional): Name of the log file. Defaults to "debug.log".
         """
+        self._gui_level = gui_level
         loguru_logger.remove()
         loguru_logger.add(
             sink=sys.stdout,
@@ -61,7 +80,7 @@ class Logger:
             level=file_level,
             format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
         )
-        self.info(f"Logging configured: console level={console_level}, file level={file_level}, file name={log_file_path}") 
+        self.info(f"Logging configured: console level={console_level}, file level={file_level}, file name={log_file_path}, gui level={self._gui_level}") 
         
         
     def info(self, message: str) -> None:
@@ -72,6 +91,8 @@ class Logger:
             message (str): The message to log.
         """
         loguru_logger.info(message)
+        if self._should_broadcast("INFO"):
+            self.broadcast_sync({"time": time.time(), "message": message, "level": "info"})
         
         
     def debug(self, message: str) -> None:
@@ -82,6 +103,8 @@ class Logger:
             message (str): The message to log.
         """
         loguru_logger.debug(message)
+        if self._should_broadcast("DEBUG"):
+            self.broadcast_sync({"time": time.time(), "message": message, "level": "debug"})
         
     
     def warning(self, message: str) -> None:
@@ -92,6 +115,8 @@ class Logger:
             message (str): The message to log.
         """
         loguru_logger.warning(message)
+        if self._should_broadcast("WARNING"):
+            self.broadcast_sync({"time": time.time(), "message": message, "level": "warning"})
         
         
     def error(self, message: str) -> None:
@@ -102,6 +127,8 @@ class Logger:
             message (str): The message to log.
         """
         loguru_logger.error(message)
+        if self._should_broadcast("ERROR"):
+            self.broadcast_sync({"time": time.time(), "message": message, "level": "error"})
         
         
     def exception(self, message: str) -> None:
@@ -112,6 +139,8 @@ class Logger:
             message (str): The message to log.
         """
         loguru_logger.exception(message)
+        if self._should_broadcast("EXCEPTION"):
+            self.broadcast({"time": time.time(), "message": message, "level": "exception"})  
 
 
 # Singleton instance

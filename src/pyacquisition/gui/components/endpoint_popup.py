@@ -7,6 +7,8 @@ from .inputs.boolean_input import BooleanInput
 from .inputs.float_input import FloatInput
 from .inputs.enum_input import EnumInput
 from .inputs.base_input import BaseInput
+from .text import add_text, add_header, add_text_area
+from .input_group import InputGroup
 from ..api_client import APIClient
 
 
@@ -17,12 +19,15 @@ class EndpointPopup:
         self.uuid = dpg.generate_uuid()
         self.api_client = api_client
         self.path = path
-        self.inputs = []  # List to store input components
-        self.response_text_area = None  # Text area for displaying the response
+        self.input_group = InputGroup()
+        self.inputs = []
+        self.response_text_area = None 
         
         for param in self.path.get.parameters.values():
             input_component = self.param_to_input(param)
             self.add_input(input_component)
+            
+            self.input_group.add_input(input_component)
             
             
     def param_to_input(self, param: str) -> BaseInput:
@@ -56,37 +61,23 @@ class EndpointPopup:
             show=True,
             tag=self.uuid,
         ):
-            dpg.add_text(f"{self.path.get.description}", color=(200, 200, 200), wrap=300)
-            dpg.add_spacer(height=10)
-            dpg.add_separator()
-            dpg.add_spacer(height=10)
-            
-            if len(self.inputs) > 0:
-                dpg.add_text(f"Parameters:", color=(255, 255, 255))
-                dpg.add_spacer(height=10)
-                for input_component in self.inputs:
-                    input_component.draw(parent=self.uuid)
-                dpg.add_spacer(height=10)
+            add_text(self.path.get.description, wrap=265)
+
+            if self.input_group.length > 0:
+                add_header("Parameters")
+                self.input_group.draw()
+                
             
             dpg.add_button(
                 label="Send Request",
                 callback=self.request,
+                indent=10,
             )
             
-            dpg.add_spacer(height=10)
-            dpg.add_separator()
             dpg.add_spacer(height=5)
+            add_header("Response")
+            self.response_text_area = add_text_area(height=200, width=265)
             
-            dpg.add_text(f"Response:", color=(255, 255, 255))
-            
-            self.response_text_area = dpg.add_input_text(
-                multiline=True,
-                readonly=True,
-                height=100,  # Adjust height as needed
-                width=280,   # Adjust width as needed
-            )
-            
-            print(self.response_text_area)
 
 
     def run_async(self, func) -> None:

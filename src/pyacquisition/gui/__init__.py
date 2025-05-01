@@ -4,7 +4,13 @@ from ..core.logging import logger
 from multiprocessing import Process
 from .api_client import APIClient
 from .openapi import Schema
+from .dataframe import DataFrame
 from .components.endpoint_popup import EndpointPopup
+from .components.live_data_window import LiveDataWindow
+from .components.live_log_window import LiveLogWindow
+from .components.live_plot import LivePlotWidget
+from .components.file_window import FileWindow
+from .components.task_manager_window import TaskManagerWindow
 import json
 from functools import partial
 
@@ -16,29 +22,9 @@ class Gui:
         super().__init__()
         
         self.api_client = APIClient(host=host, port=port)
-        
-        self.runnables = {}
-        self.popups = []
-     
-     
-    def add_runnable(self, name: str, runnable):
-        """
-        Add a runnable to the GUI.
-        """
-        if name in self.runnables:
-            logger.warning(f"Runnable {name} already exists. Overwriting.")
-        self.runnables[name] = runnable
-        
-    
-    def remove_runnable(self, name: str):
-        """
-        Remove a runnable from the GUI.
-        """
-        if name in self.runnables:
-            del self.runnables[name]
-            logger.debug(f"Runnable {name} removed")
-        else:
-            logger.warning(f"Runnable {name} not found")
+        self.dataframe = DataFrame()
+        self.live_data_window = LiveDataWindow()
+        self.live_log_window = LiveLogWindow()
     
     
     async def _render(self):
@@ -46,15 +32,7 @@ class Gui:
             dpg.render_dearpygui_frame()
             await asyncio.sleep(0.010)
             
-            
-    async def _run_runnables(self):
-        for name, runnable in self.runnables.items():
-            if hasattr(runnable, 'run'):
-                await runnable.run()
-            else:
-                logger.warning(f"Runnable {name} does not have a run method")
-            
-    
+
     async def _fetch_openapi_schema(self):
         try:
             logger.debug("Fetching OpenAPI schema")
@@ -93,7 +71,6 @@ class Gui:
             path=user_data["path"],
             api_client=self.api_client,
         )
-        self.popups.append(popup)
         popup.draw()
 
 
@@ -104,14 +81,35 @@ class Gui:
         logger.debug("Populating scribe")
      
         with dpg.viewport_menu_bar():
-             with dpg.menu(label="Scribe"):
+            with dpg.menu(label="Scribe"):
                 for name, path in schema.paths.items():
                     if name.startswith(f"/scribe"):
+                        dpg.add_spacer(height=1)
                         dpg.add_menu_item(
-                            label=path.get.summary, 
+                            label=f" {path.get.summary:{' '}<{15}}", 
                             callback=self._draw_popup,
                             user_data={"path": path},
                             )
+                dpg.add_spacer(height=1)
+                
+                
+    async def _populate_rack(self, schema: Schema):
+        """
+        Populate the scribe in the GUI.
+        """
+        logger.debug("Populating rack")
+     
+        with dpg.viewport_menu_bar():
+            with dpg.menu(label="Rack"):
+                for name, path in schema.paths.items():
+                    if name.startswith(f"/rack"):
+                        dpg.add_spacer(height=1)
+                        dpg.add_menu_item(
+                            label=f" {path.get.summary:{' '}<{15}}", 
+                            callback=self._draw_popup,
+                            user_data={"path": path},
+                            )
+                dpg.add_spacer(height=1)
                                
         
         
@@ -130,15 +128,77 @@ class Gui:
              with dpg.menu(label="Instruments"):
                 for instrument_name, instrument in instruments.items():
                     logger.debug(f"Adding instrument {instrument}")
-                    with dpg.menu(label=instrument_name):
+                    dpg.add_spacer(height=1)
+                    with dpg.menu(label=f" {instrument_name:{' '}<{15}}"):
                         for name, path in schema.paths.items():
                             if name.startswith(f"/{instrument_name}"):
+                                dpg.add_spacer(height=1)
                                 dpg.add_menu_item(
-                                    label=path.get.summary, 
+                                    label=f" {path.get.summary:{' '}<{15}}", 
                                     callback=self._draw_popup,
                                     user_data={"path": path},
                                     )
-                                
+                        dpg.add_spacer(height=1)
+                dpg.add_spacer(height=1)
+                
+                
+    async def _populate_task_manager(self, schema: Schema):
+        """
+        Populate the task manager in the GUI.
+        """
+        logger.debug("Populating task manager")
+        
+        with dpg.viewport_menu_bar():
+            with dpg.menu(label="Task Manager"):
+                for name, path in schema.paths.items():
+                    if name.startswith(f"/task_manager"):
+                        dpg.add_spacer(height=1)
+                        dpg.add_menu_item(
+                            label=f" {path.get.summary:{' '}<{15}}", 
+                            callback=self._draw_popup,
+                            user_data={"path": path},
+                            )
+                dpg.add_spacer(height=1)
+                
+                
+    async def _populate_tasks(self, schema: Schema):
+        """
+        Populate the tasks in the GUI.
+        """
+        logger.debug("Populating tasks")
+        
+        with dpg.viewport_menu_bar():
+            with dpg.menu(label="Tasks"):
+                for name, path in schema.paths.items():
+                    if name.startswith(f"/tasks"):
+                        dpg.add_spacer(height=1)
+                        dpg.add_menu_item(
+                            label=f" {path.get.summary:{' '}<{15}}", 
+                            callback=self._draw_popup,
+                            user_data={"path": path},
+                            )
+                dpg.add_spacer(height=1)
+    
+    
+    async def _populate_plots(self):
+        """
+        Populate the plots menu in the GUI.
+        """
+        logger.debug("Populating plots menu")
+        
+        with dpg.viewport_menu_bar():
+            with dpg.menu(label="Plots"):
+                dpg.add_spacer(height=1)
+                dpg.add_menu_item(label="New Plot", callback=self.new_plot)
+                dpg.add_spacer(height=1)
+                
+    
+    def new_plot(self, sender, app_data, user_data):
+        
+        plot = LivePlotWidget(self.dataframe.data)
+        self.dataframe.add_callback(plot.update)
+        plot.set_on_close(lambda: self.dataframe.remove_callback(plot.update))
+
     
     async def setup(self):
         """
@@ -146,7 +206,7 @@ class Gui:
         """
         logger.debug("GUI setup started")
         dpg.create_context()
-        dpg.create_viewport(title='PyAcquisition GUI')
+        dpg.create_viewport(title='PyAcquisition GUI', width=1440, height=900)
         dpg.setup_dearpygui()
         
         with dpg.viewport_menu_bar():
@@ -156,11 +216,38 @@ class Gui:
         schema = await self._fetch_openapi_schema()
         
         await self._populate_scribe(schema)
+        await self._populate_rack(schema)
         await self._populate_instruments(schema)
+        await self._populate_task_manager(schema)
+        await self._populate_tasks(schema)
+        await self._populate_plots()
         
         measurements = await self._fetch_measurements()
         logger.debug(f"Measurements: {measurements}")
         
+        
+        # Steams
+        self.api_client.add_stream("logs", "/logs")
+        self.api_client.add_stream("data", "/data")
+        self.dataframe.subscribe_to(self.api_client.streams["data"])
+        self.live_data_window.subscribe_to(self.dataframe)
+        self.live_log_window.subscribe_to(self.api_client.streams["logs"])
+        
+        # Pollers
+        file_poller = self.api_client.add_poller("current_file", "/scribe/current_file", period=1.0)
+        directory_poller = self.api_client.add_poller("current_directory", "/scribe/current_directory", period=1.0)
+        current_task_poller = self.api_client.add_poller("current_task", "/task_manager/current_task", period=1.0)
+        task_manager_status_poller = self.api_client.add_poller("task_manager_status", "/task_manager/status", period=1.0)
+        task_queue_poller = self.api_client.add_poller("task_queue", "/task_manager/task_list", period=1.0)
+
+        file_window = FileWindow()
+        file_poller.add_callback(lambda message: file_window.update_file(message['data']))
+        directory_poller.add_callback(lambda message: file_window.update_directory(message['data']))
+        
+        task_window = TaskManagerWindow()
+        current_task_poller.add_callback(lambda message: task_window.update_current_task(message['data']))
+        task_manager_status_poller.add_callback(lambda message: task_window.update_running_status(message['data']))
+        task_queue_poller.add_callback(lambda message: task_window.update_task_queue(message['data']))
 
         logger.debug("GUI setup completed")
         
@@ -174,7 +261,11 @@ class Gui:
         
         async with asyncio.TaskGroup() as task_group:
             task_group.create_task(self._render())
-            task_group.create_task(self._run_runnables())
+            task_group.create_task(self.api_client.run())
+            task_group.create_task(self.dataframe.run())
+            task_group.create_task(self.live_data_window.run())
+            task_group.create_task(self.live_log_window.run())
+
 
           
     async def teardown(self):
@@ -209,4 +300,4 @@ class Gui:
         process.start()
         return process
 
-        
+

@@ -121,7 +121,7 @@ class Rack(Broadcaster):
             instrument (Instrument): The instrument to be added.
         """
         self.instruments[name] = instrument
-        logger.info(f"Instrument {name} added to the rack.")
+        logger.debug(f"Instrument {name} added to the rack.")
         
         
     def remove_instrument(self, name) -> None:
@@ -133,7 +133,7 @@ class Rack(Broadcaster):
         """
         if name in self.instruments:
             del self.instruments[name]
-            logger.info(f"Instrument {name} removed from the rack.")
+            logger.debug(f"Instrument {name} removed from the rack.")
         else:
             logger.warning(f"Instrument {name} not found in the rack.")
             
@@ -149,7 +149,7 @@ class Rack(Broadcaster):
         if not isinstance(measurement, Measurement):
             raise TypeError("Expected an instance of Measurement.")
         self.measurements[name] = measurement
-        logger.info(f"Measurement {name} added to the rack.")
+        logger.debug(f"Measurement {name} added to the rack.")
         
         
     def remove_measurement(self, name: str) -> None:
@@ -161,7 +161,7 @@ class Rack(Broadcaster):
         """
         if name in self.measurements:
             del self.measurements[name]
-            logger.info(f"Measurement {name} removed from the rack.")
+            logger.debug(f"Measurement {name} removed from the rack.")
         else:
             logger.warning(f"Measurement {name} not found in the rack.")
                 
@@ -174,7 +174,7 @@ class Rack(Broadcaster):
         for instrument in self.instruments.values():
             instrument.register_endpoints(api_server)
         
-        @api_server.app.get("/rack/list_instruments")
+        @api_server.app.get("/rack/list_instruments", tags=["rack"])
         async def list_instruments():
             return {
                 "status": "success",
@@ -182,7 +182,7 @@ class Rack(Broadcaster):
             }
             
     
-        @api_server.app.get("/rack/list_measurements")
+        @api_server.app.get("/rack/list_measurements", tags=["rack"])
         async def list_measurements():
             return {
                 "status": "success",
@@ -190,7 +190,7 @@ class Rack(Broadcaster):
             }
         
         
-        @api_server.app.get("/rack/pause/")
+        @api_server.app.get("/rack/pause/", tags=["rack"])
         async def pause():
             """
             Pauses the measurements.
@@ -201,7 +201,7 @@ class Rack(Broadcaster):
             return {"status": "success", "message": "Measurements paused."}
         
         
-        @api_server.app.get("/rack/resume/")
+        @api_server.app.get("/rack/resume/", tags=["rack"])
         async def resume():
             """
             Resumes the measurements.
@@ -212,7 +212,7 @@ class Rack(Broadcaster):
             return {"status": "success", "message": "Measurements resumed."}
         
         
-        @api_server.app.get("/rack/period/set/")
+        @api_server.app.get("/rack/period/set/", tags=["rack"])
         async def set_period(period: float):
             """
             Sets the period for the measurements.
@@ -221,7 +221,7 @@ class Rack(Broadcaster):
             return {"status": "success", "period": self.period}
         
         
-        @api_server.app.get("/rack/period/get/")
+        @api_server.app.get("/rack/period/get/", tags=["rack"])
         async def get_period():
             """
             Gets the period for the measurements.

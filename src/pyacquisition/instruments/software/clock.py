@@ -82,32 +82,35 @@ class Clock(SoftwareInstrument):
         super().register_endpoints(api_server)
         
         
-        @api_server.app.get("/clock/time")
+        @api_server.app.get("/clock/time", tags=[self._uid])
         async def get_time():
             """Time since clock started in seconds."""
             return {"status": 200, "data": self.time()}
         
         
-        @api_server.app.get("/clock/timestamp")
+        @api_server.app.get("/clock/timestamp", tags=[self._uid])
         async def get_timestamp():
             """Current timestamp in milliseconds."""
             return {"status": 200, "data": self.timestamp_ms()}
         
         
-        @api_server.app.get("/clock/timer/start")
+        @api_server.app.get("/clock/timer/start", tags=[self._uid])
         async def start_timer(name: str):
             """Start a timer with the given name."""
             self.start_timer(name)
             return {"status": 200, "data": f"Timer '{name}' started."}
         
         
-        @api_server.app.get("/clock/timer/list")
+        @api_server.app.get("/clock/timer/list", tags=[self._uid])
         async def list_timers():
             """List all active timers."""
             return {"status": 200, "data": self.list_timers()}
         
         
-        @api_server.app.get("/clock/timer/read")
+        @api_server.app.get("/clock/timer/read", tags=[self._uid])
         async def read_timer(name: str):
             """Read the elapsed time for the given timer."""
-            return {"status": 200, "data": self.read_timer(name)}
+            try:
+                return {"status": 200, "data": self.read_timer(name)}
+            except ValueError as e:
+                return {"status": 400, "data": "Bad input"}
