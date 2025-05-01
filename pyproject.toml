@@ -1,7 +1,7 @@
 [project]
 name = "pyacquisition"
-version = "0.1.0"
-description = "Add your description here"
+version = "0.1.1"
+description = "Python-based data acquisition"
 readme = "README.md"
 authors = [
     { name = "jakeayres", email = "jake_ayres@hotmail.co.uk" }

@@ -161,7 +161,34 @@ class Experiment:
             return get_adapter(adapter_name)
         except KeyError:
             raise ValueError(f"Adapter '{adapter_name}' not found in adapter map.")
-        
+    
+
+    @staticmethod
+    def _open_resource(adapter, resource: str, timeout: int = 5000):
+        """
+        Open a resource using the appropriate adapter.
+
+        Args:
+            resource (str): The resource to open.
+
+        Returns:
+            Resource: The opened resource.
+
+        Raises:
+            ValueError: If the resource cannot be opened.
+        """
+        try:
+            available_resources = adapter.list_resources()
+            logger.debug(f"Available resources: {adapter.list_resources()}")
+            if resource not in available_resources:
+                logger.warning(f"Resource '{resource}' not found.")
+                return None
+            else:
+                logger.debug(f"Opening resource '{resource}'")
+                return adapter.open_resource(resource, timeout=timeout)
+        except Exception as e:
+            logger.warning(f"Failed to open resource '{resource}': {e}")
+            return None
 
     
     @classmethod
@@ -205,24 +232,39 @@ class Experiment:
 
                 instrument_class = cls._get_instrument_class(instrument['instrument'])
 
+                if instrument.get('adapter', None) is None:
+                    logger.debug(f"Creating instrument '{name}' without adapter")
+                    inst = instrument_class(name)
+                    experiment.rack.add_instrument(name, inst)
 
-                try:
-                    if instrument.get('adapter', None):
-                        adapter_class = cls._get_adapter_class(instrument['adapter'])
-                        resource = adapter_class.open_resource(instrument.get('resource', None))
+                else:
+                    logger.debug(f"Creating instrument '{name}' with adapter '{instrument['adapter']}'")
+                    adapter_class = cls._get_adapter_class(instrument['adapter'])
+                    resource = cls._open_resource(adapter_class, instrument.get('resource', None), timeout=5000)
+                    if resource:
                         inst = instrument_class(name, resource)
                         experiment.rack.add_instrument(name, inst)
                     else:
-                        inst = instrument_class(name)
-                        experiment.rack.add_instrument(name, inst)
-                except Exception as e:
-                    raise ValueError(f"Failed to create adapter '{instrument['adapter']}': {e}")
-                
+                        logger.warning(f"Failed to open resource '{instrument.get('resource', None)}' for instrument '{name}'")
+                        continue
+
             
             measurements = config.get("measurements", {})
             for name, measurement in measurements.items():
-                instrument = experiment.rack.instruments[measurement['instrument']]
-                method = instrument.queries[measurement['method']]
+                instrument_name = measurement.get('instrument')
+                method_name = measurement.get('method')
+
+                if instrument_name not in experiment.rack.instruments:
+                    logger.warning(f"Instrument '{instrument_name}' not found for measurement '{name}'")
+                    continue
+
+                instrument = experiment.rack.instruments[instrument_name]
+
+                if method_name not in instrument.queries:
+                    logger.warning(f"Method '{method_name}' not found for instrument '{instrument_name}'")
+                    continue
+
+                method = instrument.queries[method_name]
                 experiment.rack.add_measurement(name, Measurement(name, method))
 
             return experiment
