@@ -41,6 +41,7 @@ class TaskManager:
                     logger.error(f"Error running task {self._current_task}: {e}")
                 finally:
                     self._current_task = None
+
             except Exception as e:
                 logger.error(f"Error running task manager: {e}")
 

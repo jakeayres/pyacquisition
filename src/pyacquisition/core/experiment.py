@@ -10,6 +10,7 @@ from .scribe import Scribe
 from ..gui import Gui
 from ..instruments import instrument_map
 from .measurement import Measurement
+from .adapters import get_adapter
 
 
 class Experiment:
@@ -122,6 +123,46 @@ class Experiment:
             raise ValueError(f"An error occurred while reading the TOML file '{toml_file}': {e}")
         
 
+    @staticmethod
+    def _get_instrument_class(instrument_name: str):
+        """
+        Get the instrument class by name.
+
+        Args:
+            instrument_name (str): The name of the instrument.
+
+        Returns:
+            Instrument: The instrument class.
+
+        Raises:
+            ValueError: If the instrument is not found in the instrument map.
+        """
+        try:
+            return instrument_map[instrument_name]
+        except KeyError:
+            raise ValueError(f"Instrument '{instrument_name}' not found in instrument map.")
+        
+
+    @staticmethod
+    def _get_adapter_class(adapter_name: str):
+        """
+        Get the adapter class by name.
+
+        Args:
+            adapter_name (str): The name of the adapter.
+
+        Returns:
+            Adapter: The adapter class.
+
+        Raises:
+            ValueError: If the adapter is not found in the adapter map.
+        """
+        try:
+            return get_adapter(adapter_name)
+        except KeyError:
+            raise ValueError(f"Adapter '{adapter_name}' not found in adapter map.")
+        
+
     
     @classmethod
     def from_config(cls, toml_file: str) -> "Experiment":
@@ -161,13 +202,22 @@ class Experiment:
         try:
             instruments = config.get("instruments", {})
             for name, instrument in instruments.items():
+
+                instrument_class = cls._get_instrument_class(instrument['instrument'])
+
+
                 try:
-                    instrument_class = instrument_map.get(instrument['instrument'])
-                    experiment.rack.add_instrument(name, instrument_class(name))
-                except KeyError:
-                    raise ValueError(f"Instrument '{instrument['instrument']}' not found in instrument map.")
+                    if instrument.get('adapter', None):
+                        adapter_class = cls._get_adapter_class(instrument['adapter'])
+                        resource = adapter_class.open_resource(instrument.get('resource', None))
+                        inst = instrument_class(name, resource)
+                        experiment.rack.add_instrument(name, inst)
+                    else:
+                        inst = instrument_class(name)
+                        experiment.rack.add_instrument(name, inst)
                 except Exception as e:
-                    raise ValueError(f"Failed to add instrument '{name}': {e}")
+                    raise ValueError(f"Failed to create adapter '{instrument['adapter']}': {e}")
+                
             
             measurements = config.get("measurements", {})
             for name, measurement in measurements.items():

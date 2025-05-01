@@ -1,11 +1,12 @@
 [experiment]
-root_path = "."
+root_path = "data"
 
 [rack]
 period = 0.25
 
 [instruments]
 clock = {instrument = "clock"}
+lockin = {instrument = "sr830", adapter="mock", resource="GPIB0::12::INSTR"}
 
 [measurements]
 timestamp = {instrument = "clock", method = "timestamp_ms"}

@@ -1,4 +1,4 @@
-def mock_adapter(data: dict) -> dict:
+def mock_adapter():
     """
     Mock adapter function that returns the input data unchanged.
     
@@ -8,15 +8,9 @@ def mock_adapter(data: dict) -> dict:
     Returns:
         dict: The unchanged input data.
     """
-    return MockAdapter()
+    return MockResourceManager()
 
 
-class MockAdapter:
-    """
-    Mock adapter class that simulates the behavior of a real adapter.
-    """
-    
-    pass
 
 
 class MockResource:

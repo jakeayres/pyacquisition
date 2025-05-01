@@ -99,14 +99,14 @@ class Instrument(metaclass=QueryCommandProvider):
 		return self._visa_resource.write(command_String, *args, **kwargs)
 
 
-	def register_endpoints(self, app):
+	def register_endpoints(self, api_server):
 		
-		@app.get(f'/{self._uid}/'+'queries/', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'queries/', tags=[self._uid])
 		def queries() -> list[str]:
 			return [name for name, _ in self.queries.items()]
 
 
-		@app.get(f'/{self._uid}/'+'commands/', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'commands/', tags=[self._uid])
 		def commands() -> list[str]:
 			return [name for name, _ in self.commands.items()]
 

@@ -56,10 +56,11 @@ class Task():
         """
         self._abort_event.clear()
         try:
+            logger.info(f"[{self.name}] Starting task.")
             await self.setup()  # Call setup before running the task
             async for step in self.run():
                 if step:
-                    logger.info(f"[{self.__class__.__name__}] {step}")
+                    logger.info(f"[{self.name}] {step}")
                 await self._check_control_flags()
         except asyncio.CancelledError:
             print("Task was cancelled.")
@@ -67,6 +68,7 @@ class Task():
             print(f"Task encountered an error: {e}")
         finally:
             await self.teardown()
+            logger.info(f"[{self.name}] Task completed.")
 
 
     async def _check_control_flags(self):

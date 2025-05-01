@@ -21,7 +21,7 @@ class WaitFor(Task):
     @property
     def description(self) -> str:
         return f"Wait for {self.hours} hours, {self.minutes} minutes, and {self.seconds} seconds."
-    
+        
     
     async def run(self):
         
@@ -32,8 +32,8 @@ class WaitFor(Task):
         
         while time.time() < end_time:
             remaining_time = end_time - time.time()
-            if int(remaining_time) % 60 == 0:
-                yield f"{datetime.timedelta(seconds=remaining_time)} remaining"
+            if int(remaining_time) % 300 == 0:
+                yield f"{datetime.timedelta(seconds=remaining_time):i} remaining"
             else:
                 yield None
             await asyncio.sleep(1)
@@ -48,6 +48,7 @@ class WaitUntil(Task):
     minute: int
     
     name = "Wait Until"
+    help = "Wait until a specified time (24hr)."
     
     @property
     def description(self) -> str:
@@ -55,19 +56,19 @@ class WaitUntil(Task):
     
     
     async def run(self):
-        
         now = datetime.datetime.now()
-        wait_time = datetime.timedelta(hours=self.hour, minutes=self.minute) - datetime.timedelta(hours=now.hour, minutes=now.minute)
-        until = now + wait_time
-        
-        if wait_time < 0:
-            yield "Time already passed"
-            return
-        
-        while datetime.datetime.now() < until:
-            remaining_time = (until - datetime.datetime.now()).total_seconds()
-            if int(remaining_time) % 60 == 0:
-                yield f"{datetime.timedelta(seconds=remaining_time)} remaining"
+        target_time = now.replace(hour=self.hour, minute=self.minute, second=0, microsecond=0)
+
+        # If the target time is earlier than the current time, move it to the next day
+        if target_time <= now:
+            target_time += datetime.timedelta(days=1)
+
+        logger.info(f"[{self.name}] Waiting until {target_time.strftime('%H:%M')}")
+
+        while datetime.datetime.now() < target_time:
+            remaining_time = (target_time - datetime.datetime.now()).total_seconds()
+            if int(remaining_time) % 300 == 0:
+                yield f"{datetime.timedelta(seconds=remaining_time):i} remaining"
             else:
                 yield None
             await asyncio.sleep(1)
