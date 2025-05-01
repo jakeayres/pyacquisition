@@ -216,82 +216,82 @@ class SR_830(Instrument):
 
 	@mark_query
 	def identify(self):
-		return self._query('*IDN?')
+		return self.query('*IDN?')
 
 
 	@mark_command
 	def reset(self):
-		return self._command('*RST')
+		return self.command('*RST')
 
 
 	@mark_command
 	def reset_data_buffer(self):
-		return self._command('*REST')
+		return self.command('*REST')
 
 
 	@mark_command
 	def clear(self):
-		return self._command('*CLS')
+		return self.command('*CLS')
 
 
 	@mark_query
 	def get_phase(self) -> float:
-		return float(self._query("PHAS?"))
+		return float(self.query("PHAS?"))
 
 
 	@mark_command
 	def set_phase(self, phase: float):
-		return self._command(f'PHAS {phase:.2f}')
+		return self.command(f'PHAS {phase:.2f}')
 
 
 	@mark_query
 	def get_reference_source(self) -> ReferenceSource:
-		return ReferenceSource(int(self._query(f'FMOD?')))
+		return ReferenceSource(int(self.query(f'FMOD?')))
 
 
 	@mark_command
 	def set_reference_source(self, source: ReferenceSource):
-		return self._command(f'FMOD {source.value}')
+		return self.command(f'FMOD {source.value}')
 
 
 	@mark_query
 	def get_frequency(self) -> float:
-		return float(self._query("FREQ?"))
+		return float(self.query("FREQ?"))
 
 
 	@mark_command
 	def set_frequency(self, frequency: float):
-		return self._command(f'FREQ {frequency:.3f}')
+		return self.command(f'FREQ {frequency:.3f}')
 
 
 	@mark_query
-	def get_external_referece_slope(self) -> ReferenceSlope:
-		return ReferenceSlope(int(self._query(f'RSLP?')))
+	def get_external_reference_slope(self) -> ReferenceSlope:
+		return ReferenceSlope(int(self.query(f'RSLP?')))
 
 
 	@mark_command
 	def set_external_reference_slope(self, slope: ReferenceSlope):
-		return self._command(f'RSLP {slope.value}')
+		return self.command(f'RSLP {slope.value}')
 
 
 	@mark_query
 	def get_harmonic(self) -> int:
-		return int(self._query(f'HARM?'))
+		return int(self.query(f'HARM?'))
 
 
 	@mark_command
 	def set_harmonic(self, harmonic: int):
-		return self._command(f'HARM {harmonic}')
+		return self.command(f'HARM {harmonic}')
 
 
 	@mark_query
 	def get_reference_amplitude(self) -> float:
-		return float(self._query(f'SLVL?'))
+		return float(self.query(f'SLVL?'))
 
 
 	@mark_command
 	def set_reference_amplitude(self, amplitude: float):
-		return self._command(f'SLVL {amplitude:.3f}')
+		return self.command(f'SLVL {amplitude:.3f}')
 
 
 	""" INPUT AND FILTER
@@ -299,94 +299,94 @@ class SR_830(Instrument):
 
 	@mark_query
 	def get_input_configuration(self) -> InputConfiguration:
-		return InputConfiguration(int(self._query(f'ISRC?')))
+		return InputConfiguration(int(self.query(f'ISRC?')))
 
 
 	@mark_command
 	def set_input_configuration(self, configuration: InputConfiguration):
-		return self._command(f'ISRC {configuration.value}')
+		return self.command(f'ISRC {configuration.value}')
 
 
 	@mark_query
 	def get_input_grounding(self) -> InputGrounding:
-		return InputGrounding(int(self._query(f'IGND?')))
+		return InputGrounding(int(self.query(f'IGND?')))
 
 
 	@mark_command
 	def set_input_grounding(self, configuration: InputGrounding):
-		return self._command(f'IGND {configuration.value}')
+		return self.command(f'IGND {configuration.value}')
 
 
 	@mark_query
 	def get_input_coupling(self) -> InputCoupling:
-		return InputCoupling(int(self._query(f'ICPL?')))
+		return InputCoupling(int(self.query(f'ICPL?')))
 
 
 	@mark_command
 	def set_input_coupling(self, configuration: InputCoupling):
-		return self._command(f'ICPL {configuration.value}')
+		return self.command(f'ICPL {configuration.value}')
 
 
 	@mark_query
 	def get_notch_filters(self) -> NotchFilters:
-		return NotchFilters(int(self._query(f'ILIN?')))
+		return NotchFilters(int(self.query(f'ILIN?')))
 
 
 	@mark_command
 	def set_notch_filters(self, configuration: NotchFilters):
-		return self._command(f'ILIN {configuration.value}')
+		return self.command(f'ILIN {configuration.value}')
 
 	""" GAIN AND TIME CONSTANT
 	"""
 
 	@mark_query
 	def get_sensitivity(self) -> Sensitivity:
-		return Sensitivity(int(self._query(f'SENS?')))
+		return Sensitivity(int(self.query(f'SENS?')))
 
 
 	@mark_command
 	def set_sensitivity(self, sensitivity: Sensitivity):
-		return self._command(f'SENS {sensitivity.value}')
+		return self.command(f'SENS {sensitivity.value}')
 
 
 	@mark_query
 	def get_dynamic_reserve(self) -> DynamicReserve:
-		return DynamicReserve(int(self._query(f'RMOD?')))
+		return DynamicReserve(int(self.query(f'RMOD?')))
 
 
 	@mark_command
 	def set_dynamic_reserve(self, reserve: DynamicReserve):
-		return self._command(f'RMOD {reserve.value}')
+		return self.command(f'RMOD {reserve.value}')
 
 
 	@mark_query 
 	def get_time_constant(self) -> TimeConstant:
-		return TimeConstant(int(self._query(f'OFLT?')))
+		return TimeConstant(int(self.query(f'OFLT?')))
 
 
 	@mark_command
 	def set_time_constant(self, time_constant: TimeConstant):
-		return self._command(f'OFLT {time_constant.value}')
+		return self.command(f'OFLT {time_constant.value}')
 
 
 	@mark_query
 	def get_filter_slope(self) -> FilterSlope:
-		return FilterSlope(int(self._query(f'OFSL?')))
+		return FilterSlope(int(self.query(f'OFSL?')))
 
 
 	@mark_command
 	def set_filter_slope(self, filter_slope: FilterSlope):
-		return self._command(f'OFSL {filter_slope.value}')
+		return self.command(f'OFSL {filter_slope.value}')
 
 
 	@mark_query
 	def get_sync_filter_state(self) -> SyncFilterState:
-		return SyncFilterState(int(self._query(f'SYNC?')))
+		return SyncFilterState(int(self.query(f'SYNC?')))
 
 
 	@mark_command
 	def set_sync_filter_state(self, state: SyncFilterState):
-		return self._command(f'SYNC {state.value}')
+		return self.command(f'SYNC {state.value}')
 
 
 	""" DISPLAY AND OUTPUT
@@ -409,32 +409,32 @@ class SR_830(Instrument):
 
 	@mark_query
 	def get_output(self, parameter: int) -> float:
-		return float(self._query(f'OUTP? {parameter}'))
+		return float(self.query(f'OUTP? {parameter}'))
 
 
 	@mark_query
 	def get_display_output(self, parameter: int) -> float:
-		return float(self._query(f'OUTR? {parameter}'))
+		return float(self.query(f'OUTR? {parameter}'))
 
 
 	@mark_query
 	def get_x(self) -> float:
-		return float(self._query(f'OUTP? 1'))
+		return float(self.query(f'OUTP? 1'))
 
 
 	@mark_query
 	def get_y(self) -> float:
-		return float(self._query(f'OUTP? 2'))
+		return float(self.query(f'OUTP? 2'))
 
 
 	@mark_query
 	def get_xy(self) -> list[float]:
-		return [float(s) for s in self._query(f'SNAP? 1,2').split(',')]
+		return [float(s) for s in self.query(f'SNAP? 1,2').split(',')]
 
 
 	@mark_query
 	def get_display_buffer_length(self) -> int:
-		return int(self._query(f'SPTS?'))
+		return int(self.query(f'SPTS?'))
 
 
 	""" INTERFACE
@@ -451,7 +451,7 @@ class SR_830(Instrument):
 		async def get_phase() -> float:
 			return self.get_phase()
 		
-		@api_server.app.get(f'/{self._uid}/'+'phase/set/{phase}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'phase/set/', tags=[self._uid])
 		async def set_phase(phase: float) -> int:
 			self.set_phase(phase)
 			return 0
@@ -461,7 +461,7 @@ class SR_830(Instrument):
 		async def get_reference_source() -> ReferenceSourceModel:
 			return ReferenceSourceModel[self.get_reference_source().name]
 		
-		@api_server.app.get(f'/{self._uid}/'+'reference_source/set/{source}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'reference_source/set/', tags=[self._uid])
 		async def set_reference_source(source: ReferenceSourceModel) -> int:
 			self.set_reference_source(ReferenceSource[source.name])
 			return 0
@@ -471,7 +471,7 @@ class SR_830(Instrument):
 		async def get_frequency() -> float:
 			return self.get_frequency()
 		
-		@api_server.app.get(f'/{self._uid}/'+'frequency/set/{frequency}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'frequency/set/', tags=[self._uid])
 		async def set_frequency(frequency: float) -> int:
 			self.set_frequency(frequency)
 			return 0
@@ -481,7 +481,7 @@ class SR_830(Instrument):
 		async def get_external_reference_slope() -> ReferenceSlopeModel:
 			return ReferenceSlopeModel[self.get_external_reference_slope().name]
 		
-		@api_server.app.get(f'/{self._uid}/'+'external_reference_slope/set/{slope}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'external_reference_slope/set/', tags=[self._uid])
 		async def set_external_reference_slope(slope: ReferenceSlopeModel) -> int:
 			self.set_external_reference_slope(ReferenceSlope[slope.name])
 			return 0
@@ -491,7 +491,7 @@ class SR_830(Instrument):
 		async def get_harmonic() -> int:
 			return self.get_harmonic()
 		
-		@api_server.app.get(f'/{self._uid}/'+'harmonic/set/{harmonic}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'harmonic/set/', tags=[self._uid])
 		async def set_harmonic(harmonic: int) -> int:
 			self.set_harmonic(harmonic)
 			return 0
@@ -502,7 +502,7 @@ class SR_830(Instrument):
 			return self.get_reference_amplitude()
 		
 		
-		@api_server.app.get(f'/{self._uid}/'+'reference_amplitude/set/{reference_amplitude}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'reference_amplitude/set/', tags=[self._uid])
 		async def set_reference_amplitude(reference_amplitude: float) -> int:
 			self.set_reference_amplitude(reference_amplitude)
 			return 0
@@ -512,7 +512,7 @@ class SR_830(Instrument):
 		async def get_input_configuration() -> InputConfigurationModel:
 			return InputConfigurationModel[self.get_input_configuration().name]
 		
-		@api_server.app.get(f'/{self._uid}/'+'input_configuration/set/{configuration}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'input_configuration/set/', tags=[self._uid])
 		async def set_input_configuration(configuration: InputConfigurationModel) -> int:
 			self.set_input_configuration(InputConfiguration[configuration.name])
 			return 0
@@ -522,7 +522,7 @@ class SR_830(Instrument):
 		async def get_input_coupling() -> InputCouplingModel:
 			return InputCouplingModel[self.get_input_coupling().name]
 		
-		@api_server.app.get(f'/{self._uid}/'+'input_coupling/set/{coupling}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'input_coupling/set/', tags=[self._uid])
 		async def set_input_coupling(coupling: InputCouplingModel) -> int:
 			self.set_input_coupling(InputCoupling[coupling.name])
 			return 0
@@ -532,7 +532,7 @@ class SR_830(Instrument):
 		async def get_input_grounding() -> InputGroundingModel:
 			return InputGroundingModel[self.get_input_grounding().name]
 		
-		@api_server.app.get(f'/{self._uid}/'+'input_grounding/set/{grounding}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'input_grounding/set/', tags=[self._uid])
 		async def set_input_grounding(grounding: InputGroundingModel) -> int:
 			self.set_input_grounding(InputGrounding[grounding.name])
 			return 0
@@ -542,7 +542,7 @@ class SR_830(Instrument):
 		async def get_dynamic_reserve() -> DynamicReserveModel:
 			return DynamicReserveModel[self.get_dynamic_reserve().name]
 		
-		@api_server.app.get(f'/{self._uid}/'+'dynamic_reserve/set/{reserve}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'dynamic_reserve/set/', tags=[self._uid])
 		async def set_dynamic_reserve(reserve: DynamicReserveModel) -> int:
 			self.set_dynamic_reserve(DynamicReserve[reserve.name])
 			return 0
@@ -552,7 +552,7 @@ class SR_830(Instrument):
 		async def get_sensitivity() -> SensitivityModel:
 			return SensitivityModel[self.get_sensitivity().name]
 		
-		@api_server.app.get(f'/{self._uid}/'+'sensitivity/set/{sensitivity}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'sensitivity/set/', tags=[self._uid])
 		async def set_sensitivity(sensitivity: SensitivityModel) -> int:
 			self.set_sensitivity(Sensitivity[sensitivity.name])
 			return 0
@@ -563,7 +563,7 @@ class SR_830(Instrument):
 			return TimeConstantModel[self.get_time_constant().name]
 		
 
-		@api_server.app.get(f'/{self._uid}/'+'time_constant/set/{time_constant}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'time_constant/set/', tags=[self._uid])
 		async def set_time_constant(time_constant: TimeConstantModel) -> int:
 			self.set_time_constant(TimeConstant[time_constant.name])
 			return 0
@@ -574,7 +574,7 @@ class SR_830(Instrument):
 			return FilterSlopeModel[self.get_filter_slope().name]
 		
 
-		@api_server.app.get(f'/{self._uid}/'+'filter_slope/set/{filter_slope}', tags=[self._uid])
+		@api_server.app.get(f'/{self._uid}/'+'filter_slope/set/', tags=[self._uid])
 		async def set_filter_slope(filter_slope: FilterSlopeModel) -> int:
 			self.set_filter_slope(FilterSlope[filter_slope.name])
 			return 0

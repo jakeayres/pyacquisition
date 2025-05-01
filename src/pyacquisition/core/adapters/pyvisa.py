@@ -2,4 +2,6 @@ from pyvisa import ResourceManager
 
 
 def pyvisa_adapter():
-    return ResourceManager()
+    rm = ResourceManager()
+    print(rm.list_resources())
+    return rm
