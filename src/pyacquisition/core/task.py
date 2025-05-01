@@ -13,6 +13,7 @@ class Task():
     
     name = "Base Task"
     help = "Generic help message for the task."
+
     
     def __post_init__(self):
         """
@@ -26,14 +27,14 @@ class Task():
         self._abort_event.clear() # Clear to allow task to run immediately
 
         
-    async def setup(self):
+    async def setup(self, experiment=None):
         """
         Override this method in subclasses to define setup tasks.
         """
         pass
     
     
-    async def teardown(self):
+    async def teardown(self, experiment=None):
         """
         Override this method in subclasses to define teardown tasks.
         
@@ -43,22 +44,22 @@ class Task():
         pass
 
 
-    async def run(self):
+    async def run(self, experiment=None):
         """
         Override this method in subclasses to define the task's functionality.
         """
         raise NotImplementedError("Subclasses must implement the run() method.")
 
 
-    async def start(self):
+    async def start(self, experiment=None):
         """
         Starts the task and manages pausing and aborting.
         """
         self._abort_event.clear()
         try:
             logger.info(f"[{self.name}] Starting task.")
-            await self.setup()  # Call setup before running the task
-            async for step in self.run():
+            await self.setup(experiment=experiment)  # Call setup before running the task
+            async for step in self.run(experiment=experiment):
                 if step:
                     logger.info(f"[{self.name}] {step}")
                 await self._check_control_flags()
@@ -67,7 +68,7 @@ class Task():
         except Exception as e:
             print(f"Task encountered an error: {e}")
         finally:
-            await self.teardown()
+            await self.teardown(experiment=experiment)  # Call teardown after running the task
             logger.info(f"[{self.name}] Task completed.")
 
 

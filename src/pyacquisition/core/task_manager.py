@@ -36,7 +36,7 @@ class TaskManager:
                 self._current_task = await self._task_queue.get()
                 logger.info(f"[TaskManager] Task fetched from queue: {self._current_task.name}")
                 try:
-                    await self._current_task.start()
+                    await self._current_task.start(experiment=self)
                 except Exception as e:
                     logger.error(f"Error running task {self._current_task}: {e}")
                 finally:

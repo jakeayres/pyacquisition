@@ -23,7 +23,7 @@ class WaitFor(Task):
         return f"Wait for {self.hours} hours, {self.minutes} minutes, and {self.seconds} seconds."
         
     
-    async def run(self):
+    async def run(self, experiment):
         
         total_seconds = self.hours * 3600 + self.minutes * 60 + self.seconds
         start_time = time.time()
@@ -55,7 +55,7 @@ class WaitUntil(Task):
         return f"Wait until {self.hour}:{self.minute}."
     
     
-    async def run(self):
+    async def run(self, experiment):
         now = datetime.datetime.now()
         target_time = now.replace(hour=self.hour, minute=self.minute, second=0, microsecond=0)
 

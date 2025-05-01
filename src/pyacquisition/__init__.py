@@ -1,5 +1,37 @@
 from .core import Experiment
-import sys
+from .core.task import Task
+import sys, asyncio
+from dataclasses import dataclass
+
+
+@dataclass
+class MyTask(Task):
+
+    name = "MyTask"
+    description = "My task description"
+    help = "My task help"
+
+    async def run(self, experiment):
+        yield 'STARTING'
+        await asyncio.sleep(1)
+        yield 'STARTING'
+        await asyncio.sleep(1)
+        yield 'STARTING'
+        await asyncio.sleep(1)
+        yield 'STARTING'
+        await asyncio.sleep(1)
+
+
+
+class MyExperiment(Experiment):
+    
+
+    def setup(self) -> None:
+
+
+        self.register_task(MyTask)
+
+
 
 
 def main(*args) -> None:
@@ -11,5 +43,5 @@ def main(*args) -> None:
     """
     
     toml_file = " ".join(sys.argv[1:])
-    experiment = Experiment.from_config(toml_file=toml_file)
+    experiment = MyExperiment.from_config(toml_file=toml_file)
     experiment.run()

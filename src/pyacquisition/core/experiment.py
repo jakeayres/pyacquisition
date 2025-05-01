@@ -341,6 +341,19 @@ class Experiment:
     
     
     
+    def register_task(self, task: Task) -> None:
+        """
+        Registers a task with the experiment.
+
+        Args:
+            task (Task): The task to register.
+        """
+        try:
+            task.register_endpoints(self)
+        except Exception as e:
+            logger.error(f"Error registering task {task.__class__.__name__}: {e}")
+            raise
+
 
     def register_endpoints(self) -> None:
         """
@@ -350,7 +363,4 @@ class Experiment:
         from ..tasks import standard_tasks
         
         for task in standard_tasks:
-            try:
-                task.register_endpoints(self)
-            except Exception as e:
-                logger.error(f"Error registering endpoints for {task.__class__.__name__}: {e}")
+            self.register_task(task)
