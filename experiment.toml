@@ -5,13 +5,12 @@ root_path = "data"
 period = 0.25
 
 [instruments]
-clock = {instrument = "clock"}
-lockin = {instrument = "sr830", adapter="pyvisa", resource="GPIB0::8::INSTR"}
+clock = {instrument = "Clock"}
+lockin = {instrument = "SR_830", adapter="pyvisa", resource="GPIB0::8::INSTR"}
 
 [measurements]
 time = {instrument = "clock", method = "time"}
 vx = {instrument = "lockin", method = "get_x"}
-vy = {instrument = "lockin", method = "get_y"}
 
 [data]
 path = "data_sub"

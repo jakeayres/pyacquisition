@@ -1,10 +1,15 @@
 from .software import Clock
-from .stanford_research import SR_830
-from enum import Enum
+from .stanford_research import SR_830, SR_860
+from .lakeshore import Lakeshore_340, Lakeshore_350
+from .oxford_instruments import Mercury_IPS
 
 
 
 instrument_map = {
-    'clock': Clock,
-    'sr830': SR_830,
+    'Clock': Clock,
+    'SR_830': SR_830,
+    'SR_860': SR_860,
+    'Lakeshore_340': Lakeshore_340,
+    'Lakeshore_350': Lakeshore_350,
+    'Mercury_IPS': Mercury_IPS,
 }
