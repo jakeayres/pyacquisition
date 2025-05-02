@@ -16,6 +16,8 @@ class Scribe(Consumer):
     def __init__(
         self, 
         root_path: Path, 
+        delimiter: str = ',',
+        extension: str = 'data',
         #subdirectory: Path | None, 
         decimal: bool = True
     ) -> None:
@@ -29,7 +31,8 @@ class Scribe(Consumer):
         self.block = '00'
         self.step = '00'
         self.title = "start"
-        self.extension = 'data'
+        self.extension = extension
+        self.delimiter = delimiter
         
         self._pause_event = asyncio.Event()
         self._pause_event.set()
@@ -148,14 +151,14 @@ class Scribe(Consumer):
         """
         Write a line of data to a file.
         """
-        data.to_csv(self.current_path(), index=False, mode='w')
+        data.to_csv(self.current_path(), index=False, mode='w', sep=self.delimiter, header=True)
 
 
     def _append_line(self, data: pd.DataFrame) -> None:
         """
         Append a line of data to a file.
         """
-        data.to_csv(self.current_path(), index=False, mode='a', header=False)
+        data.to_csv(self.current_path(), index=False, mode='a', sep=self.delimiter, header=False)
 
 
     def setup(self):
@@ -169,7 +172,7 @@ class Scribe(Consumer):
         logger.debug("[Scribe] Setup completed")
 
 
-    async def run(self):
+    async def run(self, experiment) -> None:
         """
         The main loop that runs the tasks in the queue.
         """
