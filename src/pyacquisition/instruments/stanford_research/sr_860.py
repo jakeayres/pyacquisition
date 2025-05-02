@@ -242,218 +242,415 @@ class SR_860(Instrument):
 	"""
 
 	@mark_query
-	def identify(self):
+	def identify(self) -> str:
+		"""Queries the instrument identification string.
+
+		Returns:
+			str: The identification string of the instrument.
+		"""
 		return self.query('*IDN?')
 
-
 	@mark_command
-	def reset(self):
+	def reset(self) -> int:
+		"""Resets the instrument to its default state.
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
 		return self.command('*RST')
 
-
 	@mark_command
-	def clear(self):
-		return self.command('*CLS')
+	def clear(self) -> int:
+		"""Clears the status and error registers of the instrument.
 
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command('*CLS')
 
 	@mark_query
 	def get_phase(self) -> float:
+		"""Queries the current excitation phase in degrees.
+
+		Returns:
+			float: The current phase angle in degrees.
+		"""
 		return float(self.query("PHAS?"))
 
-
 	@mark_command
-	def set_phase(self, phase: float):
-		return self.command(f'PHAS {phase:.2f}')
+	def set_phase(self, phase: float) -> int:
+		"""Sets the excitation phase in degrees.
 
+		Args:
+			phase (float): The phase angle in degrees to set.
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'PHAS {phase:.2f}')
 
 	@mark_query
 	def get_reference_source(self) -> ReferenceSource:
+		"""Queries the current reference source.
+
+		Returns:
+			ReferenceSource: The current reference source (e.g., INTERNAL, EXTERNAL, DUAL, CHOP).
+		"""
 		return ReferenceSource(int(self.query(f'RSRC?')))
 
-
 	@mark_command
-	def set_reference_source(self, source: ReferenceSource):
-		return self.command(f'RSRC {source.value}')
+	def set_reference_source(self, source: ReferenceSource) -> int:
+		"""Sets the reference source.
 
+		Args:
+			source (ReferenceSource): The reference source to set (e.g., INTERNAL, EXTERNAL, DUAL, CHOP).
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'RSRC {source.value}')
 
 	@mark_query
 	def get_frequency(self) -> float:
+		"""Queries the current reference frequency.
+
+		Returns:
+			float: The current reference frequency in Hz.
+		"""
 		return float(self.query("FREQ?"))
 
-
 	@mark_command
-	def set_frequency(self, frequency: float):
-		return self.command(f'FREQ {frequency:.3f}')
+	def set_frequency(self, frequency: float) -> int:
+		"""Sets the reference frequency.
 
+		Args:
+			frequency (float): The frequency in Hz to set.
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'FREQ {frequency:.3f}')
 
 	@mark_query
 	def get_internal_frequency(self) -> float:
+		"""Queries the internal reference frequency.
+
+		Returns:
+			float: The internal reference frequency in Hz.
+		"""
 		return float(self.query("FREQINT?"))
 
-
 	@mark_command
-	def set_internal_frequency(self, frequency: float):
-		return self.command(f'FREQINT {frequency:.3f}')
+	def set_internal_frequency(self, frequency: float) -> int:
+		"""Sets the internal reference frequency.
 
+		Args:
+			frequency (float): The internal frequency in Hz to set.
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'FREQINT {frequency:.3f}')
 
 	@mark_query
 	def get_external_reference_slope(self) -> ReferenceSlope:
+		"""Queries the slope of the external reference signal.
+
+		Returns:
+			ReferenceSlope: The slope of the external reference signal (e.g., SINE, TTL_RISING, TTL_FALLING).
+		"""
 		return ReferenceSlope(int(self.query(f'RSLP?')))
 
-
 	@mark_command
-	def set_external_reference_slope(self, slope: ReferenceSlope):
-		return self.command(f'RSLP {slope.value}')
+	def set_external_reference_slope(self, slope: ReferenceSlope) -> int:
+		"""Sets the slope of the external reference signal.
 
+		Args:
+			slope (ReferenceSlope): The slope to set (e.g., SINE, TTL_RISING, TTL_FALLING).
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'RSLP {slope.value}')
 
 	@mark_query
 	def get_harmonic(self) -> int:
+		"""Queries the current harmonic setting.
+
+		Returns:
+			int: The current harmonic setting.
+		"""
 		return int(self.query(f'HARM?'))
 
-
 	@mark_command
-	def set_harmonic(self, harmonic: int):
-		return self.command(f'HARM {harmonic}')
+	def set_harmonic(self, harmonic: int) -> int:
+		"""Sets the harmonic.
 
+		Args:
+			harmonic (int): The harmonic to set.
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'HARM {harmonic}')
 
 	@mark_query
 	def get_reference_amplitude(self) -> float:
+		"""Queries the reference amplitude.
+
+		Returns:
+			float: The reference amplitude in volts.
+		"""
 		return float(self.query(f'SLVL?'))
 
-
 	@mark_command
-	def set_reference_amplitude(self, amplitude: float):
-		return self.command(f'SLVL {amplitude:.3f}')
+	def set_reference_amplitude(self, amplitude: float) -> int:
+		"""Sets the reference amplitude.
 
+		Args:
+			amplitude (float): The amplitude in volts to set.
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'SLVL {amplitude:.3f}')
 
 	@mark_query
 	def get_reference_offset(self) -> float:
+		"""Queries the reference offset.
+
+		Returns:
+			float: The reference offset in volts.
+		"""
 		return float(self.query(f'SOFF?'))
 
-
 	@mark_command
-	def set_reference_offset(self, amplitude: float):
-		return self.command(f'SOFF {amplitude:.3f}')
+	def set_reference_offset(self, amplitude: float) -> int:
+		"""Sets the reference offset.
 
+		Args:
+			amplitude (float): The offset in volts to set.
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'SOFF {amplitude:.3f}')
 
 	""" INPUT AND FILTER
 	"""
 
 	@mark_query
 	def get_input_mode(self) -> InputMode:
+		"""Queries the input mode.
+
+		Returns:
+			InputMode: The current input mode (e.g., VOLTAGE, CURRENT).
+		"""
 		return InputMode(int(self.query(f'IVMD?')))
 
-
 	@mark_command
-	def set_input_mode(self, mode: InputMode):
-		return self.command(f'IVMD {mode.value}')
+	def set_input_mode(self, mode: InputMode) -> int:
+		"""Sets the input mode.
 
+		Args:
+			mode (InputMode): The input mode to set (e.g., VOLTAGE, CURRENT).
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'IVMD {mode.value}')
 
 	@mark_query
 	def get_input_configuration(self) -> InputConfiguration:
+		"""Queries the input configuration.
+
+		Returns:
+			InputConfiguration: The current input configuration (e.g., A, A-B).
+		"""
 		return InputConfiguration(int(self.query(f'ISRC?')))
 
-
 	@mark_command
-	def set_input_configuration(self, configuration: InputConfiguration):
-		return self.command(f'ISRC {configuration.value}')
+	def set_input_configuration(self, configuration: InputConfiguration) -> int:
+		"""Sets the input configuration.
 
+		Args:
+			configuration (InputConfiguration): The input configuration to set (e.g., A, A-B).
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'ISRC {configuration.value}')
 
 	@mark_query
 	def get_input_coupling(self) -> InputCoupling:
+		"""Queries the input coupling configuration.
+
+		Returns:
+			InputCoupling: The current input coupling configuration (e.g., AC, DC).
+		"""
 		return InputCoupling(int(self.query(f'ICPL?')))
 
-
 	@mark_command
-	def set_input_coupling(self, coupling: InputCoupling):
-		return self.command(f'ICPL {coupling.value}')
+	def set_input_coupling(self, coupling: InputCoupling) -> int:
+		"""Sets the input coupling configuration.
 
+		Args:
+			coupling (InputCoupling): The input coupling configuration to set (e.g., AC, DC).
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'ICPL {coupling.value}')
 
 	@mark_query
 	def get_input_grounding(self) -> InputGrounding:
+		"""Queries the input grounding configuration.
+
+		Returns:
+			InputGrounding: The current input grounding configuration (e.g., FLOAT, GROUND).
+		"""
 		return InputGrounding(int(self.query(f'IGND?')))
 
-
 	@mark_command
-	def set_input_grounding(self, grounding: InputGrounding):
-		print(grounding)
-		return self.command(f'IGND {grounding.value}')
+	def set_input_grounding(self, grounding: InputGrounding) -> int:
+		"""Sets the input grounding configuration.
 
+		Args:
+			grounding (InputGrounding): The input grounding configuration to set (e.g., FLOAT, GROUND).
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'IGND {grounding.value}')
 
 	@mark_query
 	def get_input_voltage_range(self) -> InputVoltageRange:
+		"""Queries the input voltage range.
+
+		Returns:
+			InputVoltageRange: The current input voltage range (e.g., 1 V, 300 mV).
+		"""
 		return InputVoltageRange(int(self.query(f'IRNG?')))
 
-
 	@mark_command
-	def set_input_voltage_range(self, input_range: InputVoltageRange):
+	def set_input_voltage_range(self, input_range: InputVoltageRange) -> int:
+		"""Sets the input voltage range.
+
+		Args:
+			input_range (InputVoltageRange): The input voltage range to set (e.g., 1 V, 300 mV).
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
 		return self.command(f'IRNG {input_range.value}')
-
-
-	# @mark_query
-	# def get_current_input_gain()
-
-
-	# @mark_command
-	# def set_current_input_gain()
-
 
 	@mark_query
 	def get_sync_filter(self) -> SyncFilter:
+		"""Queries the synchronization filter state.
+
+		Returns:
+			SyncFilter: The current synchronization filter state (e.g., OFF, ON).
+		"""
 		return SyncFilter(int(self.query(f'SYNC?')))
 
-
 	@mark_command
-	def set_sync_filter(self, configuration: SyncFilter):
-		return self.command(f'SYNC {configuration.value}')
+	def set_sync_filter(self, configuration: SyncFilter) -> int:
+		"""Sets the synchronization filter state.
 
+		Args:
+			configuration (SyncFilter): The synchronization filter state to set (e.g., OFF, ON).
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'SYNC {configuration.value}')
 
 	@mark_query
 	def get_advanced_filter(self) -> AdvancedFilter:
+		"""Queries the advanced filter state.
+
+		Returns:
+			AdvancedFilter: The current advanced filter state (e.g., OFF, ON).
+		"""
 		return AdvancedFilter(int(self.query(f'ADVFILT?')))
 
-
 	@mark_command
-	def set_advanced_filter(self, configuration: AdvancedFilter):
-		return self.command(f'ADVFILT {configuration.value}')
+	def set_advanced_filter(self, configuration: AdvancedFilter) -> int:
+		"""Sets the advanced filter state.
 
+		Args:
+			configuration (AdvancedFilter): The advanced filter state to set (e.g., OFF, ON).
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'ADVFILT {configuration.value}')
 
 	""" GAIN AND TIME CONSTANT
 	"""
 
-	# @mark_query
-	# get_signal_strength_indicator
-	
-
 	@mark_query
 	def get_sensitivity(self) -> Sensitivity:
+		"""Queries the sensitivity setting.
+
+		Returns:
+			Sensitivity: The current sensitivity setting.
+		"""
 		return Sensitivity(int(self.query(f'SCAL?')))
 
-
 	@mark_command
-	def set_sensitivity(self, sensitivity: Sensitivity):
-		return self.command(f'SCAL {sensitivity.value}')
+	def set_sensitivity(self, sensitivity: Sensitivity) -> int:
+		"""Sets the sensitivity.
 
+		Args:
+			sensitivity (Sensitivity): The sensitivity setting to apply.
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'SCAL {sensitivity.value}')
 
 	@mark_query 
 	def get_time_constant(self) -> TimeConstant:
+		"""Queries the time constant setting.
+
+		Returns:
+			TimeConstant: The current time constant setting.
+		"""
 		return TimeConstant(int(self.query(f'OFLT?')))
 
-
 	@mark_command
-	def set_time_constant(self, time_constant: TimeConstant):
-		return self.command(f'OFLT {time_constant.value}')
+	def set_time_constant(self, time_constant: TimeConstant) -> int:
+		"""Sets the time constant.
 
+		Args:
+			time_constant (TimeConstant): The time constant setting to apply.
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'OFLT {time_constant.value}')
 
 	@mark_query
 	def get_filter_slope(self) -> FilterSlope:
+		"""Queries the filter slope setting.
+
+		Returns:
+			FilterSlope: The current filter slope setting (e.g., 6 dB, 12 dB).
+		"""
 		return FilterSlope(int(self.query(f'OFSL?')))
 
-
 	@mark_command
-	def set_filter_slope(self, filter_slope: FilterSlope):
-		return self.command(f'OFSL {filter_slope.value}')
+	def set_filter_slope(self, filter_slope: FilterSlope) -> int:
+		"""Sets the filter slope.
 
+		Args:
+			filter_slope (FilterSlope): The filter slope setting to apply (e.g., 6 dB, 12 dB).
+
+		Returns:
+			int: Status code indicating the success of the operation.
+		"""
+		return self.command(f'OFSL {filter_slope.value}')
 
 	""" DISPLAY AND OUTPUT
 	"""
