@@ -6,12 +6,9 @@ period = 0.25
 
 [instruments]
 clock = {instrument = "Clock"}
-mock = {instrument = "Mock"}
 
 [measurements]
 time = {instrument = "clock", method = "time"}
-sum = {instrument = "mock", method = "method_with_args", args = {x = 5, y = 10}}
-enum = {instrument = "mock", method = "method_with_enum_args", args = {x = "EXTERNAL", y = "EXTERNAL"}}
 
 [data]
 path = "data_sub"

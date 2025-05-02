@@ -4,9 +4,13 @@ repo_name: pyacquisition
 nav:
   - Home: index.md
   - Basic Usage:
-    - Installation: basics/installation.md
-    - Getting Started: basics/getting_started.md
-    - Configuration: basics/configuration.md
+    - Installation: basic/installation.md
+    - Getting Started: basic/getting_started.md
+    - TOML Configuration: basic/configuration.md
+  - Advanced Usage:
+    - Experiment Configuration: advanced/configuration.md
+    - Custom Instruments: advanced/instruments.md
+    - Custom Tasks: advanced/tasks.md
   - Experiment:
     - Experiment: experiment/experiment.md
     - Rack: experiment/rack.md
@@ -14,8 +18,8 @@ nav:
     - Task Manager: experiment/task_manager.md
   - Instruments:
     - Clock: instruments/clock.md
-    - SR_830: instruments/sr830.md
-    - SR_860: instruments/sr860.md
+    - SR_830: instruments/sr_830.md
+    - SR_860: instruments/sr_860.md
     - Lakeshore_340: instruments/lakeshore_340.md
     - Lakeshore_350: instruments/lakeshore_350.md
   - Tasks:
@@ -26,7 +30,7 @@ theme:
   icon:
     repo: fontawesome/brands/git-alt 
   palette:
-    primary: deep purple
+    primary: blue
   features:
     - navigation.tabs
 plugins:
@@ -48,3 +52,8 @@ markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - pymdownx.blocks.caption
+
+  

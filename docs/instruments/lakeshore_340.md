@@ -1,1 +1,1 @@
-::: pyacquisition.instruments.lakeshore_340
+::: pyacquisition.instruments.Lakeshore_340
