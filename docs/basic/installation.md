@@ -16,7 +16,7 @@ uv add pyacquisition
 
 ## Installing VISA
 
-`pyacquisition` leverages `pyvisa` for GPIB communication. As documented [at the PyVISA](https://pyvisa.readthedocs.io/en/latest/), a VISA library needs to be installed. Depending on what hardware, you might have a prefered library. PyVISA recommends the [National Instruments implementation](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html). `pyacquisition` has been tested against this implementation.
+`pyacquisition` leverages `pyvisa` for GPIB communication. As noted in the [PyVISA documentation](https://pyvisa.readthedocs.io/en/latest/), a VISA library needs to be installed. Depending on what hardware, you might have a prefered library. PyVISA recommends the [National Instruments implementation](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html). `pyacquisition` has been tested against this implementation.
 
 ## Dependency Management
 

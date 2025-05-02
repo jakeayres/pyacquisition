@@ -1,14 +1,35 @@
 # Getting Started
 
-On this page, we will run through a step-by-step example in which we will build an experiment from scratch. In this example we will introduce the concepts of `SoftwareInstruments`, `HardwareInstruments` and `Measurements` to interface with a Stanford Instruments Sr830 Lock-In Amplifier in order to record timestamped voltages. The process is generic to other instruments and measurements.
+Getting started is as simple as composing a `.toml` configuration file and instantiating an `Experiement` using the `Experiment.from_config()` classmethod. All of the in-build functionality of `pyacquisition` can be configured via this method. A simple configuration file that loads a software `Clock` and a Stanford Research `SR_830` lock-in amplifier on GPIB address 7 might look like:
 
-# Adding software instruments
+```toml title="my_configuration_file.toml"
+[experiment]
+root_path = "C://data"
 
-A `SoftwareInstrument` is an instrument not associated with any physical hardware. We anticipate that the `Clock` will be
-included in most experiments to handle the production of timestamps, times and dates.
+[data]
+path = "my_data_folder"
 
-# Adding hardward instruments
+[instruments]
+clock = {instrument = "Clock"}
+lockin = {instrument = "SR_830", adapter = "pyvisa", resource = "GPIB0:7:INSTR"}
 
-## Configuring a communication backend
+[measurements]
+time = {instrument = "clock", method = "timestamp_ms"}
+voltage = {instrument = "lockin", method = "get_x"}
+```
 
-# Adding measurements
+and the short `python` script for initializing and running your experiment might look like:
+
+```python title="experiment_script.py"
+from pyacquisition import Experiment
+
+my_experiment = Experiment.from_config('my_configuration_file.toml')
+my_experiment.run()
+```
+
+which can be run directly with python (`python experiment_script.py`) or using a dependency manager like `uv` (`uv run experiment_scripy.py`).
+
+Voila! A user interface should be running and recording a stream of timestamped voltages as comma separated values in `C://data/my_data_folder`. All of the functionality of each instrument is available from the top menu.
+
+
+

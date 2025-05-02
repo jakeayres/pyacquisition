@@ -1,5 +1,5 @@
 
-"Out-of-the-box" functionality of `pyacquisition` is confiigurable via an input `.toml` file that can be read in via the `Experiment.from_config()` classmethod as shown in the [Getting Started](getting_started.md) page. Details of the `.toml` syntax can be found at [toml.io](https://toml.io/en/). Strictly, there are no required sections or keys. An empty `.toml` will run.
+"Out-of-the-box" functionality of `pyacquisition` is configurable via an input `.toml` file that can be read in via the `Experiment.from_config()` classmethod as shown in the [Getting Started](getting_started.md) page. Details of the `.toml` syntax can be found at [toml.io](https://toml.io/en/). Strictly, there are no required sections or keys. An empty `.toml` will run (albeit with no instruments and no measurements). Reasonable defaults are provided.
 
 Below is a breakdown of all of the sections and keys available for configuration:
 

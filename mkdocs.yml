@@ -16,7 +16,8 @@ nav:
     - Rack: experiment/rack.md
     - Scribe: experiment/scribe.md
     - Task Manager: experiment/task_manager.md
-  - Instruments:
+  - Instruments: 
+    - Overview: instruments/overview.md
     - Clock: instruments/clock.md
     - SR_830: instruments/sr_830.md
     - SR_860: instruments/sr_860.md

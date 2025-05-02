@@ -6,6 +6,7 @@ period = 0.25
 
 [instruments]
 clock = {instrument = "Clock"}
+mock = {instrument = "Mock"}
 
 [measurements]
 time = {instrument = "clock", method = "time"}
