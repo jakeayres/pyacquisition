@@ -41,6 +41,8 @@ class Experiment:
         self,
         root_path: str = ".",
         data_path: str = ".",
+        data_file_extension: str = ".data",
+        data_delimiter: str = ",",
         log_path: str = ".",
         console_log_level: str = "DEBUG",
         file_log_level: str = "DEBUG",
@@ -55,6 +57,7 @@ class Experiment:
         Args:
             root_path (str): The root directory for the experiment. Defaults to ".".
             data_path (str): The directory where experiment data will be stored. Defaults to ".".
+            data_file_extension (str): The file extension for data files. Defaults to ".data".
             log_path (str): The directory where logs will be stored. Defaults to ".".
             console_log_level (str): The logging level for console output. Defaults to "DEBUG".
             file_log_level (str): The logging level for file output. Defaults to "DEBUG".
@@ -91,7 +94,11 @@ class Experiment:
         
         self._gui = Gui(host=api_server_host, port=api_server_port)
 
-        self._scribe = Scribe(root_path=self._data_path)
+        self._scribe = Scribe(
+            root_path=self._data_path,
+            delimiter=data_delimiter,
+            extension=data_file_extension,
+        )
         self._scribe.subscribe_to(self._rack)
         
         self._api_server.add_websocket_endpoint("/data")
@@ -234,6 +241,8 @@ class Experiment:
             return cls(
                 root_path=config.get("experiment", {}).get("root_path", "."),
                 data_path=config.get("data", {}).get("path", "."),
+                data_file_extension=config.get("data", {}).get("file_extension", ".data"),
+                data_delimiter=config.get("data", {}).get("delimiter", ","),
                 log_path=config.get("logging", {}).get("path", "."),
                 console_log_level=config.get("logging", {}).get("console_level", "DEBUG"),
                 file_log_level=config.get("logging", {}).get("file_level", "DEBUG"),
@@ -388,12 +397,14 @@ class Experiment:
 
         Args:
             component: The component to run (e.g., API server, rack, task manager, GUI).
+            experiment: The Experiment instance (optional).
         """
         try:
             component.register_endpoints(self._api_server)
             component.setup()
             logger.debug(f"Running {component.__class__.__name__}")
-            await component.run()
+            await component.run(experiment=self) # PROBABLY PASS THE EXP IN ALL CASES?
+
         except Exception as e:
             logger.error(f"Error running {component.__class__.__name__}: {e}")
             raise

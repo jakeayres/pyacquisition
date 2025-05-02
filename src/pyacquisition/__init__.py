@@ -19,6 +19,7 @@ class MyTask(Task):
         yield 'STARTING'
         await asyncio.sleep(1)
         yield 'STARTING'
+        print(experiment.rack.instruments["mock"].method_with_args(1, 2))
         await asyncio.sleep(1)
 
 

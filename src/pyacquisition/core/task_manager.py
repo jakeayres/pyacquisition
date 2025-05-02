@@ -25,7 +25,7 @@ class TaskManager:
         logger.debug("[TaskManager] Setup completed")
         
         
-    async def run(self):
+    async def run(self, experiment) -> None:
         """
         The main loop that runs the tasks in the queue.
         """
@@ -36,7 +36,7 @@ class TaskManager:
                 self._current_task = await self._task_queue.get()
                 logger.info(f"[TaskManager] Task fetched from queue: {self._current_task.name}")
                 try:
-                    await self._current_task.start(experiment=self)
+                    await self._current_task.start(experiment=experiment)
                 except Exception as e:
                     logger.error(f"Error running task {self._current_task}: {e}")
                 finally:

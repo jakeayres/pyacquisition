@@ -40,7 +40,7 @@ class Rack(Broadcaster):
         logger.debug("Rack setup completed")
         
         
-    async def run(self):
+    async def run(self, experiment=None) -> None:
         """
         Asynchronously runs the measurements at the specified period.
         

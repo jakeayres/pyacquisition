@@ -129,7 +129,7 @@ class APIServer:
         logger.debug("[FastApi] Server setup completed")
         
         
-    def run(self):
+    def run(self, experiment=None):
         """
         A coroutine that runs the FastAPI server.
         """

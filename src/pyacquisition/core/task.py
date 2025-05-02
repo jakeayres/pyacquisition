@@ -58,7 +58,7 @@ class Task():
         self._abort_event.clear()
         try:
             logger.info(f"[{self.name}] Starting task.")
-            await self.setup(experiment=experiment)  # Call setup before running the task
+            await self.setup(experiment=experiment)
             async for step in self.run(experiment=experiment):
                 if step:
                     logger.info(f"[{self.name}] {step}")
@@ -68,7 +68,7 @@ class Task():
         except Exception as e:
             print(f"Task encountered an error: {e}")
         finally:
-            await self.teardown(experiment=experiment)  # Call teardown after running the task
+            await self.teardown(experiment=experiment)
             logger.info(f"[{self.name}] Task completed.")
 
 
@@ -79,7 +79,7 @@ class Task():
         """
         if self._abort_event.is_set():
             raise asyncio.CancelledError("Task aborted.")
-        await self._pause_event.wait()  # Wait if paused
+        await self._pause_event.wait()
         
         
     @property
