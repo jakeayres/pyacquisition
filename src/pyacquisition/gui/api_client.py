@@ -3,6 +3,7 @@ import aiohttp
 import asyncio
 import requests
 import websockets
+import inspect
 from ..core.broadcaster import Broadcaster
 from ..core.logging import logger
 
@@ -252,3 +253,5 @@ class APIClient:
                 logger.debug("WebSocket connection closed")
             except Exception as e:
                 logger.error(f"Error in WebSocket connection: {e}")
+                
+                

@@ -2,6 +2,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from websockets.exceptions import ConnectionClosedOK
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+import inspect
 import asyncio
 from .logging import logger
 from .consumer import Consumer
@@ -154,6 +155,26 @@ class APIServer:
         """
         logger.debug("[FastApi] Server teardown started")
         logger.debug("[FastApi] Server teardown completed")
+        
+        
+    def create_endpoint_function(self, method):
+        """
+        Endpoint factory
+        """
+        async def endpoint_func(**kwargs):
+            """
+            An endpoint function to handle the request.
+            """
+            return {"status": 200, "data": method(**kwargs)}
+        
+        endpoint_func.__name__ = method.__name__
+        endpoint_func.__annotations__ = method.__annotations__
+        endpoint_func.__annotations__["return"] = dict
+        endpoint_func.__signature__ = inspect.signature(method)
+        endpoint_func.__doc__ = method.__doc__
+        
+        return endpoint_func
+
         
         
     def register_endpoints(self, api_server):

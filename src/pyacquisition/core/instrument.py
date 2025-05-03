@@ -1,4 +1,5 @@
 from functools import partial, wraps
+import inspect
 
 
 class QueryCommandProvider(type):
@@ -174,6 +175,30 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
 				"status": 200,
 				"data": [name for name, _ in self.commands.items()],
 			}
+   
+   
+		for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
+			if hasattr(method, "_is_query"):
+				endpoint_path = f"/{self._uid}/{name}"
+				endpoint_func = api_server.create_endpoint_function(method)
+				api_server.app.add_api_route(
+			        endpoint_path,
+			        endpoint_func,
+			        methods=["GET"],
+			        tags=["tasks"],
+			    )
+
+			if hasattr(method, "_is_query"):
+				endpoint_path = f"/{self._uid}/{name}"
+				endpoint_func = api_server.create_endpoint_function(method)
+				api_server.app.add_api_route(
+			        endpoint_path,
+			        endpoint_func,
+			        methods=["GET"],
+			        tags=["tasks"],
+			    )
+    
+			
 
 
 

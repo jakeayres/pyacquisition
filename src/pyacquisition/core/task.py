@@ -161,7 +161,6 @@ class Task():
                 dict: The result of the task.
             """
             task = cls(**kwargs)
-            print(asdict(task))
             experiment.task_manager.add_task(task)
             return {"status": 200, "message": f"{cls.__name__} added"}
         
