@@ -112,9 +112,27 @@ class Instrument(metaclass=QueryCommandProvider):
 			return [name for name, _ in self.commands.items()]
 
 
-		# @app.get(f'/{self._uid}/'+'ask/{query_name}', tags=[self._uid])
-		# def query(query_name: str):
-		# 	return self.queries[query_name]()
+		for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
+			if hasattr(method, "_is_query"):
+				endpoint_path = f"/{self._uid}/{name}"
+				endpoint_func = api_server.create_endpoint_function(method)
+				api_server.app.add_api_route(
+			        endpoint_path,
+			        endpoint_func,
+			        methods=["GET"],
+			        tags=["tasks"],
+			    )
+
+			if hasattr(method, "_is_command"):
+				endpoint_path = f"/{self._uid}/{name}"
+				endpoint_func = api_server.create_endpoint_function(method)
+				api_server.app.add_api_route(
+			        endpoint_path,
+			        endpoint_func,
+			        methods=["GET"],
+			        tags=["tasks"],
+			    )
+    
 
 
 
@@ -188,7 +206,7 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
 			        tags=["tasks"],
 			    )
 
-			if hasattr(method, "_is_query"):
+			if hasattr(method, "_is_command"):
 				endpoint_path = f"/{self._uid}/{name}"
 				endpoint_func = api_server.create_endpoint_function(method)
 				api_server.app.add_api_route(
