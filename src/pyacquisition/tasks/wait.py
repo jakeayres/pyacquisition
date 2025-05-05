@@ -19,24 +19,21 @@ class WaitFor(Task):
         name (str): The name of the task.
         help (str): A brief description of the task.
     """
-    
+
     hours: int = 0
     minutes: int = 0
     seconds: int = 0
-    
-    
+
     @property
     def description(self) -> str:
         return f"Wait for {self.hours} hours, {self.minutes} minutes, and {self.seconds} seconds."
-        
-    
+
     async def run(self, experiment):
-        
         total_seconds = self.hours * 3600 + self.minutes * 60 + self.seconds
         start_time = time.time()
         end_time = start_time + total_seconds
         logger.info(f"[{self.name}] Waiting for {total_seconds} seconds")
-        
+
         while time.time() < end_time:
             remaining_time = end_time - time.time()
             if int(remaining_time) % 300 == 0:
@@ -46,24 +43,22 @@ class WaitFor(Task):
             await asyncio.sleep(1)
 
 
-
 @dataclass
 class WaitUntil(Task):
-    """Wait until hh:mm (next occurrence)
-    """
-    
+    """Wait until hh:mm (next occurrence)"""
+
     hour: int = 0
     minute: int = 0
 
-    
     @property
     def description(self) -> str:
         return f"Wait until {self.hour}:{self.minute}."
-    
-    
+
     async def run(self, experiment):
         now = datetime.datetime.now()
-        target_time = now.replace(hour=self.hour, minute=self.minute, second=0, microsecond=0)
+        target_time = now.replace(
+            hour=self.hour, minute=self.minute, second=0, microsecond=0
+        )
 
         # If the target time is earlier than the current time, move it to the next day
         if target_time <= now:

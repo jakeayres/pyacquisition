@@ -7,18 +7,20 @@ class SyncFilterState(Enum):
     OFF = 0
     ON = 1
 
+
 class SyncFilterStateModel(Enum):
-    OFF = 'Off'
-    ON = 'On'
+    OFF = "Off"
+    ON = "On"
 
 
 class ReferenceSource(Enum):
     INTERNAL = 0
     EXTERNAL = 1
 
+
 class ReferenceSourceModel(Enum):
-    INTERNAL = 'Internal'
-    EXTERNAL = 'External'
+    INTERNAL = "Internal"
+    EXTERNAL = "External"
 
 
 class ReferenceSlope(Enum):
@@ -26,10 +28,11 @@ class ReferenceSlope(Enum):
     TTL_RISING = 1
     TTL_FALLING = 2
 
+
 class ReferenceSlopeModel(Enum):
-    SINE = 'Sine'
-    TTL_RISING = 'TTL Rising'
-    TTL_FALLING = 'TTL Falling'
+    SINE = "Sine"
+    TTL_RISING = "TTL Rising"
+    TTL_FALLING = "TTL Falling"
 
 
 class InputConfiguration(Enum):
@@ -38,29 +41,32 @@ class InputConfiguration(Enum):
     I_10e6 = 2
     I_100e6 = 3
 
+
 class InputConfigurationModel(Enum):
-    A = 'A'
-    A_B = 'A-B'
-    I_10e6 = 'Current 10uA'
-    I_100e6 = 'Curretn 100uA'
+    A = "A"
+    A_B = "A-B"
+    I_10e6 = "Current 10uA"
+    I_100e6 = "Curretn 100uA"
 
 
 class InputGrounding(Enum):
     FLOAT = 0
     GROUND = 1
 
+
 class InputGroundingModel(Enum):
-    FLOAT = 'Float'
-    GROUND = 'Ground'
+    FLOAT = "Float"
+    GROUND = "Ground"
 
 
 class InputCoupling(Enum):
     AC = 0
     DC = 1
 
+
 class InputCouplingModel(Enum):
-    AC = 'AC'
-    DC = 'DC'
+    AC = "AC"
+    DC = "DC"
 
 
 class NotchFilters(Enum):
@@ -69,11 +75,12 @@ class NotchFilters(Enum):
     LINE_2 = 2
     BOTH = 3
 
+
 class NotchFiltersModel(Enum):
-    NONE = 'None'
-    LINE_1 = 'Line'
-    LINE_2 = 'Line x2'
-    BOTH = 'Both'
+    NONE = "None"
+    LINE_1 = "Line"
+    LINE_2 = "Line x2"
+    BOTH = "Both"
 
 
 class Sensitivity(Enum):
@@ -105,34 +112,35 @@ class Sensitivity(Enum):
     mV_500 = 25
     V_1 = 26
 
+
 class SensitivityModel(Enum):
-    nV_2 = '2 nV'
-    nV_5 = '5 nV'
-    nV_10 = '10 nV'
-    nV_20 = '20 nV'
-    nV_50 = '50 nV'
-    nV_100 = '100 nV'
-    nV_200 = '200 nV'
-    nV_500 = '500 nV'
-    uV_1 = '1 uV'
-    uV_2 = '2 uV'
-    uV_5 = '5 uV'
-    uV_10 = '10 uV'
-    uV_20 = '20 uV'
-    uV_50 = '50 uV'
-    uV_100 = '100 uV'
-    uV_200 = '200 uV'
-    uV_500 = '500 uV'
-    mV_1 = '1 mV'
-    mV_2 = '2 mV'
-    mV_5 = '5 mV'
-    mV_10 = '10 mV'
-    mV_20 = '20 mV'
-    mV_50 = '50 mV'
-    mV_100 = '100 mV'
-    mV_200 = '200 mV'
-    mV_500 = '500 mV'
-    V_1 = '1 V'
+    nV_2 = "2 nV"
+    nV_5 = "5 nV"
+    nV_10 = "10 nV"
+    nV_20 = "20 nV"
+    nV_50 = "50 nV"
+    nV_100 = "100 nV"
+    nV_200 = "200 nV"
+    nV_500 = "500 nV"
+    uV_1 = "1 uV"
+    uV_2 = "2 uV"
+    uV_5 = "5 uV"
+    uV_10 = "10 uV"
+    uV_20 = "20 uV"
+    uV_50 = "50 uV"
+    uV_100 = "100 uV"
+    uV_200 = "200 uV"
+    uV_500 = "500 uV"
+    mV_1 = "1 mV"
+    mV_2 = "2 mV"
+    mV_5 = "5 mV"
+    mV_10 = "10 mV"
+    mV_20 = "20 mV"
+    mV_50 = "50 mV"
+    mV_100 = "100 mV"
+    mV_200 = "200 mV"
+    mV_500 = "500 mV"
+    V_1 = "1 V"
 
 
 class TimeConstant(Enum):
@@ -159,26 +167,26 @@ class TimeConstant(Enum):
 
 
 class TimeConstantModel(Enum):
-    us_10 = '10 µs'
-    us_30 = '30 µs'
-    us_100 = '100 µs'
-    us_300 = '300 µs'
-    ms_1 = '1 ms'
-    ms_3 = '3 ms'
-    ms_10 = '10 ms'
-    ms_30 = '30 ms'
-    ms_100 = '100 ms'
-    ms_300 = '300 ms'
-    s_1 = '1 s'
-    s_3 = '3 s'
-    s_10 = '10 s'
-    s_30 = '30 s'
-    s_100 = '100 s'
-    s_300 = '300 s'
-    ks_1 = '1 ks'
-    ks_3 = '3 ks'
-    ks_10 = '10 ks'
-    ks_30 = '30 ks'
+    us_10 = "10 µs"
+    us_30 = "30 µs"
+    us_100 = "100 µs"
+    us_300 = "300 µs"
+    ms_1 = "1 ms"
+    ms_3 = "3 ms"
+    ms_10 = "10 ms"
+    ms_30 = "30 ms"
+    ms_100 = "100 ms"
+    ms_300 = "300 ms"
+    s_1 = "1 s"
+    s_3 = "3 s"
+    s_10 = "10 s"
+    s_30 = "30 s"
+    s_100 = "100 s"
+    s_300 = "300 s"
+    ks_1 = "1 ks"
+    ks_3 = "3 ks"
+    ks_10 = "10 ks"
+    ks_30 = "30 ks"
 
 
 class FilterSlope(Enum):
@@ -187,11 +195,12 @@ class FilterSlope(Enum):
     db18 = 2
     db24 = 3
 
+
 class FilterSlopeModel(Enum):
-    db6 = '6 db'
-    db12 = '12 db'
-    db18 = '18 db'
-    db24 = '24 db'
+    db6 = "6 db"
+    db12 = "12 db"
+    db18 = "18 db"
+    db24 = "24 db"
 
 
 class DynamicReserve(Enum):
@@ -199,11 +208,11 @@ class DynamicReserve(Enum):
     NORMAL = 1
     LOW_NOISE = 2
 
-class DynamicReserveModel(Enum):
-    HIGH_RESERVE = 'High Reserve'
-    NORMAL = 'Normal'
-    LOW_NOISE = 'Low Noise'
 
+class DynamicReserveModel(Enum):
+    HIGH_RESERVE = "High Reserve"
+    NORMAL = "Normal"
+    LOW_NOISE = "Low Noise"
 
 
 class SR_830(Instrument):
@@ -211,8 +220,7 @@ class SR_830(Instrument):
     Stanford Research SR-830 Lock-In Amplifier class.
     """
 
-    name = 'SR_830'
-
+    name = "SR_830"
 
     @mark_query
     def identify(self) -> str:
@@ -221,7 +229,7 @@ class SR_830(Instrument):
         Returns:
             str: The identification string of the instrument.
         """
-        return self.query('*IDN?')
+        return self.query("*IDN?")
 
     @mark_command
     def reset(self) -> int:
@@ -230,7 +238,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command('*RST')
+        return self.command("*RST")
 
     @mark_command
     def reset_data_buffer(self) -> int:
@@ -239,7 +247,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command('*REST')
+        return self.command("*REST")
 
     @mark_command
     def clear(self) -> int:
@@ -248,7 +256,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command('*CLS')
+        return self.command("*CLS")
 
     @mark_query
     def get_phase(self) -> float:
@@ -269,7 +277,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'PHAS {phase:.2f}')
+        return self.command(f"PHAS {phase:.2f}")
 
     @mark_query
     def get_reference_source(self) -> ReferenceSource:
@@ -278,7 +286,7 @@ class SR_830(Instrument):
         Returns:
             ReferenceSource: The current reference source (INTERNAL or EXTERNAL).
         """
-        return ReferenceSource(int(self.query('FMOD?')))
+        return ReferenceSource(int(self.query("FMOD?")))
 
     @mark_command
     def set_reference_source(self, source: ReferenceSource) -> int:
@@ -290,7 +298,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'FMOD {source.value}')
+        return self.command(f"FMOD {source.value}")
 
     @mark_query
     def get_frequency(self) -> float:
@@ -311,7 +319,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'FREQ {frequency:.3f}')
+        return self.command(f"FREQ {frequency:.3f}")
 
     @mark_query
     def get_external_reference_slope(self) -> ReferenceSlope:
@@ -320,7 +328,7 @@ class SR_830(Instrument):
         Returns:
             ReferenceSlope: The slope of the external reference signal.
         """
-        return ReferenceSlope(int(self.query('RSLP?')))
+        return ReferenceSlope(int(self.query("RSLP?")))
 
     @mark_command
     def set_external_reference_slope(self, slope: ReferenceSlope) -> int:
@@ -332,7 +340,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'RSLP {slope.value}')
+        return self.command(f"RSLP {slope.value}")
 
     @mark_query
     def get_harmonic(self) -> int:
@@ -341,7 +349,7 @@ class SR_830(Instrument):
         Returns:
             int: The current harmonic setting.
         """
-        return int(self.query('HARM?'))
+        return int(self.query("HARM?"))
 
     @mark_command
     def set_harmonic(self, harmonic: int) -> int:
@@ -353,7 +361,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'HARM {harmonic}')
+        return self.command(f"HARM {harmonic}")
 
     @mark_query
     def get_reference_amplitude(self) -> float:
@@ -362,7 +370,7 @@ class SR_830(Instrument):
         Returns:
             float: The reference amplitude in volts.
         """
-        return float(self.query('SLVL?'))
+        return float(self.query("SLVL?"))
 
     @mark_command
     def set_reference_amplitude(self, amplitude: float) -> int:
@@ -374,7 +382,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'SLVL {amplitude:.3f}')
+        return self.command(f"SLVL {amplitude:.3f}")
 
     """ INPUT AND FILTER
     """
@@ -386,7 +394,7 @@ class SR_830(Instrument):
         Returns:
             InputConfiguration: The current input configuration.
         """
-        return InputConfiguration(int(self.query('ISRC?')))
+        return InputConfiguration(int(self.query("ISRC?")))
 
     @mark_command
     def set_input_configuration(self, configuration: InputConfiguration) -> int:
@@ -398,7 +406,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'ISRC {configuration.value}')
+        return self.command(f"ISRC {configuration.value}")
 
     @mark_query
     def get_input_grounding(self) -> InputGrounding:
@@ -407,7 +415,7 @@ class SR_830(Instrument):
         Returns:
             InputGrounding: The current input grounding configuration.
         """
-        return InputGrounding(int(self.query('IGND?')))
+        return InputGrounding(int(self.query("IGND?")))
 
     @mark_command
     def set_input_grounding(self, configuration: InputGrounding) -> int:
@@ -419,7 +427,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'IGND {configuration.value}')
+        return self.command(f"IGND {configuration.value}")
 
     @mark_query
     def get_input_coupling(self) -> InputCoupling:
@@ -428,7 +436,7 @@ class SR_830(Instrument):
         Returns:
             InputCoupling: The current input coupling configuration.
         """
-        return InputCoupling(int(self.query('ICPL?')))
+        return InputCoupling(int(self.query("ICPL?")))
 
     @mark_command
     def set_input_coupling(self, configuration: InputCoupling) -> int:
@@ -440,7 +448,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'ICPL {configuration.value}')
+        return self.command(f"ICPL {configuration.value}")
 
     @mark_query
     def get_notch_filters(self) -> NotchFilters:
@@ -449,7 +457,7 @@ class SR_830(Instrument):
         Returns:
             NotchFilters: The current notch filter configuration.
         """
-        return NotchFilters(int(self.query('ILIN?')))
+        return NotchFilters(int(self.query("ILIN?")))
 
     @mark_command
     def set_notch_filters(self, configuration: NotchFilters) -> int:
@@ -461,7 +469,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'ILIN {configuration.value}')
+        return self.command(f"ILIN {configuration.value}")
 
     """ GAIN AND TIME CONSTANT
     """
@@ -473,7 +481,7 @@ class SR_830(Instrument):
         Returns:
             Sensitivity: The current sensitivity setting.
         """
-        return Sensitivity(int(self.query('SENS?')))
+        return Sensitivity(int(self.query("SENS?")))
 
     @mark_command
     def set_sensitivity(self, sensitivity: Sensitivity) -> int:
@@ -485,7 +493,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'SENS {sensitivity.value}')
+        return self.command(f"SENS {sensitivity.value}")
 
     @mark_query
     def get_dynamic_reserve(self) -> DynamicReserve:
@@ -494,7 +502,7 @@ class SR_830(Instrument):
         Returns:
             DynamicReserve: The current dynamic reserve setting.
         """
-        return DynamicReserve(int(self.query('RMOD?')))
+        return DynamicReserve(int(self.query("RMOD?")))
 
     @mark_command
     def set_dynamic_reserve(self, reserve: DynamicReserve) -> int:
@@ -506,7 +514,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'RMOD {reserve.value}')
+        return self.command(f"RMOD {reserve.value}")
 
     @mark_query
     def get_time_constant(self) -> TimeConstant:
@@ -515,7 +523,7 @@ class SR_830(Instrument):
         Returns:
             TimeConstant: The current time constant setting.
         """
-        return TimeConstant(int(self.query('OFLT?')))
+        return TimeConstant(int(self.query("OFLT?")))
 
     @mark_command
     def set_time_constant(self, time_constant: TimeConstant) -> int:
@@ -527,7 +535,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'OFLT {time_constant.value}')
+        return self.command(f"OFLT {time_constant.value}")
 
     @mark_query
     def get_filter_slope(self) -> FilterSlope:
@@ -536,7 +544,7 @@ class SR_830(Instrument):
         Returns:
             FilterSlope: The current filter slope setting.
         """
-        return FilterSlope(int(self.query('OFSL?')))
+        return FilterSlope(int(self.query("OFSL?")))
 
     @mark_command
     def set_filter_slope(self, filter_slope: FilterSlope) -> int:
@@ -548,7 +556,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'OFSL {filter_slope.value}')
+        return self.command(f"OFSL {filter_slope.value}")
 
     @mark_query
     def get_sync_filter_state(self) -> SyncFilterState:
@@ -557,7 +565,7 @@ class SR_830(Instrument):
         Returns:
             SyncFilterState: The current state of the synchronization filter.
         """
-        return SyncFilterState(int(self.query('SYNC?')))
+        return SyncFilterState(int(self.query("SYNC?")))
 
     @mark_command
     def set_sync_filter_state(self, state: SyncFilterState) -> int:
@@ -569,34 +577,28 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'SYNC {state.value}')
-
+        return self.command(f"SYNC {state.value}")
 
     @mark_query
     def get_output(self, parameter: int) -> float:
-        return float(self.query(f'OUTP? {parameter}'))
-
+        return float(self.query(f"OUTP? {parameter}"))
 
     @mark_query
     def get_display_output(self, parameter: int) -> float:
-        return float(self.query(f'OUTR? {parameter}'))
-
+        return float(self.query(f"OUTR? {parameter}"))
 
     @mark_query
     def get_x(self) -> float:
-        return float(self.query('OUTP? 1'))
-
+        return float(self.query("OUTP? 1"))
 
     @mark_query
     def get_y(self) -> float:
-        return float(self.query('OUTP? 2'))
-
+        return float(self.query("OUTP? 2"))
 
     @mark_query
     def get_xy(self) -> list[float]:
-        return [float(s) for s in self.query('SNAP? 1,2').split(',')]
-
+        return [float(s) for s in self.query("SNAP? 1,2").split(",")]
 
     @mark_query
     def get_display_buffer_length(self) -> int:
-        return int(self.query('SPTS?'))
+        return int(self.query("SPTS?"))

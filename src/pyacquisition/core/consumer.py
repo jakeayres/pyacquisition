@@ -14,8 +14,7 @@ class Consumer:
         self.queue = asyncio.Queue()
         self._callbacks = callbacks
         self._async_callbacks = async_callbacks
-        
-        
+
     def _execute_callbacks(self, message):
         """
         Execute all registered callbacks with the given message.
@@ -25,8 +24,7 @@ class Consumer:
         """
         for callback in self._callbacks:
             callback(message)
-            
-            
+
     async def _execute_async_callbacks(self, message):
         """
         Execute all registered async callbacks with the given message.
@@ -36,8 +34,7 @@ class Consumer:
         """
         for async_callback in self._async_callbacks:
             await async_callback(message)
-            
-            
+
     def add_callback(self, callback):
         """
         Add a callback to be executed when a message is consumed.
@@ -46,8 +43,7 @@ class Consumer:
             callback (callable): The callback function to add.
         """
         self._callbacks.append(callback)
-        
-        
+
     def remove_callback(self, callback):
         """
         Remove a callback from the list of callbacks.
@@ -57,8 +53,7 @@ class Consumer:
         """
         if callback in self._callbacks:
             self._callbacks.remove(callback)
-        
-        
+
     def add_async_callback(self, async_callback):
         """
         Add an async callback to be executed when a message is consumed.
@@ -67,8 +62,7 @@ class Consumer:
             async_callback (callable): The async callback function to add.
         """
         self._async_callbacks.append(async_callback)
-        
-        
+
     def remove_async_callback(self, async_callback):
         """
         Remove an async callback from the list of async callbacks.
@@ -78,7 +72,6 @@ class Consumer:
         """
         if async_callback in self._async_callbacks:
             self._async_callbacks.remove(async_callback)
-        
 
     def subscribe_to(self, broadcaster):
         """
@@ -89,7 +82,6 @@ class Consumer:
         """
         broadcaster.subscribe(self)
 
-        
     def unsubscribe(self, broadcaster):
         """
         Unsubscribe from a Broadcaster.
@@ -97,8 +89,7 @@ class Consumer:
         Args:
             broadcaster (Broadcaster): The broadcaster to unsubscribe from.
         """
-        broadcaster.unsubscribe(self)   
-
+        broadcaster.unsubscribe(self)
 
     async def consume(self, timeout=None):
         """
@@ -120,8 +111,7 @@ class Consumer:
         except Exception as e:
             logger.error(f"Error consuming message: {e}")
             return None
-        
-        
+
     async def consume_all(self, timeout=None):
         """
         Consume all messages from the queue with a timeout.

@@ -11,11 +11,11 @@ class SystemStatusM(Enum):
 
 
 class SystemStatusMModel(Enum):
-    NORMAL = 'Normal'
-    QUENCHED = 'Quenched'
-    OVERHEATED = 'Overheaded'
-    WARMING_UP = 'Warming up'
-    FAULT = 'Fault'
+    NORMAL = "Normal"
+    QUENCHED = "Quenched"
+    OVERHEATED = "Overheaded"
+    WARMING_UP = "Warming up"
+    FAULT = "Fault"
 
 
 class SystemStatusN(Enum):
@@ -27,11 +27,11 @@ class SystemStatusN(Enum):
 
 
 class SystemStatusNModel(Enum):
-    NORMAL = 'Normal'
-    POSITIVE_VOLTAGE_LIMIT = 'On positive voltage limit'
-    NEGATIVE_VOLTAGE_LIMIT = 'On negative voltage limit'
-    NEGATIVE_CURRENT_LIMIT = 'Outside negative current limit'
-    POSITIVE_CURRENT_LIMIT = 'Outside positive current limit'
+    NORMAL = "Normal"
+    POSITIVE_VOLTAGE_LIMIT = "On positive voltage limit"
+    NEGATIVE_VOLTAGE_LIMIT = "On negative voltage limit"
+    NEGATIVE_CURRENT_LIMIT = "Outside negative current limit"
+    POSITIVE_CURRENT_LIMIT = "Outside positive current limit"
 
 
 class ActivityStatus(Enum):
@@ -42,10 +42,10 @@ class ActivityStatus(Enum):
 
 
 class ActivityStatusModel(Enum):
-    HOLD = 'Hold'
-    TO_SETPOINT = 'To setpoint'
-    TO_ZERO = 'To zero'
-    CLAMPED = 'Clamped'
+    HOLD = "Hold"
+    TO_SETPOINT = "To setpoint"
+    TO_ZERO = "To zero"
+    CLAMPED = "Clamped"
 
 
 class RemoteStatus(Enum):
@@ -56,10 +56,10 @@ class RemoteStatus(Enum):
 
 
 class RemoteStatusModel(Enum):
-    LOCAL_LOCKED = 'Local and locked'
-    REMOTE_LOCKED = 'Remote and locked'
-    LOCAL_UNLOCKED = 'Local and unlocked'
-    REMOTE_UNLOCKED = 'Remote and unlocked'
+    LOCAL_LOCKED = "Local and locked"
+    REMOTE_LOCKED = "Remote and locked"
+    LOCAL_UNLOCKED = "Local and unlocked"
+    REMOTE_UNLOCKED = "Remote and unlocked"
 
 
 class SwitchHeaterStatus(Enum):
@@ -71,11 +71,11 @@ class SwitchHeaterStatus(Enum):
 
 
 class SwitchHeaterStatusModel(Enum):
-    OFF_AT_ZERO = 'Off (closed) at zero field'
-    ON = 'On (open)'
-    OFF_AT_FIELD = 'Off (closed) at field'
-    FAULT = 'Fault'
-    NOT_FITTED = 'Not fitted'
+    OFF_AT_ZERO = "Off (closed) at zero field"
+    ON = "On (open)"
+    OFF_AT_FIELD = "Off (closed) at field"
+    FAULT = "Fault"
+    NOT_FITTED = "Not fitted"
 
 
 class ModeStatusM(Enum):
@@ -86,10 +86,10 @@ class ModeStatusM(Enum):
 
 
 class ModeStatusMModel(Enum):
-    FAST_AMPS = 'Fast sweep (amps)'
-    FAST_TESLA = 'Fast sweep (tesla)'
-    SLOW_AMPS = 'Slow sweep (amps)'
-    SLOW_TESLA = 'Slow sweep (tesla)'
+    FAST_AMPS = "Fast sweep (amps)"
+    FAST_TESLA = "Fast sweep (tesla)"
+    SLOW_AMPS = "Slow sweep (amps)"
+    SLOW_TESLA = "Slow sweep (tesla)"
 
 
 class ModeStatusN(Enum):
@@ -100,17 +100,16 @@ class ModeStatusN(Enum):
 
 
 class ModeStatusNModel(Enum):
-    REST = 'At rest (constant output)'
-    SWEEPING = 'Sweeping'
-    LIMITING = 'Sweep limiting'
-    SWEEPING_LIMITING = 'Sweeping and sweep limiting'
-
+    REST = "At rest (constant output)"
+    SWEEPING = "Sweeping"
+    LIMITING = "Sweep limiting"
+    SWEEPING_LIMITING = "Sweeping and sweep limiting"
 
 
 class Mercury_IPS(Instrument):
     """Class for controlling the Oxford Instruments Mercury IPS device."""
 
-    name = 'Mercury_IPS'
+    name = "Mercury_IPS"
 
     @mark_query
     def identify(self) -> str:
@@ -128,7 +127,7 @@ class Mercury_IPS(Instrument):
         Returns:
             str: The response.
         """
-        return self.query('C1')
+        return self.query("C1")
 
     @mark_query
     def local_and_unlocked(self) -> str:
@@ -137,7 +136,7 @@ class Mercury_IPS(Instrument):
         Returns:
             str: The response.
         """
-        return self.query('C2')
+        return self.query("C2")
 
     @mark_query
     def remote_and_unlocked(self) -> str:
@@ -146,7 +145,7 @@ class Mercury_IPS(Instrument):
         Returns:
             str: The response.
         """
-        return self.query('C3')
+        return self.query("C3")
 
     @mark_query
     def get_output_current(self) -> float:

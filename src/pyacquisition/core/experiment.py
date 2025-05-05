@@ -85,13 +85,13 @@ class Experiment:
             host=api_server_host,
             port=api_server_port,
         )
-        
+
         self._rack = Rack(
-            period = measurement_period,
+            period=measurement_period,
         )
-        
+
         self._task_manager = TaskManager()
-        
+
         self._gui = Gui(host=api_server_host, port=api_server_port)
 
         self._scribe = Scribe(
@@ -100,14 +100,13 @@ class Experiment:
             extension=data_file_extension,
         )
         self._scribe.subscribe_to(self._rack)
-        
+
         self._api_server.add_websocket_endpoint("/data")
         self._api_server.websocket_endpoints["/data"].subscribe_to(self._rack)
-        
+
         self._api_server.add_websocket_endpoint("/logs")
         self._api_server.websocket_endpoints["/logs"].subscribe_to(logger)
-        
-    
+
     @staticmethod
     def _read_toml(toml_file: str) -> dict:
         """
@@ -130,8 +129,9 @@ class Experiment:
         except tomllib.TOMLDecodeError:
             raise ValueError(f"Failed to decode TOML file '{toml_file}'.")
         except Exception as e:
-            raise ValueError(f"An error occurred while reading the TOML file '{toml_file}': {e}")
-        
+            raise ValueError(
+                f"An error occurred while reading the TOML file '{toml_file}': {e}"
+            )
 
     @staticmethod
     def _get_instrument_class(instrument_name: str):
@@ -150,8 +150,9 @@ class Experiment:
         try:
             return instrument_map[instrument_name]
         except KeyError:
-            raise ValueError(f"Instrument '{instrument_name}' not found in instrument map.")
-        
+            raise ValueError(
+                f"Instrument '{instrument_name}' not found in instrument map."
+            )
 
     @staticmethod
     def _get_adapter_class(adapter_name: str):
@@ -171,7 +172,6 @@ class Experiment:
             return get_adapter(adapter_name)
         except KeyError:
             raise ValueError(f"Adapter '{adapter_name}' not found in adapter map.")
-    
 
     @staticmethod
     def _open_resource(adapter, resource: str, timeout: int = 5000):
@@ -200,7 +200,6 @@ class Experiment:
             logger.warning(f"Failed to open resource '{resource}': {e}")
             return None
 
-    
     @classmethod
     def from_config(cls, toml_file: str) -> "Experiment":
         """
@@ -225,7 +224,6 @@ class Experiment:
         except Exception as e:
             raise ValueError(f"Failed to configure instruments or measurements: {e}")
 
-
     @classmethod
     def _initialize_experiment(cls, config: dict) -> "Experiment":
         """
@@ -241,10 +239,14 @@ class Experiment:
             return cls(
                 root_path=config.get("experiment", {}).get("root_path", "."),
                 data_path=config.get("data", {}).get("path", "."),
-                data_file_extension=config.get("data", {}).get("file_extension", ".data"),
+                data_file_extension=config.get("data", {}).get(
+                    "file_extension", ".data"
+                ),
                 data_delimiter=config.get("data", {}).get("delimiter", ","),
                 log_path=config.get("logging", {}).get("path", "."),
-                console_log_level=config.get("logging", {}).get("console_level", "DEBUG"),
+                console_log_level=config.get("logging", {}).get(
+                    "console_level", "DEBUG"
+                ),
                 file_log_level=config.get("logging", {}).get("file_level", "DEBUG"),
                 gui_log_level=config.get("logging", {}).get("gui_level", "DEBUG"),
                 log_file_name=config.get("logging", {}).get("file_name", "debug.log"),
@@ -256,7 +258,6 @@ class Experiment:
             raise ValueError(f"Missing required configuration key: {e}")
         except Exception as e:
             raise ValueError(f"Failed to create Experiment instance: {e}")
-
 
     @classmethod
     def _configure_instruments(cls, experiment: "Experiment", config: dict) -> None:
@@ -277,17 +278,22 @@ class Experiment:
                     inst = instrument_class(name)
                     experiment.rack.add_instrument(inst)
                 else:
-                    logger.debug(f"Creating instrument '{name}' with adapter '{instrument['adapter']}'")
+                    logger.debug(
+                        f"Creating instrument '{name}' with adapter '{instrument['adapter']}'"
+                    )
                     adapter_class = cls._get_adapter_class(instrument["adapter"])
-                    resource = cls._open_resource(adapter_class, instrument.get("resource", None), timeout=5000)
+                    resource = cls._open_resource(
+                        adapter_class, instrument.get("resource", None), timeout=5000
+                    )
                     if resource:
                         inst = instrument_class(name, resource)
                         experiment.rack.add_instrument(inst)
                     else:
-                        logger.warning(f"Failed to open resource '{instrument.get('resource', None)}' for instrument '{name}'")
+                        logger.warning(
+                            f"Failed to open resource '{instrument.get('resource', None)}' for instrument '{name}'"
+                        )
             except Exception as e:
                 logger.warning(f"Failed to configure instrument '{name}': {e}")
-
 
     @classmethod
     def _configure_measurements(cls, experiment: "Experiment", config: dict) -> None:
@@ -306,13 +312,17 @@ class Experiment:
                 args = measurement.get("args", None)
 
                 if instrument_name not in experiment.rack.instruments:
-                    logger.warning(f"Instrument '{instrument_name}' not found for measurement '{name}'")
+                    logger.warning(
+                        f"Instrument '{instrument_name}' not found for measurement '{name}'"
+                    )
                     continue
 
                 instrument = experiment.rack.instruments[instrument_name]
 
                 if method_name not in instrument.queries:
-                    logger.warning(f"Method '{method_name}' not found for instrument '{instrument_name}'")
+                    logger.warning(
+                        f"Method '{method_name}' not found for instrument '{instrument_name}'"
+                    )
                     continue
 
                 method = instrument.queries[method_name]
@@ -323,7 +333,6 @@ class Experiment:
                 experiment.rack.add_measurement(Measurement(name, method))
             except Exception as e:
                 logger.warning(f"Failed to configure measurement '{name}': {e}")
-
 
     @staticmethod
     def _resolve_method_args(method, args: dict):
@@ -342,13 +351,14 @@ class Experiment:
         for arg_name, arg_type in method_hints.items():
             if arg_name in args:
                 arg_value = args[arg_name]
-                if inspect.isclass(arg_type.annotation) and issubclass(arg_type.annotation, Enum):
+                if inspect.isclass(arg_type.annotation) and issubclass(
+                    arg_type.annotation, Enum
+                ):
                     resolved_args[arg_name] = arg_type.annotation[arg_value]
                 else:
                     resolved_args[arg_name] = arg_value
         return partial(method, **resolved_args)
-        
-        
+
     @property
     def rack(self) -> Rack:
         """
@@ -358,8 +368,7 @@ class Experiment:
             Rack: The rack instance.
         """
         return self._rack
-    
-    
+
     @property
     def task_manager(self) -> TaskManager:
         """
@@ -369,8 +378,7 @@ class Experiment:
             TaskManager: The task manager instance.
         """
         return self._task_manager
-    
-    
+
     @property
     def scribe(self) -> Scribe:
         """
@@ -380,7 +388,6 @@ class Experiment:
             Scribe: The scribe instance.
         """
         return self._scribe
-    
 
     def setup(self) -> None:
         """
@@ -391,16 +398,14 @@ class Experiment:
         """
         pass
 
-
     def teardown(self) -> None:
         """
         Cleans up the experiment environment.
-        
+
         This method is responsible for releasing resources or performing any necessary cleanup
         after the experiment has run.
         """
         pass
-
 
     async def _run_component(self, component) -> None:
         """
@@ -421,12 +426,11 @@ class Experiment:
             raise
         finally:
             component.teardown()
-            
-        
+
     async def _run(self) -> None:
         """
         A coroutine that runs the experiment.
-            
+
         The main logic of the experiment is executed within this coroutine.
         """
         try:
@@ -452,14 +456,13 @@ class Experiment:
                 logger.error(f"Error during experiment teardown: {e}")
                 raise
             self.teardown()
-        
 
     def run(self) -> None:
         """
         Runs the experiment.
         """
         logger.info("Experiment started")
-        
+
         try:
             asyncio.run(self._run())
         except KeyboardInterrupt:
@@ -468,9 +471,7 @@ class Experiment:
             logger.error(f"An error occurred while running the experiment: {e}")
 
         logger.info("Experiment ended")
-    
-    
-    
+
     def register_task(self, task: Task) -> None:
         """
         Registers a task with the experiment.

@@ -5,19 +5,15 @@ from ...core.logging import logger
 from ..constants import EMPHASIS_COLOR, SECONDARY_COLOR, WHITE
 
 
-
-
 class LiveDataWindow(Consumer):
-
-
     async def run(self):
         """
         Run the live data window.
         """
         logger.debug("[GUI] Running live data window")
-        
+
         self.window_tag = dpg.generate_uuid()
-        
+
         try:
             with dpg.window(
                 label="Live Data",
@@ -43,15 +39,17 @@ class LiveDataWindow(Consumer):
                     with dpg.group(horizontal=True, parent=self.window_tag):
                         tag = dpg.generate_uuid()
                         key_tags[key] = tag
-                        dpg.add_text(f"{key:{' '}<{15}}", tag=tag, color=SECONDARY_COLOR)
-                        
+                        dpg.add_text(
+                            f"{key:{' '}<{15}}", tag=tag, color=SECONDARY_COLOR
+                        )
+
                         tag = dpg.generate_uuid()
                         value_tags[key] = tag
                         dpg.add_text(f"{value:{' '}<{15}}", tag=tag)
                 with dpg.group(horizontal=True, parent=self.window_tag):
-                    dpg.add_text("Loop Time      ",  color=EMPHASIS_COLOR)
-                    dpg.add_text(f"{t1-t0:.3f} s", tag=time_tag, color=WHITE)
-                    
+                    dpg.add_text("Loop Time      ", color=EMPHASIS_COLOR)
+                    dpg.add_text(f"{t1 - t0:.3f} s", tag=time_tag, color=WHITE)
+
                 while True:
                     t0 = time.time()
                     data = await self.consume()
@@ -62,10 +60,7 @@ class LiveDataWindow(Consumer):
                         else:
                             logger.warning(f"Key {key} not found in key_tags")
                     t1 = time.time()
-                    dpg.set_value(time_tag, f"{t1-t0:.3f} s")
-                    
-                    
+                    dpg.set_value(time_tag, f"{t1 - t0:.3f} s")
+
         except Exception as e:
             logger.error(f"[LiveDataWindow] Error running live data window: {e}")
-                
-    

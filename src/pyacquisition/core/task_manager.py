@@ -1,7 +1,7 @@
 from .logging import logger
 from .task import Task
 import asyncio
-    
+
 
 class TaskManager:
     """
@@ -10,21 +10,18 @@ class TaskManager:
     """
 
     def __init__(self):
-
         self._current_task: Task = None
         self._task_queue = asyncio.Queue()
         self._pause_event = asyncio.Event()
         self._pause_event.set()
-        
-    
+
     def setup(self):
         """
         Setup the task manager.
         """
         logger.debug("[TaskManager] Setup started")
         logger.debug("[TaskManager] Setup completed")
-        
-        
+
     async def run(self, experiment) -> None:
         """
         The main loop that runs the tasks in the queue.
@@ -34,7 +31,9 @@ class TaskManager:
                 await self._pause_event.wait()
                 logger.info("[TaskManager] Waiting for task to appear on queue")
                 self._current_task = await self._task_queue.get()
-                logger.info(f"[TaskManager] Task fetched from queue: {self._current_task.name}")
+                logger.info(
+                    f"[TaskManager] Task fetched from queue: {self._current_task.name}"
+                )
                 try:
                     await self._current_task.start(experiment=experiment)
                 except Exception as e:
@@ -45,15 +44,13 @@ class TaskManager:
             except Exception as e:
                 logger.error(f"Error running task manager: {e}")
 
-
     def teardown(self):
         """
         Teardown the task manager.
         """
         logger.debug("[TaskManager] Teardown started")
         logger.debug("[TaskManager] Teardown completed")
-        
-        
+
     def pause(self):
         """
         Pause the task manager.
@@ -62,8 +59,7 @@ class TaskManager:
         if self._current_task:
             self._current_task.pause()
         logger.info("[TaskManager] paused.")
-        
-        
+
     def resume(self):
         """
         Resume the task manager.
@@ -72,8 +68,7 @@ class TaskManager:
         if self._current_task:
             self._current_task.resume()
         logger.info("[TaskManager] Resumed.")
-        
-        
+
     def abort(self):
         """
         Abort the current task.
@@ -84,59 +79,59 @@ class TaskManager:
             self.pause()
         else:
             logger.info("[TaskManager] No task to abort.")
-            
-            
+
     def current_task(self) -> Task:
         """
         Get the current task.
         """
         return self._current_task
-        
-        
+
     def add_task(self, task: Task):
         """
         Add a task to the queue.
         """
         logger.info(f"[TaskManager] Adding task to queue: {task.name}")
         self._task_queue.put_nowait(task)
-        
-        
+
     def register_task(self, task: Task):
         try:
             task.register_endpoints(self)
         except Exception as e:
-            logger.error(f"Error registering endpoints for {task.__class__.__name__}: {e}")
-        
-        
-        
-        
+            logger.error(
+                f"Error registering endpoints for {task.__class__.__name__}: {e}"
+            )
+
     def _register_endpoints(self, api_server):
         """
         Register the task manager endpoints with the API server.
         """
-        
+
         @api_server.app.get("/task_manager/pause", tags=["Task Manager"])
         async def pause():
             """
             Endpoint to pause the task manager.
             """
             if not self._pause_event.is_set():
-                return {"status": "success", "message": "Task manager is already paused."}      
+                return {
+                    "status": "success",
+                    "message": "Task manager is already paused.",
+                }
             self.pause()
             return {"status": "success", "message": "Task manager paused."}
-        
-        
+
         @api_server.app.get("/task_manager/resume", tags=["Task Manager"])
         async def resume():
             """
             Endpoint to resume the task manager.
             """
             if self._pause_event.is_set():
-                return {"status": "success", "message": "Task manager is already running."}    
+                return {
+                    "status": "success",
+                    "message": "Task manager is already running.",
+                }
             self.resume()
             return {"status": "success", "message": "Task manager resumed."}
-        
-        
+
         @api_server.app.get("/task_manager/abort", tags=["Task Manager"])
         async def abort():
             """
@@ -145,9 +140,11 @@ class TaskManager:
             if not self._current_task:
                 return {"status": "success", "message": "No task to abort."}
             self.abort()
-            return {"status": "success", "message": "Task manager aborted current task."}
-        
-        
+            return {
+                "status": "success",
+                "message": "Task manager aborted current task.",
+            }
+
         @api_server.app.get("/task_manager/status", tags=["Task Manager"])
         async def status():
             """
@@ -163,8 +160,7 @@ class TaskManager:
                     "status": 200,
                     "data": "Paused",
                 }
-        
-        
+
         @api_server.app.get("/task_manager/current_task", tags=["Task Manager"])
         async def current_task():
             """
@@ -180,18 +176,17 @@ class TaskManager:
                     "status": 200,
                     "data": None,
                 }
-        
-        
+
         @api_server.app.get("/task_manager/add_task", tags=["Task Manager"])
         async def add_task():
             """
             Endpoint to add a task to the queue.
             """
             from ..tasks import TestTask
+
             logger.info("Adding task to queue")
             self.add_task(TestTask())
-            
-        
+
         @api_server.app.get("/task_manager/task_list", tags=["Task Manager"])
         async def task_list():
             """

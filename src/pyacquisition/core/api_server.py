@@ -13,7 +13,6 @@ class WebsocketEndpoint(Consumer):
     A class that handles WebSocket connections and data streaming.
     """
 
-        
     @staticmethod
     def _enum_to_selected_dict(enum_instance):
         """
@@ -23,15 +22,15 @@ class WebsocketEndpoint(Consumer):
             item.name: {
                 "value": item.value,
                 "selected": item == enum_instance,
-            } for item in enum_instance.__class__
+            }
+            for item in enum_instance.__class__
         }
-    
-        
+
     async def run(self, websocket: WebSocket):
         """
         Start the WebSocket server and listen for incoming connections.
         """
-        
+
         await websocket.accept()
         logger.debug("[FastApi] Client connected")
         try:
@@ -50,27 +49,23 @@ class WebsocketEndpoint(Consumer):
             await websocket.close()
 
 
-
 class APIServer:
-    
-    
     def __init__(
         self,
         host: str = "localhost",
         port: int = 8000,
-        #allowed_cors_origins: list = ["http://localhost:3000"],
+        # allowed_cors_origins: list = ["http://localhost:3000"],
     ):
-        
         self.host = host
         self.port = port
-        
+
         self.app = FastAPI(
             title="PyAcquisition API",
             description="API for PyAcquisition",
         )
 
         self.websocket_endpoints = {}
-        
+
         # self.app.add_middleware(
         #     CORSMiddleware,
         #     allow_origins=allowed_cors_origins,
@@ -78,12 +73,9 @@ class APIServer:
         #     allow_methods=["*"],
         #     allow_headers=["*"],
         # )
-        
-        logger.debug("[FastApi] APIServer initialized")
-        
 
-    
-    
+        logger.debug("[FastApi] APIServer initialized")
+
     @staticmethod
     def _enum_to_selected_dict(enum_instance):
         """
@@ -93,10 +85,10 @@ class APIServer:
             item.name: {
                 "value": item.value,
                 "selected": item == enum_instance,
-            } for item in enum_instance.__class__
+            }
+            for item in enum_instance.__class__
         }
-    
-    
+
     def add_websocket_endpoint(self, url: str):
         """
         Adds a WebSocket endpoint to the FastAPI app.
@@ -106,28 +98,26 @@ class APIServer:
         """
 
         self.websocket_endpoints[url] = WebsocketEndpoint()
-        
+
         @self.app.websocket(url)
         async def websocket_endpoint(websocket: WebSocket):
             """
-			WebSocket endpoint that polls the provided async function and sends data to connected clients.
+            WebSocket endpoint that polls the provided async function and sends data to connected clients.
 
-			Args:
-				websocket (WebSocket): WebSocket connection object.
-			"""
+            Args:
+                    websocket (WebSocket): WebSocket connection object.
+            """
             await self.websocket_endpoints[url].run(websocket)
-            
+
         logger.debug(f"[FastApi] WebSocket endpoint added at '{url}'")
-            
-    
+
     def setup(self):
         """
         Sets up the API server. This method is called before running the server.
         """
         logger.debug(f"[FastApi] Server setup started at {self.host}:{self.port}")
         logger.debug("[FastApi] Server setup completed")
-        
-        
+
     def run(self, experiment=None):
         """
         A coroutine that runs the FastAPI server.
@@ -145,42 +135,38 @@ class APIServer:
             # Log the exception or handle it as needed
             logger.error(f"[FastApi] An error occurred while running the server: {e}")
             return None
-        
-        
+
     def teardown(self):
         """
         Cleans up the API server. This method is called after the server has stopped.
         """
         logger.debug("[FastApi] Server teardown started")
         logger.debug("[FastApi] Server teardown completed")
-        
-        
+
     def create_endpoint_function(self, method):
         """
         Endpoint factory
         """
+
         async def endpoint_func(**kwargs):
             """
             An endpoint function to handle the request.
             """
             return {"status": 200, "data": method(**kwargs)}
-        
+
         endpoint_func.__name__ = method.__name__
         endpoint_func.__annotations__ = method.__annotations__
         endpoint_func.__annotations__["return"] = dict
         endpoint_func.__signature__ = inspect.signature(method)
         endpoint_func.__doc__ = method.__doc__
-        
+
         return endpoint_func
 
-        
-        
     def _register_endpoints(self, api_server):
         """
         Registers endpoints to the FastAPI app.
         """
-        
-        
+
         @api_server.app.get("/ping")
         async def ping() -> DictResponse:
             """
@@ -190,8 +176,7 @@ class APIServer:
                 status=200,
                 data={"message": "Pong!"},
             )
-            
-            
+
         @api_server.app.get("/list_websockets")
         async def list_websockets() -> DictResponse:
             """
@@ -201,5 +186,3 @@ class APIServer:
                 status=200,
                 data={"websockets": list(api_server.websocket_endpoints.keys())},
             )
-        
-    

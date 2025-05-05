@@ -6,8 +6,10 @@ class Measurement:
     """
     A class to represent a measurement that can be periodically called.
     """
-    
-    def __init__(self, name: str, function: callable, call_every: int = 1, **kwargs) -> None:
+
+    def __init__(
+        self, name: str, function: callable, call_every: int = 1, **kwargs
+    ) -> None:
         """
         Initializes the Measurement instance.
 
@@ -27,7 +29,6 @@ class Measurement:
         self._validate_kwargs(function, kwargs)
         self._kwargs = kwargs  # Store additional keyword arguments
 
-
     @staticmethod
     def _validate_kwargs(function: callable, kwargs: dict) -> None:
         """
@@ -45,9 +46,12 @@ class Measurement:
 
         for key in kwargs:
             if key not in valid_params:
-                logger.error(f"Invalid keyword argument '{key}' for function '{function.__name__}'.")
-                raise ValueError(f"Invalid keyword argument '{key}' for function '{function.__name__}'.")
-
+                logger.error(
+                    f"Invalid keyword argument '{key}' for function '{function.__name__}'."
+                )
+                raise ValueError(
+                    f"Invalid keyword argument '{key}' for function '{function.__name__}'."
+                )
 
     def run(self):
         """
@@ -59,10 +63,12 @@ class Measurement:
         try:
             self._call_counter -= 1
             if self._result is None or self._call_counter == 0:
-                self._result = self._function(**self._kwargs)  # Pass kwargs to the function
+                self._result = self._function(
+                    **self._kwargs
+                )  # Pass kwargs to the function
                 self._call_counter = self._call_every  # Reset the counter
             return self._result
-        
+
         except Exception as e:
             logger.error(f"Error in measurement {self._name}: {e}")
             logger.error(f"Returning last result: {self._result}")

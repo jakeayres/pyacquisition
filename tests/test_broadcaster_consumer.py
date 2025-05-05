@@ -2,6 +2,7 @@ import pytest
 from pyacquisition.core.broadcaster import Broadcaster
 from pyacquisition.core.consumer import Consumer
 
+
 @pytest.mark.asyncio
 async def test_consumer_subscribe_to_broadcaster():
     """

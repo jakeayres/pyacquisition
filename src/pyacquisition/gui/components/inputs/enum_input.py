@@ -4,8 +4,10 @@ import dearpygui.dearpygui as dpg
 
 class EnumInput(BaseInput):
     """Enum input component with a dropdown box for selecting valid options."""
-    
-    def __init__(self, label: str, options: list[str], default_value: str = None) -> None:
+
+    def __init__(
+        self, label: str, options: list[str], default_value: str = None
+    ) -> None:
         """
         Initialize the EnumInput.
 
@@ -17,7 +19,7 @@ class EnumInput(BaseInput):
             default_value = options[0] if options else ""
         if default_value not in options:
             raise ValueError("Default value must be one of the options.")
-        
+
         super().__init__(label, default_value)
         self.options = options
 

@@ -1,4 +1,3 @@
-
 class Broadcaster:
     """
     A class responsible for broadcasting messages to subscribed consumers.
@@ -10,7 +9,6 @@ class Broadcaster:
         """
         self._subscribers = []
 
-
     def subscribe(self, consumer):
         """
         Subscribe a consumer to this broadcaster.
@@ -19,8 +17,7 @@ class Broadcaster:
             consumer (Consumer): The consumer to subscribe.
         """
         self._subscribers.append(consumer)
-        
-        
+
     def unsubscribe(self, consumer):
         """
         Unsubscribe a consumer from this broadcaster.
@@ -29,7 +26,6 @@ class Broadcaster:
             consumer (Consumer): The consumer to unsubscribe.
         """
         self._subscribers.remove(consumer)
-        
 
     async def broadcast(self, message):
         """
@@ -40,8 +36,7 @@ class Broadcaster:
         """
         for subscriber in self._subscribers:
             await subscriber.queue.put(message)
-            
-            
+
     def broadcast_sync(self, message):
         """
         Broadcast a message to all subscribed consumers synchronously.

@@ -10,7 +10,7 @@ class Logger(Broadcaster):
     """
     Singleton class for configuring and managing logging in the application.
     """
-    
+
     LOG_LEVELS = {
         "DEBUG": 10,
         "INFO": 20,
@@ -18,10 +18,9 @@ class Logger(Broadcaster):
         "ERROR": 40,
         "EXCEPTION": 50,
     }
-    
+
     _instance = None
     _lock = Lock()  # To make it thread-safe
-
 
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
@@ -30,9 +29,7 @@ class Logger(Broadcaster):
                     cls._instance = super(Logger, cls).__new__(cls, *args, **kwargs)
         return cls._instance
 
-
     def __init__(self):
-        
         # Avoid reinitializing if the instance already exists
         if hasattr(self, "_initialized") and self._initialized:
             return
@@ -40,13 +37,12 @@ class Logger(Broadcaster):
         self._initialized = True
         self._gui_level = "DEBUG"
         self.log_path: Path = Path()
-        
-    
-    def _should_broadcast(self, level: str) -> bool:
-        return self.LOG_LEVELS[level.upper()] >= self.LOG_LEVELS[self._gui_level.upper()]
 
-        
-        
+    def _should_broadcast(self, level: str) -> bool:
+        return (
+            self.LOG_LEVELS[level.upper()] >= self.LOG_LEVELS[self._gui_level.upper()]
+        )
+
     def configure(
         self,
         root_path: Path,
@@ -70,7 +66,7 @@ class Logger(Broadcaster):
             sink=sys.stdout,
             colorize=True,
             level=console_level,
-            #format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+            # format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
         )
         log_file_path = root_path / file_name
         self.debug(f"Log file path: {log_file_path}")
@@ -79,9 +75,10 @@ class Logger(Broadcaster):
             level=file_level,
             format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
         )
-        self.info(f"Logging configured: console level={console_level}, file level={file_level}, file name={log_file_path}, gui level={self._gui_level}") 
-        
-        
+        self.info(
+            f"Logging configured: console level={console_level}, file level={file_level}, file name={log_file_path}, gui level={self._gui_level}"
+        )
+
     def info(self, message: str) -> None:
         """
         Logs an info message.
@@ -91,9 +88,10 @@ class Logger(Broadcaster):
         """
         loguru_logger.info(message)
         if self._should_broadcast("INFO"):
-            self.broadcast_sync({"time": time.time(), "message": message, "level": "info"})
-        
-        
+            self.broadcast_sync(
+                {"time": time.time(), "message": message, "level": "info"}
+            )
+
     def debug(self, message: str) -> None:
         """
         Logs a debug message.
@@ -103,9 +101,10 @@ class Logger(Broadcaster):
         """
         loguru_logger.debug(message)
         if self._should_broadcast("DEBUG"):
-            self.broadcast_sync({"time": time.time(), "message": message, "level": "debug"})
-        
-    
+            self.broadcast_sync(
+                {"time": time.time(), "message": message, "level": "debug"}
+            )
+
     def warning(self, message: str) -> None:
         """
         Logs a warning message.
@@ -115,9 +114,10 @@ class Logger(Broadcaster):
         """
         loguru_logger.warning(message)
         if self._should_broadcast("WARNING"):
-            self.broadcast_sync({"time": time.time(), "message": message, "level": "warning"})
-        
-        
+            self.broadcast_sync(
+                {"time": time.time(), "message": message, "level": "warning"}
+            )
+
     def error(self, message: str) -> None:
         """
         Logs an error message.
@@ -127,9 +127,10 @@ class Logger(Broadcaster):
         """
         loguru_logger.error(message)
         if self._should_broadcast("ERROR"):
-            self.broadcast_sync({"time": time.time(), "message": message, "level": "error"})
-        
-        
+            self.broadcast_sync(
+                {"time": time.time(), "message": message, "level": "error"}
+            )
+
     def exception(self, message: str) -> None:
         """
         Logs an exception message.
@@ -139,7 +140,9 @@ class Logger(Broadcaster):
         """
         loguru_logger.exception(message)
         if self._should_broadcast("EXCEPTION"):
-            self.broadcast({"time": time.time(), "message": message, "level": "exception"})  
+            self.broadcast(
+                {"time": time.time(), "message": message, "level": "exception"}
+            )
 
 
 # Singleton instance

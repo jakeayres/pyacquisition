@@ -2,6 +2,7 @@ import pytest
 import asyncio
 from pyacquisition.core.relay import Relay
 
+
 @pytest.fixture
 def relay():
     return Relay()

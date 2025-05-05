@@ -11,10 +11,10 @@ class ReferenceSource(Enum):
 
 
 class ReferenceSourceModel(Enum):
-    INTERNAL = 'Internal'
-    EXTERNAL = 'External'
-    DUAL = 'Dual'
-    CHOP = 'Chopped'
+    INTERNAL = "Internal"
+    EXTERNAL = "External"
+    DUAL = "Dual"
+    CHOP = "Chopped"
 
 
 class ReferenceSlope(Enum):
@@ -24,9 +24,9 @@ class ReferenceSlope(Enum):
 
 
 class ReferenceSlopeModel(Enum):
-    SINE = 'Sine'
-    TTL_RISING = 'TTL Rising'
-    TTL_FALLING = 'TLL Falling'
+    SINE = "Sine"
+    TTL_RISING = "TTL Rising"
+    TTL_FALLING = "TLL Falling"
 
 
 class InputMode(Enum):
@@ -35,8 +35,8 @@ class InputMode(Enum):
 
 
 class InputModeModel(Enum):
-    VOLTAGE = 'Voltage'
-    CURRENT = 'Current'
+    VOLTAGE = "Voltage"
+    CURRENT = "Current"
 
 
 class InputConfiguration(Enum):
@@ -45,8 +45,8 @@ class InputConfiguration(Enum):
 
 
 class InputConfigurationModel(Enum):
-    A = 'A'
-    A_B = 'A-B'
+    A = "A"
+    A_B = "A-B"
 
 
 class InputGrounding(Enum):
@@ -55,8 +55,8 @@ class InputGrounding(Enum):
 
 
 class InputGroundingModel(Enum):
-    FLOAT = 'Floating'
-    GROUND = 'Grounded'
+    FLOAT = "Floating"
+    GROUND = "Grounded"
 
 
 class InputCoupling(Enum):
@@ -65,8 +65,8 @@ class InputCoupling(Enum):
 
 
 class InputCouplingModel(Enum):
-    AC = 'AC'
-    DC = 'DC'
+    AC = "AC"
+    DC = "DC"
 
 
 class InputVoltageRange(Enum):
@@ -78,11 +78,11 @@ class InputVoltageRange(Enum):
 
 
 class InputVoltageRangeModel(Enum):
-    V_1 = '1 V'
-    mV_300 = '300 mV'
-    mV_100 = '100 mV'
-    mV_30 = '30 mV'
-    mV_10 = '10 mV'
+    V_1 = "1 V"
+    mV_300 = "300 mV"
+    mV_100 = "100 mV"
+    mV_30 = "30 mV"
+    mV_10 = "10 mV"
 
 
 class SyncFilter(Enum):
@@ -91,8 +91,8 @@ class SyncFilter(Enum):
 
 
 class SyncFilterModel(Enum):
-    OFF = 'Off'
-    ON = 'On'
+    OFF = "Off"
+    ON = "On"
 
 
 class AdvancedFilter(Enum):
@@ -101,8 +101,8 @@ class AdvancedFilter(Enum):
 
 
 class AdvancedFilterModel(Enum):
-    OFF = 'Off'
-    ON = 'On'
+    OFF = "Off"
+    ON = "On"
 
 
 class Sensitivity(Enum):
@@ -137,34 +137,34 @@ class Sensitivity(Enum):
 
 
 class SensitivityModel(Enum):
-    nV_1 = '1 nV'
-    nV_2 = '2 nV'
-    nV_5 = '5 nV'
-    nV_10 = '10 nV'
-    nV_20 = '20 nV'
-    nV_50 = '50 nV'
-    nV_100 = '100 nV'
-    nV_200 = '200 nV'
-    nV_500 = '500 nV'
-    uV_1 = '1 µV'
-    uV_2 = '2 µV'
-    uV_5 = '5 µV'
-    uV_10 = '10 µV'
-    uV_20 = '20 µV'
-    uV_50 = '50 µV'
-    uV_100 = '100 µV'
-    uV_200 = '200 µV'
-    uV_500 = '500 µV'
-    mV_1 = '1 mV'
-    mV_2 = '2 mV'
-    mV_5 = '5 mV'
-    mV_10 = '10 mV'
-    mV_20 = '20 mV'
-    mV_50 = '50 mV'
-    mV_100 = '100 mV'
-    mV_200 = '200 mV'
-    mV_500 = '500 mV'
-    V_1 = '1 V'
+    nV_1 = "1 nV"
+    nV_2 = "2 nV"
+    nV_5 = "5 nV"
+    nV_10 = "10 nV"
+    nV_20 = "20 nV"
+    nV_50 = "50 nV"
+    nV_100 = "100 nV"
+    nV_200 = "200 nV"
+    nV_500 = "500 nV"
+    uV_1 = "1 µV"
+    uV_2 = "2 µV"
+    uV_5 = "5 µV"
+    uV_10 = "10 µV"
+    uV_20 = "20 µV"
+    uV_50 = "50 µV"
+    uV_100 = "100 µV"
+    uV_200 = "200 µV"
+    uV_500 = "500 µV"
+    mV_1 = "1 mV"
+    mV_2 = "2 mV"
+    mV_5 = "5 mV"
+    mV_10 = "10 mV"
+    mV_20 = "20 mV"
+    mV_50 = "50 mV"
+    mV_100 = "100 mV"
+    mV_200 = "200 mV"
+    mV_500 = "500 mV"
+    V_1 = "1 V"
 
 
 class TimeConstant(Enum):
@@ -193,28 +193,28 @@ class TimeConstant(Enum):
 
 
 class TimeConstantModel(Enum):
-    us_1 = '1 us'
-    us_3 = '3 us'
-    us_10 = '10 us'
-    us_30 = '30 us'
-    us_100 = '100 us'
-    us_300 = '300 us'
-    ms_1 = '1 ms'
-    ms_3 = '3 ms'
-    ms_10 = '10 ms'
-    ms_30 = '30 ms'
-    ms_100 = '100 ms'
-    ms_300 = '300 ms'
-    s_1 = '1 s'
-    s_3 = '3 s'
-    s_10 = '10 s'
-    s_30 = '30 s'
-    s_100 = '100 s'
-    s_300 = '300 s'
-    ks_1 = '1 ks'
-    ks_3 = '3 ks'
-    ks_10 = '10 ks'
-    ks_30 = '30 ks'
+    us_1 = "1 us"
+    us_3 = "3 us"
+    us_10 = "10 us"
+    us_30 = "30 us"
+    us_100 = "100 us"
+    us_300 = "300 us"
+    ms_1 = "1 ms"
+    ms_3 = "3 ms"
+    ms_10 = "10 ms"
+    ms_30 = "30 ms"
+    ms_100 = "100 ms"
+    ms_300 = "300 ms"
+    s_1 = "1 s"
+    s_3 = "3 s"
+    s_10 = "10 s"
+    s_30 = "30 s"
+    s_100 = "100 s"
+    s_300 = "300 s"
+    ks_1 = "1 ks"
+    ks_3 = "3 ks"
+    ks_10 = "10 ks"
+    ks_30 = "30 ks"
 
 
 class FilterSlope(Enum):
@@ -225,19 +225,18 @@ class FilterSlope(Enum):
 
 
 class FilterSlopeModel(Enum):
-    db6 = '6 db'
-    db12 = '12 db'
-    db18 = '18 db'
-    db24 = '24 db'
-
+    db6 = "6 db"
+    db12 = "12 db"
+    db18 = "18 db"
+    db24 = "24 db"
 
 
 class SR_860(Instrument):
-    """ 
+    """
     Class for the Stanford Research SR-860 Lock-In Amplifier.
     """
 
-    name = 'SR_860'
+    name = "SR_860"
 
     @mark_query
     def identify(self) -> str:
@@ -246,7 +245,7 @@ class SR_860(Instrument):
         Returns:
             str: The identification string of the instrument.
         """
-        return self.query('*IDN?')
+        return self.query("*IDN?")
 
     @mark_command
     def reset(self) -> int:
@@ -255,7 +254,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command('*RST')
+        return self.command("*RST")
 
     @mark_command
     def clear(self) -> int:
@@ -264,7 +263,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command('*CLS')
+        return self.command("*CLS")
 
     @mark_query
     def get_phase(self) -> float:
@@ -285,7 +284,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'PHAS {phase:.2f}')
+        return self.command(f"PHAS {phase:.2f}")
 
     @mark_query
     def get_reference_source(self) -> ReferenceSource:
@@ -294,7 +293,7 @@ class SR_860(Instrument):
         Returns:
             ReferenceSource: The current reference source (e.g., INTERNAL, EXTERNAL, DUAL, CHOP).
         """
-        return ReferenceSource(int(self.query('RSRC?')))
+        return ReferenceSource(int(self.query("RSRC?")))
 
     @mark_command
     def set_reference_source(self, source: ReferenceSource) -> int:
@@ -306,7 +305,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'RSRC {source.value}')
+        return self.command(f"RSRC {source.value}")
 
     @mark_query
     def get_frequency(self) -> float:
@@ -327,7 +326,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'FREQ {frequency:.3f}')
+        return self.command(f"FREQ {frequency:.3f}")
 
     @mark_query
     def get_internal_frequency(self) -> float:
@@ -348,7 +347,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'FREQINT {frequency:.3f}')
+        return self.command(f"FREQINT {frequency:.3f}")
 
     @mark_query
     def get_external_reference_slope(self) -> ReferenceSlope:
@@ -357,7 +356,7 @@ class SR_860(Instrument):
         Returns:
             ReferenceSlope: The slope of the external reference signal (e.g., SINE, TTL_RISING, TTL_FALLING).
         """
-        return ReferenceSlope(int(self.query('RSLP?')))
+        return ReferenceSlope(int(self.query("RSLP?")))
 
     @mark_command
     def set_external_reference_slope(self, slope: ReferenceSlope) -> int:
@@ -369,7 +368,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'RSLP {slope.value}')
+        return self.command(f"RSLP {slope.value}")
 
     @mark_query
     def get_harmonic(self) -> int:
@@ -378,7 +377,7 @@ class SR_860(Instrument):
         Returns:
             int: The current harmonic setting.
         """
-        return int(self.query('HARM?'))
+        return int(self.query("HARM?"))
 
     @mark_command
     def set_harmonic(self, harmonic: int) -> int:
@@ -390,7 +389,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'HARM {harmonic}')
+        return self.command(f"HARM {harmonic}")
 
     @mark_query
     def get_reference_amplitude(self) -> float:
@@ -399,7 +398,7 @@ class SR_860(Instrument):
         Returns:
             float: The reference amplitude in volts.
         """
-        return float(self.query('SLVL?'))
+        return float(self.query("SLVL?"))
 
     @mark_command
     def set_reference_amplitude(self, amplitude: float) -> int:
@@ -411,7 +410,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'SLVL {amplitude:.3f}')
+        return self.command(f"SLVL {amplitude:.3f}")
 
     @mark_query
     def get_reference_offset(self) -> float:
@@ -420,7 +419,7 @@ class SR_860(Instrument):
         Returns:
             float: The reference offset in volts.
         """
-        return float(self.query('SOFF?'))
+        return float(self.query("SOFF?"))
 
     @mark_command
     def set_reference_offset(self, amplitude: float) -> int:
@@ -432,7 +431,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'SOFF {amplitude:.3f}')
+        return self.command(f"SOFF {amplitude:.3f}")
 
     """ INPUT AND FILTER
     """
@@ -444,7 +443,7 @@ class SR_860(Instrument):
         Returns:
             InputMode: The current input mode (e.g., VOLTAGE, CURRENT).
         """
-        return InputMode(int(self.query('IVMD?')))
+        return InputMode(int(self.query("IVMD?")))
 
     @mark_command
     def set_input_mode(self, mode: InputMode) -> int:
@@ -456,7 +455,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'IVMD {mode.value}')
+        return self.command(f"IVMD {mode.value}")
 
     @mark_query
     def get_input_configuration(self) -> InputConfiguration:
@@ -465,7 +464,7 @@ class SR_860(Instrument):
         Returns:
             InputConfiguration: The current input configuration (e.g., A, A-B).
         """
-        return InputConfiguration(int(self.query('ISRC?')))
+        return InputConfiguration(int(self.query("ISRC?")))
 
     @mark_command
     def set_input_configuration(self, configuration: InputConfiguration) -> int:
@@ -477,7 +476,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'ISRC {configuration.value}')
+        return self.command(f"ISRC {configuration.value}")
 
     @mark_query
     def get_input_coupling(self) -> InputCoupling:
@@ -486,7 +485,7 @@ class SR_860(Instrument):
         Returns:
             InputCoupling: The current input coupling configuration (e.g., AC, DC).
         """
-        return InputCoupling(int(self.query('ICPL?')))
+        return InputCoupling(int(self.query("ICPL?")))
 
     @mark_command
     def set_input_coupling(self, coupling: InputCoupling) -> int:
@@ -498,7 +497,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'ICPL {coupling.value}')
+        return self.command(f"ICPL {coupling.value}")
 
     @mark_query
     def get_input_grounding(self) -> InputGrounding:
@@ -507,7 +506,7 @@ class SR_860(Instrument):
         Returns:
             InputGrounding: The current input grounding configuration (e.g., FLOAT, GROUND).
         """
-        return InputGrounding(int(self.query('IGND?')))
+        return InputGrounding(int(self.query("IGND?")))
 
     @mark_command
     def set_input_grounding(self, grounding: InputGrounding) -> int:
@@ -519,7 +518,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'IGND {grounding.value}')
+        return self.command(f"IGND {grounding.value}")
 
     @mark_query
     def get_input_voltage_range(self) -> InputVoltageRange:
@@ -528,7 +527,7 @@ class SR_860(Instrument):
         Returns:
             InputVoltageRange: The current input voltage range (e.g., 1 V, 300 mV).
         """
-        return InputVoltageRange(int(self.query('IRNG?')))
+        return InputVoltageRange(int(self.query("IRNG?")))
 
     @mark_command
     def set_input_voltage_range(self, input_range: InputVoltageRange) -> int:
@@ -540,7 +539,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'IRNG {input_range.value}')
+        return self.command(f"IRNG {input_range.value}")
 
     @mark_query
     def get_sync_filter(self) -> SyncFilter:
@@ -549,7 +548,7 @@ class SR_860(Instrument):
         Returns:
             SyncFilter: The current synchronization filter state (e.g., OFF, ON).
         """
-        return SyncFilter(int(self.query('SYNC?')))
+        return SyncFilter(int(self.query("SYNC?")))
 
     @mark_command
     def set_sync_filter(self, configuration: SyncFilter) -> int:
@@ -561,7 +560,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'SYNC {configuration.value}')
+        return self.command(f"SYNC {configuration.value}")
 
     @mark_query
     def get_advanced_filter(self) -> AdvancedFilter:
@@ -570,7 +569,7 @@ class SR_860(Instrument):
         Returns:
             AdvancedFilter: The current advanced filter state (e.g., OFF, ON).
         """
-        return AdvancedFilter(int(self.query('ADVFILT?')))
+        return AdvancedFilter(int(self.query("ADVFILT?")))
 
     @mark_command
     def set_advanced_filter(self, configuration: AdvancedFilter) -> int:
@@ -582,7 +581,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'ADVFILT {configuration.value}')
+        return self.command(f"ADVFILT {configuration.value}")
 
     """ GAIN AND TIME CONSTANT
     """
@@ -594,7 +593,7 @@ class SR_860(Instrument):
         Returns:
             Sensitivity: The current sensitivity setting.
         """
-        return Sensitivity(int(self.query('SCAL?')))
+        return Sensitivity(int(self.query("SCAL?")))
 
     @mark_command
     def set_sensitivity(self, sensitivity: Sensitivity) -> int:
@@ -606,16 +605,16 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'SCAL {sensitivity.value}')
+        return self.command(f"SCAL {sensitivity.value}")
 
-    @mark_query 
+    @mark_query
     def get_time_constant(self) -> TimeConstant:
         """Queries the time constant setting.
 
         Returns:
             TimeConstant: The current time constant setting.
         """
-        return TimeConstant(int(self.query('OFLT?')))
+        return TimeConstant(int(self.query("OFLT?")))
 
     @mark_command
     def set_time_constant(self, time_constant: TimeConstant) -> int:
@@ -627,7 +626,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'OFLT {time_constant.value}')
+        return self.command(f"OFLT {time_constant.value}")
 
     @mark_query
     def get_filter_slope(self) -> FilterSlope:
@@ -636,7 +635,7 @@ class SR_860(Instrument):
         Returns:
             FilterSlope: The current filter slope setting (e.g., 6 dB, 12 dB).
         """
-        return FilterSlope(int(self.query('OFSL?')))
+        return FilterSlope(int(self.query("OFSL?")))
 
     @mark_command
     def set_filter_slope(self, filter_slope: FilterSlope) -> int:
@@ -648,8 +647,7 @@ class SR_860(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'OFSL {filter_slope.value}')
-
+        return self.command(f"OFSL {filter_slope.value}")
 
     @mark_query
     def get_output(self, parameter: int) -> float:
@@ -661,8 +659,7 @@ class SR_860(Instrument):
         Returns:
             float: The output value corresponding to the specified parameter.
         """
-        return float(self.query(f'OUTP? {parameter}'))
-
+        return float(self.query(f"OUTP? {parameter}"))
 
     @mark_query
     def get_display_output(self, parameter: int) -> float:
@@ -674,8 +671,7 @@ class SR_860(Instrument):
         Returns:
             float: The display output value corresponding to the specified parameter.
         """
-        return float(self.query(f'OUTR? {parameter}'))
-
+        return float(self.query(f"OUTR? {parameter}"))
 
     @mark_query
     def get_x(self) -> float:
@@ -684,8 +680,7 @@ class SR_860(Instrument):
         Returns:
             float: The X output value.
         """
-        return float(self.query('OUTP? 0'))
-
+        return float(self.query("OUTP? 0"))
 
     @mark_query
     def get_y(self) -> float:
@@ -694,8 +689,7 @@ class SR_860(Instrument):
         Returns:
             float: The Y output value.
         """
-        return float(self.query('OUTP? 1'))
-
+        return float(self.query("OUTP? 1"))
 
     @mark_query
     def get_r(self) -> float:
@@ -704,8 +698,7 @@ class SR_860(Instrument):
         Returns:
             float: The R output value.
         """
-        return float(self.query('OUTP? 2'))
-
+        return float(self.query("OUTP? 2"))
 
     @mark_query
     def get_theta(self) -> float:
@@ -714,8 +707,7 @@ class SR_860(Instrument):
         Returns:
             float: The Theta output value in degrees.
         """
-        return float(self.query('OUTP? 3'))
-
+        return float(self.query("OUTP? 3"))
 
     @mark_query
     def get_xy(self) -> list[float]:
@@ -724,4 +716,4 @@ class SR_860(Instrument):
         Returns:
             list[float]: A list containing the X and Y output values.
         """
-        return [float(s) for s in self.query('SNAP? 0,1').split(',')]
+        return [float(s) for s in self.query("SNAP? 0,1").split(",")]

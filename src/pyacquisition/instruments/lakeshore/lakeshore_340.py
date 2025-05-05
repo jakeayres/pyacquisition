@@ -10,22 +10,22 @@ class State(enum.Enum):
 
 
 class StateModel(enum.Enum):
-    OFF = 'Off'
-    ON = 'On'
+    OFF = "Off"
+    ON = "On"
 
 
 class InputChannel(enum.Enum):
-    INPUT_A = 'A'
-    INPUT_B = 'B'
-    INPUT_C = 'C'
-    INPUT_D = 'D'
+    INPUT_A = "A"
+    INPUT_B = "B"
+    INPUT_C = "C"
+    INPUT_D = "D"
 
 
 class InputChannelModel(enum.Enum):
-    INPUT_A = 'Input A'
-    INPUT_B = 'Input B'
-    INPUT_C = 'Input C'
-    INPUT_D = 'Input D'
+    INPUT_A = "Input A"
+    INPUT_B = "Input B"
+    INPUT_C = "Input C"
+    INPUT_D = "Input D"
 
 
 class OutputChannel(enum.Enum):
@@ -36,10 +36,10 @@ class OutputChannel(enum.Enum):
 
 
 class OutputChannelModel(enum.Enum):
-    OUTPUT_1 = 'Output 1'
-    OUTPUT_2 = 'Output 2'
-    OUTPUT_3 = 'Output 3'
-    OUTPUT_4 = 'Output 4'
+    OUTPUT_1 = "Output 1"
+    OUTPUT_2 = "Output 2"
+    OUTPUT_3 = "Output 3"
+    OUTPUT_4 = "Output 4"
 
 
 class AutotuneMode(enum.Enum):
@@ -49,9 +49,9 @@ class AutotuneMode(enum.Enum):
 
 
 class AutotuneModeModel(enum.Enum):
-    P = 'P'
-    PI = 'PI'
-    PID = 'PID'
+    P = "P"
+    PI = "PI"
+    PID = "PID"
 
 
 class CurveFormat(enum.Enum):
@@ -62,10 +62,10 @@ class CurveFormat(enum.Enum):
 
 
 class CurveFormatModel(enum.Enum):
-    MV_K = 'mV / K'
-    V_K = 'V / K'
-    OHM_K = 'Ohm / K'
-    LOGOHM_K = 'log(Ohm) / K'
+    MV_K = "mV / K"
+    V_K = "V / K"
+    OHM_K = "Ohm / K"
+    LOGOHM_K = "log(Ohm) / K"
 
 
 class CurveCoefficient(enum.Enum):
@@ -74,8 +74,8 @@ class CurveCoefficient(enum.Enum):
 
 
 class CurveCoefficientModel(enum.Enum):
-    NEGATIVE = 'Negative'
-    POSITIVE = 'Positive'
+    NEGATIVE = "Negative"
+    POSITIVE = "Positive"
 
 
 class DisplayContrast(enum.Enum):
@@ -87,11 +87,11 @@ class DisplayContrast(enum.Enum):
 
 
 class DisplayContrastModel(enum.Enum):
-    OFF = 'Off'
-    DIM = 'Dim'
-    NORMAL = 'Normal'
-    BRIGHT = 'Bright'
-    MAXIMUM = 'Maximum'
+    OFF = "Off"
+    DIM = "Dim"
+    NORMAL = "Normal"
+    BRIGHT = "Bright"
+    MAXIMUM = "Maximum"
 
 
 class DisplayMode(enum.Enum):
@@ -121,7 +121,7 @@ class DisplayAllInputsSize(enum.Enum):
 class Lakeshore_340(Instrument):
     """Class for controlling the Lakeshore 340 temperature controller."""
 
-    name = 'Lakeshore_340'
+    name = "Lakeshore_340"
 
     def __init__(self, *args, **kwargs):
         """Initializes the Lakeshore 340 instrument."""
@@ -136,7 +136,7 @@ class Lakeshore_340(Instrument):
         Returns:
             str: The identification string of the instrument.
         """
-        return self.query('*IDN?')
+        return self.query("*IDN?")
 
     @mark_command
     def reset(self) -> int:
@@ -145,7 +145,7 @@ class Lakeshore_340(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command('*RST')
+        return self.command("*RST")
 
     @mark_command
     def clear(self) -> int:
@@ -154,7 +154,7 @@ class Lakeshore_340(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command('*CLS')
+        return self.command("*CLS")
 
     @mark_command
     def clear_event_register(self) -> int:
@@ -163,7 +163,7 @@ class Lakeshore_340(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command('*ESR')
+        return self.command("*ESR")
 
     @mark_query
     def get_alarm(self) -> dict:
@@ -179,15 +179,15 @@ class Lakeshore_340(Instrument):
                 - audible (str): The audible alarm state.
                 - visible (str): The visible alarm state.
         """
-        response = self.query('ALARM?').split(',')
+        response = self.query("ALARM?").split(",")
         return {
-            'state': response[0],
-            'high_value': response[1],
-            'low_value': response[2],
-            'deadband': response[3],
-            'latch': response[4],
-            'audible': response[5],
-            'visible': response[6]
+            "state": response[0],
+            "high_value": response[1],
+            "low_value": response[2],
+            "deadband": response[3],
+            "latch": response[4],
+            "audible": response[5],
+            "visible": response[6],
         }
 
     @mark_query
@@ -197,7 +197,7 @@ class Lakeshore_340(Instrument):
         Returns:
             float: The analog output value.
         """
-        return float(self.query('AOUT?'))
+        return float(self.query("AOUT?"))
 
     @mark_command
     def set_autotune_pid(self, output: int, mode: int) -> int:
@@ -210,7 +210,7 @@ class Lakeshore_340(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'ATUNE {output},{mode}')
+        return self.command(f"ATUNE {output},{mode}")
 
     @mark_command
     def set_display_contrast(self, contrast: int) -> int:
@@ -222,7 +222,7 @@ class Lakeshore_340(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'BRIGT {contrast}')
+        return self.command(f"BRIGT {contrast}")
 
     @mark_query
     def get_display_contrast(self) -> int:
@@ -231,7 +231,7 @@ class Lakeshore_340(Instrument):
         Returns:
             int: The current display contrast level.
         """
-        return int(self.query('BRIGT?'))
+        return int(self.query("BRIGT?"))
 
     @mark_command
     def set_curve_header(
@@ -241,7 +241,7 @@ class Lakeshore_340(Instrument):
         serial_no: str,
         curve_format: int,
         upper_limit: int,
-        coefficient: int
+        coefficient: int,
     ) -> int:
         """Sets the curve header information.
 
@@ -257,7 +257,7 @@ class Lakeshore_340(Instrument):
             int: Status code indicating the success of the operation.
         """
         return self.command(
-            f'CRVHDR {curve_index},{name},{serial_no},{curve_format},{upper_limit},{coefficient}'
+            f"CRVHDR {curve_index},{name},{serial_no},{curve_format},{upper_limit},{coefficient}"
         )
 
     @mark_query
@@ -270,7 +270,7 @@ class Lakeshore_340(Instrument):
         Returns:
             str: The curve header information.
         """
-        return self.query(f'CRVHDR? {curve_index}')
+        return self.query(f"CRVHDR? {curve_index}")
 
     @mark_query
     def get_curve_point(self, curve_index: int, point_index: int) -> str:
@@ -283,7 +283,7 @@ class Lakeshore_340(Instrument):
         Returns:
             str: The curve point information.
         """
-        return self.query(f'CRVPT? {curve_index},{point_index}')
+        return self.query(f"CRVPT? {curve_index},{point_index}")
 
     @mark_command
     def set_curve_point(
@@ -300,7 +300,7 @@ class Lakeshore_340(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'CRVPT {curve_index},{point_index},{sensor},{temperature}')
+        return self.command(f"CRVPT {curve_index},{point_index},{sensor},{temperature}")
 
     @mark_command
     def set_display_setup(self, mode: int) -> int:
@@ -312,7 +312,7 @@ class Lakeshore_340(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'DISPLAY {mode},0,0')
+        return self.command(f"DISPLAY {mode},0,0")
 
     @mark_query
     def get_display_setup(self) -> List[int]:
@@ -321,7 +321,7 @@ class Lakeshore_340(Instrument):
         Returns:
             List[int]: A list of integers representing the display setup.
         """
-        return [int(i) for i in self.query('DISPLAY?').split(',')]
+        return [int(i) for i in self.query("DISPLAY?").split(",")]
 
     @mark_query
     def get_temperature(self, input_channel: int) -> float:
@@ -333,7 +333,7 @@ class Lakeshore_340(Instrument):
         Returns:
             float: The temperature reading.
         """
-        return float(self.query(f'KRDG? {input_channel}'))
+        return float(self.query(f"KRDG? {input_channel}"))
 
     @mark_command
     def set_ramp(self, output_channel: int, state: int, rate: float) -> int:
@@ -347,7 +347,7 @@ class Lakeshore_340(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'RAMP {output_channel},{state},{rate:.3f}')
+        return self.command(f"RAMP {output_channel},{state},{rate:.3f}")
 
     @mark_query
     def get_ramp(self, output_channel: int) -> float:
@@ -359,7 +359,7 @@ class Lakeshore_340(Instrument):
         Returns:
             float: The ramp rate.
         """
-        response = self.query(f'RAMP? {output_channel}').split(',')
+        response = self.query(f"RAMP? {output_channel}").split(",")
         return float(response[1])
 
     @mark_query
@@ -372,7 +372,7 @@ class Lakeshore_340(Instrument):
         Returns:
             float: The setpoint value.
         """
-        return float(self.query(f'SETP? {output_channel}'))
+        return float(self.query(f"SETP? {output_channel}"))
 
     @mark_command
     def set_setpoint(self, output_channel: int, setpoint: float) -> int:
@@ -385,4 +385,4 @@ class Lakeshore_340(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f'SETP {output_channel},{setpoint:.2f}')
+        return self.command(f"SETP {output_channel},{setpoint:.2f}")

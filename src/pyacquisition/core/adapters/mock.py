@@ -1,24 +1,22 @@
 def mock_adapter():
     """
     Mock adapter function that returns the input data unchanged.
-    
+
     Args:
         data (dict): The input data to be processed.
-    
+
     Returns:
         dict: The unchanged input data.
     """
     return MockResourceManager()
 
 
-
-
 class MockResource:
     def __init__(
-        self, 
+        self,
         resource_name,
-        read_termination='', 
-        write_termination='',
+        read_termination="",
+        write_termination="",
         send_end=True,
         query_delay=0.0,
     ):
@@ -36,8 +34,8 @@ class MockResource:
 
     @timeout.setter
     def timeout(self, value):
-        if value is None or value == float('+inf'):
-            self._timeout = float('+inf')
+        if value is None or value == float("+inf"):
+            self._timeout = float("+inf")
         elif value < 1:
             self._timeout = 0  # Immediate
         else:
@@ -45,56 +43,45 @@ class MockResource:
 
     @timeout.deleter
     def timeout(self):
-        self._timeout = float('+inf')
-        
-        
+        self._timeout = float("+inf")
+
     @property
     def read_termination(self):
         return self._read_termination
-
 
     @read_termination.setter
     def read_termination(self, value):
         self._read_termination = value
 
-
     @property
     def write_termination(self):
         return self._write_termination
 
-
     @write_termination.setter
     def write_termination(self, value):
         self._write_termination = value
-        
-    
+
     @property
     def send_end(self):
         return self._send_end
-
 
     @send_end.setter
     def send_end(self, value):
         self._send_end = bool(value)
 
-
     @property
     def query_delay(self):
         return self._query_delay
-
 
     @query_delay.setter
     def query_delay(self, value):
         self._query_delay = float(value)
 
-
     def write(self, command):
         return f"Mock write to {self.resource_name}: {command}"
 
-
     def read(self):
         return f"Mock read from {self.resource_name}"
-
 
     def close(self):
         self.opened = False

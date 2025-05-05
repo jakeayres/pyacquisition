@@ -11,7 +11,9 @@ def test_mock_function(mocker):
 
 def test_measurement_initialization(mocker):
     mock_function = mocker.Mock(side_effect=[42, 52, 62])
-    measurement = Measurement(name="TestMeasurement", function=mock_function, call_every=2)
+    measurement = Measurement(
+        name="TestMeasurement", function=mock_function, call_every=2
+    )
 
     assert measurement.name == "TestMeasurement"
     assert measurement.function == mock_function
@@ -22,13 +24,15 @@ def test_measurement_initialization(mocker):
 
 def test_measurement_run_updates_result(mocker):
     mock_function = mocker.Mock(side_effect=[42, 52, 62])
-    measurement = Measurement(name="TestMeasurement", function=mock_function, call_every=1)
+    measurement = Measurement(
+        name="TestMeasurement", function=mock_function, call_every=1
+    )
 
     result = measurement.run()
     assert result == 42
     assert measurement.result == 42
     mock_function.assert_called_once()
-    
+
     result = measurement.run()
     assert result == 52
     assert measurement.result == 52
@@ -37,7 +41,9 @@ def test_measurement_run_updates_result(mocker):
 def test_measurement_run_respects_call_every(mocker):
     mock_function = mocker.Mock(side_effect=[42, 52, 62])
 
-    measurement = Measurement(name="TestMeasurement", function=mock_function, call_every=2)
+    measurement = Measurement(
+        name="TestMeasurement", function=mock_function, call_every=2
+    )
 
     # First call should update the result
     result1 = measurement.run()
@@ -50,12 +56,12 @@ def test_measurement_run_respects_call_every(mocker):
     assert result2 == 42
     assert measurement.result == 42
     mock_function.assert_called_once()
-    
+
     # Second call should not update the result
     result3 = measurement.run()
     assert result3 == 52
     assert measurement.result == 52
-    
+
     # Second call should not update the result
     result3 = measurement.run()
     assert result3 == 52
@@ -64,7 +70,9 @@ def test_measurement_run_respects_call_every(mocker):
 
 def test_measurement_run_resets__call_counter(mocker):
     mock_function = mocker.Mock(return_value=42)
-    measurement = Measurement(name="TestMeasurement", function=mock_function, call_every=2)
+    measurement = Measurement(
+        name="TestMeasurement", function=mock_function, call_every=2
+    )
 
     measurement.run()  # First call
     measurement.run()  # Second call
@@ -77,7 +85,9 @@ def test_measurement_run_resets__call_counter(mocker):
 
 def test_measurement_run_handles_exceptions(mocker):
     mock_function = mocker.Mock(side_effect=Exception("Test exception"))
-    measurement = Measurement(name="TestMeasurement", function=mock_function, call_every=1)
+    measurement = Measurement(
+        name="TestMeasurement", function=mock_function, call_every=1
+    )
 
     result = measurement.run()
 

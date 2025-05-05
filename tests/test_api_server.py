@@ -29,7 +29,7 @@ def test_api_server_initialization(api_server):
     assert api_server.port == 8000
     assert api_server.app.title == "PyAcquisition API"
     assert api_server.app.description == "API for PyAcquisition"
-    
+
 
 def test_server_run(api_server):
     """
@@ -37,14 +37,14 @@ def test_server_run(api_server):
     """
     coroutine = api_server.run()
     assert asyncio.iscoroutine(coroutine)
-    
-    
+
+
 class SampleEnum(Enum):
     OPTION_ONE = 1
     OPTION_TWO = 2
     OPTION_THREE = 3
-    
-    
+
+
 def test_enum_to_selected_dict():
     """
     Test the _enum_to_selected_dict function to ensure it converts an enum instance

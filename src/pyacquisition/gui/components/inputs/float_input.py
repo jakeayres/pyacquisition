@@ -4,7 +4,7 @@ import dearpygui.dearpygui as dpg
 
 class FloatInput(BaseInput):
     """Float input component."""
-    
+
     def __init__(self, label: str, default_value: float = 0.0) -> None:
         super().__init__(label, default_value)
 

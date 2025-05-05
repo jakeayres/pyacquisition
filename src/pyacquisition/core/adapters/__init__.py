@@ -1,10 +1,11 @@
 from .pyvisa import pyvisa_adapter
-from .mock import mock_adapter 
+from .mock import mock_adapter
 
 _adapters = {
-    'pyvisa': pyvisa_adapter,
-    'mock': mock_adapter,
+    "pyvisa": pyvisa_adapter,
+    "mock": mock_adapter,
 }
+
 
 def get_adapter(adapter_name: str):
     """Get the adapter class by name."""

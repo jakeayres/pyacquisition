@@ -6,11 +6,11 @@ from .mock import MockInstrument
 
 
 instrument_map = {
-    'Mock': MockInstrument,
-    'Clock': Clock,
-    'SR_830': SR_830,
-    'SR_860': SR_860,
-    'Lakeshore_340': Lakeshore_340,
-    'Lakeshore_350': Lakeshore_350,
-    'Mercury_IPS': Mercury_IPS,
+    "Mock": MockInstrument,
+    "Clock": Clock,
+    "SR_830": SR_830,
+    "SR_860": SR_860,
+    "Lakeshore_340": Lakeshore_340,
+    "Lakeshore_350": Lakeshore_350,
+    "Mercury_IPS": Mercury_IPS,
 }

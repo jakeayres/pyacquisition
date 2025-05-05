@@ -2,7 +2,13 @@ from pyacquisition.gui.openapi import Schema
 
 
 def test_schema_initialization():
-    schema_data = {"info": {"title": "Test API", "version": "1.0.0", "description": "Test description"}}
+    schema_data = {
+        "info": {
+            "title": "Test API",
+            "version": "1.0.0",
+            "description": "Test description",
+        }
+    }
     schema = Schema(schema_data)
     assert schema.schema == schema_data
 
@@ -56,7 +62,7 @@ def test_schema_description():
     schema_data = {}
     schema = Schema(schema_data)
     assert schema.description is None
-    
+
 
 def test_schema_paths():
     # Test when paths are present
@@ -66,7 +72,7 @@ def test_schema_paths():
                 "get": {
                     "summary": "Test summary",
                     "description": "Test description",
-                    "parameters": {"param1": "value1"}
+                    "parameters": {"param1": "value1"},
                 }
             }
         }
