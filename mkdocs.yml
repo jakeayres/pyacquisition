@@ -1,15 +1,20 @@
 site_name: PyAcquisition
+site_url: https://pyacquisition.readthedocs.io
 repo_url: https://github.com/jakeayres/pyacquisition
 repo_name: pyacquisition
 nav:
-  - Home: index.md
+  - Overview:
+    - Overview: index.md
+    - About: overview/about.md
+    - Roadmap: overview/roadmap.md
+    - Contributing: overview/contributing.md
   - Basic Usage:
     - Installation: basic/installation.md
     - Getting Started: basic/getting_started.md
     - TOML Configuration: basic/configuration.md
   - Advanced Usage:
     - Overview: advanced/overview.md
-  - Experiment:
+  - Experiment API:
     - Experiment: experiment/experiment.md
     - Rack: experiment/rack.md
     - Scribe: experiment/scribe.md
@@ -36,6 +41,7 @@ theme:
     - navigation.tabs
     - content.code.copy
     - content.code.annotate
+    - navigation.footer
 plugins:
   - search
   - mkdocstrings:

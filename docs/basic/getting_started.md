@@ -21,7 +21,7 @@ Getting started is as simple as composing a `.toml` configuration file and insta
 
 A simple configuration file that loads a software `Clock` and a Stanford Research Systems `SR_830` lock-in amplifier on GPIB address 7 might look like:
 
-```toml title="my_configuration_file.toml"
+```toml title="my_configuration_file.toml linenums="1""
 [experiment]
 root_path = "C://data"
 
@@ -41,9 +41,9 @@ The full list of configurable keys is available [under the configation submenu](
 
 ### Execution
 
-and the short `python` script for initializing and running your experiment might look like:
+A short `python` script for initializing and running your experiment might look like:
 
-```python title="experiment_script.py"
+```python title="experiment_script.py linenums="1""
 from pyacquisition import Experiment
 
 my_experiment = Experiment.from_config('my_configuration_file.toml')
@@ -69,7 +69,7 @@ Here we will run through the creation of an example software instrument (inheret
 
 Inheret from `SoftwareInstrument` and mark your query methods (methods that return values from your instrument) with the `@mark_query` decorator and command methods with the `@mark_command` decorator. We will write this into a new file named `random_number_generator.py` for import into this experiment and any others that may use it.
 
-```python title="random_number_generator.py"
+```python title="random_number_generator.py" linenums="1"
 from pyacquisition import SoftwareInstrument
 import random
 
@@ -102,7 +102,7 @@ class RandomNumberGenerator(SoftwareInstrument):
 
 To add the instrument to your experiment, you need to create your own experiment class that inherets from `Experiment`. The `Experiment` class has `setup()` and `teardown()` methods that are called upon starting and ending your experiment respectively. Add the instrument within the `setup()` method. If needed, any cleanup code can be added to `teardown()`.
 
-```python title="my_experiment.py" hl_lines="2 4-9 14-15"
+```python title="my_experiment.py" linenums="1" hl_lines="2 4-9 14-15"
 from pyacquisition import Experiment
 from .random_number_generator import RandomNumberGenerator
 
@@ -129,7 +129,7 @@ You can see that your instrument named `"rng"` is now available under the "Instr
 
 Whilst your instrument is now fully controllable via the GUI, you will probably want to poll one or many of the instruments query methods and save the data to file. To do this, you need to add a `Measurement` to the experiment. This can also be done in the `setup()` method of your experiment.
 
-```python title="my_experiment.py" hl_lines="1 11-12"
+```python title="my_experiment.py" linenums="1" hl_lines="1 11-12"
 from pyacquisition import Experiment, Measurement
 from .random_number_generator import RandomNumberGenerator
 
@@ -162,7 +162,7 @@ In the above, we have added a measurement labelled "random" which polls `rng.ran
 
 If you would like to poll an instruments method that takes arguments, simply pass them as keyword arguments (received internally as `**kwargs`) when initializing the relevant `Measurement` object. These keyword arguments will be used with each function call.
 
-```python title="my_experiment.py" hl_lines="14-15"
+```python title="my_experiment.py" linenums="1" hl_lines="14-15"
 from pyacquisition import Experiment, Measurement
 from .random_number_generator import RandomNumberGenerator
 
@@ -237,7 +237,7 @@ You will see that "WaitFor" is now accessible from the "Tasks" menu in the GUI. 
 
 The following shows a new `FreuencySweep(Task)` class that inherets from `Task`. Any parameters can be defined as required and optional attributes of your class. Tasks have three `async` methods `setup()`, `run()` and `teardown()` within which you can add functionality. The `setup()` and `teardown()` methods are simple `async` methods that are called before and after your task is run. `run()` is an `async` generator method.
 
-```python title="experiment_script.py" hl_lines="1 5-33"
+```python title="experiment_script.py" linenums="1" hl_lines="1 5-33"
 from pyacquisition import Experiment, Measurement, Task
 from .random_number_generator import RandomNumberGenerator
 import asyncio
@@ -315,7 +315,7 @@ if __name__ == "__main__":
 
 In order to use the `FrequencySweep` task, it also needs to be registered to the experiment. This is done in the `setup()` method using the `register_task()` method:
 
-```python title="experiment_script.py" hl_lines="46"
+```python title="experiment_script.py" linenums="1" hl_lines="46"
 from pyacquisition import Experiment, Measurement, Task
 from .random_number_generator import RandomNumberGenerator
 import asyncio
@@ -379,3 +379,13 @@ if __name__ == "__main__":
 You should now see that `FrequencySweep` is available under "Tasks" in the GUI. Clicking it should create a popup within which the experimental parameters `start_frequency`, `end_frequency` and `amplitude` can be provided. Submitting the form adds the task to the task queue for execution.
 
 
+## Summary
+
+In total, you have written:
+
+- a simple `.toml` configuration file
+- a ~20 line `Instrument` class with custom functionality
+- a ~25 line `Task` class to automate your experimental procedure
+- a ~15 line `Experiment` class connecting them together
+
+and for free, you get a fully featured gui exposing all of the core functionality of `pyacquisition` (file I/O, logging, visualization) and all of the functionality of your `Instrument` and `Task` classes with robust data validation and error handling baked in.

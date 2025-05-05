@@ -20,9 +20,6 @@ class Task():
 
     
     def __post_init__(self):
-        """
-        Initialize the task with default events.
-        """
         self._pause_event: asyncio.Event = asyncio.Event()
         self._abort_event: asyncio.Event = asyncio.Event()
         self._is_paused: bool = False

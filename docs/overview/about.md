@@ -1,0 +1,1 @@
+`pyacquisition` was started as a personal project by Jake Ayres and is used by a number of members of the University of Bristol Quantum and Soft Matter group.
