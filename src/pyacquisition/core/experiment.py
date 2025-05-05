@@ -370,6 +370,17 @@ class Experiment:
         """
         return self._task_manager
     
+    
+    @property
+    def scribe(self) -> Scribe:
+        """
+        Returns the scribe associated with the experiment.
+
+        Returns:
+            Scribe: The scribe instance.
+        """
+        return self._scribe
+    
 
     def setup(self) -> None:
         """
@@ -400,10 +411,10 @@ class Experiment:
             experiment: The Experiment instance (optional).
         """
         try:
-            component.register_endpoints(self._api_server)
+            component._register_endpoints(self._api_server)
             component.setup()
             logger.debug(f"Running {component.__class__.__name__}")
-            await component.run(experiment=self) # PROBABLY PASS THE EXP IN ALL CASES?
+            await component.run(experiment=self)
 
         except Exception as e:
             logger.error(f"Error running {component.__class__.__name__}: {e}")
@@ -420,7 +431,6 @@ class Experiment:
         """
         try:
             self.setup()
-            self.register_endpoints()
             try:
                 self._ui_process = self._gui.run_in_new_process()
             except Exception as e:
@@ -473,14 +483,3 @@ class Experiment:
         except Exception as e:
             logger.error(f"Error registering task {task.__class__.__name__}: {e}")
             raise
-
-
-    def register_endpoints(self) -> None:
-        """
-        Registers the endpoints for the FastAPI server.
-        """
-        
-        from ..tasks import standard_tasks
-        
-        for task in standard_tasks:
-            self.register_task(task)

@@ -166,7 +166,7 @@ class Rack(Broadcaster):
             logger.warning(f"Measurement {name} not found in the rack.")
                 
                 
-    def register_endpoints(self, api_server):
+    def _register_endpoints(self, api_server):
         """
         Registers endpoints to the FastAPI app. 
         """

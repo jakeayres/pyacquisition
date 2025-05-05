@@ -110,7 +110,7 @@ class TaskManager:
         
         
         
-    def register_endpoints(self, api_server):
+    def _register_endpoints(self, api_server):
         """
         Register the task manager endpoints with the API server.
         """

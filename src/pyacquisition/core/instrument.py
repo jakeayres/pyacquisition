@@ -73,7 +73,7 @@ class Instrument(metaclass=QueryCommandProvider):
 	def metadata(self):
 		return {
 			'id': self._uid,
-			'class': self.name,
+			'class': self.__class__.__name__,
 			'address': self._visa_resource.address(),
 		}
 

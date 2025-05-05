@@ -196,7 +196,7 @@ class Scribe(Consumer):
 
         
         
-    def register_endpoints(self, api_server):
+    def _register_endpoints(self, api_server):
         """
         Register the Scribe endpoints with the API server.
         """
