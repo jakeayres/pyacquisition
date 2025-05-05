@@ -19,11 +19,13 @@ nav:
   - Instruments: 
     - Overview: instruments/overview.md
     - Clock: instruments/clock.md
-    - SR_830: instruments/sr_830.md
-    - SR_860: instruments/sr_860.md
     - Lakeshore_340: instruments/lakeshore_340.md
     - Lakeshore_350: instruments/lakeshore_350.md
+    - Mercury IPS: instruments/mercury_ips.md
+    - SR_830: instruments/sr_830.md
+    - SR_860: instruments/sr_860.md
   - Tasks:
+    - Overview: tasks/overview.md
     - WaitFor: tasks/wait_for.md
     - WaitUntil: tasks/wait_until.md
 theme:

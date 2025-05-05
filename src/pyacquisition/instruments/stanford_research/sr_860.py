@@ -654,43 +654,75 @@ class SR_860(Instrument):
 
     @mark_query
     def get_output(self, parameter: int) -> float:
+        """Queries the output value for a specific parameter.
+
+        Args:
+            parameter (int): The parameter index to query (e.g., 0 for X, 1 for Y, 2 for R, 3 for Theta).
+
+        Returns:
+            float: The output value corresponding to the specified parameter.
+        """
         return float(self.query(f'OUTP? {parameter}'))
 
 
     @mark_query
     def get_display_output(self, parameter: int) -> float:
+        """Queries the display output value for a specific parameter.
+
+        Args:
+            parameter (int): The parameter index to query (e.g., 0 for X, 1 for Y, 2 for R, 3 for Theta).
+
+        Returns:
+            float: The display output value corresponding to the specified parameter.
+        """
         return float(self.query(f'OUTR? {parameter}'))
 
 
     @mark_query
     def get_x(self) -> float:
+        """Queries the X output value.
+
+        Returns:
+            float: The X output value.
+        """
         return float(self.query(f'OUTP? 0'))
 
 
     @mark_query
     def get_y(self) -> float:
+        """Queries the Y output value.
+
+        Returns:
+            float: The Y output value.
+        """
         return float(self.query(f'OUTP? 1'))
 
 
     @mark_query
     def get_r(self) -> float:
+        """Queries the R output value.
+
+        Returns:
+            float: The R output value.
+        """
         return float(self.query(f'OUTP? 2'))
 
 
     @mark_query
     def get_theta(self) -> float:
-        return float(self.query(f'OUTP? 3'))
+        """Queries the Theta output value.
 
+        Returns:
+            float: The Theta output value in degrees.
+        """
+        return float(self.query(f'OUTP? 3'))
 
 
     @mark_query
     def get_xy(self) -> list[float]:
+        """Queries both X and Y output values simultaneously.
+
+        Returns:
+            list[float]: A list containing the X and Y output values.
+        """
         return [float(s) for s in self.query(f'SNAP? 0,1').split(',')]
-
-
-
-    """ INTERFACE
-    """
-
-    """ STATUS
-    """
