@@ -8,9 +8,7 @@ nav:
     - Getting Started: basic/getting_started.md
     - TOML Configuration: basic/configuration.md
   - Advanced Usage:
-    - Experiment Configuration: advanced/configuration.md
-    - Custom Instruments: advanced/instruments.md
-    - Custom Tasks: advanced/tasks.md
+    - Overview: advanced/overview.md
   - Experiment:
     - Experiment: experiment/experiment.md
     - Rack: experiment/rack.md
@@ -36,6 +34,8 @@ theme:
     primary: blue
   features:
     - navigation.tabs
+    - content.code.copy
+    - content.code.annotate
 plugins:
   - search
   - mkdocstrings:
@@ -58,5 +58,13 @@ markdown_extensions:
   - attr_list
   - md_in_html
   - pymdownx.blocks.caption
-
-  
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg

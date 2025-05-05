@@ -112,19 +112,18 @@ class Rack(Broadcaster):
         logger.info(f"Measurement period set to {self._period} seconds.")
         
         
-    def add_instrument(self, name: str, instrument) -> None:
+    def add_instrument(self, instrument: Instrument) -> None:
         """
         Adds an instrument to the rack.
         
         Args:
-            name (str): The name of the instrument.
             instrument (Instrument): The instrument to be added.
         """
-        self.instruments[name] = instrument
-        logger.debug(f"Instrument {name} added to the rack.")
+        self.instruments[instrument._uid] = instrument
+        logger.debug(f"Instrument {instrument._uid} added to the rack.")
         
         
-    def remove_instrument(self, name) -> None:
+    def remove_instrument(self, name: str) -> None:
         """
         Removes an instrument from the rack.
         
@@ -138,18 +137,17 @@ class Rack(Broadcaster):
             logger.warning(f"Instrument {name} not found in the rack.")
             
             
-    def add_measurement(self, name: str, measurement: Measurement) -> None:
+    def add_measurement(self, measurement: Measurement) -> None:
         """
         Adds a measurement to the rack.
         
         Args:
-            name (str): The name of the measurement.
             measurement (Measurement): The measurement to be added.
         """
         if not isinstance(measurement, Measurement):
             raise TypeError("Expected an instance of Measurement.")
-        self.measurements[name] = measurement
-        logger.debug(f"Measurement {name} added to the rack.")
+        self.measurements[measurement._name] = measurement
+        logger.debug(f"Measurement {measurement._name} added to the rack.")
         
         
     def remove_measurement(self, name: str) -> None:
@@ -186,7 +184,7 @@ class Rack(Broadcaster):
         async def list_measurements():
             return {
                 "status": "success",
-                "measurements": {name: measurement.name for name, measurement in self.measurements.items()},
+                "measurements": {name: measurement._name for name, measurement in self.measurements.items()},
             }
         
         

@@ -17,15 +17,15 @@ class Measurement:
             call_every (int): Call the function every Nth time. Default is 1.
             **kwargs: Additional keyword arguments to pass to the function.
         """
-        self.name = name
-        self.function = function
-        self.call_every = call_every
+        self._name = name
+        self._function = function
+        self._call_every = call_every
         self._call_counter = call_every
-        self.result = None
+        self._result = None
 
         # Validate kwargs against the function's signature
         self._validate_kwargs(function, kwargs)
-        self.kwargs = kwargs  # Store additional keyword arguments
+        self._kwargs = kwargs  # Store additional keyword arguments
 
 
     @staticmethod
@@ -58,13 +58,13 @@ class Measurement:
         """
         try:
             self._call_counter -= 1
-            if self.result is None or self._call_counter == 0:
-                self.result = self.function(**self.kwargs)  # Pass kwargs to the function
-                self._call_counter = self.call_every  # Reset the counter
-            return self.result
+            if self._result is None or self._call_counter == 0:
+                self._result = self._function(**self._kwargs)  # Pass kwargs to the function
+                self._call_counter = self._call_every  # Reset the counter
+            return self._result
         
         except Exception as e:
-            logger.error(f"Error in measurement {self.name}: {e}")
-            logger.error(f"Returning last result: {self.result}")
-            self._call_counter = self.call_every
-            return self.result
+            logger.error(f"Error in measurement {self._name}: {e}")
+            logger.error(f"Returning last result: {self._result}")
+            self._call_counter = self._call_every
+            return self._result

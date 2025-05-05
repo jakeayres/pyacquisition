@@ -7,12 +7,16 @@ from functools import wraps
 
 @dataclass
 class Task():
-    """
-    Base class for tasks in the experiment framework.
+    """Base class for tasks in the experiment framework.
     """
     
-    name = "Base Task"
-    help = "Generic help message for the task."
+    
+    @property
+    def name(self) -> str:
+        """
+        Returns the name of the task.
+        """
+        return self.__class__.__name__
 
     
     def __post_init__(self):
@@ -106,7 +110,7 @@ class Task():
             dict: Dictionary representation of the task.
         """
         return {
-            "name": self.__class__.__name__,
+            "name": self.name,
             "description": self.description,
             "parameters": self.parameters,
         }
@@ -164,13 +168,13 @@ class Task():
             experiment.task_manager.add_task(task)
             return {"status": 200, "message": f"{cls.__name__} added"}
         
-        task_endpoint.__name__ = f"{cls.name}"
+        task_endpoint.__name__ = f"{cls.__name__}"
         task_endpoint.__annotations__ = fields_dict
         task_endpoint.__annotations__["return"] = dict
         task_endpoint.__signature__ = Signature(parameters=params, return_annotation=dict)
-        task_endpoint.__doc__ = cls.help
+        task_endpoint.__doc__ = cls.__doc__.split("\n")[0] if cls.__doc__ else "No help available."
         
-        endpoint_path = f"/tasks/{cls.name.lower().replace(' ', '_')}"
+        endpoint_path = f"/tasks/{cls.__name__.lower().replace(' ', '_')}"
         experiment._api_server.app.add_api_route(
             endpoint_path,
             task_endpoint,

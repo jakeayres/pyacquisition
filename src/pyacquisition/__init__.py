@@ -1,13 +1,14 @@
 from .core import Experiment
+from .core.measurement import Measurement
 from .core.task import Task
 import sys, asyncio
 from dataclasses import dataclass
+from .tasks import WaitFor, WaitUntil
 
 
 @dataclass
 class MyTask(Task):
 
-    name = "MyTask"
     description = "My task description"
     help = "My task help"
 
@@ -28,8 +29,8 @@ class MyExperiment(Experiment):
     
 
     def setup(self) -> None:
-
-
+        self.register_task(WaitFor)
+        self.register_task(WaitUntil)
         self.register_task(MyTask)
 
 

@@ -275,14 +275,14 @@ class Experiment:
                 if instrument.get("adapter", None) is None:
                     logger.debug(f"Creating instrument '{name}' without adapter")
                     inst = instrument_class(name)
-                    experiment.rack.add_instrument(name, inst)
+                    experiment.rack.add_instrument(inst)
                 else:
                     logger.debug(f"Creating instrument '{name}' with adapter '{instrument['adapter']}'")
                     adapter_class = cls._get_adapter_class(instrument["adapter"])
                     resource = cls._open_resource(adapter_class, instrument.get("resource", None), timeout=5000)
                     if resource:
                         inst = instrument_class(name, resource)
-                        experiment.rack.add_instrument(name, inst)
+                        experiment.rack.add_instrument(inst)
                     else:
                         logger.warning(f"Failed to open resource '{instrument.get('resource', None)}' for instrument '{name}'")
             except Exception as e:
@@ -320,7 +320,7 @@ class Experiment:
                 if args:
                     method = cls._resolve_method_args(method, args)
 
-                experiment.rack.add_measurement(name, Measurement(name, method))
+                experiment.rack.add_measurement(Measurement(name, method))
             except Exception as e:
                 logger.warning(f"Failed to configure measurement '{name}': {e}")
 

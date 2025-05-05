@@ -8,14 +8,21 @@ from ..core.logging import logger
 
 @dataclass
 class WaitFor(Task):
+    """A task that waits for a specified amount of time.
+
+    Attributes:
+        hours (int): The number of hours to wait. Defult is 0.
+        minutes (int): The number of minutes to wait. Default is 0.
+        seconds (int): The number of seconds to wait. Default is 0.
+
+    Class Attributes:
+        name (str): The name of the task.
+        help (str): A brief description of the task.
+    """
     
-    hours: int
-    minutes: int
-    seconds: int
-    
-    
-    name = "Wait For"
-    help = "Wait for a specified amount of time."
+    hours: int = 0
+    minutes: int = 0
+    seconds: int = 0
     
     
     @property
@@ -42,13 +49,12 @@ class WaitFor(Task):
 
 @dataclass
 class WaitUntil(Task):
+    """Wait until hh:mm (next occurrence)
+    """
     
-    
-    hour: int
-    minute: int
-    
-    name = "Wait Until"
-    help = "Wait until a specified time (24hr)."
+    hour: int = 0
+    minute: int = 0
+
     
     @property
     def description(self) -> str:
