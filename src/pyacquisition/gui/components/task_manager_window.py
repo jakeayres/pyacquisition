@@ -60,8 +60,7 @@ class TaskManagerWindow:
         Args:
             tasks (list): The list of tasks in the queue.
         """
-        
-        viewport_width = dpg.get_viewport_client_width()
+
         viewport_height = dpg.get_viewport_client_height()
         
         dpg.configure_item(self.window_tag, height=viewport_height-100)

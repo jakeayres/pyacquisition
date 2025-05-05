@@ -1,8 +1,10 @@
-from .core import Experiment
-from .core.measurement import Measurement
-from .core.task import Task
-import sys, asyncio
+from .core.experiment import Experiment as Experiment
+from .core.measurement import Measurement as Measurement
+from .core.task import Task as Task
+import sys
+import asyncio
 from dataclasses import dataclass
+
 from .tasks import WaitFor, WaitUntil
 
 

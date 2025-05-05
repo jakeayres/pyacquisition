@@ -16,12 +16,12 @@ def test_schema_title():
     # Test when title is missing
     schema_data = {"info": {}}
     schema = Schema(schema_data)
-    assert schema.title == None
+    assert schema.title is None
 
     # Test when info is missing
     schema_data = {}
     schema = Schema(schema_data)
-    assert schema.title == None
+    assert schema.title is None
 
 
 def test_schema_version():
@@ -33,12 +33,12 @@ def test_schema_version():
     # Test when version is missing
     schema_data = {"info": {}}
     schema = Schema(schema_data)
-    assert schema.version == None
+    assert schema.version is None
 
     # Test when info is missing
     schema_data = {}
     schema = Schema(schema_data)
-    assert schema.version == None
+    assert schema.version is None
 
 
 def test_schema_description():
@@ -50,12 +50,12 @@ def test_schema_description():
     # Test when description is missing
     schema_data = {"info": {}}
     schema = Schema(schema_data)
-    assert schema.description == None
+    assert schema.description is None
 
     # Test when info is missing
     schema_data = {}
     schema = Schema(schema_data)
-    assert schema.description == None
+    assert schema.description is None
     
 
 def test_schema_paths():

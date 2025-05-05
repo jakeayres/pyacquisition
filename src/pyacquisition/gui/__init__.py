@@ -11,8 +11,6 @@ from .components.live_log_window import LiveLogWindow
 from .components.live_plot import LivePlotWidget
 from .components.file_window import FileWindow
 from .components.task_manager_window import TaskManagerWindow
-import json
-from functools import partial
 
 
 class Gui:
@@ -36,7 +34,7 @@ class Gui:
     async def _fetch_openapi_schema(self):
         try:
             logger.debug("Fetching OpenAPI schema")
-            data = await self.api_client.async_get(f"/openapi.json")
+            data = await self.api_client.async_get("/openapi.json")
             return Schema(data)
         except Exception as e:
             logger.error(f"Error fetching OpenAPI schema: {e}")
@@ -46,7 +44,7 @@ class Gui:
     async def _fetch_instruments(self):
         try:
             logger.debug("Fetching instruments")
-            data = await self.api_client.async_get(f"/rack/list_instruments")
+            data = await self.api_client.async_get("/rack/list_instruments")
             logger.debug(f"Instruments: {data}")   
             return data.get('instruments', [])
         except Exception as e:
@@ -57,7 +55,7 @@ class Gui:
     async def _fetch_measurements(self):
         try:
             logger.debug("Fetching measurements")
-            data = await self.api_client.async_get(f"/rack/list_measurements")
+            data = await self.api_client.async_get("/rack/list_measurements")
             logger.debug(f"Measurements: {data}")   
             return data.get('measurements', [])
         except Exception as e:
@@ -83,7 +81,7 @@ class Gui:
         with dpg.viewport_menu_bar():
             with dpg.menu(label="Scribe"):
                 for name, path in schema.paths.items():
-                    if name.startswith(f"/scribe"):
+                    if name.startswith("/scribe"):
                         dpg.add_spacer(height=1)
                         dpg.add_menu_item(
                             label=f" {path.get.summary:{' '}<{15}}", 
@@ -102,7 +100,7 @@ class Gui:
         with dpg.viewport_menu_bar():
             with dpg.menu(label="Rack"):
                 for name, path in schema.paths.items():
-                    if name.startswith(f"/rack"):
+                    if name.startswith("/rack"):
                         dpg.add_spacer(height=1)
                         dpg.add_menu_item(
                             label=f" {path.get.summary:{' '}<{15}}", 
@@ -151,7 +149,7 @@ class Gui:
         with dpg.viewport_menu_bar():
             with dpg.menu(label="Task Manager"):
                 for name, path in schema.paths.items():
-                    if name.startswith(f"/task_manager"):
+                    if name.startswith("/task_manager"):
                         dpg.add_spacer(height=1)
                         dpg.add_menu_item(
                             label=f" {path.get.summary:{' '}<{15}}", 
@@ -170,7 +168,7 @@ class Gui:
         with dpg.viewport_menu_bar():
             with dpg.menu(label="Tasks"):
                 for name, path in schema.paths.items():
-                    if name.startswith(f"/tasks"):
+                    if name.startswith("/tasks"):
                         dpg.add_spacer(height=1)
                         dpg.add_menu_item(
                             label=f" {path.get.summary:{' '}<{15}}", 

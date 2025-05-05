@@ -143,7 +143,7 @@ def test_logger_exception(temp_log_dir, logger_instance):
     
     try:
         raise ValueError("This is a test exception")
-    except ValueError as e:
+    except ValueError:
         logger_instance.exception("An exception occurred")
     
     log_file_path = os.path.join(temp_log_dir, log_file_name)

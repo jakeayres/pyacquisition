@@ -188,7 +188,7 @@ class TaskManager:
             Endpoint to add a task to the queue.
             """
             from ..tasks import TestTask
-            logger.info(f"Adding task to queue")
+            logger.info("Adding task to queue")
             self.add_task(TestTask())
             
         

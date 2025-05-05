@@ -1,7 +1,6 @@
 from loguru import logger as loguru_logger
 from threading import Lock
 import sys
-import os
 import time
 from pathlib import Path
 from .broadcaster import Broadcaster

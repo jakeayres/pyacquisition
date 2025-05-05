@@ -2,7 +2,7 @@ import dearpygui.dearpygui as dpg
 import time
 from ...core.consumer import Consumer
 from ...core.logging import logger
-from ..constants import TEXT_COLOR, EMPHASIS_COLOR, SECONDARY_COLOR, WHITE
+from ..constants import EMPHASIS_COLOR, SECONDARY_COLOR, WHITE
 
 
 
@@ -19,7 +19,6 @@ class LiveDataWindow(Consumer):
         self.window_tag = dpg.generate_uuid()
         
         try:
-            window_tag = dpg.generate_uuid()
             with dpg.window(
                 label="Live Data",
                 pos=[20, 140],
@@ -50,7 +49,7 @@ class LiveDataWindow(Consumer):
                         value_tags[key] = tag
                         dpg.add_text(f"{value:{' '}<{15}}", tag=tag)
                 with dpg.group(horizontal=True, parent=self.window_tag):
-                    dpg.add_text(f"Loop Time      ",  color=EMPHASIS_COLOR)
+                    dpg.add_text("Loop Time      ",  color=EMPHASIS_COLOR)
                     dpg.add_text(f"{t1-t0:.3f} s", tag=time_tag, color=WHITE)
                     
                 while True:

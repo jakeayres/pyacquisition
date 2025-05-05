@@ -278,7 +278,7 @@ class SR_830(Instrument):
         Returns:
             ReferenceSource: The current reference source (INTERNAL or EXTERNAL).
         """
-        return ReferenceSource(int(self.query(f'FMOD?')))
+        return ReferenceSource(int(self.query('FMOD?')))
 
     @mark_command
     def set_reference_source(self, source: ReferenceSource) -> int:
@@ -320,7 +320,7 @@ class SR_830(Instrument):
         Returns:
             ReferenceSlope: The slope of the external reference signal.
         """
-        return ReferenceSlope(int(self.query(f'RSLP?')))
+        return ReferenceSlope(int(self.query('RSLP?')))
 
     @mark_command
     def set_external_reference_slope(self, slope: ReferenceSlope) -> int:
@@ -341,7 +341,7 @@ class SR_830(Instrument):
         Returns:
             int: The current harmonic setting.
         """
-        return int(self.query(f'HARM?'))
+        return int(self.query('HARM?'))
 
     @mark_command
     def set_harmonic(self, harmonic: int) -> int:
@@ -362,7 +362,7 @@ class SR_830(Instrument):
         Returns:
             float: The reference amplitude in volts.
         """
-        return float(self.query(f'SLVL?'))
+        return float(self.query('SLVL?'))
 
     @mark_command
     def set_reference_amplitude(self, amplitude: float) -> int:
@@ -386,7 +386,7 @@ class SR_830(Instrument):
         Returns:
             InputConfiguration: The current input configuration.
         """
-        return InputConfiguration(int(self.query(f'ISRC?')))
+        return InputConfiguration(int(self.query('ISRC?')))
 
     @mark_command
     def set_input_configuration(self, configuration: InputConfiguration) -> int:
@@ -407,7 +407,7 @@ class SR_830(Instrument):
         Returns:
             InputGrounding: The current input grounding configuration.
         """
-        return InputGrounding(int(self.query(f'IGND?')))
+        return InputGrounding(int(self.query('IGND?')))
 
     @mark_command
     def set_input_grounding(self, configuration: InputGrounding) -> int:
@@ -428,7 +428,7 @@ class SR_830(Instrument):
         Returns:
             InputCoupling: The current input coupling configuration.
         """
-        return InputCoupling(int(self.query(f'ICPL?')))
+        return InputCoupling(int(self.query('ICPL?')))
 
     @mark_command
     def set_input_coupling(self, configuration: InputCoupling) -> int:
@@ -449,7 +449,7 @@ class SR_830(Instrument):
         Returns:
             NotchFilters: The current notch filter configuration.
         """
-        return NotchFilters(int(self.query(f'ILIN?')))
+        return NotchFilters(int(self.query('ILIN?')))
 
     @mark_command
     def set_notch_filters(self, configuration: NotchFilters) -> int:
@@ -473,7 +473,7 @@ class SR_830(Instrument):
         Returns:
             Sensitivity: The current sensitivity setting.
         """
-        return Sensitivity(int(self.query(f'SENS?')))
+        return Sensitivity(int(self.query('SENS?')))
 
     @mark_command
     def set_sensitivity(self, sensitivity: Sensitivity) -> int:
@@ -494,7 +494,7 @@ class SR_830(Instrument):
         Returns:
             DynamicReserve: The current dynamic reserve setting.
         """
-        return DynamicReserve(int(self.query(f'RMOD?')))
+        return DynamicReserve(int(self.query('RMOD?')))
 
     @mark_command
     def set_dynamic_reserve(self, reserve: DynamicReserve) -> int:
@@ -515,7 +515,7 @@ class SR_830(Instrument):
         Returns:
             TimeConstant: The current time constant setting.
         """
-        return TimeConstant(int(self.query(f'OFLT?')))
+        return TimeConstant(int(self.query('OFLT?')))
 
     @mark_command
     def set_time_constant(self, time_constant: TimeConstant) -> int:
@@ -536,7 +536,7 @@ class SR_830(Instrument):
         Returns:
             FilterSlope: The current filter slope setting.
         """
-        return FilterSlope(int(self.query(f'OFSL?')))
+        return FilterSlope(int(self.query('OFSL?')))
 
     @mark_command
     def set_filter_slope(self, filter_slope: FilterSlope) -> int:
@@ -557,7 +557,7 @@ class SR_830(Instrument):
         Returns:
             SyncFilterState: The current state of the synchronization filter.
         """
-        return SyncFilterState(int(self.query(f'SYNC?')))
+        return SyncFilterState(int(self.query('SYNC?')))
 
     @mark_command
     def set_sync_filter_state(self, state: SyncFilterState) -> int:
@@ -584,19 +584,19 @@ class SR_830(Instrument):
 
     @mark_query
     def get_x(self) -> float:
-        return float(self.query(f'OUTP? 1'))
+        return float(self.query('OUTP? 1'))
 
 
     @mark_query
     def get_y(self) -> float:
-        return float(self.query(f'OUTP? 2'))
+        return float(self.query('OUTP? 2'))
 
 
     @mark_query
     def get_xy(self) -> list[float]:
-        return [float(s) for s in self.query(f'SNAP? 1,2').split(',')]
+        return [float(s) for s in self.query('SNAP? 1,2').split(',')]
 
 
     @mark_query
     def get_display_buffer_length(self) -> int:
-        return int(self.query(f'SPTS?'))
+        return int(self.query('SPTS?'))

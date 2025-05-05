@@ -1,6 +1,5 @@
 from enum import Enum
-from typing import Union, Tuple
-from ...core.instrument import Instrument, mark_query, mark_command
+from ...core.instrument import Instrument, mark_query
 
 
 class SystemStatusM(Enum):

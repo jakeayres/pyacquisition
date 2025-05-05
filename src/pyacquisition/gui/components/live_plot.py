@@ -1,8 +1,6 @@
 import dearpygui.dearpygui as dpg
 from ...core.consumer import Consumer
 from ...core.logging import logger
-import time
-import asyncio
 
 
 

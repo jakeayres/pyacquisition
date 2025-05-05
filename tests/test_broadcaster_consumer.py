@@ -1,4 +1,3 @@
-import asyncio
 import pytest
 from pyacquisition.core.broadcaster import Broadcaster
 from pyacquisition.core.consumer import Consumer

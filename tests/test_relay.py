@@ -1,6 +1,5 @@
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, patch
 from pyacquisition.core.relay import Relay
 
 @pytest.fixture

@@ -1,5 +1,5 @@
 import dearpygui.dearpygui as dpg
-from ..constants import TEXT_COLOR, EMPHASIS_COLOR, SECONDARY_COLOR, WHITE
+from ..constants import SECONDARY_COLOR, WHITE
 
 
 class FileWindow:

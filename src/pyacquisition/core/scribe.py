@@ -2,7 +2,6 @@ from .consumer import Consumer
 from .logging import logger
 import asyncio
 import pandas as pd
-import json
 from pathlib import Path
 
 

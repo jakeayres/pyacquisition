@@ -29,17 +29,7 @@ def test_api_server_initialization(api_server):
     assert api_server.port == 8000
     assert api_server.app.title == "PyAcquisition API"
     assert api_server.app.description == "API for PyAcquisition"
-
-
-# def test_cors_middleware(test_client):
-#     """
-#     Test if the CORS middleware is configured correctly.
-#     """
-#     response = test_client.options("/")
-#     assert response.status_code == 200
-#     assert "access-control-allow-origin" in response.headers
-#     assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
-
+    
 
 def test_server_run(api_server):
     """
@@ -60,7 +50,6 @@ def test_enum_to_selected_dict():
     Test the _enum_to_selected_dict function to ensure it converts an enum instance
     to the correct dictionary format.
     """
-    api_server = APIServer()
     enum_instance = SampleEnum.OPTION_TWO
     # Call the private method
     result = APIServer._enum_to_selected_dict(enum_instance)

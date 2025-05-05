@@ -1,12 +1,10 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from websockets.exceptions import ConnectionClosedOK
-from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 import inspect
-import asyncio
 from .logging import logger
 from .consumer import Consumer
-from .response import StringResponse, DictResponse
+from .response import DictResponse
 from enum import Enum
 
 

@@ -3,7 +3,6 @@ import aiohttp
 import asyncio
 import requests
 import websockets
-import inspect
 from ..core.broadcaster import Broadcaster
 from ..core.logging import logger
 

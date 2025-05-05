@@ -9,7 +9,6 @@ from .inputs.enum_input import EnumInput
 from .inputs.base_input import BaseInput
 from .text import add_text, add_header, add_text_area
 from .input_group import InputGroup
-from ..api_client import APIClient
 
 
 class EndpointPopup:

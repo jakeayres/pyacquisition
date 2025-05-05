@@ -1,4 +1,3 @@
-import pytest
 from pyacquisition.core.measurement import Measurement
 
 
