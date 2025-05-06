@@ -53,7 +53,6 @@ class ModelStatusN(BaseEnum):
     SWEEPING_LIMITING = (3, "Sweeping and sweep limiting")
 
 
-
 class Mercury_IPS(Instrument):
     """Class for controlling the Oxford Instruments Mercury IPS device."""
 

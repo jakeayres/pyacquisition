@@ -4,7 +4,6 @@ from enum import Enum
 
 
 class BaseEnum(Enum):
-
     def __init__(self, raw_value, label):
         self.raw_value = raw_value
         self.label = label
@@ -14,11 +13,9 @@ class BaseEnum(Enum):
         return self.label
 
 
-
 class IntEnum(BaseEnum):
     SEVEN = (7, "Seven")
     NINE = (9, "Nine")
-    
 
 
 class MockInstrument(SoftwareInstrument):

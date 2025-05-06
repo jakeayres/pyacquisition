@@ -1,4 +1,3 @@
-
 from ...core.instrument import Instrument, BaseEnum, mark_query, mark_command
 
 
@@ -6,14 +5,17 @@ class SyncFilterState(BaseEnum):
     OFF = (0, "Off")
     ON = (1, "On")
 
+
 class ReferenceSource(BaseEnum):
     INTERNAL = (0, "Internal")
     EXTERNAL = (1, "External")
+
 
 class ReferenceSlope(BaseEnum):
     SINE = (0, "Sine")
     TTL_RISING = (1, "TTL Rising")
     TTL_FALLING = (2, "TTL Falling")
+
 
 class InputConfiguration(BaseEnum):
     A = (0, "A")
@@ -21,19 +23,23 @@ class InputConfiguration(BaseEnum):
     I_10e6 = (2, "Current 10uA")
     I_100e6 = (3, "Current 100uA")
 
+
 class InputGrounding(BaseEnum):
     FLOAT = (0, "Float")
     GROUND = (1, "Ground")
 
+
 class InputCoupling(BaseEnum):
     AC = (0, "AC")
     DC = (1, "DC")
+
 
 class NotchFilter(BaseEnum):
     NONE = (0, "None")
     LINE_1 = (1, "Line 1")
     LINE_2 = (2, "Line 2")
     BOTH = (3, "Both")
+
 
 class Sensitivity(BaseEnum):
     nV_2 = (0, "2 nV")
@@ -99,7 +105,6 @@ class DynamicReserve(BaseEnum):
     HIGH_RESERVE = (0, "High Reserve")
     NORMAL = (1, "Normal")
     LOW_NOISE = (2, "Low Noise")
-
 
 
 class SR_830(Instrument):

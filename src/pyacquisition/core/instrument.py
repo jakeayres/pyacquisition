@@ -13,7 +13,6 @@ class BaseEnum(Enum):
     @property
     def value(self):
         return self.label
-    
 
     @classmethod
     def from_raw_value(cls, raw_value):
@@ -21,7 +20,7 @@ class BaseEnum(Enum):
             if item.raw_value == raw_value:
                 return item
         raise ValueError(f"Invalid raw value: {raw_value}")
-    
+
 
 class QueryCommandProvider(type):
     """Metaclass that reads through methods and registers

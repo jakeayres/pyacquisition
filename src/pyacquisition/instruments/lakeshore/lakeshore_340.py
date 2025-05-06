@@ -3,70 +3,72 @@ from ...core.instrument import Instrument, BaseEnum, mark_query, mark_command
 
 
 class State(BaseEnum):
-    OFF = (0, 'Off')
-    ON = (1, 'On')
+    OFF = (0, "Off")
+    ON = (1, "On")
 
 
 class InputChannelState(BaseEnum):
-    INPUT_A = ('A', 'Input A')
-    INPUT_B = ('B', 'Input B')
-    INPUT_C = ('C', 'Input C')
-    INPUT_D = ('D', 'Input D')
+    INPUT_A = ("A", "Input A")
+    INPUT_B = ("B", "Input B")
+    INPUT_C = ("C", "Input C")
+    INPUT_D = ("D", "Input D")
 
 
 class OutputChannel(BaseEnum):
-    OUTPUT_1 = (1, 'Output 1')
-    OUTPUT_2 = (2, 'Output 2')
-    OUTPUT_3 = (3, 'Output 3')
-    OUTPUT_4 = (4, 'Output 4')
-    
+    OUTPUT_1 = (1, "Output 1")
+    OUTPUT_2 = (2, "Output 2")
+    OUTPUT_3 = (3, "Output 3")
+    OUTPUT_4 = (4, "Output 4")
+
 
 class AutotuneMode(BaseEnum):
-    P = (0, 'P')
-    PI = (1, 'PI')
-    PID = (2, 'PID')
+    P = (0, "P")
+    PI = (1, "PI")
+    PID = (2, "PID")
 
 
 class CurveFormat(BaseEnum):
-    MV_K = (1, 'mV/K')
-    V_K = (2, 'V/K')
-    OHM_K = (3, 'Ohm/K')
-    LOGOHM_K = (4, 'log(Ohm)/K')
+    MV_K = (1, "mV/K")
+    V_K = (2, "V/K")
+    OHM_K = (3, "Ohm/K")
+    LOGOHM_K = (4, "log(Ohm)/K")
 
 
 class CurveCoefficient(BaseEnum):
-    NEGATIVE = (1, 'Negative')
-    POSITIVE = (2, 'Positive')
+    NEGATIVE = (1, "Negative")
+    POSITIVE = (2, "Positive")
 
 
 class DisplayContrastLevel(BaseEnum):
-    OFF = (0, 'Off')
-    DIM = (1, 'Dim')
-    NORMAL = (2, 'Normal')
-    BRIGHT = (3, 'Bright')
-    MAXIMUM = (4, 'Maximum')
+    OFF = (0, "Off")
+    DIM = (1, "Dim")
+    NORMAL = (2, "Normal")
+    BRIGHT = (3, "Bright")
+    MAXIMUM = (4, "Maximum")
+
 
 class DisplayMode(BaseEnum):
-    INPUT_A = (0, 'Input A')
-    INPUT_B = (1, 'Input B')
-    INPUT_C = (2, 'Input C')
-    INPUT_D = (3, 'Input D')
-    FOUR_LOOP = (5, 'Four Loop')
-    ALL_INPUTS = (6, 'All Inputs')
-    INPUT_D2 = (7, 'Input D2')
-    INPUT_D3 = (8, 'Input D3')
-    INPUT_D4 = (9, 'Input D4')
-    INPUT_D5 = (10, 'Input D5')
+    INPUT_A = (0, "Input A")
+    INPUT_B = (1, "Input B")
+    INPUT_C = (2, "Input C")
+    INPUT_D = (3, "Input D")
+    FOUR_LOOP = (5, "Four Loop")
+    ALL_INPUTS = (6, "All Inputs")
+    INPUT_D2 = (7, "Input D2")
+    INPUT_D3 = (8, "Input D3")
+    INPUT_D4 = (9, "Input D4")
+    INPUT_D5 = (10, "Input D5")
+
 
 class DisplayCustomNumerber(BaseEnum):
-    LARGE_2 = (0, 'Large 2')
-    LARGE_4 = (1, 'Large 4')
-    SMALL_8 = (2, 'Small 8')
+    LARGE_2 = (0, "Large 2")
+    LARGE_4 = (1, "Large 4")
+    SMALL_8 = (2, "Small 8")
 
 
 class DisplayAllInputsSize(BaseEnum):
-    SMALL = (0, 'Small')
-    LARGE = (1, 'Large')
+    SMALL = (0, "Small")
+    LARGE = (1, "Large")
 
 
 class Lakeshore_340(Instrument):

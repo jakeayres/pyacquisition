@@ -1,9 +1,5 @@
 from ..core.task import Task
-import asyncio
-import datetime
-import time
 from dataclasses import dataclass
-from ..core.logging import logger
 
 
 @dataclass
@@ -24,5 +20,7 @@ class NewFile(Task):
 
     async def run(self, experiment):
         yield None
-        experiment.scribe.next_file(title=self.file_name, next_block=self.increment_block)
+        experiment.scribe.next_file(
+            title=self.file_name, next_block=self.increment_block
+        )
         yield None
