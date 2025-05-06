@@ -93,13 +93,13 @@ class TaskManager:
         logger.info(f"[TaskManager] Adding task to queue: {task.name}")
         self._task_queue.put_nowait(task)
 
-    def register_task(self, task: Task):
-        try:
-            task.register_endpoints(self)
-        except Exception as e:
-            logger.error(
-                f"Error registering endpoints for {task.__class__.__name__}: {e}"
-            )
+    # def register_task(self, task: Task):
+    #     try:
+    #         task.register_endpoints(self)
+    #     except Exception as e:
+    #         logger.error(
+    #             f"Error registering endpoints for {task.__class__.__name__}: {e}"
+    #         )
 
     def _register_endpoints(self, api_server):
         """

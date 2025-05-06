@@ -120,7 +120,7 @@ class Task:
         self._pause_event.set()  # Ensure it doesn't stay paused
 
     @classmethod
-    def register_endpoints(cls, experiment):
+    def register_endpoints(cls, experiment, label=None, **fixed_kwargs):
         """
         Register the task endpoints with the API server.
 
@@ -136,6 +136,7 @@ class Task:
         params = [
             Parameter(name, Parameter.POSITIONAL_OR_KEYWORD, annotation=type_)
             for name, type_ in fields_dict.items()
+            if name not in fixed_kwargs
         ]
 
         async def task_endpoint(**kwargs):
@@ -145,11 +146,16 @@ class Task:
             Returns:
                 dict: The result of the task.
             """
-            task = cls(**kwargs)
+            task = cls(**fixed_kwargs, **kwargs)
             experiment.task_manager.add_task(task)
             return {"status": 200, "message": f"{cls.__name__} added"}
 
-        task_endpoint.__name__ = f"{cls.__name__}"
+        if label is not None:
+            task_endpoint.__name__ = f"{label}"
+            endpoint_path = f"/tasks/{label.lower().replace(' ', '_')}"
+        else:
+            task_endpoint.__name__ = f"{cls.__name__}"
+            endpoint_path = f"/tasks/{cls.__name__.lower().replace(' ', '_')}"
         task_endpoint.__annotations__ = fields_dict
         task_endpoint.__annotations__["return"] = dict
         task_endpoint.__signature__ = Signature(
@@ -159,7 +165,6 @@ class Task:
             cls.__doc__.split("\n")[0] if cls.__doc__ else "No help available."
         )
 
-        endpoint_path = f"/tasks/{cls.__name__.lower().replace(' ', '_')}"
         experiment._api_server.app.add_api_route(
             endpoint_path,
             task_endpoint,

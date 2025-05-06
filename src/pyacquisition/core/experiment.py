@@ -472,7 +472,7 @@ class Experiment:
 
         logger.info("Experiment ended")
 
-    def register_task(self, task: Task) -> None:
+    def register_task(self, task: Task, **kwargs) -> None:
         """
         Registers a task with the experiment.
 
@@ -480,7 +480,7 @@ class Experiment:
             task (Task): The task to register.
         """
         try:
-            task.register_endpoints(self)
+            task.register_endpoints(self, **kwargs)
         except Exception as e:
             logger.error(f"Error registering task {task.__class__.__name__}: {e}")
             raise

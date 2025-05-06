@@ -6,31 +6,52 @@ import asyncio
 from dataclasses import dataclass
 
 from .tasks import WaitFor, WaitUntil, NewFile
+from .tasks import RampTemperature, SweepMagneticField
+
+from .instruments.lakeshore.lakeshore_340 import OutputChannel as OC350
 
 
 @dataclass
 class MyTask(Task):
-    description = "My task description"
-    help = "My task help"
+    age: int
+    sex: str
+    location: str
+
+    @property
+    def description(self):
+        return f"Task {self.name} is {self.age} years old"
 
     async def run(self, experiment):
-        yield "STARTING"
+        yield self.name
         await asyncio.sleep(1)
-        yield "STARTING"
+        yield f"{self.age}"
         await asyncio.sleep(1)
-        yield "STARTING"
+        yield self.sex
         await asyncio.sleep(1)
-        yield "STARTING"
-        print(experiment.rack.instruments["mock"].method_with_args(1, 2))
+        yield self.location
         await asyncio.sleep(1)
+        yield "Done!"
 
 
 class MyExperiment(Experiment):
     def setup(self) -> None:
         self.register_task(WaitFor)
         self.register_task(WaitUntil)
-        self.register_task(MyTask)
-        self.register_task(NewFile)
+        self.register_task(MyTask, sex="male")
+        self.register_task(NewFile, label="New")
+        self.register_task(
+            RampTemperature,
+            label="Ramp 1",
+            lakeshore="lake",
+            output_channel=OC350.OUTPUT_1,
+        )
+        self.register_task(
+            RampTemperature,
+            label="Ramp 2",
+            lakeshore="lake",
+            output_channel=OC350.OUTPUT_2,
+        )
+        self.register_task(SweepMagneticField, magnet_psu="magnet")
 
 
 def main(*args) -> None:

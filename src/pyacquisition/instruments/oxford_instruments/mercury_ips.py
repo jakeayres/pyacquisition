@@ -39,14 +39,14 @@ class SwitchHeaterStatus(BaseEnum):
     NOT_FITTED = (4, "Not fitted")
 
 
-class ModelStatusM(BaseEnum):
+class ModeStatusM(BaseEnum):
     FAST_AMPS = (0, "Fast sweep (amps)")
     FAST_TESLA = (1, "Fast sweep (tesla)")
     SLOW_AMPS = (4, "Slow sweep (amps)")
     SLOW_TESLA = (5, "Slow sweep (tesla)")
 
 
-class ModelStatusN(BaseEnum):
+class ModeStatusN(BaseEnum):
     REST = (0, "At rest (constant output)")
     SWEEPING = (1, "Sweeping")
     LIMITING = (2, "Sweep limiting")
