@@ -69,7 +69,7 @@ class DisplayAllInputsSize(BaseEnum):
     LARGE = (1, 'Large')
 
 
-class Lakeshore_340(Instrument):
+class Lakeshore_350(Instrument):
     """Class for controlling the Lakeshore 340 temperature controller."""
 
     name = "Lakeshore_340"
