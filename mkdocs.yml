@@ -29,6 +29,7 @@ nav:
     - SR_860: instruments/sr_860.md
   - Tasks:
     - Overview: tasks/overview.md
+    - NewFile: tasks/new_file.md
     - WaitFor: tasks/wait_for.md
     - WaitUntil: tasks/wait_until.md
 theme:

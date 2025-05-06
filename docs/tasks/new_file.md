@@ -1,0 +1,1 @@
+::: pyacquisition.tasks.files.NewFile

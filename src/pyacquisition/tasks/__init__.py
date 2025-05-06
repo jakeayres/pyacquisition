@@ -1,4 +1,5 @@
 from .wait import WaitFor, WaitUntil
+from .files import NewFile
 
 
-standard_tasks = [WaitFor, WaitUntil]
+standard_tasks = [NewFile, WaitFor, WaitUntil]
