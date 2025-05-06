@@ -1,5 +1,5 @@
 from .core.experiment import Experiment as Experiment
-from .core.measurement import Measurement
+from .core.measurement import Measurement as Measurement
 from .core.task import Task as Task
 import sys
 import asyncio
