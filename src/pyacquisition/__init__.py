@@ -5,7 +5,7 @@ import sys
 import asyncio
 from dataclasses import dataclass
 
-from .tasks import WaitFor, WaitUntil
+from .tasks import WaitFor, WaitUntil, NewFile
 
 
 @dataclass
@@ -30,6 +30,7 @@ class MyExperiment(Experiment):
         self.register_task(WaitFor)
         self.register_task(WaitUntil)
         self.register_task(MyTask)
+        self.register_task(NewFile)
 
 
 def main(*args) -> None:
