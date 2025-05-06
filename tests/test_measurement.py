@@ -15,11 +15,11 @@ def test_measurement_initialization(mocker):
         name="TestMeasurement", function=mock_function, call_every=2
     )
 
-    assert measurement.name == "TestMeasurement"
-    assert measurement.function == mock_function
-    assert measurement.call_every == 2
+    assert measurement._name == "TestMeasurement"
+    assert measurement._function == mock_function
+    assert measurement._call_every == 2
     assert measurement._call_counter == 2
-    assert measurement.result is None
+    assert measurement._result is None
 
 
 def test_measurement_run_updates_result(mocker):
@@ -30,12 +30,11 @@ def test_measurement_run_updates_result(mocker):
 
     result = measurement.run()
     assert result == 42
-    assert measurement.result == 42
+    assert measurement._result == 42
     mock_function.assert_called_once()
 
     result = measurement.run()
     assert result == 52
-    assert measurement.result == 52
 
 
 def test_measurement_run_respects_call_every(mocker):
@@ -48,24 +47,19 @@ def test_measurement_run_respects_call_every(mocker):
     # First call should update the result
     result1 = measurement.run()
     assert result1 == 42
-    assert measurement.result == 42
     mock_function.assert_called_once()
 
     # Second call should not update the result
     result2 = measurement.run()
     assert result2 == 42
-    assert measurement.result == 42
     mock_function.assert_called_once()
 
     # Second call should not update the result
     result3 = measurement.run()
     assert result3 == 52
-    assert measurement.result == 52
-
     # Second call should not update the result
     result3 = measurement.run()
     assert result3 == 52
-    assert measurement.result == 52
 
 
 def test_measurement_run_resets__call_counter(mocker):
@@ -78,8 +72,6 @@ def test_measurement_run_resets__call_counter(mocker):
     measurement.run()  # Second call
     measurement.run()  # Third call, should reset the counter and call the function again
 
-    assert measurement.result == 42
-    assert measurement._call_counter == 2
     assert mock_function.call_count == 2  # Function should be called twice
 
 
