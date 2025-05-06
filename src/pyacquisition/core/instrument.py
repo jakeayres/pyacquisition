@@ -1,6 +1,27 @@
 from functools import partial, wraps
 import inspect
+from enum import Enum
 
+
+class BaseEnum(Enum):
+    """Base class for Enums used as args in query/command methods."""
+
+    def __init__(self, raw_value, label):
+        self.raw_value = raw_value
+        self.label = label
+
+    @property
+    def value(self):
+        return self.label
+    
+
+    @classmethod
+    def from_raw_value(cls, raw_value):
+        for item in cls:
+            if item.raw_value == raw_value:
+                return item
+        raise ValueError(f"Invalid raw value: {raw_value}")
+    
 
 class QueryCommandProvider(type):
     """Metaclass that reads through methods and registers

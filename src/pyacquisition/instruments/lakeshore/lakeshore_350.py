@@ -1,130 +1,81 @@
-import enum
 from typing import List
-
-from ...core.instrument import Instrument, mark_query, mark_command
-
-
-class State(enum.Enum):
-    OFF = 0
-    ON = 1
+from ...core.instrument import Instrument, BaseEnum, mark_query, mark_command
 
 
-class StateModel(enum.Enum):
-    OFF = "Off"
-    ON = "On"
+class State(BaseEnum):
+    OFF = (0, 'Off')
+    ON = (1, 'On')
 
 
-class InputChannel(enum.Enum):
-    INPUT_A = "A"
-    INPUT_B = "B"
-    INPUT_C = "C"
-    INPUT_D = "D"
+class InputChannelState(BaseEnum):
+    INPUT_A = ('A', 'Input A')
+    INPUT_B = ('B', 'Input B')
+    INPUT_C = ('C', 'Input C')
+    INPUT_D = ('D', 'Input D')
 
 
-class InputChannelModel(enum.Enum):
-    INPUT_A = "Input A"
-    INPUT_B = "Input B"
-    INPUT_C = "Input C"
-    INPUT_D = "Input D"
+class OutputChannel(BaseEnum):
+    OUTPUT_1 = (1, 'Output 1')
+    OUTPUT_2 = (2, 'Output 2')
+    OUTPUT_3 = (3, 'Output 3')
+    OUTPUT_4 = (4, 'Output 4')
+    
+
+class AutotuneMode(BaseEnum):
+    P = (0, 'P')
+    PI = (1, 'PI')
+    PID = (2, 'PID')
 
 
-class OutputChannel(enum.Enum):
-    OUTPUT_1 = 1
-    OUTPUT_2 = 2
-    OUTPUT_3 = 3
-    OUTPUT_4 = 4
+class CurveFormat(BaseEnum):
+    MV_K = (1, 'mV/K')
+    V_K = (2, 'V/K')
+    OHM_K = (3, 'Ohm/K')
+    LOGOHM_K = (4, 'log(Ohm)/K')
 
 
-class OutputChannelModel(enum.Enum):
-    OUTPUT_1 = "Output 1"
-    OUTPUT_2 = "Output 2"
-    OUTPUT_3 = "Output 3"
-    OUTPUT_4 = "Output 4"
+class CurveCoefficient(BaseEnum):
+    NEGATIVE = (1, 'Negative')
+    POSITIVE = (2, 'Positive')
 
 
-class AutotuneMode(enum.Enum):
-    P = 0
-    PI = 1
-    PID = 2
+class DisplayContrastLevel(BaseEnum):
+    OFF = (0, 'Off')
+    DIM = (1, 'Dim')
+    NORMAL = (2, 'Normal')
+    BRIGHT = (3, 'Bright')
+    MAXIMUM = (4, 'Maximum')
+
+class DisplayMode(BaseEnum):
+    INPUT_A = (0, 'Input A')
+    INPUT_B = (1, 'Input B')
+    INPUT_C = (2, 'Input C')
+    INPUT_D = (3, 'Input D')
+    FOUR_LOOP = (5, 'Four Loop')
+    ALL_INPUTS = (6, 'All Inputs')
+    INPUT_D2 = (7, 'Input D2')
+    INPUT_D3 = (8, 'Input D3')
+    INPUT_D4 = (9, 'Input D4')
+    INPUT_D5 = (10, 'Input D5')
+
+class DisplayCustomNumerber(BaseEnum):
+    LARGE_2 = (0, 'Large 2')
+    LARGE_4 = (1, 'Large 4')
+    SMALL_8 = (2, 'Small 8')
 
 
-class AutotuneModeModel(enum.Enum):
-    P = "P"
-    PI = "PI"
-    PID = "PID"
+class DisplayAllInputsSize(BaseEnum):
+    SMALL = (0, 'Small')
+    LARGE = (1, 'Large')
 
 
-class CurveFormat(enum.Enum):
-    MV_K = 1
-    V_K = 2
-    OHM_K = 3
-    LOGOHM_K = 4
+class Lakeshore_340(Instrument):
+    """Class for controlling the Lakeshore 340 temperature controller."""
 
-
-class CurveFormatModel(enum.Enum):
-    MV_K = "mV / K"
-    V_K = "V / K"
-    OHM_K = "Ohm / K"
-    LOGOHM_K = "log(Ohm) / K"
-
-
-class CurveCoefficient(enum.Enum):
-    NEGATIVE = 1
-    POSITIVE = 2
-
-
-class CurveCoefficientModel(enum.Enum):
-    NEGATIVE = "Negative"
-    POSITIVE = "Positive"
-
-
-class DisplayContrast(enum.Enum):
-    OFF = 1
-    DIM = 12
-    NORMAL = 18
-    BRIGHT = 26
-    MAXIMUM = 32
-
-
-class DisplayContrastModel(enum.Enum):
-    OFF = "Off"
-    DIM = "Dim"
-    NORMAL = "Normal"
-    BRIGHT = "Bright"
-    MAXIMUM = "Maximum"
-
-
-class DisplayMode(enum.Enum):
-    INPUT_A = 0
-    INPUT_B = 1
-    INPUT_C = 2
-    INPUT_D = 3
-    FOUR_LOOP = 5
-    ALL_INPUTS = 6
-    INPUT_D2 = 7
-    INPUT_D3 = 8
-    INPUT_D4 = 9
-    INPUT_D5 = 10
-
-
-class DisplayCustomNumber(enum.Enum):
-    LARGE_2 = 0
-    LARGE_4 = 1
-    SMALL_8 = 2
-
-
-class DisplayAllInputsSize(enum.Enum):
-    SMALL = 0
-    LARGE = 1
-
-
-class Lakeshore_350(Instrument):
-    """Class for controlling the Lakeshore 350 temperature controller."""
-
-    name = "Lakeshore_350"
+    name = "Lakeshore_340"
 
     def __init__(self, *args, **kwargs):
-        """Initializes the Lakeshore 350 instrument."""
+        """Initializes the Lakeshore 340 instrument."""
         super().__init__(*args, **kwargs)
         self.clear()
         self.clear_event_register()

@@ -1,12 +1,24 @@
 from ...core.instrument import SoftwareInstrument, mark_query, mark_command
 from ...core.logging import logger
-
 from enum import Enum
 
 
-class StringEnum(Enum):
-    INTERNAL = "Internal"
-    EXTERNAL = "External"
+class BaseEnum(Enum):
+
+    def __init__(self, raw_value, label):
+        self.raw_value = raw_value
+        self.label = label
+
+    @property
+    def value(self):
+        return self.label
+
+
+
+class IntEnum(BaseEnum):
+    SEVEN = (7, "Seven")
+    NINE = (9, "Nine")
+    
 
 
 class MockInstrument(SoftwareInstrument):
@@ -28,23 +40,23 @@ class MockInstrument(SoftwareInstrument):
         return x + y
 
     @mark_query
-    def method_with_enum_args(self, x: StringEnum, y: StringEnum) -> str:
+    def method_with_enum_args(self, x: IntEnum, y: IntEnum) -> str:
         """
         A mock method that simulates some processing with enum arguments.
 
         Args:
-            x (StringEnum): The first input value.
-            y (StringEnum): The second input value.
+            x (IntEnum): The first input value.
+            y (IntEnum): The second input value.
 
         Returns:
             str: A string indicating the method was called.
         """
         logger.info(f"Method called with x: {x}, y: {y}")
         ans = 0
-        if x == StringEnum.INTERNAL:
-            ans += 1
-        if y == StringEnum.EXTERNAL:
-            ans += 2
+        if x == IntEnum.SEVEN:
+            ans += 7
+        if y == IntEnum.NINE:
+            ans += 9
         return ans
 
     @mark_command

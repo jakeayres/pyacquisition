@@ -1,109 +1,57 @@
-from enum import Enum
-from ...core.instrument import Instrument, mark_query
+from ...core.instrument import BaseEnum, Instrument, mark_query
 
 
-class SystemStatusM(Enum):
-    NORMAL = 0
-    QUENCHED = 1
-    OVERHEATED = 2
-    WARMING_UP = 4
-    FAULT = 8
+class SystemStatusM(BaseEnum):
+    NORMAL = (0, "Normal")
+    QUENCHED = (1, "Quenched")
+    OVERHEATED = (2, "Overheated")
+    WARMING_UP = (4, "Warming up")
+    FAULT = (8, "Fault")
 
 
-class SystemStatusMModel(Enum):
-    NORMAL = "Normal"
-    QUENCHED = "Quenched"
-    OVERHEATED = "Overheaded"
-    WARMING_UP = "Warming up"
-    FAULT = "Fault"
+class SystemStatusN(BaseEnum):
+    NORMAL = (0, "Normal")
+    POSITIVE_VOLTAGE_LIMIT = (1, "On positive voltage limit")
+    NEGATIVE_VOLTAGE_LIMIT = (2, "On negative voltage limit")
+    NEGATIVE_CURRENT_LIMIT = (4, "Outside negative current limit")
+    POSITIVE_CURRENT_LIMIT = (8, "Outside positive current limit")
 
 
-class SystemStatusN(Enum):
-    NORMAL = 0
-    POSITIVE_VOLTAGE_LIMIT = 1
-    NEGATIVE_VOLTAGE_LIMIT = 2
-    NEGATIVE_CURRENT_LIMIT = 4
-    POSITIVE_CURRENT_LIMIT = 8
+class ActivityStatus(BaseEnum):
+    HOLD = (0, "Hold")
+    TO_SETPOINT = (1, "To setpoint")
+    TO_ZERO = (2, "To zero")
+    CLAMPED = (4, "Clamped")
 
 
-class SystemStatusNModel(Enum):
-    NORMAL = "Normal"
-    POSITIVE_VOLTAGE_LIMIT = "On positive voltage limit"
-    NEGATIVE_VOLTAGE_LIMIT = "On negative voltage limit"
-    NEGATIVE_CURRENT_LIMIT = "Outside negative current limit"
-    POSITIVE_CURRENT_LIMIT = "Outside positive current limit"
+class RemoteStatus(BaseEnum):
+    LOCAL_LOCKED = (0, "Local and locked")
+    REMOTE_LOCKED = (1, "Remote and locked")
+    LOCAL_UNLOCKED = (2, "Local and unlocked")
+    REMOTE_UNLOCKED = (3, "Remote and unlocked")
 
 
-class ActivityStatus(Enum):
-    HOLD = 0
-    TO_SETPOINT = 1
-    TO_ZERO = 2
-    CLAMPED = 4
+class SwitchHeaterStatus(BaseEnum):
+    OFF_AT_ZERO = (0, "Off (closed) at zero field")
+    ON = (1, "On (open)")
+    OFF_AT_FIELD = (2, "Off (closed) at field")
+    FAULT = (3, "Fault")
+    NOT_FITTED = (4, "Not fitted")
 
 
-class ActivityStatusModel(Enum):
-    HOLD = "Hold"
-    TO_SETPOINT = "To setpoint"
-    TO_ZERO = "To zero"
-    CLAMPED = "Clamped"
+class ModelStatusM(BaseEnum):
+    FAST_AMPS = (0, "Fast sweep (amps)")
+    FAST_TESLA = (1, "Fast sweep (tesla)")
+    SLOW_AMPS = (4, "Slow sweep (amps)")
+    SLOW_TESLA = (5, "Slow sweep (tesla)")
 
 
-class RemoteStatus(Enum):
-    LOCAL_LOCKED = 0
-    REMOTE_LOCKED = 1
-    LOCAL_UNLOCKED = 2
-    REMOTE_UNLOCKED = 3
+class ModelStatusN(BaseEnum):
+    REST = (0, "At rest (constant output)")
+    SWEEPING = (1, "Sweeping")
+    LIMITING = (2, "Sweep limiting")
+    SWEEPING_LIMITING = (3, "Sweeping and sweep limiting")
 
-
-class RemoteStatusModel(Enum):
-    LOCAL_LOCKED = "Local and locked"
-    REMOTE_LOCKED = "Remote and locked"
-    LOCAL_UNLOCKED = "Local and unlocked"
-    REMOTE_UNLOCKED = "Remote and unlocked"
-
-
-class SwitchHeaterStatus(Enum):
-    OFF_AT_ZERO = 0
-    ON = 1
-    OFF_AT_FIELD = 2
-    FAULT = 3
-    NOT_FITTED = 4
-
-
-class SwitchHeaterStatusModel(Enum):
-    OFF_AT_ZERO = "Off (closed) at zero field"
-    ON = "On (open)"
-    OFF_AT_FIELD = "Off (closed) at field"
-    FAULT = "Fault"
-    NOT_FITTED = "Not fitted"
-
-
-class ModeStatusM(Enum):
-    FAST_AMPS = 0
-    FAST_TESLA = 1
-    SLOW_AMPS = 4
-    SLOW_TESLA = 5
-
-
-class ModeStatusMModel(Enum):
-    FAST_AMPS = "Fast sweep (amps)"
-    FAST_TESLA = "Fast sweep (tesla)"
-    SLOW_AMPS = "Slow sweep (amps)"
-    SLOW_TESLA = "Slow sweep (tesla)"
-
-
-class ModeStatusN(Enum):
-    REST = 0
-    SWEEPING = 1
-    LIMITING = 2
-    SWEEPING_LIMITING = 3
-
-
-class ModeStatusNModel(Enum):
-    REST = "At rest (constant output)"
-    SWEEPING = "Sweeping"
-    LIMITING = "Sweep limiting"
-    SWEEPING_LIMITING = "Sweeping and sweep limiting"
 
 
 class Mercury_IPS(Instrument):
