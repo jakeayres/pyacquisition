@@ -51,6 +51,7 @@ class Experiment:
         api_server_host: str = "localhost",
         api_server_port: int = 8000,
         measurement_period: float = 0.25,
+        gui: bool = True,
     ) -> None:
         """
         Initializes the Experiment instance.
@@ -66,6 +67,7 @@ class Experiment:
             api_server_host (str): The host address for the API server. Defaults to "localhost".
             api_server_port (int): The port number for the API server. Defaults to 8000.
             measurement_period (float): The time interval between measurements in seconds. Defaults to 0.25.
+            ui (bool): Whether to run the GUI. Defaults to True.
         """
         self._root_path: Path = Path(root_path)
         self._data_path: Path = self._root_path / Path(data_path)
@@ -92,6 +94,7 @@ class Experiment:
 
         self._task_manager = TaskManager()
 
+        self._run_gui = gui
         self._gui = Gui(host=api_server_host, port=api_server_port)
 
         self._scribe = Scribe(
@@ -253,6 +256,7 @@ class Experiment:
                 api_server_host=config.get("api_server", {}).get("host", "localhost"),
                 api_server_port=config.get("api_server", {}).get("port", 8000),
                 measurement_period=config.get("rack", {}).get("period", 0.25),
+                gui=config.get("gui", {}).get("run", True),
             )
         except KeyError as e:
             raise ValueError(f"Missing required configuration key: {e}")
@@ -436,7 +440,8 @@ class Experiment:
         try:
             self.setup()
             try:
-                self._ui_process = self._gui.run_in_new_process()
+                if self._run_gui:
+                    self._ui_process = self._gui.run_in_new_process()
             except Exception as e:
                 logger.error(f"Error during experiment setup: {e}")
                 raise
@@ -451,7 +456,11 @@ class Experiment:
             logger.error(f"Task group terminated due to an error: {e}")
         finally:
             try:
-                self._ui_process.join()
+                if self._run_gui:
+                    logger.debug("Waiting for GUI process to finish")
+                    self._ui_process.terminate()
+                    self._ui_process.join()
+                    logger.debug("GUI process terminated")
             except Exception as e:
                 logger.error(f"Error during experiment teardown: {e}")
                 raise
