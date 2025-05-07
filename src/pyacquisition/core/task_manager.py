@@ -177,15 +177,6 @@ class TaskManager:
                     "data": None,
                 }
 
-        @api_server.app.get("/task_manager/add_task", tags=["Task Manager"])
-        async def add_task():
-            """
-            Endpoint to add a task to the queue.
-            """
-            from ..tasks import TestTask
-
-            logger.info("Adding task to queue")
-            self.add_task(TestTask())
 
         @api_server.app.get("/task_manager/task_list", tags=["Task Manager"])
         async def task_list():
