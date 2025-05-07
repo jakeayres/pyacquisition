@@ -1,5 +1,0 @@
-2025-05-07 at 20:39:27 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log, gui level=DEBUG
-2025-05-07 at 20:39:27 | DEBUG | [FastApi] APIServer initialized
-2025-05-07 at 20:39:27 | DEBUG | [FastApi] WebSocket endpoint added at '/data'
-2025-05-07 at 20:39:27 | DEBUG | [FastApi] WebSocket endpoint added at '/logs'
-2025-05-07 at 20:39:27 | INFO | [Experiment] Fully initialized

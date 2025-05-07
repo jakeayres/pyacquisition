@@ -4,7 +4,6 @@ import uvicorn
 import inspect
 from .logging import logger
 from .consumer import Consumer
-from .response import DictResponse
 from enum import Enum
 
 
@@ -172,7 +171,7 @@ class APIServer:
             """
             Endpoint to check if the API server is running.
             """
-            return 'pong'
+            return "pong"
 
         @api_server.app.get("/list_websockets")
         async def list_websockets() -> list:

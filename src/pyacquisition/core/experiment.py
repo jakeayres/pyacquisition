@@ -109,7 +109,7 @@ class Experiment:
 
         self._api_server.add_websocket_endpoint("/logs")
         self._api_server.websocket_endpoints["/logs"].subscribe_to(logger)
-        
+
         logger.info("[Experiment] Fully initialized")
 
     @staticmethod
@@ -282,7 +282,7 @@ class Experiment:
                 if instrument.get("adapter", None) is None:
                     logger.debug(f"Creating instrument '{name}' without adapter")
                     inst = instrument_class(name)
-                    experiment.rack.add_instrument(inst)
+                    experiment._rack.add_instrument(inst)
                 else:
                     logger.debug(
                         f"Creating instrument '{name}' with adapter '{instrument['adapter']}'"
@@ -293,7 +293,7 @@ class Experiment:
                     )
                     if resource:
                         inst = instrument_class(name, resource)
-                        experiment.rack.add_instrument(inst)
+                        experiment._rack.add_instrument(inst)
                     else:
                         logger.warning(
                             f"Failed to open resource '{instrument.get('resource', None)}' for instrument '{name}'"
@@ -317,13 +317,13 @@ class Experiment:
                 method_name = measurement.get("method")
                 args = measurement.get("args", None)
 
-                if instrument_name not in experiment.rack.instruments:
+                if instrument_name not in experiment._rack.instruments:
                     logger.warning(
                         f"Instrument '{instrument_name}' not found for measurement '{name}'"
                     )
                     continue
 
-                instrument = experiment.rack.instruments[instrument_name]
+                instrument = experiment._rack.instruments[instrument_name]
 
                 if method_name not in instrument.queries:
                     logger.warning(
@@ -336,7 +336,7 @@ class Experiment:
                 if args:
                     method = cls._resolve_method_args(method, args)
 
-                experiment.rack.add_measurement(Measurement(name, method))
+                experiment._rack.add_measurement(Measurement(name, method))
             except Exception as e:
                 logger.warning(f"Failed to configure measurement '{name}': {e}")
 
@@ -366,34 +366,14 @@ class Experiment:
         return partial(method, **resolved_args)
 
     @property
-    def rack(self) -> Rack:
+    def instruments(self) -> dict:
         """
-        Returns the rack associated with the experiment.
+        Returns the instruments associated with the experiment.
 
         Returns:
-            Rack: The rack instance.
+            dict: A dictionary of instrument instances.
         """
-        return self._rack
-
-    @property
-    def task_manager(self) -> TaskManager:
-        """
-        Returns the task manager associated with the experiment.
-
-        Returns:
-            TaskManager: The task manager instance.
-        """
-        return self._task_manager
-
-    @property
-    def scribe(self) -> Scribe:
-        """
-        Returns the scribe associated with the experiment.
-
-        Returns:
-            Scribe: The scribe instance.
-        """
-        return self._scribe
+        return self._rack.instruments
 
     def setup(self) -> None:
         """

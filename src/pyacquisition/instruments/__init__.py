@@ -1,12 +1,11 @@
-from .software import Clock
+from .software import Clock, Calculator
 from .stanford_research import SR_830, SR_860
 from .lakeshore import Lakeshore_340, Lakeshore_350
 from .oxford_instruments import Mercury_IPS
-from .mock import MockInstrument
 
 
 instrument_map = {
-    "Mock": MockInstrument,
+    "Calculator": Calculator,
     "Clock": Clock,
     "SR_830": SR_830,
     "SR_860": SR_860,

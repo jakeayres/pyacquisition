@@ -177,7 +177,6 @@ class TaskManager:
                     "data": None,
                 }
 
-
         @api_server.app.get("/task_manager/task_list", tags=["Task Manager"])
         async def task_list():
             """
