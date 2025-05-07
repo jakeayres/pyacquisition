@@ -1,4 +1,4 @@
-from ...core.instrument import SoftwareInstrument, BaseEnum, mark_query
+from ...core.instrument import SoftwareInstrument, BaseEnum, mark_query, mark_command
 import math
 
 
@@ -6,6 +6,10 @@ class TrigFunction(BaseEnum):
     SIN = (0, "sine")
     COS = (1, "cosine")
     TAN = (2, "tangent")
+    
+class AngleUnit(BaseEnum):
+    DEGREE = (0, "degree")
+    RADIAN = (1, "radian")
 
 
 class Calculator(SoftwareInstrument):
@@ -14,6 +18,35 @@ class Calculator(SoftwareInstrument):
 
     Mainly used as a test instrument for the pyacquisition framework.
     """
+    
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._units = AngleUnit.RADIAN
+        
+        
+    @mark_command
+    def set_angle_unit(self, unit: AngleUnit) -> int:
+        """
+        Sets the angle unit for trigonometric functions.
+
+        Args:
+            unit (AngleUnit): The angle unit to set.
+        """
+        self._units = unit
+        return 0
+    
+    
+    @mark_query
+    def get_angle_unit(self) -> AngleUnit:
+        """
+        Gets the current angle unit.
+
+        Returns:
+            AngleUnit: The current angle unit.
+        """
+        return self._units
+        
 
     @mark_query
     def one(self) -> float:

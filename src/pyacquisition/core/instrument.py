@@ -20,6 +20,13 @@ class BaseEnum(Enum):
             if item.raw_value == raw_value:
                 return item
         raise ValueError(f"Invalid raw value: {raw_value}")
+    
+    @classmethod
+    def from_label(cls, label):
+        for item in cls:
+            if item.label == label:
+                return item
+        raise ValueError(f"Invalid label: {label}")
 
 
 class QueryCommandProvider(type):
