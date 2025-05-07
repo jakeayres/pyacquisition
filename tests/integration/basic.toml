@@ -2,7 +2,7 @@
 root_path = "data"
 
 [rack]
-period = 0.25
+period = 0.45
 
 [instruments]
 clock = {instrument = "Clock"}

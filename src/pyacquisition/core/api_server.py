@@ -168,21 +168,15 @@ class APIServer:
         """
 
         @api_server.app.get("/ping")
-        async def ping() -> DictResponse:
+        async def ping() -> str:
             """
             Endpoint to check if the API server is running.
             """
-            return DictResponse(
-                status=200,
-                data={"message": "Pong!"},
-            )
+            return 'pong'
 
         @api_server.app.get("/list_websockets")
-        async def list_websockets() -> DictResponse:
+        async def list_websockets() -> list:
             """
             Endpoint to list all available WebSocket endpoints.
             """
-            return DictResponse(
-                status=200,
-                data={"websockets": list(api_server.websocket_endpoints.keys())},
-            )
+            return list(api_server.websocket_endpoints.keys())

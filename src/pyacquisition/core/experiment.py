@@ -109,6 +109,8 @@ class Experiment:
 
         self._api_server.add_websocket_endpoint("/logs")
         self._api_server.websocket_endpoints["/logs"].subscribe_to(logger)
+        
+        logger.info("[Experiment] Fully initialized")
 
     @staticmethod
     def _read_toml(toml_file: str) -> dict:
