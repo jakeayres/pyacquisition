@@ -37,6 +37,7 @@ class Logger(Broadcaster):
         self._initialized = True
         self._gui_level = "DEBUG"
         self.log_path: Path = Path()
+        loguru_logger.remove() 
 
     def _should_broadcast(self, level: str) -> bool:
         return (

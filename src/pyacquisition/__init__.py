@@ -1,3 +1,4 @@
+from .core.logging import logger as logger
 from .core.experiment import Experiment as Experiment
 from .core.measurement import Measurement as Measurement
 from .core.task import Task as Task

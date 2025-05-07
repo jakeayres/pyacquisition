@@ -18,6 +18,14 @@ def temp_log_dir(tmp_path_factory):
     # Cleanup is handled automatically by pytest
 
 
+@pytest.fixture
+def logger_instance_with_config(temp_log_dir):
+    """Fixture to provide a fresh instance of the Logger singleton."""
+    logger = Logger()
+    logger.configure(root_path=temp_log_dir)
+    yield logger
+
+
 def test_logger_singleton(logger_instance):
     """Test that Logger is a singleton."""
     logger1 = logger_instance
