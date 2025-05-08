@@ -1,0 +1,4 @@
+[instruments]
+clock = {instrument = "Clock"}
+lockin = {adapter = "pyvisa", resource = "GPIB0::6::INSTR"}
+

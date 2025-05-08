@@ -2,10 +2,31 @@ import tomllib
 from .logging import logger
 
 
+class TOMLConfigError(Exception):
+    """Custom exception for configuration errors."""
+    pass
+
+
+class UnexpectedSectionError(Exception):
+    """Custom exception for unexpected sections in the configuration."""
+    pass
+
+
+class InvalidInstrumentError(Exception):
+    """Custom exception for invalid instrument configurations."""
+    pass
+
+
+class InvalidMeasurementError(Exception):
+    """Custom exception for invalid measurement configurations."""
+    pass
+
+
+
 class ConfigParser:
 
     
-    ALLOWED_SECTIONS = ['experiment', 'instruments', 'measurements', 'data', 'api_server', 'logging', 'gui']
+    ALLOWED_SECTIONS = ['experiment', 'rack', 'instruments', 'measurements', 'data', 'api_server', 'logging', 'gui']
 
     @staticmethod
     def parse(file_path: str) -> dict:
@@ -16,7 +37,7 @@ class ConfigParser:
         #     with open(file_path, "r", encoding="utf-8") as file:
         #         return yaml.safe_load(file)
         else:
-            raise ValueError(f"Unsupported file type: {file_path}")
+            raise TOMLConfigError(f"Unsupported file type: {file_path}")
         
         if ConfigParser.validate(config):
             logger.debug(f"Config validation passed for: {file_path}")
@@ -29,23 +50,26 @@ class ConfigParser:
     @staticmethod
     def load_toml(file_path: str) -> dict:
         """Load a TOML file."""
-        with open(file_path, "rb") as file:
-            config = tomllib.load(file)
-        return config
-
+        try:
+            with open(file_path, "rb") as file:
+                config = tomllib.load(file)
+                logger.debug(f"Loaded TOML config from {file_path}")
+                return config
+        except FileNotFoundError:
+            logger.error(f"File not found: {file_path}")
+            raise
+        except tomllib.TOMLDecodeError as e:
+            logger.error(f"Error decoding TOML file: {file_path}. Error: {e}")
+            raise
+        
     @staticmethod
     def validate(config: dict) -> None:
-        
         if not ConfigParser.all_sections_are_valid(config):
-            raise ValueError("Config contains invalid sections.")
-        
+            raise UnexpectedSectionError("Config contains unexpected sections.")
         if not ConfigParser.all_instrument_values_are_dicts(config):
-            raise ValueError("Config contains invalid instrument values.")#
-        
+            raise InvalidInstrumentError("Config contains instrument entries that are not dictionaries.")
         if not ConfigParser.all_instrument_dicts_contain_instrument(config):
-            raise ValueError("Config contains instrument dictionaries without 'instrument' key.")
-        
-        
+            raise InvalidInstrumentError("Config contains instrument dictionaries that do not contain 'instrument' key.")
         return config
 
     @staticmethod
@@ -77,14 +101,35 @@ class ConfigParser:
                 logger.warning(f"Instrument '{instrument}' dictionary does not contain 'instrument' key.")
                 return False
         return True
+    
+    
+    @staticmethod
+    def all_measurement_values_are_dicts(config: dict) -> bool:
+        """Check if all measurements in the config are dictionaries."""
+        for measurement, values in config.get("measurements", {}).items():
+            if not isinstance(values, dict):
+                logger.warning(f"Measurement '{measurement}' does not have a dictionary value.")
+                return False
+        return True
+    
+    
+    @staticmethod
+    def all_measurement_dicts_contain_instrument(config: dict) -> bool:
+        """Check if all measurement dictionaries contain the 'instrument' key."""
+        for measurement, values in config.get("measurements", {}).items():
+            if not isinstance(values, dict):
+                logger.warning(f"Measurement '{measurement}' does not have a dictionary value.")
+                return False
+            if "instrument" not in values:
+                logger.warning(f"Measurement '{measurement}' dictionary does not contain 'instrument' key.")
+                return False
+        return True
+
 
     @staticmethod
     def all_measurement_instruments_exist(config: dict) -> bool:
         """Check if all measurement instruments exist in the config."""
         for measurement in config.get("measurements", {}):
-            if "instrument" not in measurement:
-                logger.warning(f"Measurement '{measurement}' does not have an 'instrument' key.")
-                return False
             if measurement["instrument"] not in config.get("instruments", {}):
                 logger.warning(f"Instrument '{measurement['instrument']}' not found in instruments.")
                 return False

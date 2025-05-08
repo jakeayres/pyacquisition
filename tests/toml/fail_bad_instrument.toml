@@ -1,0 +1,4 @@
+[instruments]
+clock = {instrument = "Clock"}
+calculator = "Calculator"
+
