@@ -56,8 +56,6 @@ class ModeStatusN(BaseEnum):
 class Mercury_IPS(Instrument):
     """Class for controlling the Oxford Instruments Mercury IPS device."""
 
-    name = "Mercury_IPS"
-
     @mark_query
     def identify(self) -> str:
         """Identifies the device.

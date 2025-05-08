@@ -74,8 +74,6 @@ class DisplayAllInputsSize(BaseEnum):
 class Lakeshore_340(Instrument):
     """Class for controlling the Lakeshore 340 temperature controller."""
 
-    name = "Lakeshore_340"
-
     def __init__(self, *args, **kwargs):
         """Initializes the Lakeshore 340 instrument."""
         super().__init__(*args, **kwargs)
@@ -300,7 +298,9 @@ class Lakeshore_340(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f"RAMP {output_channel.raw_value},{state.raw_value},{rate:.3f}")
+        return self.command(
+            f"RAMP {output_channel.raw_value},{state.raw_value},{rate:.3f}"
+        )
 
     @mark_query
     def get_ramp(self, output_channel: OutputChannel) -> float:

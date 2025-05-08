@@ -112,8 +112,6 @@ class SR_830(Instrument):
     Stanford Research SR-830 Lock-In Amplifier class.
     """
 
-    name = "SR_830"
-
     @mark_query
     def identify(self) -> str:
         """Queries the instrument identification string.
