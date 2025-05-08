@@ -13,6 +13,7 @@ time = {instrument = "clock", method = "time"}
 one = {instrument = "calculator", method = "one"}
 add = {instrument = "calculator", method = "add", args = {x = 1.0, y = 2.0}}
 sine_one = {instrument = "calculator", method = "trig", args = {x = 1.0, function = "SIN"}}
+temperature  = {instrument = "calculator", method = "get_temperature", args = {input_channel = "INPUT_A"}}
 
 [data]
 path = "data_sub"

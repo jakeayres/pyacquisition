@@ -2,7 +2,7 @@
 root_path = "data"
 
 [rack]
-period = 0.25
+period = 0.45
 
 [instruments]
 clock = {instrument = "Clock"}
@@ -10,7 +10,7 @@ calculator = {instrument = "Calculator"}
 
 [measurements]
 time = {instrument = "clock", method = "time"}
-sine = {instrument = "calculator", method = "trig", args = {x = 1.0, function = "SIN"}}
+timestamp = {instrument = "clock", method = "timestamp_ms"}
 
 [data]
 path = "data_sub"
@@ -25,3 +25,6 @@ console_level = "DEBUG"
 gui_level = "DEBUG"
 file_level = "DEBUG"
 file_name = "debug.log"
+
+[gui]
+run = false

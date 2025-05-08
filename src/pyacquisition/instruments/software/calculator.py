@@ -13,6 +13,13 @@ class AngleUnit(BaseEnum):
     RADIAN = (1, "radian")
 
 
+class InputChannel(BaseEnum):
+    INPUT_A = ("A", "Input A")
+    INPUT_B = ("B", "Input B")
+    INPUT_C = ("C", "Input C")
+    INPUT_D = ("D", "Input D")
+
+
 class Calculator(SoftwareInstrument):
     """
     A mock calculator instrument that performs basic arithmetic operations.
@@ -22,7 +29,24 @@ class Calculator(SoftwareInstrument):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._units = AngleUnit.RADIAN
+        self._units = 1 # Default to radians
+
+
+    @mark_query
+    def get_temperature(self, input_channel: InputChannel) -> float:
+        """Queries the temperature reading for a specific input channel.
+
+        Args:
+            input_channel (InputChannel): The input channel to query.
+
+        Returns:
+            float: The temperature reading.
+        """
+        if input_channel == InputChannel.INPUT_A:
+            return 25.0
+        elif input_channel == InputChannel.INPUT_B:
+            return 30.0
+
 
     @mark_command
     def set_angle_unit(self, unit: AngleUnit) -> int:
@@ -32,8 +56,8 @@ class Calculator(SoftwareInstrument):
         Args:
             unit (AngleUnit): The angle unit to set.
         """
-        self._units = unit
-        return 0
+        self._units = unit.raw_value
+        return self._units
 
     @mark_query
     def get_angle_unit(self) -> AngleUnit:
@@ -43,8 +67,8 @@ class Calculator(SoftwareInstrument):
         Returns:
             AngleUnit: The current angle unit.
         """
-        return self._units
-
+        return AngleUnit.from_raw_value(self._units)
+    
     @mark_query
     def one(self) -> float:
         """

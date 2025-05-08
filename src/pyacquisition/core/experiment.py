@@ -14,6 +14,7 @@ from ..gui import Gui
 from ..instruments import instrument_map
 from .measurement import Measurement
 from .adapters import get_adapter
+from .instrument import BaseEnum
 
 
 class Experiment:
@@ -312,6 +313,7 @@ class Experiment:
         """
         measurements = config.get("measurements", {})
         for name, measurement in measurements.items():
+            logger.debug(f"Configuring measurement '{name}'")
             try:
                 instrument_name = measurement.get("instrument")
                 method_name = measurement.get("method")
@@ -359,9 +361,11 @@ class Experiment:
                 arg_value = args[arg_name]
                 if inspect.isclass(arg_type.annotation) and issubclass(
                     arg_type.annotation, Enum
-                ):
+                ):  
+                    logger.debug(f"Resolving Enum type for argument '{arg_name}': {arg_value}")
                     resolved_args[arg_name] = arg_type.annotation[arg_value]
                 else:
+                    logger.debug(f"Resolving argument '{arg_name}': {arg_value}")
                     resolved_args[arg_name] = arg_value
         return partial(method, **resolved_args)
 
