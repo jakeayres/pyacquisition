@@ -50,24 +50,28 @@ def test_instrument_identify_endpoint(running_experiment, toml_config):
         assert response.status_code == 200, (
             f"Identify endpoint for {instrument} should return 200 OK"
         )
-        
-        
+
+
 def test_set_get_enum_endpoints(running_experiment):
-    response = requests.get("http://localhost:8005/calculator/set_angle_unit?unit=degree")
+    response = requests.get(
+        "http://localhost:8005/calculator/set_angle_unit?unit=degree"
+    )
     assert response.status_code == 200
-    assert response.json()['data'] == 0
-    
+    assert response.json()["data"] == 0
+
     response = requests.get("http://localhost:8005/calculator/get_angle_unit")
     assert response.status_code == 200
-    assert response.json()['data'] == "degree"
-    
-    response = requests.get("http://localhost:8005/calculator/set_angle_unit?unit=radian")
+    assert response.json()["data"] == "degree"
+
+    response = requests.get(
+        "http://localhost:8005/calculator/set_angle_unit?unit=radian"
+    )
     assert response.status_code == 200
-    assert response.json()['data'] == 0
-    
+    assert response.json()["data"] == 0
+
     response = requests.get("http://localhost:8005/calculator/get_angle_unit")
     assert response.status_code == 200
-    assert response.json()['data'] == "radian"
+    assert response.json()["data"] == "radian"
 
 
 def test_float_endpoint(running_experiment):

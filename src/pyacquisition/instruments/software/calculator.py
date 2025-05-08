@@ -6,7 +6,8 @@ class TrigFunction(BaseEnum):
     SIN = (0, "sine")
     COS = (1, "cosine")
     TAN = (2, "tangent")
-    
+
+
 class AngleUnit(BaseEnum):
     DEGREE = (0, "degree")
     RADIAN = (1, "radian")
@@ -18,13 +19,11 @@ class Calculator(SoftwareInstrument):
 
     Mainly used as a test instrument for the pyacquisition framework.
     """
-    
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._units = AngleUnit.RADIAN
-        
-        
+
     @mark_command
     def set_angle_unit(self, unit: AngleUnit) -> int:
         """
@@ -35,8 +34,7 @@ class Calculator(SoftwareInstrument):
         """
         self._units = unit
         return 0
-    
-    
+
     @mark_query
     def get_angle_unit(self) -> AngleUnit:
         """
@@ -46,7 +44,6 @@ class Calculator(SoftwareInstrument):
             AngleUnit: The current angle unit.
         """
         return self._units
-        
 
     @mark_query
     def one(self) -> float:

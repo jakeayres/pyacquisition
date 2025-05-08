@@ -7,7 +7,7 @@ class State(BaseEnum):
     ON = (1, "On")
 
 
-class InputChannelState(BaseEnum):
+class InputChannel(BaseEnum):
     INPUT_A = ("A", "Input A")
     INPUT_B = ("B", "Input B")
     INPUT_C = ("C", "Input C")
@@ -277,65 +277,65 @@ class Lakeshore_350(Instrument):
         return [int(i) for i in self.query("DISPLAY?").split(",")]
 
     @mark_query
-    def get_temperature(self, input_channel: int) -> float:
+    def get_temperature(self, input_channel: InputChannel) -> float:
         """Queries the temperature reading for a specific input channel.
 
         Args:
-            input_channel (int): The input channel to query.
+            input_channel (InputChannel): The input channel to query.
 
         Returns:
             float: The temperature reading.
         """
-        return float(self.query(f"KRDG? {input_channel}"))
+        return float(self.query(f"KRDG? {input_channel.raw_value}"))
 
     @mark_command
-    def set_ramp(self, output_channel: int, state: int, rate: float) -> int:
+    def set_ramp(self, output_channel: OutputChannel, state: State, rate: float) -> int:
         """Sets the ramp configuration for a specific output channel.
 
         Args:
-            output_channel (int): The output channel to configure.
-            state (int): The state of the ramp (ON/OFF).
+            output_channel (OutputChannel): The output channel to configure.
+            state (State): The state of the ramp (ON/OFF).
             rate (float): The ramp rate.
 
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f"RAMP {output_channel},{state},{rate:.3f}")
+        return self.command(f"RAMP {output_channel.raw_value},{state.raw_value},{rate:.3f}")
 
     @mark_query
-    def get_ramp(self, output_channel: int) -> float:
+    def get_ramp(self, output_channel: OutputChannel) -> float:
         """Queries the ramp rate for a specific output channel.
 
         Args:
-            output_channel (int): The output channel to query.
+            output_channel (OutputChannel): The output channel to query.
 
         Returns:
             float: The ramp rate.
         """
-        response = self.query(f"RAMP? {output_channel}").split(",")
+        response = self.query(f"RAMP? {output_channel.raw_value}").split(",")
         return float(response[1])
 
     @mark_query
-    def get_setpoint(self, output_channel: int) -> float:
+    def get_setpoint(self, output_channel: OutputChannel) -> float:
         """Queries the setpoint for a specific output channel.
 
         Args:
-            output_channel (int): The output channel to query.
+            output_channel (OutputChannel): The output channel to query.
 
         Returns:
             float: The setpoint value.
         """
-        return float(self.query(f"SETP? {output_channel}"))
+        return float(self.query(f"SETP? {output_channel.raw_value}"))
 
     @mark_command
-    def set_setpoint(self, output_channel: int, setpoint: float) -> int:
+    def set_setpoint(self, output_channel: OutputChannel, setpoint: float) -> int:
         """Sets the setpoint for a specific output channel.
 
         Args:
-            output_channel (int): The output channel to configure.
+            output_channel (OutputChannel): The output channel to configure.
             setpoint (float): The desired setpoint value.
 
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f"SETP {output_channel},{setpoint:.2f}")
+        return self.command(f"SETP {output_channel.raw_value},{setpoint:.2f}")
