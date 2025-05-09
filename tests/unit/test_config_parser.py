@@ -59,7 +59,7 @@ def test_invalid_sections_toml(load_toml_file, file_name):
     "pass_empty.toml",
     "fail_bad_instrument.toml",
 ])
-def test_invalid_instrument_toml(load_toml_file, file_name):
+def test_invalid_instrument_not_dict_toml(load_toml_file, file_name):
     if "pass" in file_name:
         config = load_toml_file(file_name)
         assert ConfigParser.all_instrument_values_are_dicts(config), "Config should contain only valid instrument values"
@@ -73,21 +73,65 @@ def test_invalid_instrument_toml(load_toml_file, file_name):
     "pass_empty.toml",
     "fail_instrument_missing_instrument_key.toml",
 ])
-def test_invalid_instrument_toml(load_toml_file, file_name):
+def test_invalid_instrument_missing_key_toml(load_toml_file, file_name):
     if "pass" in file_name:
         config = load_toml_file(file_name)
         assert ConfigParser.all_instrument_dicts_contain_instrument(config), "Config should contain only valid instrument values"
     elif "fail" in file_name:
         config = load_toml_file(file_name)
         assert not ConfigParser.all_instrument_dicts_contain_instrument(config), "Config should contain invalid instrument values"
-       
-       
+
+
+@pytest.mark.parametrize("files", [
+    ("pass", "pass_basic.toml"),
+    ("pass", "pass_empty.toml"),
+    ("fail", "fail_instrument_not_in_map.toml"),
+])
+
+def test_invalid_instrument_not_in_map_toml(load_toml_file, files):
+    if files[0] == "pass":
+        config = load_toml_file(files[1])
+        assert ConfigParser.all_instruments_in_instrument_map(config), "Config should contain only valid instrument keys"
+    elif files[0] == "fail":
+        config = load_toml_file(files[1])
+        assert not ConfigParser.all_instruments_in_instrument_map(config), "Config should contain invalid instrument keys"
+
+
+
 @pytest.mark.parametrize("file_name", [
     "pass_basic.toml",
     "pass_empty.toml",
-    "fail_measurement_with_nonexistant_instrument.toml",
+    "fail_measurement_not_dict.toml",
 ])
-def test_invalid_measurement(load_toml_file, file_name):
+def test_invalid_measurement_not_dict_toml(load_toml_file, file_name):
+    if "pass" in file_name:
+        config = load_toml_file(file_name)
+        assert ConfigParser.all_measurement_values_are_dicts(config), "Config should contain only valid measurement values"
+    elif "fail" in file_name:
+        config = load_toml_file(file_name)
+        assert not ConfigParser.all_measurement_values_are_dicts(config), "Config should contain invalid measurement values"
+       
+
+@pytest.mark.parametrize("file_name", [
+    "pass_basic.toml",
+    "pass_empty.toml",
+    "fail_measurement_missing_instrument_key.toml",
+])
+def test_invalid_measurement_missing_key_toml(load_toml_file, file_name):
+    if "pass" in file_name:
+        config = load_toml_file(file_name)
+        assert ConfigParser.all_measurement_dicts_contain_instrument(config), "Config should contain only valid measurement values"
+    elif "fail" in file_name:
+        config = load_toml_file(file_name)
+        assert not ConfigParser.all_measurement_dicts_contain_instrument(config), "Config should contain invalid measurement values"
+
+
+@pytest.mark.parametrize("file_name", [
+    "pass_basic.toml",
+    "pass_empty.toml",
+    "fail_measurement_with_unknown_instrument.toml",
+])
+def test_invalid_measurement_unknown_instrument_toml(load_toml_file, file_name):
     if "pass" in file_name:
         config = load_toml_file(file_name)
         assert ConfigParser.all_measurement_instruments_exist(config), "Config should contain only valid instrument values"

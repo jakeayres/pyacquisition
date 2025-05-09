@@ -1,0 +1,7 @@
+[instruments]
+clock = {instrument = "Clock"}
+calculator = {instrument = "Calculator"}
+
+[measurements]
+time = {instrument = "clock", method = "time"}
+timestamp = "clock"

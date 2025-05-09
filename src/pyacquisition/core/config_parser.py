@@ -1,5 +1,6 @@
 import tomllib
 from .logging import logger
+from ..instruments import instrument_map
 
 
 class TOMLConfigError(Exception):
@@ -70,6 +71,14 @@ class ConfigParser:
             raise InvalidInstrumentError("Config contains instrument entries that are not dictionaries.")
         if not ConfigParser.all_instrument_dicts_contain_instrument(config):
             raise InvalidInstrumentError("Config contains instrument dictionaries that do not contain 'instrument' key.")
+        if not ConfigParser.all_instruments_in_instrument_map(config):
+            raise InvalidInstrumentError("Config contains instruments that are not in the instrument map.")
+        if not ConfigParser.all_measurement_values_are_dicts(config):
+            raise InvalidMeasurementError("Config contains measurement entries that are not dictionaries.")
+        if not ConfigParser.all_measurement_dicts_contain_instrument(config):
+            raise InvalidMeasurementError("Config contains measurement dictionaries that do not contain 'instrument' key.")
+        if not ConfigParser.all_measurement_instruments_exist(config):
+            raise InvalidMeasurementError("Config contains measurements with instruments that do not exist.")
         return config
 
     @staticmethod
@@ -102,6 +111,16 @@ class ConfigParser:
                 return False
         return True
     
+
+    @staticmethod
+    def all_instruments_in_instrument_map(config: dict) -> bool:
+        """Check if all instruments in the config are in the instrument map."""
+        for instrument, values in config.get("instruments", {}).items():
+            if values["instrument"] not in instrument_map.keys():
+                logger.warning(f"Instrument '{values['instrument']}' not found in instrument map.")
+                return False
+        return True
+    
     
     @staticmethod
     def all_measurement_values_are_dicts(config: dict) -> bool:
@@ -129,9 +148,10 @@ class ConfigParser:
     @staticmethod
     def all_measurement_instruments_exist(config: dict) -> bool:
         """Check if all measurement instruments exist in the config."""
-        for measurement in config.get("measurements", {}):
-            if measurement["instrument"] not in config.get("instruments", {}):
-                logger.warning(f"Instrument '{measurement['instrument']}' not found in instruments.")
+        for measurement, values in config.get("measurements", {}).items():
+            inst = values["instrument"]
+            if inst not in config.get("instruments", {}).keys():
+                logger.warning(f"Instrument '{inst}' not found in instruments.")
                 return False
         return True
 

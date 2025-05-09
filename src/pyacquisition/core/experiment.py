@@ -14,7 +14,7 @@ from ..gui import Gui
 from ..instruments import instrument_map
 from .measurement import Measurement
 from .adapters import get_adapter
-from .instrument import BaseEnum
+from .config_parser import ConfigParser
 
 
 class Experiment:
@@ -220,7 +220,9 @@ class Experiment:
         Raises:
             ValueError: If the TOML file cannot be loaded or parsed.
         """
-        config = cls._read_toml(toml_file)
+        config = ConfigParser.parse(toml_file)
+        
+            
 
         try:
             experiment = cls._initialize_experiment(config)
