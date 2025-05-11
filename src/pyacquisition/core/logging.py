@@ -39,7 +39,6 @@ class Logger(Broadcaster):
         super().__init__()
         self._initialized = True
         self._gui_level = "NONE"
-        
 
     def _should_broadcast(self, level: str) -> bool:
         return (
@@ -64,7 +63,7 @@ class Logger(Broadcaster):
             file_name (str, optional): Name of the log file. Defaults to "debug.log".
         """
         self._gui_level = gui_level
-        
+
         if console_level is not None:
             loguru_logger.add(
                 sink=sys.stdout,
@@ -73,7 +72,7 @@ class Logger(Broadcaster):
                 enqueue=True,
                 # format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
             )
-        
+
         if file_level is not None:
             log_file_path = root_path / file_name
             loguru_logger.add(
@@ -85,7 +84,7 @@ class Logger(Broadcaster):
         else:
             log_file_path = None
         self.debug(f"Log file path: {log_file_path}")
-            
+
         self.info(
             f"Logging configured: console level={console_level}, file level={file_level}, file name={log_file_path}, gui level={self._gui_level}"
         )
@@ -115,7 +114,7 @@ class Logger(Broadcaster):
             self.broadcast_sync(
                 {"time": time.time(), "message": message, "level": "debug"}
             )
-            
+
     def trace(self, message: str) -> None:
         """
         Logs a trace message.

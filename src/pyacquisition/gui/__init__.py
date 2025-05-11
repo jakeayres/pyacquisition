@@ -13,19 +13,14 @@ from .components.file_window import FileWindow
 from .components.task_manager_window import TaskManagerWindow
 
 
-
-
-
 class Gui:
     def __init__(self, host: str = "localhost", port: int = 8000):
         super().__init__()
-        
+
         self.api_client = APIClient(host=host, port=port)
         self.dataframe = DataFrame()
         self.live_data_window = LiveDataWindow()
         self.live_log_window = LiveLogWindow()
-        
-        
 
     async def _render(self):
         while dpg.is_dearpygui_running():
@@ -283,6 +278,7 @@ class Gui:
         Run the GUI in the main thread using asyncio.
         """
         from ..core.logging import logger
+
         try:
             asyncio.run(self.setup())
             asyncio.run(self.run())

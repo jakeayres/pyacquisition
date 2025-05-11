@@ -5,29 +5,39 @@ from ..instruments import instrument_map
 
 class TOMLConfigError(Exception):
     """Custom exception for configuration errors."""
+
     pass
 
 
 class UnexpectedSectionError(Exception):
     """Custom exception for unexpected sections in the configuration."""
+
     pass
 
 
 class InvalidInstrumentError(Exception):
     """Custom exception for invalid instrument configurations."""
+
     pass
 
 
 class InvalidMeasurementError(Exception):
     """Custom exception for invalid measurement configurations."""
+
     pass
 
 
-
 class ConfigParser:
-
-    
-    ALLOWED_SECTIONS = ['experiment', 'rack', 'instruments', 'measurements', 'data', 'api_server', 'logging', 'gui']
+    ALLOWED_SECTIONS = [
+        "experiment",
+        "rack",
+        "instruments",
+        "measurements",
+        "data",
+        "api_server",
+        "logging",
+        "gui",
+    ]
 
     @staticmethod
     def parse(file_path: str) -> dict:
@@ -39,14 +49,13 @@ class ConfigParser:
         #         return yaml.safe_load(file)
         else:
             raise TOMLConfigError(f"Unsupported file type: {file_path}")
-        
+
         if ConfigParser.validate(config):
             logger.debug(f"Config validation passed for: {file_path}")
             return config
         else:
             logger.error(f"Config validation failed for: {file_path}")
             return config
-        
 
     @staticmethod
     def load_toml(file_path: str) -> dict:
@@ -62,23 +71,35 @@ class ConfigParser:
         except tomllib.TOMLDecodeError as e:
             logger.error(f"Error decoding TOML file: {file_path}. Error: {e}")
             raise
-        
+
     @staticmethod
     def validate(config: dict) -> None:
         if not ConfigParser.all_sections_are_valid(config):
             raise UnexpectedSectionError("Config contains unexpected sections.")
         if not ConfigParser.all_instrument_values_are_dicts(config):
-            raise InvalidInstrumentError("Config contains instrument entries that are not dictionaries.")
+            raise InvalidInstrumentError(
+                "Config contains instrument entries that are not dictionaries."
+            )
         if not ConfigParser.all_instrument_dicts_contain_instrument(config):
-            raise InvalidInstrumentError("Config contains instrument dictionaries that do not contain 'instrument' key.")
+            raise InvalidInstrumentError(
+                "Config contains instrument dictionaries that do not contain 'instrument' key."
+            )
         if not ConfigParser.all_instruments_in_instrument_map(config):
-            raise InvalidInstrumentError("Config contains instruments that are not in the instrument map.")
+            raise InvalidInstrumentError(
+                "Config contains instruments that are not in the instrument map."
+            )
         if not ConfigParser.all_measurement_values_are_dicts(config):
-            raise InvalidMeasurementError("Config contains measurement entries that are not dictionaries.")
+            raise InvalidMeasurementError(
+                "Config contains measurement entries that are not dictionaries."
+            )
         if not ConfigParser.all_measurement_dicts_contain_instrument(config):
-            raise InvalidMeasurementError("Config contains measurement dictionaries that do not contain 'instrument' key.")
+            raise InvalidMeasurementError(
+                "Config contains measurement dictionaries that do not contain 'instrument' key."
+            )
         if not ConfigParser.all_measurement_instruments_exist(config):
-            raise InvalidMeasurementError("Config contains measurements with instruments that do not exist.")
+            raise InvalidMeasurementError(
+                "Config contains measurements with instruments that do not exist."
+            )
         return config
 
     @staticmethod
@@ -95,7 +116,9 @@ class ConfigParser:
         """Check if all instrument values in the config are dictionaries."""
         for instrument, values in config.get("instruments", {}).items():
             if not isinstance(values, dict):
-                logger.warning(f"Instrument '{instrument}' does not have a dictionary value.")
+                logger.warning(
+                    f"Instrument '{instrument}' does not have a dictionary value."
+                )
                 return False
         return True
 
@@ -104,46 +127,54 @@ class ConfigParser:
         """Check if all instrument dictionaries contain the 'instrument' key."""
         for instrument, values in config.get("instruments", {}).items():
             if not isinstance(values, dict):
-                logger.warning(f"Instrument '{instrument}' does not have a dictionary value.")
+                logger.warning(
+                    f"Instrument '{instrument}' does not have a dictionary value."
+                )
                 return False
             if "instrument" not in values:
-                logger.warning(f"Instrument '{instrument}' dictionary does not contain 'instrument' key.")
+                logger.warning(
+                    f"Instrument '{instrument}' dictionary does not contain 'instrument' key."
+                )
                 return False
         return True
-    
 
     @staticmethod
     def all_instruments_in_instrument_map(config: dict) -> bool:
         """Check if all instruments in the config are in the instrument map."""
         for instrument, values in config.get("instruments", {}).items():
             if values["instrument"] not in instrument_map.keys():
-                logger.warning(f"Instrument '{values['instrument']}' not found in instrument map.")
+                logger.warning(
+                    f"Instrument '{values['instrument']}' not found in instrument map."
+                )
                 return False
         return True
-    
-    
+
     @staticmethod
     def all_measurement_values_are_dicts(config: dict) -> bool:
         """Check if all measurements in the config are dictionaries."""
         for measurement, values in config.get("measurements", {}).items():
             if not isinstance(values, dict):
-                logger.warning(f"Measurement '{measurement}' does not have a dictionary value.")
+                logger.warning(
+                    f"Measurement '{measurement}' does not have a dictionary value."
+                )
                 return False
         return True
-    
-    
+
     @staticmethod
     def all_measurement_dicts_contain_instrument(config: dict) -> bool:
         """Check if all measurement dictionaries contain the 'instrument' key."""
         for measurement, values in config.get("measurements", {}).items():
             if not isinstance(values, dict):
-                logger.warning(f"Measurement '{measurement}' does not have a dictionary value.")
+                logger.warning(
+                    f"Measurement '{measurement}' does not have a dictionary value."
+                )
                 return False
             if "instrument" not in values:
-                logger.warning(f"Measurement '{measurement}' dictionary does not contain 'instrument' key.")
+                logger.warning(
+                    f"Measurement '{measurement}' dictionary does not contain 'instrument' key."
+                )
                 return False
         return True
-
 
     @staticmethod
     def all_measurement_instruments_exist(config: dict) -> bool:
@@ -154,4 +185,3 @@ class ConfigParser:
                 logger.warning(f"Instrument '{inst}' not found in instruments.")
                 return False
         return True
-

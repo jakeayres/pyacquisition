@@ -18,7 +18,6 @@ from .adapters import get_adapter
 from .config_parser import ConfigParser
 
 
-
 class Experiment:
     """
     Class representing an experiment.
@@ -94,7 +93,7 @@ class Experiment:
         self._rack = Rack(
             period=measurement_period,
         )
-        
+
         self._calculations = Calculations()
 
         self._task_manager = TaskManager()
@@ -107,7 +106,7 @@ class Experiment:
             delimiter=data_delimiter,
             extension=data_file_extension,
         )
-        
+
         self._calculations.subscribe_to(self._rack)
         self._scribe.subscribe_to(self._calculations)
 
@@ -227,8 +226,6 @@ class Experiment:
             ValueError: If the TOML file cannot be loaded or parsed.
         """
         config = ConfigParser.parse(toml_file)
-        
-            
 
         try:
             experiment = cls._initialize_experiment(config)
@@ -369,8 +366,10 @@ class Experiment:
                 arg_value = args[arg_name]
                 if inspect.isclass(arg_type.annotation) and issubclass(
                     arg_type.annotation, Enum
-                ):  
-                    logger.debug(f"Resolving Enum type for argument '{arg_name}': {arg_value}")
+                ):
+                    logger.debug(
+                        f"Resolving Enum type for argument '{arg_name}': {arg_value}"
+                    )
                     resolved_args[arg_name] = arg_type.annotation[arg_value]
                 else:
                     logger.debug(f"Resolving argument '{arg_name}': {arg_value}")

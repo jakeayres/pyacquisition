@@ -29,8 +29,7 @@ class Calculator(SoftwareInstrument):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._units = 1 # Default to radians
-
+        self._units = 1  # Default to radians
 
     @mark_query
     def get_temperature(self, input_channel: InputChannel) -> float:
@@ -46,7 +45,6 @@ class Calculator(SoftwareInstrument):
             return 25.0
         elif input_channel == InputChannel.INPUT_B:
             return 30.0
-
 
     @mark_command
     def set_angle_unit(self, unit: AngleUnit) -> int:
@@ -68,7 +66,7 @@ class Calculator(SoftwareInstrument):
             AngleUnit: The current angle unit.
         """
         return AngleUnit.from_raw_value(self._units)
-    
+
     @mark_query
     def one(self) -> float:
         """

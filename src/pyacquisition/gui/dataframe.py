@@ -13,7 +13,7 @@ class DataFrame(Relay):
         super().__init__()
         self.data = {}
         self.length = 0
-        
+
         self._maximum_points = 10000
         self._crop_length = 1000
 
@@ -52,11 +52,11 @@ class DataFrame(Relay):
                             self.data[key] = [0] * self.length
                         self.data[key].append(value)
                     self.length += 1
-                     
+
                 if self.length > self._maximum_points:
-                    self.crop(start = self._crop_length)
+                    self.crop(start=self._crop_length)
                     self.length -= self._crop_length
-                        
+
             except asyncio.TimeoutError:
                 pass
             except Exception as e:
