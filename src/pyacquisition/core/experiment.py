@@ -7,6 +7,7 @@ from enum import Enum
 from .logging import logger
 from .api_server import APIServer
 from .rack import Rack
+from .calculations import Calculations
 from .task_manager import TaskManager
 from .task import Task
 from .scribe import Scribe
@@ -92,6 +93,8 @@ class Experiment:
         self._rack = Rack(
             period=measurement_period,
         )
+        
+        self._calculations = Calculations()
 
         self._task_manager = TaskManager()
 
@@ -103,7 +106,9 @@ class Experiment:
             delimiter=data_delimiter,
             extension=data_file_extension,
         )
-        self._scribe.subscribe_to(self._rack)
+        
+        self._calculations.subscribe_to(self._rack)
+        self._scribe.subscribe_to(self._calculations)
 
         self._api_server.add_websocket_endpoint("/data")
         self._api_server.websocket_endpoints["/data"].subscribe_to(self._rack)
@@ -437,6 +442,7 @@ class Experiment:
             async with asyncio.TaskGroup() as tg:
                 tg.create_task(self._run_component(self._api_server))
                 tg.create_task(self._run_component(self._rack))
+                tg.create_task(self._run_component(self._calculations))
                 tg.create_task(self._run_component(self._scribe))
                 tg.create_task(self._run_component(self._task_manager))
                 logger.debug("All experiment tasks started")
