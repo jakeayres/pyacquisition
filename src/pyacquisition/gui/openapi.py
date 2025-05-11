@@ -273,7 +273,6 @@ class Schema:
         for path in self.paths.values():
             for param in path.get.parameters.values():
                 if param.contains_reference:
-                    print(param.schema["$ref"].split("/")[-1])
                     param.schema = self.component(
                         param.schema["$ref"].split("/")[-1]
                     ).details

@@ -13,14 +13,19 @@ from .components.file_window import FileWindow
 from .components.task_manager_window import TaskManagerWindow
 
 
+
+
+
 class Gui:
     def __init__(self, host: str = "localhost", port: int = 8000):
         super().__init__()
-
+        
         self.api_client = APIClient(host=host, port=port)
         self.dataframe = DataFrame()
         self.live_data_window = LiveDataWindow()
         self.live_log_window = LiveLogWindow()
+        
+        
 
     async def _render(self):
         while dpg.is_dearpygui_running():
@@ -132,7 +137,7 @@ class Gui:
         """
         Populate the task manager in the GUI.
         """
-        logger.debug("Populating task manager")
+        logger.warning("Populating task manager")
 
         with dpg.viewport_menu_bar():
             with dpg.menu(label="Task Manager"):
@@ -185,7 +190,7 @@ class Gui:
         """
         Setup the GUI.
         """
-        logger.debug("GUI setup started")
+        logger.warning("[GUI] Setup started")
         dpg.create_context()
         dpg.create_viewport(title="PyAcquisition GUI", width=1440, height=900)
         dpg.setup_dearpygui()
@@ -249,7 +254,7 @@ class Gui:
             lambda message: task_window.update_task_queue(message["data"])
         )
 
-        logger.debug("GUI setup completed")
+        logger.debug("[GUI] Setup completed")
 
     async def run(self):
         """
@@ -277,6 +282,7 @@ class Gui:
         """
         Run the GUI in the main thread using asyncio.
         """
+        from ..core.logging import logger
         try:
             asyncio.run(self.setup())
             asyncio.run(self.run())

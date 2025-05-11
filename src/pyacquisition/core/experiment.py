@@ -18,6 +18,7 @@ from .adapters import get_adapter
 from .config_parser import ConfigParser
 
 
+
 class Experiment:
     """
     Class representing an experiment.
