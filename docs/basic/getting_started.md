@@ -30,7 +30,7 @@ path = "my_data_folder"
 
 [instruments]
 clock = {instrument = "Clock"}
-lockin = {instrument = "SR_830", adapter = "pyvisa", resource = "GPIB0:7:INSTR"}
+lockin = {instrument = "SR_830", adapter = "pyvisa", resource = "GPIB0::7::INSTR"}
 
 [measurements]
 time = {instrument = "clock", method = "timestamp_ms"}
