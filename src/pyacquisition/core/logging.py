@@ -12,11 +12,13 @@ class Logger(Broadcaster):
     """
 
     LOG_LEVELS = {
+        "TRACE": 5,
         "DEBUG": 10,
         "INFO": 20,
         "WARNING": 30,
         "ERROR": 40,
         "EXCEPTION": 50,
+        "NONE": 100,
     }
 
     _instance = None
@@ -33,11 +35,11 @@ class Logger(Broadcaster):
         # Avoid reinitializing if the instance already exists
         if hasattr(self, "_initialized") and self._initialized:
             return
+        loguru_logger.remove()
         super().__init__()
         self._initialized = True
-        self._gui_level = "DEBUG"
-        self.log_path: Path = Path()
-        loguru_logger.remove()
+        self._gui_level = "NONE"
+        
 
     def _should_broadcast(self, level: str) -> bool:
         return (
@@ -46,11 +48,11 @@ class Logger(Broadcaster):
 
     def configure(
         self,
-        root_path: Path,
-        console_level: str = "DEBUG",
-        file_level: str = "DEBUG",
-        gui_level: str = "DEBUG",
-        file_name: Path = Path("debug.log"),
+        root_path: Path | None = None,
+        console_level: str | None = "DEBUG",
+        file_level: str | None = "DEBUG",
+        gui_level: str | None = "DEBUG",
+        file_name: Path | None = Path("debug.log"),
     ) -> None:
         """
         Configures the logger for the application.
@@ -62,20 +64,28 @@ class Logger(Broadcaster):
             file_name (str, optional): Name of the log file. Defaults to "debug.log".
         """
         self._gui_level = gui_level
-        loguru_logger.remove()
-        loguru_logger.add(
-            sink=sys.stdout,
-            colorize=True,
-            level=console_level,
-            # format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
-        )
-        log_file_path = root_path / file_name
+        
+        if console_level is not None:
+            loguru_logger.add(
+                sink=sys.stdout,
+                colorize=True,
+                level=console_level,
+                enqueue=True,
+                # format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+            )
+        
+        if file_level is not None:
+            log_file_path = root_path / file_name
+            loguru_logger.add(
+                sink=log_file_path,
+                level=file_level,
+                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+                enqueue=True,
+            )
+        else:
+            log_file_path = None
         self.debug(f"Log file path: {log_file_path}")
-        loguru_logger.add(
-            sink=log_file_path,
-            level=file_level,
-            format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
-        )
+            
         self.info(
             f"Logging configured: console level={console_level}, file level={file_level}, file name={log_file_path}, gui level={self._gui_level}"
         )
@@ -104,6 +114,19 @@ class Logger(Broadcaster):
         if self._should_broadcast("DEBUG"):
             self.broadcast_sync(
                 {"time": time.time(), "message": message, "level": "debug"}
+            )
+            
+    def trace(self, message: str) -> None:
+        """
+        Logs a trace message.
+
+        Args:
+            message (str): The message to log.
+        """
+        loguru_logger.trace(message)
+        if self._should_broadcast("TRACE"):
+            self.broadcast_sync(
+                {"time": time.time(), "message": message, "level": "trace"}
             )
 
     def warning(self, message: str) -> None:
