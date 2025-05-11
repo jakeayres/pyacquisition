@@ -151,7 +151,7 @@ class Lakeshore_350(Instrument):
         return float(self.query("AOUT?"))
 
     @mark_command
-    def set_autotune_pid(self, output: int, mode: int) -> int:
+    def set_autotune_pid(self, output: OutputChannel, mode: int) -> int:
         """Sets the autotune PID mode for a specific output channel.
 
         Args:
@@ -161,7 +161,7 @@ class Lakeshore_350(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f"ATUNE {output},{mode}")
+        return self.command(f"ATUNE {output.raw_value},{mode}")
 
     @mark_command
     def set_display_contrast(self, contrast: int) -> int:

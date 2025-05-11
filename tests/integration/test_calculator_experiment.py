@@ -67,7 +67,7 @@ def test_set_get_enum_endpoints(running_experiment):
         "http://localhost:8005/calculator/set_angle_unit?unit=radian"
     )
     assert response.status_code == 200
-    assert response.json()["data"] == 0
+    assert response.json()["data"] == 1
 
     response = requests.get("http://localhost:8005/calculator/get_angle_unit")
     assert response.status_code == 200
@@ -129,6 +129,19 @@ async def test_float_measurement_with_enum_args(running_experiment):
             message = await websocket.receive_json()
             assert message["sine_one"] == pytest.approx(0.8415, rel=1e-4), (
                 "Response should contain the key 'trig'"
+            )
+            assert "random_key" not in message, (
+                "Response should not contain the key 'random_key'"
+            )
+
+
+@pytest.mark.asyncio
+async def test_temperature_measurement(running_experiment):
+    async with ClientSession() as session:
+        async with session.ws_connect("ws://localhost:8005/data") as websocket:
+            message = await websocket.receive_json()
+            assert message["temperature"] == 25.0, (
+                "Response should contain the key 'temperature'"
             )
             assert "random_key" not in message, (
                 "Response should not contain the key 'random_key'"

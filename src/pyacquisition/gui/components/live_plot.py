@@ -7,6 +7,11 @@ class LivePlotWidget(Consumer):
     def __init__(self, data: dict[str, list]):
         super().__init__()
 
+        self._maximum_points = 25000
+        self._crop_length = 1000
+        self._plot_every_n = 1
+        self._plot_counter = 0
+
         self.window_tag = dpg.generate_uuid()
         self.plot_tag = dpg.generate_uuid()
         self.x_axis_tag = dpg.generate_uuid()
@@ -71,8 +76,8 @@ class LivePlotWidget(Consumer):
         for key in self.data.keys():
             series_tag = dpg.generate_uuid()
             dpg.add_scatter_series(
-                x=self.data[self.x_key],
-                y=self.data[key],
+                x=self.data[self.x_key][:: self._plot_every_n],
+                y=self.data[key][:: self._plot_every_n],
                 label=key,
                 tag=series_tag,
                 parent=self.y_axis_tag,
@@ -100,5 +105,15 @@ class LivePlotWidget(Consumer):
         """
         Update the plot with new data.
         """
-        self.update_data(data)
+
+        self._plot_counter += 1
+
+        if self._plot_counter % self._plot_every_n == 0:
+            self.update_data(data)
+            self._plot_counter = 0
+
+        if len(self.data[self.x_key]) > self._maximum_points:
+            for key in self.data:
+                self.data[key] = self.data[key][self._crop_length :]
+
         self.update_series()

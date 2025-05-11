@@ -7,6 +7,7 @@ from enum import Enum
 from .logging import logger
 from .api_server import APIServer
 from .rack import Rack
+from .calculations import Calculations
 from .task_manager import TaskManager
 from .task import Task
 from .scribe import Scribe
@@ -14,6 +15,7 @@ from ..gui import Gui
 from ..instruments import instrument_map
 from .measurement import Measurement
 from .adapters import get_adapter
+from .config_parser import ConfigParser
 
 
 class Experiment:
@@ -92,6 +94,8 @@ class Experiment:
             period=measurement_period,
         )
 
+        self._calculations = Calculations()
+
         self._task_manager = TaskManager()
 
         self._run_gui = gui
@@ -102,7 +106,9 @@ class Experiment:
             delimiter=data_delimiter,
             extension=data_file_extension,
         )
-        self._scribe.subscribe_to(self._rack)
+
+        self._calculations.subscribe_to(self._rack)
+        self._scribe.subscribe_to(self._calculations)
 
         self._api_server.add_websocket_endpoint("/data")
         self._api_server.websocket_endpoints["/data"].subscribe_to(self._rack)
@@ -219,7 +225,7 @@ class Experiment:
         Raises:
             ValueError: If the TOML file cannot be loaded or parsed.
         """
-        config = cls._read_toml(toml_file)
+        config = ConfigParser.parse(toml_file)
 
         try:
             experiment = cls._initialize_experiment(config)
@@ -312,6 +318,7 @@ class Experiment:
         """
         measurements = config.get("measurements", {})
         for name, measurement in measurements.items():
+            logger.debug(f"Configuring measurement '{name}'")
             try:
                 instrument_name = measurement.get("instrument")
                 method_name = measurement.get("method")
@@ -360,8 +367,12 @@ class Experiment:
                 if inspect.isclass(arg_type.annotation) and issubclass(
                     arg_type.annotation, Enum
                 ):
+                    logger.debug(
+                        f"Resolving Enum type for argument '{arg_name}': {arg_value}"
+                    )
                     resolved_args[arg_name] = arg_type.annotation[arg_value]
                 else:
+                    logger.debug(f"Resolving argument '{arg_name}': {arg_value}")
                     resolved_args[arg_name] = arg_value
         return partial(method, **resolved_args)
 
@@ -431,6 +442,7 @@ class Experiment:
             async with asyncio.TaskGroup() as tg:
                 tg.create_task(self._run_component(self._api_server))
                 tg.create_task(self._run_component(self._rack))
+                tg.create_task(self._run_component(self._calculations))
                 tg.create_task(self._run_component(self._scribe))
                 tg.create_task(self._run_component(self._task_manager))
                 logger.debug("All experiment tasks started")
