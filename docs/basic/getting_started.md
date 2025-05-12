@@ -21,7 +21,7 @@ Getting started is as simple as composing a `.toml` configuration file and insta
 
 A simple configuration file that loads a software `Clock` and a Stanford Research Systems `SR_830` lock-in amplifier on GPIB address 7 might look like:
 
-```toml title="my_configuration_file.toml linenums="1""
+```toml title="my_configuration_file.toml" linenums="1"
 [experiment]
 root_path = "C://data"
 
@@ -43,7 +43,7 @@ The full list of configurable keys is available [under the configation submenu](
 
 A short `python` script for initializing and running your experiment might look like:
 
-```python title="experiment_script.py linenums="1""
+```python title="experiment_script.py" linenums="1"
 from pyacquisition import Experiment
 
 my_experiment = Experiment.from_config('my_configuration_file.toml')
