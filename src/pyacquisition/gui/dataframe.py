@@ -45,7 +45,6 @@ class DataFrame(Relay):
         while True:
             try:
                 data = await self.relay(timeout=timeout)
-                logger.debug(f"DataFrame received data: {data}")
                 if data is not None:
                     for key, value in data.items():
                         if key not in self.data:

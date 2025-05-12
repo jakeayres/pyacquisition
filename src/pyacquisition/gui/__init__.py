@@ -132,7 +132,7 @@ class Gui:
         """
         Populate the task manager in the GUI.
         """
-        logger.warning("Populating task manager")
+        logger.debug("Populating task manager")
 
         with dpg.viewport_menu_bar():
             with dpg.menu(label="Task Manager"):
