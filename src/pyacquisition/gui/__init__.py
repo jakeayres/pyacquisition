@@ -201,9 +201,9 @@ class Gui:
         )
         dpg.setup_dearpygui()
 
-        with dpg.viewport_menu_bar():
-            with dpg.menu(label="File"):
-                dpg.add_menu_item(label="Exit", callback=self.shutdown)
+        # with dpg.viewport_menu_bar():
+        #     with dpg.menu(label="File"):
+        #         dpg.add_menu_item(label="Exit", callback=self.shutdown)
 
         dpg.set_exit_callback(self.shutdown)
 
