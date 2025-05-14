@@ -172,6 +172,7 @@ class APIServer:
             Endpoint to check if the API server is running.
             """
             return "pong"
+        
 
         @api_server.app.get("/list_websockets")
         async def list_websockets() -> list:

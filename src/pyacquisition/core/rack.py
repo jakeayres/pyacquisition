@@ -34,8 +34,8 @@ class Rack(Broadcaster):
         """
         Sets up the rack by initializing the instruments and measurements.
         """
-        logger.debug("Rack setup started")
-        logger.debug("Rack setup completed")
+        logger.debug("[Rack] setup started")
+        logger.debug("[Rack] setup completed")
 
     async def run(self, experiment=None) -> None:
         """
@@ -58,8 +58,8 @@ class Rack(Broadcaster):
         """
         Cleans up the rack by stopping all measurements and instruments.
         """
-        logger.debug("Rack teardown started")
-        logger.debug("Rack teardown completed")
+        logger.debug("[Rack] teardown started")
+        logger.debug("[Rack] teardown completed")
 
     def pause(self):
         """
