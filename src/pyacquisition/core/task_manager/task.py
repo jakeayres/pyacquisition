@@ -147,7 +147,7 @@ class Task:
                 dict: The result of the task.
             """
             task = cls(**fixed_kwargs, **kwargs)
-            experiment.task_manager.add_task(task)
+            experiment._task_manager.add_task(task)
             return {"status": 200, "message": f"{cls.__name__} added"}
 
         if label is not None:

@@ -116,10 +116,10 @@ class Experiment:
 
         self._api_server.add_websocket_endpoint("/logs")
         self._api_server.websocket_endpoints["/logs"].subscribe_to(logger)
-        
+
         for task in standard_tasks:
             self.register_task(task)
-            
+
         self._shutdown_event = asyncio.Event()
 
         logger.info("[Experiment] Fully initialized")
@@ -418,17 +418,11 @@ class Experiment:
             component: The component to run (e.g., API server, rack, task manager, GUI).
             experiment: The Experiment instance (optional).
         """
-        try:
-            component._register_endpoints(self._api_server)
-            component.setup()
-            logger.debug(f"Running {component.__class__.__name__}")
-            await component.run(experiment=self)
-
-        except Exception as e:
-            logger.error(f"Error running {component.__class__.__name__}: {e}")
-            raise
-        finally:
-            component.teardown()
+        component._register_endpoints(self._api_server)
+        await component.setup()
+        logger.debug(f"Running {component.__class__.__name__}")
+        await component.run(experiment=self)
+        await component.teardown()
 
     async def _run(self) -> None:
         """
@@ -437,23 +431,50 @@ class Experiment:
         The main logic of the experiment is executed within this coroutine.
         """
         try:
+            self._register_endpoints(self._api_server)
             self.setup()
             try:
                 if self._run_gui:
                     self._ui_process = self._gui.run_in_new_process()
+                    self._ui_process.start()
             except Exception as e:
                 logger.error(f"Error during experiment setup: {e}")
                 raise
-            # Run tasks in an async task group
+
+            # async def monitor_shutdown_event(workers):
+            #     """
+            #     Monitor the shutdown event and terminate the workers if set.
+            #     """
+            #     await self._shutdown_event.wait()
+            #     logger.info("Shutdown event set, terminating workers")
+
+            #     self._api_server.server.should_exit = True
+            #     self._rack._shutdown_event.set()
+
             async with asyncio.TaskGroup() as tg:
+                # tg.create_task(monitor_shutdown_event(tg))
                 tg.create_task(self._run_component(self._api_server))
                 tg.create_task(self._run_component(self._rack))
                 tg.create_task(self._run_component(self._calculations))
                 tg.create_task(self._run_component(self._scribe))
                 tg.create_task(self._run_component(self._task_manager))
                 logger.debug("All experiment tasks started")
+
+                await self._shutdown_event.wait()
+
+                logger.info("Shutdown event set, terminating tasks")
+
+                await self._api_server.shutdown()
+                await self._rack.shutdown()
+                await self._calculations.shutdown()
+                await self._scribe.shutdown()
+                await self._task_manager.shutdown()
+
         except Exception as e:
             logger.error(f"Task group terminated due to an error: {e}")
+            if isinstance(e, ExceptionGroup):
+                for subexception in e.exceptions:
+                    logger.exception(f"Subexception details: {e}")
         finally:
             try:
                 if self._run_gui:
@@ -489,18 +510,17 @@ class Experiment:
             task (Task): The task to register.
         """
         self._task_manager.register_task(self, task, **kwargs)
-        
-        
+
     def _register_endpoints(self, api_server):
         """
         Register the endpoints for the experiment.
         """
-        
+
         @api_server.app.get("/experiment/shutdown", tags=["experiment"])
         async def shutdown():
             """
             Endpoint to shut down the experiment.
             """
             logger.info("Shutting down the experiment")
-            await self._shutdown_event.set()
+            self._shutdown_event.set()
             return {"status": "success", "message": "Experiment shutdown initiated."}

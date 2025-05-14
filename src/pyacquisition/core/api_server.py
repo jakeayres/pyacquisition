@@ -2,6 +2,7 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from websockets.exceptions import ConnectionClosedOK
 import uvicorn
 import inspect
+import asyncio
 from .logging import logger
 from .consumer import Consumer
 from enum import Enum
@@ -11,6 +12,10 @@ class WebsocketEndpoint(Consumer):
     """
     A class that handles WebSocket connections and data streaming.
     """
+
+    def __init__(self):
+        super().__init__()
+        self._shutdown_event = asyncio.Event()
 
     @staticmethod
     def _enum_to_selected_dict(enum_instance):
@@ -34,11 +39,18 @@ class WebsocketEndpoint(Consumer):
         logger.debug("[FastApi] Client connected")
         try:
             while True:
-                data = await self.consume()
-                for key, value in data.items():
-                    if isinstance(value, Enum):
-                        data[key] = APIServer._enum_to_selected_dict(value)
-                await websocket.send_json(data)
+                data = await self.consume(timeout=0.1)
+                if data is not None:
+                    for key, value in data.items():
+                        if isinstance(value, Enum):
+                            data[key] = APIServer._enum_to_selected_dict(value)
+                    await websocket.send_json(data)
+
+                if self._shutdown_event.is_set():
+                    logger.debug("[FastApi] Shutdown event set, closing WebSocket.")
+                    await websocket.close()
+                    break
+
         except WebSocketDisconnect:
             logger.debug("[FastApi] Client disconnected")
         except ConnectionClosedOK:
@@ -75,6 +87,8 @@ class APIServer:
 
         logger.debug("[FastApi] APIServer initialized")
 
+        self._shutdown_event = asyncio.Event()
+
     @staticmethod
     def _enum_to_selected_dict(enum_instance):
         """
@@ -110,7 +124,7 @@ class APIServer:
 
         logger.debug(f"[FastApi] WebSocket endpoint added at '{url}'")
 
-    def setup(self):
+    async def setup(self):
         """
         Sets up the API server. This method is called before running the server.
         """
@@ -128,19 +142,29 @@ class APIServer:
                 port=self.port,
                 log_level="warning",
             )
-            server = uvicorn.Server(config)
-            return server.serve()
+            self.server = uvicorn.Server(config)
+            return self.server.serve()
         except Exception as e:
-            # Log the exception or handle it as needed
             logger.error(f"[FastApi] An error occurred while running the server: {e}")
             return None
 
-    def teardown(self):
+    async def teardown(self):
         """
         Cleans up the API server. This method is called after the server has stopped.
         """
         logger.debug("[FastApi] Server teardown started")
         logger.debug("[FastApi] Server teardown completed")
+
+    async def shutdown(self):
+        """
+        Shuts down the API server.
+        """
+        logger.debug("[FastApi] Server shutdown started")
+        self._shutdown_event.set()
+        for url, endpoint in self.websocket_endpoints.items():
+            endpoint._shutdown_event.set()
+        await asyncio.sleep(0.1)
+        self.server.should_exit = True
 
     def create_endpoint_function(self, method):
         """
@@ -172,7 +196,6 @@ class APIServer:
             Endpoint to check if the API server is running.
             """
             return "pong"
-        
 
         @api_server.app.get("/list_websockets")
         async def list_websockets() -> list:

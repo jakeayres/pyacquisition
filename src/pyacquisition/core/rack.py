@@ -14,11 +14,12 @@ class Rack(Broadcaster):
     def __init__(self, period: float = 0.25) -> None:
         super().__init__()
 
-        self._period = period  # Default period for measurements
+        self._period = period
         self.instruments = {}
         self.measurements = {}
         self._pause_event = asyncio.Event()
         self._pause_event.set()
+        self._shutdown_event = asyncio.Event()
 
     async def measure(self) -> dict:
         """
@@ -30,7 +31,7 @@ class Rack(Broadcaster):
         result = {k: v.run() for k, v in self.measurements.items()}
         await self.broadcast(result)
 
-    def setup(self):
+    async def setup(self):
         """
         Sets up the rack by initializing the instruments and measurements.
         """
@@ -40,12 +41,15 @@ class Rack(Broadcaster):
     async def run(self, experiment=None) -> None:
         """
         Asynchronously runs the measurements at the specified period.
-
-        This method is intended to be run in an asyncio event loop.
         """
+
         while True:
             try:
                 await self._pause_event.wait()
+
+                if self._shutdown_event.is_set():
+                    break
+
                 t0 = time.time()
                 await self.measure()
                 t1 = time.time()
@@ -54,12 +58,18 @@ class Rack(Broadcaster):
                 logger.error(f"Error in rack run loop: {e}")
                 await asyncio.sleep(self.period)
 
-    def teardown(self):
+    async def teardown(self):
         """
         Cleans up the rack by stopping all measurements and instruments.
         """
         logger.debug("[Rack] teardown started")
         logger.debug("[Rack] teardown completed")
+
+    async def shutdown(self):
+        """
+        Shuts down the rack and all its instruments.
+        """
+        self._shutdown_event.set()
 
     def pause(self):
         """

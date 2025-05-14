@@ -1,1 +1,1 @@
-from .task_manager.task import Task
+from .task_manager.task import Task as Task

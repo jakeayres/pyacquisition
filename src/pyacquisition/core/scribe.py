@@ -62,6 +62,8 @@ class Scribe(Consumer):
             self.step = "00"
             logger.debug(f"[Scribe] Starting at: {self.block}.{self.step}")
 
+            self._shutdown_event = asyncio.Event()
+
         except Exception as e:
             logger.error(f"[Scribe] Error getting next block: {e}")
 
@@ -162,7 +164,7 @@ class Scribe(Consumer):
             self.current_path(), index=False, mode="a", sep=self.delimiter, header=False
         )
 
-    def setup(self):
+    async def setup(self):
         """
         Setup the Scribe.
         """
@@ -179,19 +181,29 @@ class Scribe(Consumer):
         while True:
             try:
                 await self._pause_event.wait()
-                data = await self.consume()
-                data = pd.DataFrame(data=data, index=[0])
-                self._process_line(data)
+                data = await self.consume(timeout=0.1)
+                if data is not None:
+                    data = pd.DataFrame(data=data, index=[0])
+                    self._process_line(data)
+                if self._shutdown_event.is_set():
+                    break
 
             except Exception as e:
                 logger.error(f"[Scribe] Error running main loop: {e}")
 
-    def teardown(self):
+    async def teardown(self):
         """
         Teardown the Scribe.
         """
         logger.debug("[Scribe] Teardown started")
         logger.debug("[Scribe] Teardown completed")
+
+    async def shutdown(self):
+        """
+        Shutdown the Scribe.
+        """
+        logger.debug("[Scribe] Shutdown started")
+        self._shutdown_event.set()
 
     def _register_endpoints(self, api_server):
         """

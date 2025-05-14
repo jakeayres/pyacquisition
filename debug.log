@@ -1,0 +1,232 @@
+2025-05-14 at 18:55:22 | DEBUG | Log file path: debug.log
+2025-05-14 at 18:55:22 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=debug.log, gui level=DEBUG
+2025-05-14 at 18:55:22 | DEBUG | [FastApi] APIServer initialized
+2025-05-14 at 18:55:22 | DEBUG | [FastApi] WebSocket endpoint added at '/data'
+2025-05-14 at 18:55:22 | DEBUG | [FastApi] WebSocket endpoint added at '/logs'
+2025-05-14 at 18:55:22 | DEBUG | Task '<property object at 0x0000014CEED8C590>' registered with the experiment
+2025-05-14 at 18:55:22 | DEBUG | Task '<property object at 0x0000014CEED8C590>' registered with the experiment
+2025-05-14 at 18:55:22 | DEBUG | Task '<property object at 0x0000014CEED8C590>' registered with the experiment
+2025-05-14 at 18:55:22 | INFO | [Experiment] Fully initialized
+2025-05-14 at 18:55:22 | DEBUG | Log file path: C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs0\test_debug.log
+2025-05-14 at 18:55:22 | INFO | Logging configured: console level=INFO, file level=WARNING, file name=C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs0\test_debug.log, gui level=DEBUG
+2025-05-14 at 18:55:22 | DEBUG | Log file path: C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs1\test_debug.log
+2025-05-14 at 18:55:22 | INFO | Logging configured: console level=DEBUG, file level=DEBUG, file name=C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs1\test_debug.log, gui level=DEBUG
+2025-05-14 at 18:55:22 | DEBUG | This is a debug message
+2025-05-14 at 18:55:23 | DEBUG | Log file path: C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs2\test_info.log
+2025-05-14 at 18:55:23 | INFO | Logging configured: console level=INFO, file level=INFO, file name=C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs2\test_info.log, gui level=DEBUG
+2025-05-14 at 18:55:23 | INFO | This is an info message
+2025-05-14 at 18:55:23 | DEBUG | Log file path: C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs3\test_debug_when_info.log
+2025-05-14 at 18:55:23 | INFO | Logging configured: console level=INFO, file level=INFO, file name=C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs3\test_debug_when_info.log, gui level=DEBUG
+2025-05-14 at 18:55:23 | DEBUG | This is a debug message
+2025-05-14 at 18:55:23 | DEBUG | Log file path: C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs4\test_warning.log
+2025-05-14 at 18:55:23 | INFO | Logging configured: console level=WARNING, file level=WARNING, file name=C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs4\test_warning.log, gui level=DEBUG
+2025-05-14 at 18:55:23 | WARNING | This is a warning message
+2025-05-14 at 18:55:23 | DEBUG | Log file path: C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs5\test_error.log
+2025-05-14 at 18:55:23 | INFO | Logging configured: console level=ERROR, file level=ERROR, file name=C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs5\test_error.log, gui level=DEBUG
+2025-05-14 at 18:55:23 | ERROR | This is an error message
+2025-05-14 at 18:55:23 | DEBUG | Log file path: C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs6\test_exception.log
+2025-05-14 at 18:55:23 | INFO | Logging configured: console level=ERROR, file level=ERROR, file name=C:\Users\jake_\AppData\Local\Temp\pytest-of-jake_\pytest-22\logs6\test_exception.log, gui level=DEBUG
+2025-05-14 at 18:55:23 | ERROR | An exception occurred
+Traceback (most recent call last):
+
+  File "c:\Users\jake_\.vscode\extensions\ms-python.python-2025.6.0-win32-x64\python_files\vscode_pytest\run_pytest_script.py", line 64, in <module>
+    pytest.main(arg_array)
+    │      │    └ ['-p', 'vscode_pytest', '--rootdir=c:\\Repos\\pyacquisition', 'c:\\Repos\\pyacquisition\\tests\\unit\\test_api_server.py::tes...
+    │      └ <function main at 0x0000014CEABD18A0>
+    └ <module 'pytest' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\pytest\\__init__.py'>
+
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\config\__init__.py", line 175, in main
+    ret: ExitCode | int = config.hook.pytest_cmdline_main(config=config)
+         │                │      │    │                          └ <_pytest.config.Config object at 0x0000014CEA4403B0>
+         │                │      │    └ <HookCaller 'pytest_cmdline_main'>
+         │                │      └ <_pytest.config.compat.PathAwareHookProxy object at 0x0000014CEA54AE70>
+         │                └ <_pytest.config.Config object at 0x0000014CEA4403B0>
+         └ <enum 'ExitCode'>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_hooks.py", line 513, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           │    │         │    │     │    │                  │       └ True
+           │    │         │    │     │    │                  └ {'config': <_pytest.config.Config object at 0x0000014CEA4403B0>}
+           │    │         │    │     │    └ <member '_hookimpls' of 'HookCaller' objects>
+           │    │         │    │     └ <HookCaller 'pytest_cmdline_main'>
+           │    │         │    └ <member 'name' of 'HookCaller' objects>
+           │    │         └ <HookCaller 'pytest_cmdline_main'>
+           │    └ <member '_hookexec' of 'HookCaller' objects>
+           └ <HookCaller 'pytest_cmdline_main'>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           │    │               │          │        │       └ True
+           │    │               │          │        └ {'config': <_pytest.config.Config object at 0x0000014CEA4403B0>}
+           │    │               │          └ [<HookImpl plugin_name='main', plugin=<module '_pytest.main' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\_pyte...
+           │    │               └ 'pytest_cmdline_main'
+           │    └ <function _multicall at 0x0000014CEA4D2700>
+           └ <_pytest.config.PytestPluginManager object at 0x0000014CEA621460>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_callers.py", line 103, in _multicall
+    res = hook_impl.function(*args)
+          │         │         └ [<_pytest.config.Config object at 0x0000014CEA4403B0>]
+          │         └ <member 'function' of 'HookImpl' objects>
+          └ <HookImpl plugin_name='main', plugin=<module '_pytest.main' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\_pytes...
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\main.py", line 330, in pytest_cmdline_main
+    return wrap_session(config, _main)
+           │            │       └ <function _main at 0x0000014CEAC4E160>
+           │            └ <_pytest.config.Config object at 0x0000014CEA4403B0>
+           └ <function wrap_session at 0x0000014CEAC4E020>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\main.py", line 283, in wrap_session
+    session.exitstatus = doit(config, session) or 0
+    │       │            │    │       └ <Session  exitstatus=<ExitCode.OK: 0> testsfailed=3 testscollected=59>
+    │       │            │    └ <_pytest.config.Config object at 0x0000014CEA4403B0>
+    │       │            └ <function _main at 0x0000014CEAC4E160>
+    │       └ <ExitCode.OK: 0>
+    └ <Session  exitstatus=<ExitCode.OK: 0> testsfailed=3 testscollected=59>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\main.py", line 337, in _main
+    config.hook.pytest_runtestloop(session=session)
+    │      │    │                          └ <Session  exitstatus=<ExitCode.OK: 0> testsfailed=3 testscollected=59>
+    │      │    └ <HookCaller 'pytest_runtestloop'>
+    │      └ <_pytest.config.compat.PathAwareHookProxy object at 0x0000014CEA54AE70>
+    └ <_pytest.config.Config object at 0x0000014CEA4403B0>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_hooks.py", line 513, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           │    │         │    │     │    │                  │       └ True
+           │    │         │    │     │    │                  └ {'session': <Session  exitstatus=<ExitCode.OK: 0> testsfailed=3 testscollected=59>}
+           │    │         │    │     │    └ <member '_hookimpls' of 'HookCaller' objects>
+           │    │         │    │     └ <HookCaller 'pytest_runtestloop'>
+           │    │         │    └ <member 'name' of 'HookCaller' objects>
+           │    │         └ <HookCaller 'pytest_runtestloop'>
+           │    └ <member '_hookexec' of 'HookCaller' objects>
+           └ <HookCaller 'pytest_runtestloop'>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           │    │               │          │        │       └ True
+           │    │               │          │        └ {'session': <Session  exitstatus=<ExitCode.OK: 0> testsfailed=3 testscollected=59>}
+           │    │               │          └ [<HookImpl plugin_name='main', plugin=<module '_pytest.main' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\_pyte...
+           │    │               └ 'pytest_runtestloop'
+           │    └ <function _multicall at 0x0000014CEA4D2700>
+           └ <_pytest.config.PytestPluginManager object at 0x0000014CEA621460>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_callers.py", line 103, in _multicall
+    res = hook_impl.function(*args)
+          │         │         └ [<Session  exitstatus=<ExitCode.OK: 0> testsfailed=3 testscollected=59>]
+          │         └ <member 'function' of 'HookImpl' objects>
+          └ <HookImpl plugin_name='main', plugin=<module '_pytest.main' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\_pytes...
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\main.py", line 362, in pytest_runtestloop
+    item.config.hook.pytest_runtest_protocol(item=item, nextitem=nextitem)
+    │    │                                        │              └ <Function test_mock_function>
+    │    │                                        └ <Function test_logger_exception>
+    │    └ <member 'config' of 'Node' objects>
+    └ <Function test_logger_exception>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_hooks.py", line 513, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           │    │         │    │     │    │                  │       └ True
+           │    │         │    │     │    │                  └ {'item': <Function test_logger_exception>, 'nextitem': <Function test_mock_function>}
+           │    │         │    │     │    └ <member '_hookimpls' of 'HookCaller' objects>
+           │    │         │    │     └ <HookCaller 'pytest_runtest_protocol'>
+           │    │         │    └ <member 'name' of 'HookCaller' objects>
+           │    │         └ <HookCaller 'pytest_runtest_protocol'>
+           │    └ <member '_hookexec' of 'HookCaller' objects>
+           └ <HookCaller 'pytest_runtest_protocol'>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           │    │               │          │        │       └ True
+           │    │               │          │        └ {'item': <Function test_logger_exception>, 'nextitem': <Function test_mock_function>}
+           │    │               │          └ [<HookImpl plugin_name='runner', plugin=<module '_pytest.runner' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\_...
+           │    │               └ 'pytest_runtest_protocol'
+           │    └ <function _multicall at 0x0000014CEA4D2700>
+           └ <_pytest.config.PytestPluginManager object at 0x0000014CEA621460>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_callers.py", line 103, in _multicall
+    res = hook_impl.function(*args)
+          │         │         └ [<Function test_logger_exception>, <Function test_mock_function>]
+          │         └ <member 'function' of 'HookImpl' objects>
+          └ <HookImpl plugin_name='runner', plugin=<module '_pytest.runner' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\_p...
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\runner.py", line 113, in pytest_runtest_protocol
+    runtestprotocol(item, nextitem=nextitem)
+    │               │              └ <Function test_mock_function>
+    │               └ <Function test_logger_exception>
+    └ <function runtestprotocol at 0x0000014CEAC4D300>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\runner.py", line 132, in runtestprotocol
+    reports.append(call_and_report(item, "call", log))
+    │       │      │               │             └ True
+    │       │      │               └ <Function test_logger_exception>
+    │       │      └ <function call_and_report at 0x0000014CEAC4D760>
+    │       └ <method 'append' of 'list' objects>
+    └ [<TestReport 'tests/unit/test_logging.py::test_logger_exception' when='setup' outcome='passed'>]
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\runner.py", line 241, in call_and_report
+    call = CallInfo.from_call(
+           │        └ <classmethod(<function CallInfo.from_call at 0x0000014CEAC4DA80>)>
+           └ <class '_pytest.runner.CallInfo'>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\runner.py", line 341, in from_call
+    result: TResult | None = func()
+            │                └ <function call_and_report.<locals>.<lambda> at 0x0000014C87CA68E0>
+            └ +TResult
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\runner.py", line 242, in <lambda>
+    lambda: runtest_hook(item=item, **kwds), when=when, reraise=reraise
+            │                 │       └ {}
+            │                 └ <Function test_logger_exception>
+            └ <HookCaller 'pytest_runtest_call'>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_hooks.py", line 513, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           │    │         │    │     │    │                  │       └ False
+           │    │         │    │     │    │                  └ {'item': <Function test_logger_exception>}
+           │    │         │    │     │    └ <member '_hookimpls' of 'HookCaller' objects>
+           │    │         │    │     └ <HookCaller 'pytest_runtest_call'>
+           │    │         │    └ <member 'name' of 'HookCaller' objects>
+           │    │         └ <HookCaller 'pytest_runtest_call'>
+           │    └ <member '_hookexec' of 'HookCaller' objects>
+           └ <HookCaller 'pytest_runtest_call'>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           │    │               │          │        │       └ False
+           │    │               │          │        └ {'item': <Function test_logger_exception>}
+           │    │               │          └ [<HookImpl plugin_name='runner', plugin=<module '_pytest.runner' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\_...
+           │    │               └ 'pytest_runtest_call'
+           │    └ <function _multicall at 0x0000014CEA4D2700>
+           └ <_pytest.config.PytestPluginManager object at 0x0000014CEA621460>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_callers.py", line 103, in _multicall
+    res = hook_impl.function(*args)
+          │         │         └ [<Function test_logger_exception>]
+          │         └ <member 'function' of 'HookImpl' objects>
+          └ <HookImpl plugin_name='runner', plugin=<module '_pytest.runner' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\_p...
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\runner.py", line 174, in pytest_runtest_call
+    item.runtest()
+    │    └ <function Function.runtest at 0x0000014CEAD828E0>
+    └ <Function test_logger_exception>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\python.py", line 1627, in runtest
+    self.ihook.pytest_pyfunc_call(pyfuncitem=self)
+    │    │                                   └ <Function test_logger_exception>
+    │    └ <property object at 0x0000014CEABE1490>
+    └ <Function test_logger_exception>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_hooks.py", line 513, in __call__
+    return self._hookexec(self.name, self._hookimpls.copy(), kwargs, firstresult)
+           │    │         │    │     │    │                  │       └ True
+           │    │         │    │     │    │                  └ {'pyfuncitem': <Function test_logger_exception>}
+           │    │         │    │     │    └ <member '_hookimpls' of 'HookCaller' objects>
+           │    │         │    │     └ <HookCaller 'pytest_pyfunc_call'>
+           │    │         │    └ <member 'name' of 'HookCaller' objects>
+           │    │         └ <HookCaller 'pytest_pyfunc_call'>
+           │    └ <member '_hookexec' of 'HookCaller' objects>
+           └ <HookCaller 'pytest_pyfunc_call'>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_manager.py", line 120, in _hookexec
+    return self._inner_hookexec(hook_name, methods, kwargs, firstresult)
+           │    │               │          │        │       └ True
+           │    │               │          │        └ {'pyfuncitem': <Function test_logger_exception>}
+           │    │               │          └ [<HookImpl plugin_name='python', plugin=<module '_pytest.python' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\_...
+           │    │               └ 'pytest_pyfunc_call'
+           │    └ <function _multicall at 0x0000014CEA4D2700>
+           └ <_pytest.config.PytestPluginManager object at 0x0000014CEA621460>
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\pluggy\_callers.py", line 103, in _multicall
+    res = hook_impl.function(*args)
+          │         │         └ [<Function test_logger_exception>]
+          │         └ <member 'function' of 'HookImpl' objects>
+          └ <HookImpl plugin_name='python', plugin=<module '_pytest.python' from 'c:\\Repos\\pyacquisition\\.venv\\Lib\\site-packages\\_p...
+  File "c:\Repos\pyacquisition\.venv\Lib\site-packages\_pytest\python.py", line 159, in pytest_pyfunc_call
+    result = testfunction(**testargs)
+             │              └ {'temp_log_dir': WindowsPath('C:/Users/jake_/AppData/Local/Temp/pytest-of-jake_/pytest-22/logs6'), 'logger_instance': <pyacqu...
+             └ <function test_logger_exception at 0x0000014C87BF3380>
+
+> File "c:\Repos\pyacquisition\tests\unit\test_logging.py", line 171, in test_logger_exception
+    raise ValueError("This is a test exception")
+
+ValueError: This is a test exception
+2025-05-14 at 18:55:23 | ERROR | Error in measurement TestMeasurement: Test exception
+2025-05-14 at 18:55:23 | ERROR | Returning last result: None
+2025-05-14 at 18:55:23 | ERROR | Error resolving parameter references: string indices must be integers, not 'str'
+2025-05-14 at 18:55:23 | INFO | [ExampleTask] Starting task.
+2025-05-14 at 18:55:23 | INFO | [ExampleTask] Running step
+2025-05-14 at 18:55:23 | INFO | [ExampleTask] Task completed.

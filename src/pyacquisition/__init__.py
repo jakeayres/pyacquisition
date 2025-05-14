@@ -3,6 +3,7 @@ from .core.measurement import Measurement as Measurement
 from .core.task_manager.task import Task as Task
 import sys
 
+
 def main(*args) -> None:
     """
     Main function to run the experiment.

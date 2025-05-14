@@ -14,10 +14,11 @@ class TaskManager:
         self._task_queue = asyncio.Queue()
         self._pause_event = asyncio.Event()
         self._pause_event.set()
-        
-        self._task_registry = {}
 
-    def setup(self):
+        self._task_registry = {}
+        self._shutdown_event = asyncio.Event()
+
+    async def setup(self):
         """
         Setup the task manager.
         """
@@ -28,11 +29,20 @@ class TaskManager:
         """
         The main loop that runs the tasks in the queue.
         """
+        logger.info("[TaskManager] Waiting for task to appear on queue")
         while True:
+            await self._pause_event.wait()
+
             try:
-                await self._pause_event.wait()
-                logger.info("[TaskManager] Waiting for task to appear on queue")
-                self._current_task = await self._task_queue.get()
+                self._current_task = await asyncio.wait_for(
+                    self._task_queue.get(), timeout=0.1
+                )
+            except asyncio.TimeoutError:
+                pass
+            except Exception as e:
+                logger.error(f"[Taskmanager] Error getting task from queue: {e}")
+
+            if self._current_task:
                 logger.info(
                     f"[TaskManager] Task fetched from queue: {self._current_task.name}"
                 )
@@ -42,16 +52,26 @@ class TaskManager:
                     logger.error(f"Error running task {self._current_task}: {e}")
                 finally:
                     self._current_task = None
+                    logger.info("[TaskManager] Waiting for task to appear on queue")
 
-            except Exception as e:
-                logger.error(f"Error running task manager: {e}")
+            if self._shutdown_event.is_set():
+                break
 
-    def teardown(self):
+    async def teardown(self):
         """
         Teardown the task manager.
         """
         logger.debug("[TaskManager] Teardown started")
         logger.debug("[TaskManager] Teardown completed")
+
+    async def shutdown(self):
+        """
+        Shutdown the task manager.
+        """
+        logger.debug("[TaskManager] Shutdown started")
+        self._shutdown_event.set()
+
+        self.abort()
 
     def pause(self):
         """
@@ -109,7 +129,6 @@ class TaskManager:
         except Exception as e:
             logger.error(f"Error registering task {task.__class__.__name__}: {e}")
             raise
-
 
     def _register_endpoints(self, api_server):
         """

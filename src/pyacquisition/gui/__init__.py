@@ -181,6 +181,15 @@ class Gui:
         self.dataframe.add_callback(plot.update)
         plot.set_on_close(lambda: self.dataframe.remove_callback(plot.update))
 
+    def shutdown(self):
+        """
+        Shutdown the GUI.
+        """
+        logger.debug("Shutting down GUI")
+        self.api_client.get("/experiment/shutdown")
+        dpg.stop_dearpygui()
+        logger.debug("GUI shutdown completed")
+
     async def setup(self):
         """
         Setup the GUI.
@@ -192,7 +201,7 @@ class Gui:
 
         with dpg.viewport_menu_bar():
             with dpg.menu(label="File"):
-                dpg.add_menu_item(label="Exit", callback=lambda: dpg.stop_dearpygui())
+                dpg.add_menu_item(label="Exit", callback=self.shutdown)
 
         schema = await self._fetch_openapi_schema()
 
@@ -294,5 +303,4 @@ class Gui:
         Run the GUI in a new process.
         """
         process = Process(target=self.run_with_asyncio)
-        process.start()
         return process
