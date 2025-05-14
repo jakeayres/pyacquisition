@@ -114,14 +114,14 @@ class TaskManager:
         """
         logger.info(f"[TaskManager] Adding task to queue: {task.name}")
         self._task_queue.put_nowait(task)
-        
+
     async def remove_task(self, index: int):
         """
         Remove a task from the queue.
         """
         if index < 0:
             index = len(self._task_queue._queue) + index
-            
+
         if (index < len(self._task_queue._queue)) and (index >= 0):
             new_queue = asyncio.Queue()
             count = 0
@@ -134,7 +134,7 @@ class TaskManager:
             logger.info(f"[TaskManager] Removed task-{index} from queue")
         else:
             logger.warning(f"[TaskManager] Index out of range: {index}")
-            
+
     async def clear_tasks(self):
         """
         Clear all tasks from the queue.
@@ -201,7 +201,7 @@ class TaskManager:
                 "status": "success",
                 "message": "Task manager aborted current task.",
             }
-            
+
         @api_server.app.get("/task_manager/remove_task", tags=["Task Manager"])
         async def remove_task(N: int) -> dict:
             """
@@ -212,7 +212,7 @@ class TaskManager:
                 "status": "success",
                 "message": f"Attempted to remove task-{N} from queue.",
             }
-            
+
         @api_server.app.get("/task_manager/clear_tasks", tags=["Task Manager"])
         async def clear_all_tasks():
             """

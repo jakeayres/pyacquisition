@@ -1,6 +1,6 @@
 [project]
 name = "pyacquisition"
-version = "0.1.4"
+version = "0.1.5"
 description = "Python-based data acquisition"
 readme = "README.md"
 authors = [

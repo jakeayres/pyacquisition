@@ -6,8 +6,8 @@ nav:
   - Overview:
     - Overview: index.md
     - About: overview/about.md
+    - Comparison: overview/comparison.md
     - Roadmap: overview/roadmap.md
-    - Contributing: overview/contributing.md
   - Basic Usage:
     - Installation: basic/installation.md
     - Getting Started: basic/getting_started.md
@@ -32,6 +32,9 @@ nav:
     - NewFile: tasks/new_file.md
     - WaitFor: tasks/wait_for.md
     - WaitUntil: tasks/wait_until.md
+  - For Developers:
+    - Overview: dev/overview.md
+    - Contributing: dev/contributing.md
 theme:
   name: material
   icon:
