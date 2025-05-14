@@ -196,12 +196,16 @@ class Gui:
         """
         logger.warning("[GUI] Setup started")
         dpg.create_context()
-        dpg.create_viewport(title="PyAcquisition GUI", width=1440, height=900)
+        dpg.create_viewport(
+            title="PyAcquisition GUI", width=1440, height=900, disable_close=True
+        )
         dpg.setup_dearpygui()
 
         with dpg.viewport_menu_bar():
             with dpg.menu(label="File"):
                 dpg.add_menu_item(label="Exit", callback=self.shutdown)
+
+        dpg.set_exit_callback(self.shutdown)
 
         schema = await self._fetch_openapi_schema()
 
