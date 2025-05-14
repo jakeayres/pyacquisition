@@ -114,6 +114,34 @@ class TaskManager:
         """
         logger.info(f"[TaskManager] Adding task to queue: {task.name}")
         self._task_queue.put_nowait(task)
+        
+    async def remove_task(self, index: int):
+        """
+        Remove a task from the queue.
+        """
+        if index < 0:
+            index = len(self._task_queue._queue) + index
+            
+        if (index < len(self._task_queue._queue)) and (index >= 0):
+            new_queue = asyncio.Queue()
+            count = 0
+            while not self._task_queue.empty():
+                item = await self._task_queue.get()
+                if count != index:
+                    await new_queue.put(item)
+                count += 1
+            self._task_queue = new_queue
+            logger.info(f"[TaskManager] Removed task-{index} from queue")
+        else:
+            logger.warning(f"[TaskManager] Index out of range: {index}")
+            
+    async def clear_tasks(self):
+        """
+        Clear all tasks from the queue.
+        """
+        while not self._task_queue.empty():
+            await self._task_queue.get()
+        logger.info("[TaskManager] All tasks cleared from queue")
 
     def register_task(self, experiment, task: Task, **kwargs) -> None:
         """
@@ -162,7 +190,7 @@ class TaskManager:
             return {"status": "success", "message": "Task manager resumed."}
 
         @api_server.app.get("/task_manager/abort", tags=["Task Manager"])
-        async def abort():
+        async def abort_current_task():
             """
             Endpoint to abort the current task.
             """
@@ -172,6 +200,28 @@ class TaskManager:
             return {
                 "status": "success",
                 "message": "Task manager aborted current task.",
+            }
+            
+        @api_server.app.get("/task_manager/remove_task", tags=["Task Manager"])
+        async def remove_task(N: int) -> dict:
+            """
+            Remove the nth task from the queue
+            """
+            await self.remove_task(N)
+            return {
+                "status": "success",
+                "message": f"Attempted to remove task-{N} from queue.",
+            }
+            
+        @api_server.app.get("/task_manager/clear_tasks", tags=["Task Manager"])
+        async def clear_all_tasks():
+            """
+            Clear all queued tasks from the queue.
+            """
+            await self.clear_tasks()
+            return {
+                "status": "success",
+                "message": "All tasks cleared from queue.",
             }
 
         @api_server.app.get("/task_manager/status", tags=["Task Manager"])
