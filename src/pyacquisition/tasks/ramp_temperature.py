@@ -1,7 +1,7 @@
 from ..instruments.lakeshore.lakeshore_340 import OutputChannel as OC340
 from ..instruments.lakeshore.lakeshore_350 import OutputChannel as OC350
 from ..instruments.lakeshore.lakeshore_350 import State
-from ..core.task import Task
+from ..core import Task
 from dataclasses import dataclass
 import asyncio
 

@@ -1,4 +1,4 @@
-from ..core.task import Task
+from ..core import Task
 from dataclasses import dataclass
 
 

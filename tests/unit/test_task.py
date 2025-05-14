@@ -1,5 +1,5 @@
 import pytest
-from pyacquisition.core.task import Task
+from pyacquisition import Task
 
 
 def test_task_name():

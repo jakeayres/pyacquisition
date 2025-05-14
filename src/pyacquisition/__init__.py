@@ -1,6 +1,6 @@
 from .core.experiment import Experiment as Experiment
 from .core.measurement import Measurement as Measurement
-from .core.task import Task as Task
+from .core.task_manager.task import Task as Task
 import sys
 
 def main(*args) -> None:

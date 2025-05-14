@@ -8,11 +8,12 @@ from .logging import logger
 from .api_server import APIServer
 from .rack import Rack
 from .calculations import Calculations
-from .task_manager import TaskManager
-from .task import Task
+from .task_manager.task_manager import TaskManager
+from .task_manager.task import Task
 from .scribe import Scribe
 from ..gui import Gui
 from ..instruments import instrument_map
+from ..tasks import standard_tasks
 from .measurement import Measurement
 from .adapters import get_adapter
 from .config_parser import ConfigParser
@@ -43,7 +44,7 @@ class Experiment:
         self,
         root_path: str = ".",
         data_path: str = ".",
-        data_file_extension: str = ".data",
+        data_file_extension: str = "data",
         data_delimiter: str = ",",
         log_path: str = ".",
         console_log_level: str = "DEBUG",
@@ -115,6 +116,9 @@ class Experiment:
 
         self._api_server.add_websocket_endpoint("/logs")
         self._api_server.websocket_endpoints["/logs"].subscribe_to(logger)
+        
+        for task in standard_tasks:
+            self.register_task(task)
 
         logger.info("[Experiment] Fully initialized")
 
@@ -482,8 +486,4 @@ class Experiment:
         Args:
             task (Task): The task to register.
         """
-        try:
-            task.register_endpoints(self, **kwargs)
-        except Exception as e:
-            logger.error(f"Error registering task {task.__class__.__name__}: {e}")
-            raise
+        self._task_manager.register_task(self, task, **kwargs)

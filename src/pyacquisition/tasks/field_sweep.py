@@ -5,7 +5,7 @@ from ..instruments.oxford_instruments.mercury_ips import (
 )
 
 from ..core.logging import logger
-from ..core.task import Task
+from ..core import Task
 
 
 import asyncio

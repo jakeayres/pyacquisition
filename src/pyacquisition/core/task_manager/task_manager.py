@@ -1,4 +1,4 @@
-from .logging import logger
+from ..logging import logger
 from .task import Task
 import asyncio
 
@@ -14,6 +14,8 @@ class TaskManager:
         self._task_queue = asyncio.Queue()
         self._pause_event = asyncio.Event()
         self._pause_event.set()
+        
+        self._task_registry = {}
 
     def setup(self):
         """
@@ -93,13 +95,21 @@ class TaskManager:
         logger.info(f"[TaskManager] Adding task to queue: {task.name}")
         self._task_queue.put_nowait(task)
 
-    # def register_task(self, task: Task):
-    #     try:
-    #         task.register_endpoints(self)
-    #     except Exception as e:
-    #         logger.error(
-    #             f"Error registering endpoints for {task.__class__.__name__}: {e}"
-    #         )
+    def register_task(self, experiment, task: Task, **kwargs) -> None:
+        """
+        Registers a task with the experiment.
+
+        Args:
+            task (Task): The task to register.
+        """
+        try:
+            task.register_endpoints(experiment, **kwargs)
+            self._task_registry[task.__class__.__name__] = task
+            logger.debug(f"Task '{task.name}' registered with the experiment")
+        except Exception as e:
+            logger.error(f"Error registering task {task.__class__.__name__}: {e}")
+            raise
+
 
     def _register_endpoints(self, api_server):
         """
