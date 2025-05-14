@@ -119,6 +119,8 @@ class Experiment:
         
         for task in standard_tasks:
             self.register_task(task)
+            
+        self._shutdown_event = asyncio.Event()
 
         logger.info("[Experiment] Fully initialized")
 
@@ -487,3 +489,18 @@ class Experiment:
             task (Task): The task to register.
         """
         self._task_manager.register_task(self, task, **kwargs)
+        
+        
+    def _register_endpoints(self, api_server):
+        """
+        Register the endpoints for the experiment.
+        """
+        
+        @api_server.app.get("/experiment/shutdown", tags=["experiment"])
+        async def shutdown():
+            """
+            Endpoint to shut down the experiment.
+            """
+            logger.info("Shutting down the experiment")
+            await self._shutdown_event.set()
+            return {"status": "success", "message": "Experiment shutdown initiated."}
