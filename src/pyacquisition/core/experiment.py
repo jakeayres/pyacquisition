@@ -191,7 +191,7 @@ class Experiment:
             raise ValueError(f"Adapter '{adapter_name}' not found in adapter map.")
 
     @staticmethod
-    def _open_resource(adapter, resource: str, timeout: int = 5000):
+    def _open_resource(adapter, resource: str, timeout: int = 5000, **kwargs):
         """
         Open a resource using the appropriate adapter.
 
@@ -212,7 +212,7 @@ class Experiment:
                 return None
             else:
                 logger.debug(f"Opening resource '{resource}'")
-                return adapter.open_resource(resource, timeout=timeout)
+                return adapter.open_resource(resource, timeout=timeout, **kwargs)
         except Exception as e:
             logger.warning(f"Failed to open resource '{resource}': {e}")
             return None
@@ -300,9 +300,14 @@ class Experiment:
                         f"Creating instrument '{name}' with adapter '{instrument['adapter']}'"
                     )
                     adapter_class = cls._get_adapter_class(instrument["adapter"])
+                    kwargs = instrument.get("args", {})
                     resource = cls._open_resource(
-                        adapter_class, instrument.get("resource", None), timeout=5000
+                        adapter_class, 
+                        instrument.get("resource", None), 
+                        timeout=5000,
+                        **kwargs,
                     )
+
                     if resource:
                         inst = instrument_class(name, resource)
                         experiment._rack.add_instrument(inst)
