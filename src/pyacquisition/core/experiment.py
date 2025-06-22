@@ -257,7 +257,7 @@ class Experiment:
                 root_path=config.get("experiment", {}).get("root_path", "."),
                 data_path=config.get("data", {}).get("path", "."),
                 data_file_extension=config.get("data", {}).get(
-                    "file_extension", ".data"
+                    "file_extension", "data"
                 ),
                 data_delimiter=config.get("data", {}).get("delimiter", ","),
                 log_path=config.get("logging", {}).get("path", "."),
