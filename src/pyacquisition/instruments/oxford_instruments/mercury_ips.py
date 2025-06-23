@@ -123,42 +123,42 @@ class Mercury_IPS(Instrument):
     def get_limit_status(self) -> SystemStatusN:
         response = self.query("X")
         response = self._parse_status_string(response, 2)
-        return SystemStatusN(int(response))
+        return SystemStatusN.from_raw_value(int(response))
 
 
     @mark_query
     def get_activity_status(self) -> ActivityStatus:
         response = self.query("X")
         response = self._parse_status_string(response, 4)
-        return ActivityStatus(int(response))
+        return ActivityStatus.from_raw_value(int(response))
 
 
     @mark_query
     def get_remote_status(self) -> RemoteStatus:
         response = self.query("X")
         response = self._parse_status_string(response, 6)
-        return RemoteStatus(int(response))
+        return RemoteStatus.from_raw_value(int(response))
 
 
     @mark_query
     def get_switch_heater_status(self) -> SwitchHeaterStatus:
         response = self.query("X")
         response = self._parse_status_string(response, 8)
-        return SwitchHeaterStatus(int(response))
+        return SwitchHeaterStatus.from_raw_value(int(response))
 
 
     @mark_query
     def get_sweep_mode_status(self) -> ModeStatusM:
         response = self.query("X")
         response = self._parse_status_string(response, 10)
-        return ModeStatusM(int(response))
+        return ModeStatusM.from_raw_value(int(response))
 
 
     @mark_query
     def get_sweep_status(self) -> ModeStatusN:
         response = self.query("X")
         response = self._parse_status_string(response, 11)
-        return ModeStatusN(int(response))
+        return ModeStatusN.from_raw_value(int(response))
 
 
     @mark_query
