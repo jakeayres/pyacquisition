@@ -37,7 +37,7 @@ class WaitFor(Task):
         while time.time() < end_time:
             remaining_time = end_time - time.time()
             if int(remaining_time) % 300 == 0:
-                yield f"{datetime.timedelta(seconds=remaining_time):i} remaining"
+                yield f"{datetime.timedelta(seconds=remaining_time):.2f} remaining"
             else:
                 yield None
             await asyncio.sleep(1)
