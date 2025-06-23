@@ -116,7 +116,7 @@ class Mercury_IPS(Instrument):
     def get_system_status(self) -> SystemStatusM:
         response = self.query("X")
         response = self._parse_status_string(response, 1)
-        return SystemStatusM(int(response))
+        return SystemStatusM.from_raw_value(int(response))
     
 
     @mark_query
