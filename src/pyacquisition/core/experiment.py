@@ -400,9 +400,9 @@ class Experiment:
     def setup(self) -> None:
         """
         Sets up the experiment environment.
-
-        This method is responsible for preparing the experiment environment, such as
-        initializing resources or configuring dependencies.
+        
+        Override this method to implement custom setup logic for the experiment. It
+        is called before the main experiment event loop starts
         """
         pass
 
@@ -410,8 +410,8 @@ class Experiment:
         """
         Cleans up the experiment environment.
 
-        This method is responsible for releasing resources or performing any necessary cleanup
-        after the experiment has run.
+        Override this method to implement custom teardown logic for the experiment.
+        It is called after the main experiment event loop ends.
         """
         pass
 
@@ -494,7 +494,11 @@ class Experiment:
 
     def run(self) -> None:
         """
-        Runs the experiment.
+        Run the experiment. The main entry point for executing the experiment.
+        
+        Example:
+            experiment = Experiment.from_config("experiment_config.toml")
+            experiment.run()
         """
         logger.info("Experiment started")
 
@@ -510,9 +514,17 @@ class Experiment:
     def register_task(self, task: Task, **kwargs) -> None:
         """
         Registers a task with the experiment.
+        
+        This method allows you to register a task with the experiment. Once 
+        registered, the task can be added to the task queue within the GUI.
 
         Args:
             task (Task): The task to register.
+            **kwargs: Additional keyword arguments to pass to the task manager.
+
+        Example:
+            experiment.register_task(MyCustomTask())
+        
         """
         self._task_manager.register_task(self, task, **kwargs)
 
