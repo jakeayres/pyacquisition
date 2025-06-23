@@ -34,12 +34,22 @@ class WaitFor(Task):
         end_time = start_time + total_seconds
         logger.info(f"[{self.name}] Waiting for {total_seconds} seconds")
 
-        while time.time() < end_time:
-            remaining_time = end_time - time.time()
-            if int(remaining_time) % 300 == 0:
-                yield f"{datetime.timedelta(seconds=remaining_time):.2f} remaining"
+        last_report = None
+        while True:
+            now = time.time()
+            remaining_time = max(0, end_time - now)
+
+            # Report every 5 minutes and at end
+            if int(remaining_time) % 300 == 0 and int(remaining_time) != last_report:
+                yield f"{datetime.timedelta(seconds=int(remaining_time))} remaining"
+                last_report = int(remaining_time)
+            
             else:
                 yield None
+
+            if now >= end_time:
+                break
+
             await asyncio.sleep(1)
 
 
