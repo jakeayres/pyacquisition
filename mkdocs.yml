@@ -6,6 +6,7 @@ nav:
   - Overview:
     - Overview: index.md
     - About: overview/about.md
+    - License: overview/license.md
     - Comparison: overview/comparison.md
     - Roadmap: overview/roadmap.md
   - Basic Usage:
