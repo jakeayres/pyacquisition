@@ -9,12 +9,25 @@ nav:
     - License: overview/license.md
     - Comparison: overview/comparison.md
     - Roadmap: overview/roadmap.md
-  - Basic Usage:
-    - Installation: basic/installation.md
-    - Getting Started: basic/getting_started.md
-    - TOML Configuration: basic/configuration.md
-  - Advanced Usage:
-    - Overview: advanced/overview.md
+
+  - Usage:
+    - Introduction: usage/introduction.md
+    - Installation: usage/installation.md
+    - Quick Start: usage/quick_start.md
+    - TOML Configuration: usage/toml_config.md
+
+    - Instrument Communication:
+      - Hardware Instruments: usage/hardware_instruments.md
+      - Software Instruments: usage/software_instruments.md
+
+    - Data Acquisition:
+      - Measurements: usage/measurements.md
+
+    - Experiment Automation: 
+      - Creating Tasks: usage/tasks.md
+
+  # - Advanced Usage:
+  #   - Overview: advanced/overview.md
   - Experiment API:
     - Experiment: experiment/experiment.md
     - Rack: experiment/rack.md
@@ -47,6 +60,7 @@ theme:
     - content.code.copy
     - content.code.annotate
     - navigation.footer
+    - navigation.sections
 plugins:
   - search
   - mkdocstrings:
