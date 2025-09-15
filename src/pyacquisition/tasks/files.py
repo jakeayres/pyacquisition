@@ -20,7 +20,7 @@ class NewFile(Task):
 
     async def run(self, experiment):
         yield None
-        experiment.scribe.next_file(
+        experiment._scribe.next_file(
             title=self.file_name, next_block=self.increment_block
         )
         yield None
