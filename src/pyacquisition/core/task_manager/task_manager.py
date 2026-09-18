@@ -33,6 +33,9 @@ class TaskManager:
         while True:
             await self._pause_event.wait()
 
+            if self._shutdown_event.is_set():
+                break  # do not start queued tasks while shutting down
+
             try:
                 self._current_task = await asyncio.wait_for(
                     self._task_queue.get(), timeout=0.1
@@ -72,6 +75,10 @@ class TaskManager:
         self._shutdown_event.set()
 
         self.abort()
+
+        # A paused task manager (after Pause, or after an Abort) waits for a resume
+        # and would never see the shutdown event.
+        self._pause_event.set()
 
     def pause(self):
         """

@@ -12,6 +12,8 @@ class Task:
     def name(self) -> str:
         """
         Returns the name of the task.
+
+        This can be overridden in subclasses to provide a custom name for the task.
         """
         return self.__class__.__name__
 
@@ -20,6 +22,8 @@ class Task:
         self._abort_event: asyncio.Event = asyncio.Event()
         self._is_paused: bool = False
         self._status: str = "running"
+        self._experiment = None
+        self._active_subtask: Task | None = None
         self._pause_event.set()  # Set to allow task to run immediately
         self._abort_event.clear()  # Clear to allow task to run immediately
 
@@ -49,6 +53,7 @@ class Task:
         Starts the task and manages pausing and aborting.
         """
         self._abort_event.clear()
+        self._experiment = experiment
         try:
             logger.info(f"[{self.name}] Starting task.")
             await self.setup(experiment=experiment)
@@ -64,6 +69,59 @@ class Task:
             await self.teardown(experiment=experiment)
             logger.info(f"[{self.name}] Task completed.")
 
+    async def run_subtask(self, subtask: "Task", experiment=None):
+        """
+        Runs another task as part of this one. Call it with `await` from inside `run()`.
+
+        The subtask goes through its full lifecycle: `setup()`, `run()` and then
+        `teardown()`, which runs even if the subtask is aborted or fails. Its steps
+        are logged under its own name.
+
+        Pausing or aborting this task also pauses or aborts the subtask, at any
+        depth, at the subtask's next step. An abort raises out of this call, so
+        the rest of this task's `run()` is skipped. Aborting the subtask directly
+        aborts this task too, since it cannot continue without it.
+
+        Errors in the subtask are raised here. Wrap the call in `try`/`except` to
+        carry on regardless.
+
+        This task's own `run()` must still be an async generator, so `yield` between
+        subtasks (`yield None` if there is nothing to log).
+
+        Args:
+            subtask (Task): The task to run.
+            experiment: The experiment to pass to the subtask. Defaults to the
+                experiment this task was started with.
+
+        Example:
+            async def run(self, experiment):
+                await self.run_subtask(WaitFor(minutes=5))
+                yield "Waited"
+                await self.run_subtask(NewFile(title="after wait"))
+                yield "New file"
+        """
+        if experiment is None:
+            experiment = self._experiment
+
+        # Do not begin if this task has already been aborted or is paused.
+        await self._check_control_flags()
+
+        subtask._abort_event.clear()
+        previous_subtask = self._active_subtask
+        self._active_subtask = subtask
+        try:
+            logger.info(f"[{subtask.name}] Starting subtask of [{self.name}].")
+            await subtask.setup(experiment=experiment)
+            async for step in subtask.run(experiment=experiment):
+                if step:
+                    logger.info(f"[{subtask.name}] {step}")
+                await self._check_control_flags()
+                await subtask._check_control_flags()
+        finally:
+            self._active_subtask = previous_subtask
+            await subtask.teardown(experiment=experiment)
+            logger.info(f"[{subtask.name}] Subtask completed.")
+
     async def _check_control_flags(self):
         """
         Checks for pause or abort signals and handles them.
@@ -72,6 +130,8 @@ class Task:
         if self._abort_event.is_set():
             raise asyncio.CancelledError("Task aborted.")
         await self._pause_event.wait()
+        if self._abort_event.is_set():  # aborted while paused
+            raise asyncio.CancelledError("Task aborted.")
 
     @property
     def description(self) -> str:
@@ -102,22 +162,28 @@ class Task:
 
     def pause(self):
         """
-        Pauses the task.
+        Pauses the task, and any subtask it is currently running.
         """
         self._pause_event.clear()
+        if self._active_subtask:
+            self._active_subtask.pause()
 
     def resume(self):
         """
-        Resumes the task.
+        Resumes the task, and any subtask it is currently running.
         """
         self._pause_event.set()
+        if self._active_subtask:
+            self._active_subtask.resume()
 
     def abort(self):
         """
-        Aborts the task.
+        Aborts the task, and any subtask it is currently running.
         """
         self._abort_event.set()
         self._pause_event.set()  # Ensure it doesn't stay paused
+        if self._active_subtask:
+            self._active_subtask.abort()
 
     @classmethod
     def register_endpoints(cls, experiment, label=None, **fixed_kwargs):
