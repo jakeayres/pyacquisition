@@ -1,6 +1,6 @@
 [project]
 name = "pyacquisition"
-version = "0.1.13"
+dynamic = ["version"] # taken from the git tag, see [tool.hatch.version]
 description = "Python-based data acquisition"
 readme = "README.md"
 authors = [
@@ -8,22 +8,17 @@ authors = [
 ]
 requires-python = ">=3.11"
 dependencies = [
-    "aiohttp>=3.11.18",
     "asyncio>=3.4.3",
     "dearpygui>=2.0.0",
-    "fastapi[standard]>=0.115.12",
+    "fastapi[standard]>=0.141.1",
     "loguru>=0.7.3",
-    "mkdocs>=1.6.1",
-    "mkdocs-material>=9.6.11",
-    "mkdocstrings[python]>=0.29.1",
     "pandas>=2.2.3",
     "pyserial>=3.5",
-    "pytest>=8.3.5",
-    "pytest-asyncio>=0.26.0",
-    "pytest-mock>=3.14.0",
     "pyvisa>=1.15.0",
     "pyvisa-py>=0.8.0",
-    "uvicorn>=0.34.1",
+    "requests>=2.34.2",
+    "uvicorn>=0.53.0",
+    "websockets>=17.1",
 ]
 
 [project.urls]
@@ -33,8 +28,17 @@ Repository = "https://github.com/jakeayres/pyacquisition.git"
 Issues = "https://github.com/jakeayres/pyacquisition/issues"
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
+
+# The version comes from the latest git tag: tagging `v0.2.0` releases 0.2.0.
+[tool.hatch.version]
+source = "vcs"
+
+# Rebuild the installed project when the git commit or tags change, so that the
+# version reported locally stays up to date.
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { git = { commit = true, tags = true } }]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
@@ -42,6 +46,18 @@ pythonpath = ["src"]
 [dependency-groups]
 dev = [
     "ruff>=0.11.8",
+    {include-group = "test"},
+    {include-group = "docs"},
+]
+test = [
+    "aiohttp>=3.14.3",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.26.0",
+    "pytest-mock>=3.14.0",
+]
+docs = [
+    "zensical>=0.0.62",
+    "mkdocstrings[python]>=1.0",
 ]
 
 

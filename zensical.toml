@@ -1,0 +1,101 @@
+[project]
+site_name = "PyAcquisition"
+site_url = "https://pyacquisition.readthedocs.io"
+repo_url = "https://github.com/jakeayres/pyacquisition"
+repo_name = "pyacquisition"
+
+nav = [
+  { "Overview" = [
+    { "Overview" = "index.md" },
+    { "About" = "overview/about.md" },
+    { "License" = "overview/license.md" },
+    { "Comparison" = "overview/comparison.md" },
+    { "Roadmap" = "overview/roadmap.md" },
+  ] },
+  { "Usage" = [
+    { "Introduction" = "usage/introduction.md" },
+    { "Installation" = "usage/installation.md" },
+    { "Setting Up an Experiment" = "usage/setting_up.md" },
+    { "Running an Experiment" = "usage/running.md" },
+    { "Instruments" = [
+      { "Adding Instruments" = "usage/instruments.md" },
+      { "Writing Your Own Instrument" = "usage/custom_instruments.md" },
+    ] },
+    { "Measurements and Data Files" = "usage/measurements.md" },
+    { "Tasks" = [
+      { "Writing Tasks" = "usage/tasks.md" },
+      { "Composing Tasks" = "usage/composing_tasks.md" },
+      { "Running Tasks" = "usage/running_tasks.md" },
+    ] },
+  ] },
+  { "Experiment API" = [
+    { "Experiment" = "experiment/experiment.md" },
+    { "Rack" = "experiment/rack.md" },
+    { "Scribe" = "experiment/scribe.md" },
+    { "Task Manager" = "experiment/task_manager.md" },
+  ] },
+  { "Instruments" = [
+    { "Overview" = "instruments/overview.md" },
+    { "Clock" = "instruments/clock.md" },
+    { "Lakeshore_340" = "instruments/lakeshore_340.md" },
+    { "Lakeshore_350" = "instruments/lakeshore_350.md" },
+    { "Mercury IPS" = "instruments/mercury_ips.md" },
+    { "SR_830" = "instruments/sr_830.md" },
+    { "SR_860" = "instruments/sr_860.md" },
+  ] },
+  { "Tasks" = [
+    { "Overview" = "tasks/overview.md" },
+    { "NewFile" = "tasks/new_file.md" },
+    { "WaitFor" = "tasks/wait_for.md" },
+    { "WaitUntil" = "tasks/wait_until.md" },
+  ] },
+  { "For Developers" = [
+    { "Overview" = "dev/overview.md" },
+    { "Contributing" = "dev/contributing.md" },
+  ] },
+]
+
+[project.theme]
+variant = "classic" # the Material look. Remove this line for Zensical's newer default design.
+features = [
+  "content.code.annotate",
+  "content.code.copy",
+  "navigation.footer",
+  "navigation.sections",
+  "navigation.tabs",
+]
+palette.primary = "blue"
+
+[project.theme.icon]
+repo = "fontawesome/brands/git-alt"
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["src"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+heading_level = 2
+show_root_heading = true
+show_root_toc_entry = false
+show_root_full_path = false
+merge_init_into_class = true
+show_symbol_type_heading = true
+show_symbol_type_toc = true
+show_docstring_examples = true
+modernize_annotations = true
+show_source = false
+
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+md_in_html = {}
+toc.permalink = true
+pymdownx.blocks.caption = {}
+pymdownx.details = {}
+pymdownx.emoji.emoji_generator = "zensical.extensions.emoji.to_svg"
+pymdownx.emoji.emoji_index = "zensical.extensions.emoji.twemoji"
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.snippets = {}
+pymdownx.superfences = {}
