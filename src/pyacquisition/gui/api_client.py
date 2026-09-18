@@ -1,48 +1,107 @@
 import json
-import aiohttp
-import asyncio
+import queue
+import threading
 import requests
-import websockets
-from ..core.broadcaster import Broadcaster
+from websockets.exceptions import ConnectionClosed
+from websockets.sync.client import connect
 from ..core.logging import logger
 
 
-class Stream(Broadcaster):
-    def __init__(self, name: str, url: str, params: dict = None) -> None:
-        """
-        Initializes the Stream with the specified name.
+class _Source:
+    """
+    Base class for anything that receives data from the FastAPI server.
 
-        Args:
-            name (str): The name of the stream.
-        """
-        super().__init__()
+    A worker thread does the blocking network I/O and puts each decoded message on
+    a thread-safe queue. The GUI thread calls `dispatch` once per frame, which
+    drains the queue and runs the callbacks. This keeps every DearPyGui call on
+    the thread that owns the render loop.
+    """
+
+    def __init__(self, name: str, url: str, params: dict = None) -> None:
         self.name = name
         self.url = url
         self.params = params if params else {}
+        self._queue = queue.Queue()
+        self._callbacks = []
+        self._stop_event = threading.Event()
+        self._thread = None
 
-    async def run(self):
+    def add_callback(self, callback: callable) -> None:
         """
-        Connects to a websocket endpoint and yields messages as they arrive.
+        Adds a callback to be called (on the GUI thread) with each message.
 
         Args:
-            endpoint (str): The websocket endpoint to connect to (e.g., '/ws').
-            params (dict, optional): Query parameters to include in the connection URL.
-
+            callback (callable): The callback function to add.
         """
-        async with websockets.connect(self.url) as websocket:
+        self._callbacks.append(callback)
+
+    def start(self) -> None:
+        """
+        Starts the worker thread.
+        """
+        self._thread = threading.Thread(
+            target=self._run, name=f"{type(self).__name__}-{self.name}", daemon=True
+        )
+        self._thread.start()
+
+    def stop(self) -> None:
+        """
+        Asks the worker thread to stop.
+        """
+        self._stop_event.set()
+
+    def dispatch(self) -> None:
+        """
+        Runs the callbacks for every message received since the last call.
+        Must be called from the GUI thread.
+        """
+        while True:
             try:
-                while True:
-                    message = await websocket.recv()
-                    await self.broadcast(json.loads(message))
-            except websockets.ConnectionClosed:
+                message = self._queue.get_nowait()
+            except queue.Empty:
+                return
+            for callback in self._callbacks:
+                try:
+                    callback(message)
+                except Exception as e:
+                    logger.error(f"Error in {self.name} callback: {e}")
+
+    def _run(self) -> None:
+        raise NotImplementedError
+
+
+class Stream(_Source):
+    """
+    A class for receiving messages from a websocket endpoint.
+    """
+
+    RECONNECT_DELAY = 1.0
+    RECV_TIMEOUT = 0.5
+
+    def _run(self) -> None:
+        """
+        Connects to the websocket and queues messages as they arrive,
+        reconnecting if the connection is lost.
+        """
+        while not self._stop_event.is_set():
+            try:
+                with connect(self.url) as websocket:
+                    while not self._stop_event.is_set():
+                        try:
+                            message = websocket.recv(timeout=self.RECV_TIMEOUT)
+                        except TimeoutError:
+                            continue
+                        self._queue.put(json.loads(message))
+            except ConnectionClosed:
                 logger.debug("WebSocket connection closed")
             except Exception as e:
                 logger.error(f"Error in WebSocket connection: {e}")
+            self._stop_event.wait(self.RECONNECT_DELAY)
 
 
-class Poller:
+class Poller(_Source):
     """
-    A class for polling an API endpoint and broadcasting the response.
+    A class for polling an API endpoint at a fixed period.
     """
 
     def __init__(
@@ -57,41 +116,23 @@ class Poller:
             params (dict, optional): Query parameters to include in the request.
             period (float, optional): The time interval between requests in seconds.
         """
-        super().__init__()
-        self.name = name
-        self.url = url
-        self.params = params if params else {}
+        super().__init__(name, url, params)
         self.period = period
-        self.callbacks = []
 
-    def add_callback(self, callback: callable) -> None:
+    def _run(self) -> None:
         """
-        Adds a callback to be called with the response data.
-
-        Args:
-            callback (callable): The callback function to add.
+        Repeatedly polls the endpoint and queues the response.
         """
-        self.callbacks.append(callback)
-
-    async def run(self):
-        """
-        Repeatedly poll an API endpoint and broadcast the response.
-        """
-        async with aiohttp.ClientSession() as session:
-            while True:
+        with requests.Session() as session:
+            while not self._stop_event.is_set():
                 try:
-                    async with session.get(self.url, params=self.params) as response:
-                        data = await response.text()
-                        json_data = json.loads(data)
-                        try:
-                            for callback in self.callbacks:
-                                callback(json_data)
-                        except Exception as e:
-                            logger.error(f"Error in poller [{self.name}] callback: {e}")
-                    await asyncio.sleep(self.period)
+                    response = session.get(
+                        self.url, params=self.params, timeout=self.period + 5
+                    )
+                    self._queue.put(response.json())
                 except Exception as e:
                     logger.error(f"Error in Poller run: {e}")
-                    await asyncio.sleep(self.period)
+                self._stop_event.wait(self.period)
 
 
 class APIClient:
@@ -113,36 +154,43 @@ class APIClient:
         self.streams = {}
         self.pollers = {}
 
-    async def run(self):
+    def start(self) -> None:
         """
-        Starts the APIClient and its streams.
+        Starts the worker threads of all streams and pollers.
         """
-        try:
-            async with asyncio.TaskGroup() as task_group:
-                for name, stream in self.streams.items():
-                    task_group.create_task(stream.run())
-                for name, poller in self.pollers.items():
-                    task_group.create_task(poller.run())
-        except Exception as e:
-            logger.error(f"Error in APIClient run: {e}")
+        for source in [*self.streams.values(), *self.pollers.values()]:
+            source.start()
 
-    def add_stream(self, name: str, url: str) -> None:
+    def stop(self) -> None:
+        """
+        Asks the worker threads of all streams and pollers to stop.
+        """
+        for source in [*self.streams.values(), *self.pollers.values()]:
+            source.stop()
+
+    def dispatch(self) -> None:
+        """
+        Runs the callbacks for all data received since the last call.
+        Call once per frame from the GUI thread.
+        """
+        for source in [*self.streams.values(), *self.pollers.values()]:
+            source.dispatch()
+
+    def add_stream(self, name: str, url: str) -> Stream:
         """
         Adds a new stream to the APIClient.
 
         Args:
             name (str): The name of the stream to add.
+            url (str): The websocket endpoint to connect to (e.g., '/ws').
         """
-        try:
-            full_url = f"ws://{self.host}:{self.port}{url}"
-            self.streams[name] = Stream(name, full_url)
-            return self.streams[name]
-        except Exception as e:
-            logger.error(f"Error adding stream {name}: {e}")
+        full_url = f"ws://{self.host}:{self.port}{url}"
+        self.streams[name] = Stream(name, full_url)
+        return self.streams[name]
 
     def add_poller(
         self, name: str, url: str, params: dict = None, period: float = 1.0
-    ) -> None:
+    ) -> Poller:
         """
         Adds a new poller to the APIClient.
 
@@ -152,34 +200,9 @@ class APIClient:
             params (dict, optional): Query parameters to include in the request.
             period (float, optional): The time interval between requests in seconds.
         """
-        try:
-            full_url = f"http://{self.host}:{self.port}{url}"
-            self.pollers[name] = Poller(name, full_url, params, period)
-            return self.pollers[name]
-        except Exception as e:
-            logger.error(f"Error adding poller {name}: {e}")
-
-    async def async_get(
-        self, endpoint: str, params: dict = None, callback: callable = None
-    ) -> dict:
-        """
-        Sends a GET request to the specified endpoint with optional parameters.
-
-        Args:
-            endpoint (str): The API endpoint to send the request to.
-            params (dict, optional): The query parameters to include in the request.
-
-        Returns:
-            dict: The JSON response from the server.
-        """
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"http://{self.host}:{self.port}{endpoint}", params=params
-            ) as response:
-                data = await response.text()
-                if callback:
-                    await callback(json.loads(data))
-                return json.loads(data)
+        full_url = f"http://{self.host}:{self.port}{url}"
+        self.pollers[name] = Poller(name, full_url, params, period)
+        return self.pollers[name]
 
     def get(
         self, endpoint: str, params: dict = None, callback: callable = None
@@ -203,54 +226,3 @@ class APIClient:
         if callback:
             callback(data)
         return data
-
-    async def poll(
-        self,
-        endpoint: str,
-        params: dict = None,
-        period: float = 1.0,
-        callback: callable = None,
-    ) -> dict:
-        """
-        Repeatedly poll an API endpoint and broadcast the response.
-
-        Args:
-            broadcaster (str): The name of the broadcaster to use.
-            endpoint (str): The API endpoint to poll.
-            params (dict, optional): The query parameters to include in the request.
-            period (float, optional): The time interval between requests in seconds.
-        """
-        async with aiohttp.ClientSession() as session:
-            while True:
-                async with session.get(
-                    f"http://{self.host}:{self.port}{endpoint}", params=params
-                ) as response:
-                    data = await response.text()
-                    json_data = json.loads(data)
-                    if callback:
-                        await callback(json_data)
-                await asyncio.sleep(period)
-
-    async def websocket_connect(self, endpoint: str, params: dict = None):
-        """
-        Connects to a websocket endpoint and yields messages as they arrive.
-
-        Args:
-            endpoint (str): The websocket endpoint to connect to (e.g., '/ws').
-            params (dict, optional): Query parameters to include in the connection URL.
-
-        Yields:
-            str: Messages received from the websocket.
-        """
-        url = f"ws://{self.host}:{self.port}{endpoint}"
-
-        async with websockets.connect(url) as websocket:
-            try:
-                while True:
-                    message = await websocket.recv()
-                    print(message)
-                    # yield message
-            except websockets.ConnectionClosed:
-                logger.debug("WebSocket connection closed")
-            except Exception as e:
-                logger.error(f"Error in WebSocket connection: {e}")

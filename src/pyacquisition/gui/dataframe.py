@@ -1,21 +1,32 @@
-import asyncio
-from ..core.relay import Relay
 from ..core.logging import logger
 
 
-class DataFrame(Relay):
+class DataFrame:
     """
-    A class that connects to the live stream of data
-    and holds a dataframe that other components can access.
+    A class that holds the live stream of data as a dataframe
+    that other components can access.
     """
 
     def __init__(self):
-        super().__init__()
         self.data = {}
         self.length = 0
 
+        self._callbacks = []
         self._maximum_points = 10000
         self._crop_length = 1000
+
+    def add_callback(self, callback: callable):
+        """
+        Add a callback to be called with each new row of data.
+        """
+        self._callbacks.append(callback)
+
+    def remove_callback(self, callback: callable):
+        """
+        Remove a callback from the list of callbacks.
+        """
+        if callback in self._callbacks:
+            self._callbacks.remove(callback)
 
     def clear(self):
         """
@@ -36,27 +47,22 @@ class DataFrame(Relay):
         self.data = cropped_data
         logger.debug(f"DataFrame cropped from {start} to {end}")
 
-    async def run(self, timeout=None):
+    def update(self, message: dict):
         """
-        Run the DataFrame GUI.
+        Append a new row of data and notify the callbacks.
         """
-        # Initialize the DataFrame GUI here
+        for key, value in message.items():
+            if key not in self.data:
+                self.data[key] = [0] * self.length
+            self.data[key].append(value)
+        self.length += 1
 
-        while True:
+        if self.length > self._maximum_points:
+            self.crop(start=self._crop_length)
+            self.length -= self._crop_length
+
+        for callback in self._callbacks:
             try:
-                data = await self.relay(timeout=timeout)
-                if data is not None:
-                    for key, value in data.items():
-                        if key not in self.data:
-                            self.data[key] = [0] * self.length
-                        self.data[key].append(value)
-                    self.length += 1
-
-                if self.length > self._maximum_points:
-                    self.crop(start=self._crop_length)
-                    self.length -= self._crop_length
-
-            except asyncio.TimeoutError:
-                pass
+                callback(message)
             except Exception as e:
-                logger.error(f"Error running DataFrame: {e}")
+                logger.error(f"Error in DataFrame callback: {e}")

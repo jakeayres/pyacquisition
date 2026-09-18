@@ -1,12 +1,9 @@
 import dearpygui.dearpygui as dpg
-from ...core.consumer import Consumer
 from ...core.logging import logger
 
 
-class LivePlotWidget(Consumer):
+class LivePlotWidget:
     def __init__(self, data: dict[str, list]):
-        super().__init__()
-
         self._maximum_points = 25000
         self._crop_length = 1000
         self._plot_every_n = 1
@@ -16,7 +13,7 @@ class LivePlotWidget(Consumer):
         self.plot_tag = dpg.generate_uuid()
         self.x_axis_tag = dpg.generate_uuid()
         self.y_axis_tag = dpg.generate_uuid()
-        self.data = data.copy()
+        self.data = {key: list(values) for key, values in data.items()}
         self.x_key = next(iter(self.data.keys()))
         self.series_tags = {}
 

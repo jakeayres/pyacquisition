@@ -1,5 +1,4 @@
 import dearpygui.dearpygui as dpg
-import asyncio
 from ..core.logging import logger
 from multiprocessing import Process
 from .api_client import APIClient
@@ -17,39 +16,35 @@ class Gui:
     def __init__(self, host: str = "localhost", port: int = 8000):
         super().__init__()
 
+        # The Gui is pickled when it is sent to the new process, so __init__ holds
+        # only plain data. Anything that touches DearPyGui is created in setup(),
+        # and the network threads are not started until run().
         self.api_client = APIClient(host=host, port=port)
         self.dataframe = DataFrame()
-        self.live_data_window = LiveDataWindow()
-        self.live_log_window = LiveLogWindow()
 
-    async def _render(self):
-        while dpg.is_dearpygui_running():
-            dpg.render_dearpygui_frame()
-            await asyncio.sleep(0.010)
-
-    async def _fetch_openapi_schema(self):
+    def _fetch_openapi_schema(self):
         try:
             logger.debug("Fetching OpenAPI schema")
-            data = await self.api_client.async_get("/openapi.json")
+            data = self.api_client.get("/openapi.json")
             return Schema(data)
         except Exception as e:
             logger.error(f"Error fetching OpenAPI schema: {e}")
             return None
 
-    async def _fetch_instruments(self):
+    def _fetch_instruments(self):
         try:
             logger.debug("Fetching instruments")
-            data = await self.api_client.async_get("/rack/list_instruments")
+            data = self.api_client.get("/rack/list_instruments")
             logger.debug(f"Instruments: {data}")
             return data.get("instruments", [])
         except Exception as e:
             logger.error(f"Error fetching instruments: {e}")
             return None
 
-    async def _fetch_measurements(self):
+    def _fetch_measurements(self):
         try:
             logger.debug("Fetching measurements")
-            data = await self.api_client.async_get("/rack/list_measurements")
+            data = self.api_client.get("/rack/list_measurements")
             logger.debug(f"Measurements: {data}")
             return data.get("measurements", [])
         except Exception as e:
@@ -64,7 +59,7 @@ class Gui:
         )
         popup.draw()
 
-    async def _populate_scribe(self, schema: Schema):
+    def _populate_scribe(self, schema: Schema):
         """
         Populate the scribe in the GUI.
         """
@@ -82,7 +77,7 @@ class Gui:
                         )
                 dpg.add_spacer(height=1)
 
-    async def _populate_rack(self, schema: Schema):
+    def _populate_rack(self, schema: Schema):
         """
         Populate the scribe in the GUI.
         """
@@ -100,12 +95,12 @@ class Gui:
                         )
                 dpg.add_spacer(height=1)
 
-    async def _populate_instruments(self, schema: Schema):
+    def _populate_instruments(self, schema: Schema):
         """
         Populate the instruments in the GUI.
         """
         logger.debug("Populating instruments")
-        instruments = await self._fetch_instruments()
+        instruments = self._fetch_instruments()
 
         if instruments is None:
             logger.error("No instruments found")
@@ -128,7 +123,7 @@ class Gui:
                         dpg.add_spacer(height=1)
                 dpg.add_spacer(height=1)
 
-    async def _populate_task_manager(self, schema: Schema):
+    def _populate_task_manager(self, schema: Schema):
         """
         Populate the task manager in the GUI.
         """
@@ -146,7 +141,7 @@ class Gui:
                         )
                 dpg.add_spacer(height=1)
 
-    async def _populate_tasks(self, schema: Schema):
+    def _populate_tasks(self, schema: Schema):
         """
         Populate the tasks in the GUI.
         """
@@ -164,7 +159,7 @@ class Gui:
                         )
                 dpg.add_spacer(height=1)
 
-    async def _populate_plots(self):
+    def _populate_plots(self):
         """
         Populate the plots menu in the GUI.
         """
@@ -190,7 +185,7 @@ class Gui:
         dpg.stop_dearpygui()
         logger.debug("GUI shutdown completed")
 
-    async def setup(self):
+    def setup(self):
         """
         Setup the GUI.
         """
@@ -207,24 +202,30 @@ class Gui:
 
         dpg.set_exit_callback(self.shutdown)
 
-        schema = await self._fetch_openapi_schema()
+        schema = self._fetch_openapi_schema()
 
-        await self._populate_scribe(schema)
-        await self._populate_rack(schema)
-        await self._populate_instruments(schema)
-        await self._populate_task_manager(schema)
-        await self._populate_tasks(schema)
-        await self._populate_plots()
+        self._populate_scribe(schema)
+        self._populate_rack(schema)
+        self._populate_instruments(schema)
+        self._populate_task_manager(schema)
+        self._populate_tasks(schema)
+        self._populate_plots()
 
-        measurements = await self._fetch_measurements()
+        measurements = self._fetch_measurements()
         logger.debug(f"Measurements: {measurements}")
 
-        # Steams
-        self.api_client.add_stream("logs", "/logs")
-        self.api_client.add_stream("data", "/data")
-        self.dataframe.subscribe_to(self.api_client.streams["data"])
-        self.live_data_window.subscribe_to(self.dataframe)
-        self.live_log_window.subscribe_to(self.api_client.streams["logs"])
+        # Windows
+        self.live_data_window = LiveDataWindow()
+        self.live_log_window = LiveLogWindow()
+        file_window = FileWindow()
+        task_window = TaskManagerWindow()
+
+        # Streams
+        data_stream = self.api_client.add_stream("data", "/data")
+        log_stream = self.api_client.add_stream("logs", "/logs")
+        data_stream.add_callback(self.dataframe.update)
+        self.dataframe.add_callback(self.live_data_window.update)
+        log_stream.add_callback(self.live_log_window.add_log)
 
         # Pollers
         file_poller = self.api_client.add_poller(
@@ -243,15 +244,12 @@ class Gui:
             "task_queue", "/task_manager/task_list", period=1.0
         )
 
-        file_window = FileWindow()
         file_poller.add_callback(
             lambda message: file_window.update_file(message["data"])
         )
         directory_poller.add_callback(
             lambda message: file_window.update_directory(message["data"])
         )
-
-        task_window = TaskManagerWindow()
         current_task_poller.add_callback(
             lambda message: task_window.update_current_task(message["data"])
         )
@@ -264,47 +262,46 @@ class Gui:
 
         logger.debug("[GUI] Setup completed")
 
-    async def run(self):
+    def run(self):
         """
-        The main loop that runs the GUI.
+        The DearPyGui render loop. Runs on the main thread: incoming data is
+        handed to the widgets, then the frame is rendered.
         """
         logger.debug("Running GUI")
+        self.api_client.start()
         dpg.show_viewport()
 
-        async with asyncio.TaskGroup() as task_group:
-            task_group.create_task(self._render())
-            task_group.create_task(self.api_client.run())
-            task_group.create_task(self.dataframe.run())
-            task_group.create_task(self.live_data_window.run())
-            task_group.create_task(self.live_log_window.run())
+        while dpg.is_dearpygui_running():
+            self.api_client.dispatch()
+            self.live_log_window.update_layout()
+            dpg.render_dearpygui_frame()
 
-    async def teardown(self):
+    def teardown(self):
         """
         Teardown the GUI.
         """
         logger.debug("GUI teardown started")
+        self.api_client.stop()
         dpg.destroy_context()
         logger.debug("GUI teardown completed")
 
-    def run_with_asyncio(self):
+    def main(self):
         """
-        Run the GUI in the main thread using asyncio.
+        Set up, run and tear down the GUI on the calling thread.
         """
-        from ..core.logging import logger
-
         try:
-            asyncio.run(self.setup())
-            asyncio.run(self.run())
+            self.setup()
+            self.run()
         except KeyboardInterrupt:
             logger.info("GUI closed by user")
         except Exception as e:
             logger.error(f"Error running GUI: {e}")
         finally:
-            asyncio.run(self.teardown())
+            self.teardown()
 
     def run_in_new_process(self):
         """
         Run the GUI in a new process.
         """
-        process = Process(target=self.run_with_asyncio)
+        process = Process(target=self.main)
         return process

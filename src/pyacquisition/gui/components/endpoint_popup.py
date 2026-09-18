@@ -1,5 +1,4 @@
 import dearpygui.dearpygui as dpg
-import asyncio
 import json
 from .inputs.integer_input import IntegerInput
 from .inputs.string_input import StringInput
@@ -76,10 +75,6 @@ class EndpointPopup:
             dpg.add_spacer(height=5)
             add_header("Response")
             self.response_text_area = add_text_area(height=200, width=265)
-
-    def run_async(self, func) -> None:
-        """Run an async function in the event loop."""
-        asyncio.create_task(func)
 
     def get_input_data(self) -> dict:
         """Retrieve data from all inputs."""
