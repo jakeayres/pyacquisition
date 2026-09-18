@@ -1,6 +1,7 @@
 import tomllib
 import asyncio
 from pathlib import Path
+from types import MappingProxyType
 from functools import partial
 import inspect
 from enum import Enum
@@ -15,6 +16,7 @@ from ..gui import Gui
 from ..instruments import instrument_map
 from ..tasks import standard_tasks
 from .measurement import Measurement
+from .instrument import Instrument, SoftwareInstrument
 from .adapters import get_adapter
 from .config_parser import ConfigParser
 
@@ -121,6 +123,7 @@ class Experiment:
             self.register_task(task)
 
         self._shutdown_event = asyncio.Event()
+        self._started = False
 
         logger.info("[Experiment] Fully initialized")
 
@@ -294,7 +297,7 @@ class Experiment:
                 if instrument.get("adapter", None) is None:
                     logger.debug(f"Creating instrument '{name}' without adapter")
                     inst = instrument_class(name)
-                    experiment._rack.add_instrument(inst)
+                    experiment.add_instrument(inst)
                 else:
                     logger.debug(
                         f"Creating instrument '{name}' with adapter '{instrument['adapter']}'"
@@ -310,7 +313,7 @@ class Experiment:
 
                     if resource:
                         inst = instrument_class(name, resource)
-                        experiment._rack.add_instrument(inst)
+                        experiment.add_instrument(inst)
                     else:
                         logger.warning(
                             f"Failed to open resource '{instrument.get('resource', None)}' for instrument '{name}'"
@@ -335,13 +338,13 @@ class Experiment:
                 method_name = measurement.get("method")
                 args = measurement.get("args", None)
 
-                if instrument_name not in experiment._rack.instruments:
+                if instrument_name not in experiment.instruments:
                     logger.warning(
                         f"Instrument '{instrument_name}' not found for measurement '{name}'"
                     )
                     continue
 
-                instrument = experiment._rack.instruments[instrument_name]
+                instrument = experiment.instruments[instrument_name]
 
                 if method_name not in instrument.queries:
                     logger.warning(
@@ -354,7 +357,7 @@ class Experiment:
                 if args:
                     method = cls._resolve_method_args(method, args)
 
-                experiment._rack.add_measurement(Measurement(name, method))
+                experiment.add_measurement(Measurement(name, method))
             except Exception as e:
                 logger.warning(f"Failed to configure measurement '{name}': {e}")
 
@@ -388,14 +391,112 @@ class Experiment:
         return partial(method, **resolved_args)
 
     @property
-    def instruments(self) -> dict:
+    def instruments(self) -> MappingProxyType:
         """
         Returns the instruments associated with the experiment.
 
+        The mapping is read-only. Use `add_instrument` and `remove_instrument`
+        to change it.
+
         Returns:
-            dict: A dictionary of instrument instances.
+            MappingProxyType: A read-only mapping of instrument uid to instrument.
         """
-        return self._rack.instruments
+        return MappingProxyType(self._rack.instruments)
+
+    @property
+    def measurements(self) -> MappingProxyType:
+        """
+        Returns the measurements associated with the experiment.
+
+        The mapping is read-only. Use `add_measurement` and `remove_measurement`
+        to change it.
+
+        Returns:
+            MappingProxyType: A read-only mapping of measurement name to measurement.
+        """
+        return MappingProxyType(self._rack.measurements)
+
+    def _check_not_started(self, action: str) -> None:
+        """
+        Raises if the experiment has already started running.
+
+        Instrument endpoints are registered with the API server, and the GUI builds
+        its menus from them, when the experiment starts. Changes after that point
+        would be measured but not visible to either.
+        """
+        if self._started:
+            raise RuntimeError(
+                f"Cannot {action} after the experiment has started running. "
+                "Instruments and measurements must be set up beforehand, "
+                "for example in `setup()`."
+            )
+
+    def add_instrument(self, instrument: Instrument | SoftwareInstrument) -> None:
+        """
+        Adds an instrument to the experiment.
+
+        Must be called before the experiment starts running, for example in `setup()`.
+
+        Args:
+            instrument (Instrument | SoftwareInstrument): The instrument to add.
+
+        Raises:
+            RuntimeError: If the experiment has already started running.
+
+        Example:
+            clock = Clock("clock")
+            experiment.add_instrument(clock)
+        """
+        self._check_not_started("add an instrument")
+        self._rack.add_instrument(instrument)
+
+    def remove_instrument(self, uid: str) -> None:
+        """
+        Removes an instrument from the experiment.
+
+        Must be called before the experiment starts running, for example in `setup()`.
+
+        Args:
+            uid (str): The uid of the instrument to remove.
+
+        Raises:
+            RuntimeError: If the experiment has already started running.
+        """
+        self._check_not_started("remove an instrument")
+        self._rack.remove_instrument(uid)
+
+    def add_measurement(self, measurement: Measurement) -> None:
+        """
+        Adds a measurement to the experiment.
+
+        Must be called before the experiment starts running, for example in `setup()`.
+
+        Args:
+            measurement (Measurement): The measurement to add.
+
+        Raises:
+            RuntimeError: If the experiment has already started running.
+
+        Example:
+            experiment.add_measurement(Measurement("time", clock.timestamp_ms))
+        """
+        self._check_not_started("add a measurement")
+        self._rack.add_measurement(measurement)
+
+    def remove_measurement(self, name: str) -> None:
+        """
+        Removes a measurement from the experiment.
+
+        Must be called before the experiment starts running, for example in `setup()`.
+
+        Args:
+            name (str): The name of the measurement to remove.
+
+        Raises:
+            RuntimeError: If the experiment has already started running.
+        """
+        self._check_not_started("remove a measurement")
+        self._rack.remove_measurement(name)
 
     def setup(self) -> None:
         """
@@ -438,6 +539,7 @@ class Experiment:
         try:
             self._register_endpoints(self._api_server)
             self.setup()
+            self._started = True
             try:
                 if self._run_gui:
                     self._ui_process = self._gui.run_in_new_process()

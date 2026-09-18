@@ -238,7 +238,7 @@ class SweepMagneticField(Task):
         logger.info(f"Magnet status: {status.name}")
 
     async def run(self, experiment):
-        magnet_psu = self.experiment.rack.instruments[self.magnet_psu]
+        magnet_psu = self.experiment.instruments[self.magnet_psu]
         wait_time = 1.0
 
         await asyncio.sleep(wait_time)

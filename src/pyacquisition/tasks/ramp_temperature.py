@@ -19,7 +19,7 @@ class RampTemperature(Task):
         return f"Ramping temperature {self.output_channel} to {self.setpoint} at {self.ramp_rate}K/min"
 
     async def run(self, experiment):
-        lakeshore = experiment.rack.instruments[self.lakeshore]
+        lakeshore = experiment.instruments[self.lakeshore]
         tolerance = 0.003
 
         await asyncio.sleep(1)
