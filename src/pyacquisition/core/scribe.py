@@ -35,6 +35,7 @@ class Scribe(Consumer):
 
         self._pause_event = asyncio.Event()
         self._pause_event.set()
+        self._shutdown_event = asyncio.Event()
 
     def _set_next_unused_block(self) -> str:
         """
@@ -61,8 +62,6 @@ class Scribe(Consumer):
             self.block = str(next_block).zfill(2)
             self.step = "00"
             logger.debug(f"[Scribe] Starting at: {self.block}.{self.step}")
-
-            self._shutdown_event = asyncio.Event()
 
         except Exception as e:
             logger.error(f"[Scribe] Error getting next block: {e}")
