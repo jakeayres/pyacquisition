@@ -43,7 +43,7 @@ class WaitFor(Task):
             if int(remaining_time) % 300 == 0 and int(remaining_time) != last_report:
                 yield f"{datetime.timedelta(seconds=int(remaining_time))} remaining"
                 last_report = int(remaining_time)
-            
+
             else:
                 yield None
 
