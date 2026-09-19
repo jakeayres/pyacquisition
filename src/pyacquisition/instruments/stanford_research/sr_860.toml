@@ -1,0 +1,105 @@
+# Verification spec for SR_860. See pyacquisition/verify/spec.py for the format.
+#
+# Written from the class, and not yet run against a real SR860.
+#
+# A lock-in has no output to switch off, so the safe state is "nothing to do".
+# The settings that drive the sample (excitation amplitude and DC offset) are
+# hazardous.
+
+[identity]
+contains = ["STANFORD", "SR860"]
+
+[safe_state]
+steps = []
+
+[read.get_output]
+args = [{ parameter = 0 }, { parameter = 1 }, { parameter = 2 }, { parameter = 3 }]
+note = "0 to 3 are X, Y, R and theta"
+
+[read.get_display_output]
+args = [{ parameter = 0 }, { parameter = 1 }, { parameter = 2 }, { parameter = 3 }]
+
+# ---- settings that only change how the input is processed
+[roundtrip.advanced_filter]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.filter_slope]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.input_configuration]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.input_coupling]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.input_grounding]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.input_mode]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.input_voltage_range]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.sync_filter]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.sensitivity]
+hazard = "reversible"
+values = "*"
+note = "steps through every range, and a live measurement will overload while it does"
+
+[roundtrip.time_constant]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.harmonic]
+hazard = "reversible"
+values = [1, 2]
+
+[roundtrip.phase]
+hazard = "reversible"
+values = [0.0, 10.0]
+abs = 0.01
+
+[roundtrip.external_reference_slope]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.reference_source]
+hazard = "reversible"
+values = "*"
+note = "selecting EXTERNAL, DUAL or CHOP with no reference connected makes the lock-in unlock until restored"
+
+# ---- the reference output drives the sample
+[roundtrip.frequency]
+hazard = "reversible"
+values = [137.0, 1000.0]
+rel = 1e-3
+preconditions = [{ call = "get_reference_source", equals = "INTERNAL" }]
+note = "only settable with the internal reference, and changes the excitation frequency"
+
+[roundtrip.internal_frequency]
+hazard = "reversible"
+values = [137.0, 1000.0]
+rel = 1e-3
+
+[roundtrip.reference_amplitude]
+hazard = "hazardous"
+values = [0.001]
+abs = 0.0005
+note = "the sine output amplitude is applied to the sample, which can be damaged by it"
+
+[roundtrip.reference_offset]
+hazard = "hazardous"
+values = [0.0]
+abs = 0.001
+note = "the DC offset of the sine output is applied to the sample"

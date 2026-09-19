@@ -24,3 +24,7 @@ data/
 # Documentation build (Zensical)
 site/
 .cache/
+
+# hardware verification: local inventory and recorded traffic
+tests/hardware/hardware.toml
+recordings/

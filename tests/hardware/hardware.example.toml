@@ -1,0 +1,48 @@
+# A hardware inventory: the instruments connected to this machine.
+#
+# Copy this to hardware.toml (which is git-ignored) and edit it. It reuses the
+# format of an experiment config's [instruments] section, so an instrument is
+# opened exactly as it is in a real run, plus a `verify` table per instrument.
+#
+#   pytest tests/hardware --hardware hardware.toml               read-only checks only
+#   pytest tests/hardware --hardware hardware.toml --reversible  also change settings and restore
+#   pytest tests/hardware --hardware hardware.toml --hazardous   also run hazardous checks
+#   pytest tests/hardware --hardware hardware.toml --dry-run     contact nothing, print what would be sent
+#
+# or, without pytest:  python -m pyacquisition.verify hardware.toml --dry-run
+#
+# Always start with --dry-run: it lists every command a run would send.
+
+[instruments.k6221]
+instrument = "Keithley_6221"
+adapter = "pyvisa"
+resource = "GPIB0::12::INSTR"
+args = { read_termination = "\n" }
+
+[instruments.k6221.verify]
+# What is attached, for checks that need it ("nanovoltmeter" = a 2182/2182A).
+capabilities = []
+# This instrument is never asked for more than this, whatever the run allows.
+max_hazard = "reversible"
+# Log every command and reply, to replay in CI with adapter = "mock".
+record = "recordings/k6221.jsonl"
+
+
+# A magnet supply: pin it to read-only for good.
+#
+# [instruments.magnet]
+# instrument = "Mercury_IPS"
+# adapter = "pyvisa"
+# resource = "GPIB0::25::INSTR"
+#
+# [instruments.magnet.verify]
+# max_hazard = "read-only"
+
+
+# Behind a Prologix GPIB-USB controller:
+#
+# [instruments.lockin]
+# instrument = "SR_830"
+# adapter = "prologix"
+# resource = "COM3::7"
+# args = { read_termination = "\n" }

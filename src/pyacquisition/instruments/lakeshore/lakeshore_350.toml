@@ -1,0 +1,37 @@
+# Verification spec for Lakeshore_350. See pyacquisition/verify/spec.py for the format.
+#
+# Written from the class, and not yet run against a real 350.
+#
+# The safe state is "nothing to do": the heater outputs are never touched by an
+# active check. Anything that changes what a heater does is hazardous, and the
+# examples below are left commented out until you choose values for your cryostat.
+
+[identity]
+contains = ["LSCI", "MODEL350"]
+
+[safe_state]
+steps = []
+
+[read.get_curve_header]
+args = [{ curve_index = 1 }]
+note = "curve 1 is always present"
+
+[read.get_curve_point]
+args = [{ curve_index = 1, point_index = 1 }]
+
+# get_temperature, get_setpoint and get_ramp take an input or output channel and
+# are expanded over every channel automatically.
+
+[roundtrip.display_contrast]
+hazard = "reversible"
+values = [8, 16]
+
+# A setpoint change makes an active control loop heat or cool towards the new
+# target, so it is hazardous. Give values that are safe for your setup, and
+# consider adding a precondition that the heater is off:
+#
+# [roundtrip.setpoint]
+# hazard = "hazardous"
+# values = [10.0]
+# abs = 0.01
+# select = { output_channel = ["OUTPUT_1"] }

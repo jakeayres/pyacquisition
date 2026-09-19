@@ -1,0 +1,24 @@
+# Verification spec for Mercury_IPS. See pyacquisition/verify/spec.py for the format.
+#
+# READ THIS BEFORE EDITING. This is a magnet power supply.
+#
+# Mercury_IPS registers every one of its methods as a query, including the ones
+# that act: hold, to_setpoint, to_zero, clamp, switch_heater_on/off,
+# force_heater_on, set_target_current, set_target_field and the sweep-rate
+# setters. The verification engine therefore never trusts the decorator. It runs
+# only methods named get_..., and the guard below is the second line of defence:
+# only the read commands of this instrument's protocol (R<n> and X) may be sent,
+# and anything else, such as A1 (to setpoint) or J<field> (set the field), is
+# refused and reported.
+#
+# There is deliberately no [safe_state] and no [roundtrip]: this spec can only
+# ever read. Pair it with max_hazard = "read-only" in the inventory.
+
+[guard]
+read = ['^R\d+$', '^X$']
+
+# The class sends *IDN? for identify(), which an IPS may not answer. Once you
+# have seen what yours replies, add for example:
+#
+# [identity]
+# contains = ["..."]
