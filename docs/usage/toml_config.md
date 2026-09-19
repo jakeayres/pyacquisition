@@ -46,9 +46,50 @@ my_lockin = {instrument = "SR_830", adapter = "pyvisa", resource = "GPIB0::7::IN
 | Parameter Name | Description                          | Example Value  |
 |----------------|--------------------------------------|---------------|
 | instrument       | The name of the instrument class to be instantiated.       | `SR_830`, `Lakeshore_350` |
-| adapter | The communication adapter to use. Currently only `pyvisa` is implemented | `pyvisa` |
+| adapter | The communication adapter to use: `pyvisa` for hardware, `prologix` for hardware behind a Prologix GPIB-USB controller, or `mock` to run the instrument without the device | `pyvisa`, `prologix`, `mock` |
 | resource | The resource string associated with the instrumeent | `GPIB0::10:INSTR` |
 
+
+### Instruments behind a Prologix GPIB-USB controller
+
+A [Prologix GPIB-USB controller](https://prologix.biz) shows up as a virtual COM port. Set `adapter = "prologix"` and give the serial port and the instrument's GPIB address as the resource, separated by `::`:
+
+```toml
+[instruments]
+lockin = {instrument = "SR_830", adapter = "prologix", resource = "COM3::7"}
+current = {instrument = "Keithley_6221", adapter = "prologix", resource = "COM3::12", args = {read_termination = "\n"}}
+```
+
+Instruments then work as they would over GPIB with `pyvisa`, and take the same `args` (`timeout`, `read_termination`, `write_termination`, ...). On Linux the port looks like `/dev/ttyUSB0::12`. A secondary address goes last, as in `COM3::9::0`.
+
+- **Several instruments, one controller.** Give each its own address on the same port. The port is opened once and shared, and instruments used from different threads do not interfere.
+- **Replies.** As with GPIB, a reply ends on EOI. If an instrument does not assert EOI, set `read_termination` to what it sends at the end of a message, for example `"\n"`.
+- **Long waits.** The controller waits at most 3 seconds for a reply. A longer `timeout` still works, by asking again until it runs out.
+- **The controller's settings** are managed for you. The adapter turns off the saving of settings to the controller's EEPROM, so switching between instruments does not wear it out.
+
+### Running hardware instruments without the device
+
+Set `adapter = "mock"` to run a hardware instrument class with no device connected, for example to develop a task or to test a config away from the lab. Any `resource` string is accepted.
+
+```toml
+[instruments]
+current = {instrument = "Keithley_6221", adapter = "mock", resource = "GPIB0::12::INSTR"}
+```
+
+The mock has no model of the instrument. It answers each query from the first rule that applies:
+
+1. A reply you configured with `responses`.
+2. The value last written: after `set_current(1e-3)`, `get_current()` returns `1e-3`, so every setter and getter pair round-trips.
+3. `"0"`, so a getter that was never set still returns a number.
+
+Queries that read something the instrument would measure, such as a temperature, therefore return `0` unless you give them a reply. Do this with `args`:
+
+```toml
+[instruments]
+temperature = {instrument = "Lakeshore_350", adapter = "mock", resource = "mock", args = {responses = {"KRDG? A" = ["4.20", "4.21", "4.19"]}}}
+```
+
+A list of replies is returned in turn, holding on the last one. A key is either a whole query (`"KRDG? A"`) or just its header (`"KRDG?"`), and the whole query wins.
 
 ## `[measurements]` Section
 

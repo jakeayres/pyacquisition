@@ -1,0 +1,2 @@
+
+::: pyacquisition.instruments.software.SignalGenerator

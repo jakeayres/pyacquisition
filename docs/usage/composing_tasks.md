@@ -90,6 +90,84 @@ Run **Tasks → Compare Distributions** with `seconds` 10. After twenty seconds 
 - **It gets the same experiment.** You do not pass `experiment` on. Subtasks receive the one the parent was given.
 - **Errors stop the parent.** If a subtask raises an error, that error is raised at the `await self.run_subtask(...)` line, the parent stops, and both `teardown()` methods run.
 
+## Running tasks at the same time
+
+Some things have to happen together: hold a temperature steady while a field sweeps, or keep a control loop going while you record data. A task can run several subtasks at once in two ways.
+
+### Waiting for all of them: `run_subtasks()`
+
+`run_subtasks()` starts several tasks together and waits until every one of them has finished:
+
+```python
+async def run(self, experiment):
+    await self.run_subtasks(RampField(target=5.0), RampTemperature(target=2.0)) # (1)!
+    yield "Both ramps finished"
+```
+
+1. `RampField` and `RampTemperature` stand for two tasks of your own. Each one runs its full lifecycle, and the line ends when the slower of the two is done.
+
+### In the background: `alongside()`
+
+Some tasks never finish by themselves: a control loop runs until you tell it to stop. Use `alongside()` to run one in the background for as long as a block of code runs:
+
+```python
+@dataclass
+class DriftSigma(Task):
+    """Keep making the Gaussian a little wider, until stopped."""
+
+    async def run(self, experiment):
+        rng = experiment.instruments["rng"]
+        sigma = 1.0
+        while True: # (1)!
+            sigma += 0.1
+            rng.use_gaussian(0.0, sigma)
+            yield None
+            await asyncio.sleep(1) # (2)!
+
+    async def teardown(self, experiment):
+        experiment.instruments["rng"].use_gaussian(0.0, 1.0)
+
+
+@dataclass
+class WideningGaussian(Task):
+    """Record Gaussian numbers whose width keeps growing."""
+
+    seconds: int = 20
+
+    async def run(self, experiment):
+        async with self.alongside(DriftSigma()): # (3)!
+            await self.run_subtask(
+                SampleGaussian(mean=0.0, sigma=1.0, seconds=self.seconds)
+            )
+            yield "Sampling finished"
+        yield "The drift has stopped" # (4)!
+```
+
+1. This task has no end. That is fine, because `alongside()` stops it for you.
+2. **Every loop needs an `await`.** Tasks running together take turns, and they can only switch at an `await`. A loop with only `yield` in it never lets the others run, and freezes the whole experiment.
+3. `DriftSigma` starts when the block starts and runs while the block does.
+4. When the block ends, `DriftSigma` is aborted, finishes its current step, and runs its `teardown()`. The block waits for that, so this line runs after the drift has stopped.
+
+Give `alongside()` several tasks if you need several things in the background: `self.alongside(HoldTemperature(...), LogPressure(...))`.
+
+### What to expect
+
+- **Pausing and aborting reach all of them.** Pausing or aborting the parent pauses or aborts every subtask running at that moment, however deeply they are nested, and each one runs its `teardown()`.
+- **One error stops the rest.** If one of the tasks in `run_subtasks()` fails or is aborted, the others are aborted too, and the error is raised at the `await self.run_subtasks(...)` line. In `alongside()`, an error in a background task interrupts the block and is raised at the `async with` line. Catch it there, as in [carrying on after an error](#carrying-on-after-an-error), if you want to carry on. If several fail together, the first error is raised and the others are logged.
+- **Stopping one background task yourself.** Aborting a background task directly stops only that task, and the block carries on. Keep a reference to it to do that from your own code:
+
+    ```python
+    drift = DriftSigma()
+    async with self.alongside(drift):
+        ...
+        drift.abort()  # only the drift stops
+    ```
+
+    Aborting a task inside `run_subtasks()` is different: the others are aborted too, because the parent cannot finish without it.
+- **They take turns on one thread.** The tasks switch only when one of them awaits, so a task that blocks (a slow instrument query, `time.sleep()`) holds all of the others up for as long as it blocks. The upside is that instrument calls never overlap, so you do not need locks. It is still up to you not to have two tasks change the same setting.
+- **Each task object runs once at a time.** Passing the same task object twice, or running one that is already running, raises a `ValueError`. Make a second object instead.
+- **The interface shows the parent.** **Current Task** in the **Task Queue** window shows the task you queued, not its subtasks. Their steps appear in the **Logs** window under their own names.
+
 ## Loops and conditions
 
 A task's `run()` is ordinary Python, so use loops and `if` statements to decide what to run:

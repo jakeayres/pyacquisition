@@ -23,6 +23,10 @@ The following tasks are registered to your experiment by default.
 
 The following tasks are **not registered** to your experiment by default. They can be imported from `pyacquisition.tasks` and registered to your experiment within `your_experiment.setup()` using `self.register_task(...)`.
 
+#### Control
+
+`IMPORTABLE` [`Task` **PID**](pid.md) - Hold a value at a setpoint with a PID controller.
+
 #### Mercury IPS
 
 `IMPORTABLE` [`Task` **SweepMagneticField**](wait_for.md) - Sweep magnetic field.

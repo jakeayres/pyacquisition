@@ -37,10 +37,12 @@ The interface has a menu bar across the top and four windows.
 
 | Window | Shows |
 |---|---|
-| **Current File** | The data file (and its folder) that is being written. |
-| **Task Queue** | Whether the task manager is running or paused, the task that is running now, and the tasks waiting behind it. |
-| **Live Data** | The latest value of every measurement, updating as it arrives. |
+| **Current File** | The data file that is being written, shown large in the header, and its folder. |
+| **Task Queue** | For each task manager: whether it is running or paused, the task that is running now, and the tasks waiting behind it. |
+| **Live Data** | The latest value of every measurement, updating as it arrives. Its header says whether data is arriving. |
 | **Logs** | Messages from the experiment as they happen, in colour by severity. |
+
+Each window has a coloured header, so that its state can be read at a glance. The values in the **Live Data** window are in a card with a green border while measurements arrive, like the card of a running task. The card and its header turn amber, with a **STALE** badge, if none has arrived for a few seconds (for example while measuring is paused), and grey, with **WAITING**, before the first one. The headers in the **Task Queue** window use the same colours for a task manager: green when a task is running, amber when it is paused, red while a task is being aborted, and grey when nothing is running.
 
 **Menus**
 

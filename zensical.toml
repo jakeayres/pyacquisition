@@ -22,6 +22,7 @@ nav = [
       { "Writing Your Own Instrument" = "usage/custom_instruments.md" },
     ] },
     { "Measurements and Data Files" = "usage/measurements.md" },
+    { "Calculations" = "usage/calculations.md" },
     { "Tasks" = [
       { "Writing Tasks" = "usage/tasks.md" },
       { "Composing Tasks" = "usage/composing_tasks.md" },
@@ -31,12 +32,17 @@ nav = [
   { "Experiment API" = [
     { "Experiment" = "experiment/experiment.md" },
     { "Rack" = "experiment/rack.md" },
+    { "Calculations" = "experiment/calculations.md" },
     { "Scribe" = "experiment/scribe.md" },
     { "Task Manager" = "experiment/task_manager.md" },
   ] },
   { "Instruments" = [
     { "Overview" = "instruments/overview.md" },
     { "Clock" = "instruments/clock.md" },
+    { "Random Number Generator" = "instruments/random_number_generator.md" },
+    { "Signal Generator" = "instruments/signal_generator.md" },
+    { "Keithley_2000" = "instruments/keithley_2000.md" },
+    { "Keithley_6221" = "instruments/keithley_6221.md" },
     { "Lakeshore_340" = "instruments/lakeshore_340.md" },
     { "Lakeshore_350" = "instruments/lakeshore_350.md" },
     { "Mercury IPS" = "instruments/mercury_ips.md" },
@@ -48,10 +54,12 @@ nav = [
     { "NewFile" = "tasks/new_file.md" },
     { "WaitFor" = "tasks/wait_for.md" },
     { "WaitUntil" = "tasks/wait_until.md" },
+    { "PID" = "tasks/pid.md" },
   ] },
   { "For Developers" = [
     { "Overview" = "dev/overview.md" },
     { "Contributing" = "dev/contributing.md" },
+    { "Verifying Hardware" = "dev/verifying_hardware.md" },
   ] },
 ]
 

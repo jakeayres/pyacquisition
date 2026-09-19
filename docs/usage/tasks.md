@@ -67,7 +67,7 @@ if __name__ == "__main__":
 1. **Every task class needs the `@dataclass` decorator.** It turns the annotated attributes below into the task's inputs. Without it the task registers with no inputs and fails when it runs.
 2. The first line of the docstring is shown in the interface as the description of the task.
 3. **Inputs** are annotated attributes. Ones without a default value are required. Use `int`, `float`, `str` or `bool`.
-4. Optional, but recommended. `description` and `parameters` are what the **Task Queue** window shows for a task that is waiting. Without them it shows `None`.
+4. Optional, but recommended. `description` and `parameters` are what the **Task Queue** window shows for a task that is waiting, and for the task that is running. Without them it shows `None`. The window is refreshed about once a second, and `parameters` is read each time, so it can return values that change while the task runs, such as the latest reading.
 5. `run()` is where the work happens. It is an `async` method that **yields**. Everything you need to know about it is [explained below](#how-run-works).
 6. `experiment` is your experiment. `experiment.instruments` is how a task reaches the instruments it controls.
 7. Whatever `run()` yields is written to the log. Yield `None` if there is nothing to say.

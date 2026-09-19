@@ -14,8 +14,12 @@ Instrument classes are imported from `pyacquisition.instruments`.
 | Instrument | Type | Description |
 |---|---|---|
 | [`Clock`](../instruments/clock.md) | Software | Elapsed time and named timers. |
+| [`RandomNumberGenerator`](../instruments/random_number_generator.md) | Software | Random numbers from the common probability distributions. Stands in for real hardware while you develop. |
+| [`SignalGenerator`](../instruments/signal_generator.md) | Software | Waveforms (sine, square, triangle, chirp and more) computed from the time. |
 | `Calculator` | Software | A mock calculator (addition, trigonometry) that is mainly used to test the framework. |
 | [`SR_830`](../instruments/sr_830.md), [`SR_860`](../instruments/sr_860.md) | Hardware | Stanford Research Systems lock-in amplifiers. |
+| [`Keithley_2000`](../instruments/keithley_2000.md) | Hardware | Keithley 6½-digit multimeter: volts, current, resistance, frequency, temperature, with an optional scanner card. |
+| [`Keithley_6221`](../instruments/keithley_6221.md) | Hardware | Keithley AC and DC current source, with wave generator, sweeps and delta mode. |
 | [`Lakeshore_340`](../instruments/lakeshore_340.md), [`Lakeshore_350`](../instruments/lakeshore_350.md) | Hardware | Lakeshore temperature controllers. |
 | [`Mercury_IPS`](../instruments/mercury_ips.md) | Hardware | Oxford Instruments magnet power supply. |
 
