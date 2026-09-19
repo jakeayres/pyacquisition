@@ -79,6 +79,8 @@ async def test_cannot_change_once_running(tmp_path):
                 Measurement("late", lambda: 1)
             ),
             "remove_measurement": lambda: experiment.remove_measurement("time"),
+            "add_calculation": lambda: experiment.add_calculation(lambda row: {}),
+            "add_task_manager": lambda: experiment.add_task_manager("late"),
         }
         for name, attempt in attempts.items():
             try:
@@ -96,6 +98,8 @@ async def test_cannot_change_once_running(tmp_path):
         "remove_instrument",
         "add_measurement",
         "remove_measurement",
+        "add_calculation",
+        "add_task_manager",
     }
     # nothing was changed by the rejected calls
     assert set(experiment.instruments) == {"clock"}

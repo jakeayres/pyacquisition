@@ -1,5 +1,8 @@
 from .core.experiment import Experiment as Experiment
 from .core.measurement import Measurement as Measurement
+from .core.calculations import Calculation as Calculation
+from .core.calculations import RollingMean as RollingMean
+from .core.calculations import Sum as Sum
 from .core.task_manager.task import Task as Task
 import sys
 import argparse
@@ -48,27 +51,26 @@ def main(*args) -> None:
         required=False,
         help="Path to the Python script with experiment.",
     )
-    
+
     parsed_args = parser.parse_args(args if args else sys.argv[1:])
-    
+
     toml_file = parsed_args.toml if parsed_args.toml else None
     py_file = parsed_args.py if parsed_args.py else None
-    
+
     if toml_file:
         print(f"Running experiment from TOML file: {toml_file}")
         experiment = Experiment.from_config(toml_file=toml_file)
         experiment.run()
     else:
         print("No TOML file provided. Please specify a TOML file with --toml.")
-    
+
     if py_file:
         print(f"Running experiment from Python script: {py_file}")
-        
+
         mod = _import_from_file(py_file)
-        
+
         UserExperiment = _find_experiment_class(mod)
         experiment = UserExperiment()
         experiment.run()
     else:
         print("No Python script provided. Please specify a Python script with --py.")
-

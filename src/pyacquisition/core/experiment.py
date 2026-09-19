@@ -1,5 +1,6 @@
 import tomllib
 import asyncio
+import re
 from pathlib import Path
 from types import MappingProxyType
 from functools import partial
@@ -99,7 +100,13 @@ class Experiment:
 
         self._calculations = Calculations()
 
+        # The main task manager keeps the original endpoints. More can be added
+        # with `add_task_manager()`, and they all run at the same time.
         self._task_manager = TaskManager()
+        self._task_managers = {self._task_manager.name: self._task_manager}
+        # Tasks registered on every task manager, kept so that a task manager added
+        # later gets them too.
+        self._shared_tasks = []
 
         self._run_gui = gui
         self._gui = Gui(host=api_server_host, port=api_server_port)
@@ -305,8 +312,8 @@ class Experiment:
                     adapter_class = cls._get_adapter_class(instrument["adapter"])
                     kwargs = instrument.get("args", {})
                     resource = cls._open_resource(
-                        adapter_class, 
-                        instrument.get("resource", None), 
+                        adapter_class,
+                        instrument.get("resource", None),
                         timeout=5000,
                         **kwargs,
                     )
@@ -416,6 +423,19 @@ class Experiment:
         """
         return MappingProxyType(self._rack.measurements)
 
+    @property
+    def task_managers(self) -> MappingProxyType:
+        """
+        Returns the task managers of the experiment.
+
+        There is always one called `"main"`, which is where tasks go by default.
+        The mapping is read-only. Use `add_task_manager` to add another.
+
+        Returns:
+            MappingProxyType: A read-only mapping of name to task manager.
+        """
+        return MappingProxyType(self._task_managers)
+
     def _check_not_started(self, action: str) -> None:
         """
         Raises if the experiment has already started running.
@@ -427,8 +447,8 @@ class Experiment:
         if self._started:
             raise RuntimeError(
                 f"Cannot {action} after the experiment has started running. "
-                "Instruments and measurements must be set up beforehand, "
-                "for example in `setup()`."
+                "Instruments, measurements, calculations and task managers must be "
+                "set up beforehand, for example in `setup()`."
             )
 
     def add_instrument(self, instrument: Instrument | SoftwareInstrument) -> None:
@@ -498,10 +518,88 @@ class Experiment:
         self._check_not_started("remove a measurement")
         self._rack.remove_measurement(name)
 
+    def add_calculation(self, calculation) -> None:
+        """
+        Adds a calculation, which makes new columns from the measurements.
+
+        A calculation is a function that takes a row of data (a dict of column
+        name to value) and returns a dict of new columns. Calculations run in the
+        order they are added, and each one sees the columns added by the ones
+        before it. The results are saved to the data file alongside the
+        measurements.
+
+        Must be called before the experiment starts running, for example in `setup()`.
+
+        Args:
+            calculation (callable): A function, lambda or `Calculation` such as
+                `RollingMean`.
+
+        Raises:
+            RuntimeError: If the experiment has already started running.
+            TypeError: If the calculation is not callable.
+
+        Example:
+            experiment.add_calculation(lambda row: {"power": row["v"] * row["i"]})
+            experiment.add_calculation(RollingMean("power", window=10))
+        """
+        self._check_not_started("add a calculation")
+        self._calculations.add_calculation(calculation)
+
+    def add_task_manager(self, name: str) -> TaskManager:
+        """
+        Adds a task manager, which runs its own queue of tasks at the same time as
+        the others.
+
+        Each task manager runs the tasks in its queue one after another, and is
+        paused, resumed and aborted independently of the others. Use one for work
+        that must carry on while the main queue does something else, such as a
+        control loop.
+
+        Queue tasks on it in `setup()` with `task_manager.add_task(...)`. Every task
+        registered with `register_task`, including the standard ones, can be queued
+        on it from the API, unless it was registered for other task managers only.
+        Its endpoints are placed under `/managers/<name>/`.
+
+        Must be called before the experiment starts running, for example in `setup()`.
+
+        Args:
+            name (str): The name of the task manager. It is used in URLs, so it may
+                only contain letters, numbers, `_` and `-`. `"main"` is taken.
+
+        Returns:
+            TaskManager: The new task manager.
+
+        Raises:
+            RuntimeError: If the experiment has already started running.
+            ValueError: If the name is not valid, or is already used.
+
+        Example:
+            control = self.add_task_manager("control")
+            control.add_task(HoldTemperature(kelvin=4.2))
+        """
+        self._check_not_started("add a task manager")
+        if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_-]+", name):
+            raise ValueError(
+                f"Invalid task manager name {name!r}. Use letters, numbers, "
+                "`_` and `-` only."
+            )
+        if name in self._task_managers:
+            raise ValueError(f"There is already a task manager called '{name}'.")
+
+        task_manager = TaskManager(
+            name=name,
+            path=f"/managers/{name}",
+            tasks_path=f"/managers/{name}/tasks",
+        )
+        self._task_managers[name] = task_manager
+        for task, kwargs in self._shared_tasks:
+            task_manager.register_task(self, task, **kwargs)
+        return task_manager
+
     def setup(self) -> None:
         """
         Sets up the experiment environment.
-        
+
         Override this method to implement custom setup logic for the experiment. It
         is called before the main experiment event loop starts
         """
@@ -564,7 +662,8 @@ class Experiment:
                 tg.create_task(self._run_component(self._rack))
                 tg.create_task(self._run_component(self._calculations))
                 tg.create_task(self._run_component(self._scribe))
-                tg.create_task(self._run_component(self._task_manager))
+                for task_manager in self._task_managers.values():
+                    tg.create_task(self._run_component(task_manager))
                 logger.debug("All experiment tasks started")
 
                 await self._shutdown_event.wait()
@@ -575,7 +674,8 @@ class Experiment:
                 await self._rack.shutdown()
                 await self._calculations.shutdown()
                 await self._scribe.shutdown()
-                await self._task_manager.shutdown()
+                for task_manager in self._task_managers.values():
+                    await task_manager.shutdown()
 
         except Exception as e:
             logger.error(f"Task group terminated due to an error: {e}")
@@ -597,7 +697,7 @@ class Experiment:
     def run(self) -> None:
         """
         Run the experiment. The main entry point for executing the experiment.
-        
+
         Example:
             experiment = Experiment.from_config("experiment_config.toml")
             experiment.run()
@@ -613,27 +713,74 @@ class Experiment:
 
         logger.info("Experiment ended")
 
-    def register_task(self, task: Task, **kwargs) -> None:
+    def register_task(self, task: Task, manager=None, **kwargs) -> None:
         """
         Registers a task with the experiment.
-        
-        This method allows you to register a task with the experiment. Once 
-        registered, the task can be added to the task queue within the GUI.
+
+        This method allows you to register a task with the experiment. Once
+        registered, the task can be added to a task queue within the GUI.
+
+        By default a task can be queued on every task manager, including any you
+        add afterwards. Give `manager` to limit it to one, or to several.
 
         Args:
             task (Task): The task to register.
+            manager (str | list[str] | None): The name of the task manager, or a
+                list of names, that the task can be queued on. Defaults to all of
+                them. See `add_task_manager`.
             **kwargs: Additional keyword arguments to pass to the task manager.
+
+        Raises:
+            ValueError: If there is no task manager with one of the names.
 
         Example:
             experiment.register_task(MyCustomTask())
-        
+            experiment.register_task(HoldTemperature, manager="control")
+
         """
-        self._task_manager.register_task(self, task, **kwargs)
+        if manager is None:
+            self._shared_tasks.append((task, kwargs))
+            for task_manager in self._task_managers.values():
+                task_manager.register_task(self, task, **kwargs)
+            return
+
+        names = [manager] if isinstance(manager, str) else list(manager)
+        for name in names:
+            if name not in self._task_managers:
+                raise ValueError(
+                    f"There is no task manager called '{name}'. Add it first with "
+                    f"`add_task_manager()`. The task managers are: "
+                    f"{', '.join(self._task_managers)}."
+                )
+        for name in names:
+            self._task_managers[name].register_task(self, task, **kwargs)
 
     def _register_endpoints(self, api_server):
         """
         Register the endpoints for the experiment.
         """
+
+        @api_server.app.get("/managers", tags=["experiment"])
+        async def list_task_managers():
+            """
+            Endpoint to list the task managers. The main one is controlled at
+            `/task_manager/...`, and the others at `/managers/<name>/...`.
+            """
+            return {"status": 200, "data": list(self._task_managers)}
+
+        @api_server.app.get("/managers/state", tags=["experiment"])
+        async def task_manager_states():
+            """
+            Endpoint for the status, current task and queue of every task manager,
+            in one call.
+            """
+            return {
+                "status": 200,
+                "data": {
+                    name: task_manager.state()
+                    for name, task_manager in self._task_managers.items()
+                },
+            }
 
         @api_server.app.get("/experiment/shutdown", tags=["experiment"])
         async def shutdown():

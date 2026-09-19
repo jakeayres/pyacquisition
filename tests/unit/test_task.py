@@ -540,7 +540,7 @@ async def test_subtask_is_not_left_active_after_it_finishes():
     await parent.start()
     parent.pause()  # must not reach the finished subtask
 
-    assert parent._active_subtask is None
+    assert parent._active_subtasks == []
     assert child._pause_event.is_set()
 
 
