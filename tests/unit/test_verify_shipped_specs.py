@@ -163,7 +163,7 @@ def test_the_keithley_2000_coupled_settings_have_their_preconditions():
 
 def test_the_keithley_2000_has_nothing_to_switch_off():
     spec = load_spec(Keithley_2000)
-    assert spec.steps == []
+    assert spec.steps == ()
 
 
 def test_the_keithley_2000_scanner_card_is_optional():
