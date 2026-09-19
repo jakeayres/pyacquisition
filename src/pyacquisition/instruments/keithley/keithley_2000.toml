@@ -1,0 +1,415 @@
+# Verification spec for Keithley_2000. See pyacquisition/verify/spec.py for the format.
+#
+# Written from the class and the manual, and not yet run against a real 2000.
+# Expect to adjust values and tolerances the first time it is on the bench.
+#
+# A multimeter has no output to switch off, so the safe state is "nothing to do".
+# What can hurt is the *selected function*: the resistance, diode and continuity
+# functions source a test current into whatever is connected, and the current
+# functions are a near short. Changing the function is therefore hazardous. The
+# per-function settings (range, NPLC...) change a function without selecting it,
+# so they are only reversible.
+#
+# Several settings are coupled, which would leave something changed after a round
+# trip, so those round trips only run when the coupling cannot matter (see the
+# preconditions).
+
+[identity]
+contains = ["KEITHLEY", "MODEL 2000"]
+
+[safe_state]
+steps = []
+
+
+# ------------------------------------------------------------------ level 1
+# Every get_ method runs. Enum arguments (function, register...) are expanded
+# automatically. These rules only cover what cannot be inferred.
+
+[read.get_last_key]
+skip = "the reply before any key has been pressed is not documented"
+
+# The scanner card is optional. List "scanner" under `capabilities` in the inventory
+# when a Model 2000-SCAN or 2001-TCSCAN is installed.
+[read.get_closed_channel]
+requires = ["scanner"]
+
+[read.get_closed_channels]
+requires = ["scanner"]
+
+[read.get_internal_scan_list]
+requires = ["scanner"]
+
+[read.get_buffer_data]
+note = "an empty buffer may answer with nothing, which shows as a timeout"
+
+[read.get_statistic]
+note = "with the statistic off or an empty buffer this returns the raw reading"
+
+
+# ------------------------------------------------------------------ level 2
+# ---- the selected function: hazardous, see the note at the top
+[roundtrip.function]
+hazard = "hazardous"
+values = "*"
+note = "steps through every function, including resistance, diode and continuity, which source a test current, and the current functions, which are a near short across the input"
+
+# ---- settings kept per function, that do not select the function
+[roundtrip.nplc]
+hazard = "reversible"
+values = [0.1, 1.0]
+rel = 1e-3
+select = { function = "*" }
+
+[roundtrip.digits]
+hazard = "reversible"
+values = [4, 5]
+select = { function = "*" }
+
+[roundtrip.auto_range]
+hazard = "reversible"
+values = "*"
+select = { function = "*" }
+
+# Setting a range turns auto range off. So these only run when auto range is already
+# off for that function (press AUTO on the meter, or use set_auto_range), and the
+# coupling then changes nothing. The values are the ranges themselves, and the meter
+# is assumed to report the range it chose; loosen `rel` if it reports the overrange.
+[roundtrip.range_dcv]
+setter = "set_range"
+getter = "get_range"
+hazard = "reversible"
+values = [1.0, 100.0]
+rel = 1e-2
+select = { function = ["DC_VOLTAGE"] }
+preconditions = [{ call = "get_auto_range", args = { function = "DC_VOLTAGE" }, equals = "OFF" }]
+
+[roundtrip.range_acv]
+setter = "set_range"
+getter = "get_range"
+hazard = "reversible"
+values = [1.0, 100.0]
+rel = 1e-2
+select = { function = ["AC_VOLTAGE"] }
+preconditions = [{ call = "get_auto_range", args = { function = "AC_VOLTAGE" }, equals = "OFF" }]
+
+[roundtrip.range_dci]
+setter = "set_range"
+getter = "get_range"
+hazard = "reversible"
+values = [0.1, 1.0]
+rel = 1e-2
+select = { function = ["DC_CURRENT"] }
+preconditions = [{ call = "get_auto_range", args = { function = "DC_CURRENT" }, equals = "OFF" }]
+
+[roundtrip.range_aci]
+setter = "set_range"
+getter = "get_range"
+hazard = "reversible"
+values = [1.0, 3.0]
+rel = 1e-2
+select = { function = ["AC_CURRENT"] }
+preconditions = [{ call = "get_auto_range", args = { function = "AC_CURRENT" }, equals = "OFF" }]
+
+[roundtrip.range_res]
+setter = "set_range"
+getter = "get_range"
+hazard = "reversible"
+values = [1000.0, 1000000.0]
+rel = 1e-2
+select = { function = ["RESISTANCE"] }
+preconditions = [{ call = "get_auto_range", args = { function = "RESISTANCE" }, equals = "OFF" }]
+
+[roundtrip.range_fres]
+setter = "set_range"
+getter = "get_range"
+hazard = "reversible"
+values = [1000.0, 1000000.0]
+rel = 1e-2
+select = { function = ["RESISTANCE_4W"] }
+preconditions = [{ call = "get_auto_range", args = { function = "RESISTANCE_4W" }, equals = "OFF" }]
+
+[roundtrip.reference]
+hazard = "reversible"
+values = [0.001, 0.002]
+abs = 1e-9
+rel = 1e-3
+select = { function = "*" }
+
+[roundtrip.reference_state]
+hazard = "reversible"
+values = "*"
+select = { function = "*" }
+
+[roundtrip.average_filter]
+hazard = "reversible"
+values = "*"
+select = { function = "*" }
+
+[roundtrip.average_filter_control]
+hazard = "reversible"
+values = "*"
+select = { function = "*" }
+
+[roundtrip.average_filter_count]
+hazard = "reversible"
+values = [5, 20]
+select = { function = "*" }
+
+[roundtrip.bandwidth]
+hazard = "reversible"
+values = [3.0, 300.0]
+abs = 0.5
+select = { function = "*" }
+
+[roundtrip.threshold_range]
+hazard = "reversible"
+values = [1.0, 100.0]
+rel = 1e-2
+select = { function = "*" }
+
+# ---- temperature, diode, continuity
+[roundtrip.thermocouple_type]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.reference_junction]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.simulated_junction_temperature]
+hazard = "reversible"
+values = [0.0, 25.0]
+abs = 0.01
+preconditions = [{ call = "get_temperature_unit", equals = "CELSIUS" }]
+note = "the range 0 to 50 is in degrees C, so this only runs with Celsius selected"
+
+[roundtrip.junction_temperature_coefficient]
+hazard = "reversible"
+values = [1e-4, 3e-4]
+rel = 1e-3
+
+[roundtrip.junction_voltage_offset]
+hazard = "reversible"
+values = [0.01, 0.02]
+rel = 1e-3
+
+[roundtrip.diode_current_range]
+hazard = "reversible"
+values = [1e-4, 1e-5]
+rel = 1e-2
+
+[roundtrip.continuity_threshold]
+hazard = "reversible"
+values = [5.0, 50.0]
+rel = 1e-3
+
+# ---- reading hold
+[roundtrip.hold_window]
+hazard = "reversible"
+values = [0.5, 5.0]
+rel = 1e-3
+
+[roundtrip.hold_count]
+hazard = "reversible"
+values = [3, 10]
+
+[roundtrip.hold]
+hazard = "reversible"
+values = "*"
+
+# ---- math, statistics and limits
+[roundtrip.math_format]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.math_factor_m]
+hazard = "reversible"
+values = [2.0, 3.0]
+rel = 1e-3
+
+[roundtrip.math_factor_b]
+hazard = "reversible"
+values = [1.0, 2.0]
+rel = 1e-3
+
+[roundtrip.math_units]
+hazard = "reversible"
+values = ["ABC", "XYZ"]
+
+[roundtrip.math_percent_target]
+hazard = "reversible"
+values = [10.0, 20.0]
+rel = 1e-3
+
+[roundtrip.math_state]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.statistic_format]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.statistic_state]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.limit_upper]
+hazard = "reversible"
+values = [2.0, 3.0]
+rel = 1e-3
+
+[roundtrip.limit_lower]
+hazard = "reversible"
+values = [-2.0, -3.0]
+rel = 1e-3
+
+[roundtrip.limit_test]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.limit_auto_clear]
+hazard = "reversible"
+values = "*"
+
+# ---- units
+[roundtrip.temperature_unit]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.ac_voltage_unit]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.dc_voltage_unit]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.ac_db_reference]
+hazard = "reversible"
+values = [0.5, 2.0]
+rel = 1e-3
+
+[roundtrip.ac_dbm_impedance]
+hazard = "reversible"
+values = [50, 600]
+
+[roundtrip.dc_db_reference]
+hazard = "reversible"
+values = [0.5, 2.0]
+rel = 1e-3
+
+[roundtrip.dc_dbm_impedance]
+hazard = "reversible"
+values = [50, 600]
+
+# ---- display
+[roundtrip.display_enabled]
+hazard = "reversible"
+values = "*"
+note = "while off the display is frozen and the front panel controls are disabled"
+
+[roundtrip.display_text]
+hazard = "reversible"
+values = ["VERIFY"]
+
+[roundtrip.display_text_state]
+hazard = "reversible"
+values = "*"
+
+# ---- buffer: hazardous because they discard or overwrite stored readings
+[roundtrip.buffer_size]
+hazard = "hazardous"
+values = [10, 100]
+preconditions = [{ call = "get_buffer_control", equals = "NEVER" }]
+note = "resizing discards the stored readings, and also sets the buffer control to NEVER, so it only runs when it already is"
+
+[roundtrip.buffer_feed]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.buffer_control]
+hazard = "hazardous"
+values = "*"
+note = "NEXT starts storing at once, overwriting the readings already in the buffer"
+
+# ---- trigger model
+[roundtrip.continuous_initiation]
+hazard = "reversible"
+values = "*"
+note = "OFF stops the readings and leaves the instrument idle until it is restored"
+
+[roundtrip.trigger_count]
+hazard = "reversible"
+values = [1, 10]
+abs = 0.5
+
+[roundtrip.trigger_delay]
+hazard = "reversible"
+values = [0.1, 0.5]
+rel = 1e-3
+
+[roundtrip.trigger_auto_delay]
+hazard = "reversible"
+values = "*"
+
+# The timer source is only available while stepping or scanning, so it is left out.
+[roundtrip.trigger_source]
+hazard = "reversible"
+values = ["IMMEDIATE", "EXTERNAL", "MANUAL", "BUS"]
+
+[roundtrip.trigger_timer]
+hazard = "reversible"
+values = [0.5, 2.0]
+rel = 1e-3
+
+[roundtrip.sample_count]
+hazard = "reversible"
+values = [1, 5]
+preconditions = [{ call = "get_continuous_initiation", equals = "OFF" }]
+note = "a sample count above 1 is refused while continuous initiation is on"
+
+# ---- system
+[roundtrip.power_on_setup]
+hazard = "hazardous"
+values = ["RST", "PRESET"]
+note = "changes what the instrument loads at power-up, and stays if it is not restored"
+
+[roundtrip.autozero]
+hazard = "reversible"
+values = "*"
+preconditions = [{ call = "get_continuous_initiation", equals = "OFF" }]
+note = "autozero can only be changed while the instrument is idle"
+
+[roundtrip.beeper]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.key_click]
+hazard = "reversible"
+values = "*"
+
+# ---- status
+[roundtrip.event_enable]
+hazard = "reversible"
+values = [1, 32]
+
+[roundtrip.service_request_enable]
+hazard = "reversible"
+values = [4, 32]
+
+[roundtrip.status_enable]
+hazard = "reversible"
+values = [0, 32]
+select = { register = "*" }
+
+# ---- scanner card
+[roundtrip.internal_scan_list]
+hazard = "reversible"
+values = [[1, 2], [1, 2, 3]]
+requires = ["scanner"]
+note = "the channels must be consecutive"
+
+[roundtrip.scan_mode]
+hazard = "reversible"
+values = "*"
+requires = ["scanner"]

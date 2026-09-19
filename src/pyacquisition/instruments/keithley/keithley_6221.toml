@@ -1,0 +1,522 @@
+# Verification spec for Keithley_6221. See pyacquisition/verify/spec.py for the format.
+#
+# Written from the class and the manual, and not yet run against a real 6221.
+# Expect to adjust values and tolerances the first time it is on the bench.
+#
+# The safe state is: output off. Round trips only run with the output off, and
+# every one is followed by turning it off again and checking that it is.
+
+[identity]
+contains = ["KEITHLEY", "6221"]
+
+[safe_state]
+steps = [{ call = "set_output_state", args = { state = "OFF" } }]
+verify = [{ call = "get_output_state", equals = "OFF" }]
+
+
+# ------------------------------------------------------------------ level 1
+# Every get_ method runs. Enum arguments are expanded automatically. These
+# rules only cover what cannot be inferred.
+
+[read.get_fresh_reading]
+skip = "can only be read once, so reading it here would consume a real reading"
+
+[read.get_fresh_math_reading]
+skip = "can only be read once, so reading it here would consume a real reading"
+
+# Readings come from the 2182/2182A nanovoltmeter. List "nanovoltmeter" under
+# `capabilities` in the inventory when one is attached.
+[read.get_latest_reading]
+requires = ["nanovoltmeter"]
+
+[read.get_math_reading]
+requires = ["nanovoltmeter"]
+
+[read.get_diffcond_v_zero]
+requires = ["nanovoltmeter"]
+
+[read.get_statistic]
+requires = ["nanovoltmeter"]
+
+[read.get_buffer_data]
+requires = ["nanovoltmeter"]
+
+[read.get_buffer_selected]
+args = [{ start = 1, count = 1 }]
+requires = ["nanovoltmeter"]
+
+[read.get_display_text_attributes]
+note = "the reply format is not documented, so only that it answers is checked"
+
+
+# ------------------------------------------------------------------ level 2
+# set_x is written, get_x read back, and the original restored. Everything is
+# reversible unless tagged hazardous.
+
+# ---- the output itself: hazardous, it can put current into a load
+[roundtrip.output_state]
+hazard = "hazardous"
+values = "*"
+note = "turns the output ON, with whatever current level is set, into whatever is connected"
+
+[roundtrip.low_to_earth]
+hazard = "hazardous"
+values = "*"
+note = "reconnects output low to earth ground, which changes the grounding of the setup"
+
+[roundtrip.inner_shield]
+hazard = "hazardous"
+values = "*"
+note = "switches the triax inner shield between output low and guard"
+
+[roundtrip.io_pattern_force]
+hazard = "hazardous"
+values = "*"
+note = "forces the digital I/O pattern, which can drive equipment connected to it"
+
+[roundtrip.io_pattern]
+hazard = "hazardous"
+values = [5, 10]
+preconditions = [{ call = "get_io_pattern_force", equals = "OFF" }]
+note = "the pattern is only driven when forced; skipped if forcing is already on"
+
+[roundtrip.power_on_setup]
+hazard = "hazardous"
+values = ["RST", "PRESET"]
+note = "changes what the instrument loads at power-up, and stays if it is not restored"
+
+[roundtrip.buffer_size]
+hazard = "hazardous"
+values = [10, 100]
+abs = 0.5
+note = "resizing the buffer discards the readings stored in it"
+
+[roundtrip.current_range]
+hazard = "hazardous"
+values = [2e-3, 2e-6]
+rel = 1e-3
+preconditions = [
+    { call = "get_output_state", equals = "OFF" },
+    { call = "get_current", equals = 0.0 },
+]
+note = "a range smaller than the present level could clamp it, so only run at zero current"
+
+# ---- the source level and compliance: reversible only with the output off
+[roundtrip.current]
+hazard = "reversible"
+values = [1e-9, -1e-9, 0.0]
+abs = 1e-12
+rel = 1e-3
+preconditions = [{ call = "get_output_state", equals = "OFF" }]
+
+[roundtrip.compliance]
+hazard = "reversible"
+values = [1.0, 5.0]
+rel = 1e-3
+preconditions = [{ call = "get_output_state", equals = "OFF" }]
+
+[roundtrip.auto_range]
+hazard = "reversible"
+values = "*"
+preconditions = [{ call = "get_output_state", equals = "OFF" }]
+
+[roundtrip.analog_filter]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.output_response]
+hazard = "reversible"
+values = "*"
+
+# ---- sweeps
+[roundtrip.sweep_start]
+hazard = "reversible"
+values = [1e-6, -1e-6]
+abs = 1e-9
+rel = 1e-3
+
+[roundtrip.sweep_stop]
+hazard = "reversible"
+values = [1e-6, -1e-6]
+abs = 1e-9
+rel = 1e-3
+
+[roundtrip.sweep_step]
+hazard = "reversible"
+values = [1e-6, 2e-6]
+abs = 1e-9
+rel = 1e-3
+
+[roundtrip.sweep_center]
+hazard = "reversible"
+values = [0.0, 1e-6]
+abs = 1e-9
+rel = 1e-3
+
+[roundtrip.sweep_span]
+hazard = "reversible"
+values = [2e-6, 4e-6]
+abs = 1e-9
+rel = 1e-3
+
+[roundtrip.source_delay]
+hazard = "reversible"
+values = [0.5, 2.0]
+rel = 1e-3
+
+[roundtrip.sweep_spacing]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.sweep_points]
+hazard = "reversible"
+values = [2, 11]
+
+[roundtrip.sweep_ranging]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.sweep_count]
+hazard = "reversible"
+values = [1, 5]
+abs = 0.5
+
+[roundtrip.sweep_compliance_abort]
+hazard = "reversible"
+values = "*"
+
+# ---- delta, pulse delta and differential conductance
+[roundtrip.delta_high]
+hazard = "reversible"
+values = [1e-6, 2e-6]
+abs = 1e-9
+rel = 1e-3
+preconditions = [{ call = "get_output_state", equals = "OFF" }]
+
+[roundtrip.delta_low]
+hazard = "reversible"
+values = [-1e-6, -2e-6]
+abs = 1e-9
+rel = 1e-3
+preconditions = [{ call = "get_output_state", equals = "OFF" }]
+
+[roundtrip.delta_delay]
+hazard = "reversible"
+values = [0.01, 0.5]
+rel = 1e-3
+
+[roundtrip.delta_count]
+hazard = "reversible"
+values = [10, 100]
+abs = 0.5
+
+[roundtrip.delta_compliance_abort]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.delta_cold_switching]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.pulse_delta_high]
+hazard = "reversible"
+values = [1e-6, 2e-6]
+abs = 1e-9
+rel = 1e-3
+preconditions = [{ call = "get_output_state", equals = "OFF" }]
+
+[roundtrip.pulse_delta_low]
+hazard = "reversible"
+values = [0.0, -1e-6]
+abs = 1e-9
+rel = 1e-3
+preconditions = [{ call = "get_output_state", equals = "OFF" }]
+
+[roundtrip.pulse_delta_width]
+hazard = "reversible"
+values = [5e-5, 1e-4]
+rel = 1e-3
+
+[roundtrip.pulse_delta_source_delay]
+hazard = "reversible"
+values = [1.6e-5, 1e-4]
+rel = 1e-3
+
+[roundtrip.pulse_delta_count]
+hazard = "reversible"
+values = [10, 20]
+abs = 0.5
+
+[roundtrip.pulse_delta_ranging]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.pulse_delta_interval]
+hazard = "reversible"
+values = [5, 10]
+
+[roundtrip.pulse_delta_sweep]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.pulse_delta_low_measurements]
+hazard = "reversible"
+values = [1, 2]
+
+[roundtrip.diffcond_start]
+hazard = "reversible"
+values = [-1e-6, -2e-6]
+abs = 1e-9
+rel = 1e-3
+
+[roundtrip.diffcond_stop]
+hazard = "reversible"
+values = [1e-6, 2e-6]
+abs = 1e-9
+rel = 1e-3
+
+[roundtrip.diffcond_step]
+hazard = "reversible"
+values = [1e-7, 2e-7]
+abs = 1e-9
+rel = 1e-3
+
+[roundtrip.diffcond_delta]
+hazard = "reversible"
+values = [1e-7, 2e-7]
+abs = 1e-9
+rel = 1e-3
+
+[roundtrip.diffcond_delay]
+hazard = "reversible"
+values = [0.01, 0.5]
+rel = 1e-3
+
+[roundtrip.diffcond_compliance_abort]
+hazard = "reversible"
+values = "*"
+
+# ---- wave generator (arbitrary waveforms need points loaded first, so are left out)
+[roundtrip.wave_function]
+hazard = "reversible"
+values = ["SINUSOID", "SQUARE", "RAMP"]
+
+[roundtrip.wave_duty_cycle]
+hazard = "reversible"
+values = [25.0, 75.0]
+rel = 1e-3
+
+[roundtrip.wave_amplitude]
+hazard = "reversible"
+values = [1e-6, 2e-6]
+abs = 1e-9
+rel = 1e-3
+preconditions = [{ call = "get_output_state", equals = "OFF" }]
+
+[roundtrip.wave_frequency]
+hazard = "reversible"
+values = [10.0, 100.0]
+rel = 1e-3
+
+[roundtrip.wave_offset]
+hazard = "reversible"
+values = [0.0, 1e-6]
+abs = 1e-9
+rel = 1e-3
+preconditions = [{ call = "get_output_state", equals = "OFF" }]
+
+[roundtrip.wave_phase_marker_level]
+hazard = "reversible"
+values = [90.0, 270.0]
+rel = 1e-3
+
+[roundtrip.wave_phase_marker_line]
+hazard = "reversible"
+values = [1, 4]
+
+[roundtrip.wave_phase_marker_state]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.wave_ranging]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.wave_duration_time]
+hazard = "reversible"
+values = [1.0, 2.0]
+rel = 1e-3
+
+[roundtrip.wave_duration_cycles]
+hazard = "reversible"
+values = [1.0, 10.0]
+rel = 1e-3
+
+[roundtrip.wave_external_trigger]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.wave_external_trigger_line]
+hazard = "reversible"
+values = [0, 1]
+
+[roundtrip.wave_ignore_retrigger]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.wave_inactive_value]
+hazard = "reversible"
+values = [0.0, 0.1]
+abs = 1e-9
+rel = 1e-3
+
+# ---- nanovoltmeter side: averaging, units, math, statistics, limits
+[roundtrip.average_filter_control]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.average_filter_window]
+hazard = "reversible"
+values = [1.0, 5.0]
+rel = 1e-3
+
+[roundtrip.average_filter_count]
+hazard = "reversible"
+values = [5, 10]
+
+[roundtrip.average_filter]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.reading_units]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.power_type]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.math_format]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.math_factor_m]
+hazard = "reversible"
+values = [2.0, 3.0]
+rel = 1e-3
+
+[roundtrip.math_factor_b]
+hazard = "reversible"
+values = [1.0, 2.0]
+rel = 1e-3
+
+[roundtrip.math_state]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.statistic_format]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.statistic_state]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.limit_test]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.limit_fail_pattern]
+hazard = "reversible"
+values = [5, 10]
+
+# ---- buffer, trigger model
+[roundtrip.buffer_feed]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.buffer_control]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.buffer_notify]
+hazard = "reversible"
+values = [1]
+note = "must stay below the buffer size"
+
+[roundtrip.buffer_timestamp_format]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.arm_source]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.arm_timer]
+hazard = "reversible"
+values = [0.5, 1.0]
+rel = 1e-3
+
+[roundtrip.arm_output]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.trigger_source]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.trigger_output]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.layer_direction]
+hazard = "reversible"
+values = "*"
+select = { layer = "*" }
+
+[roundtrip.layer_input_line]
+hazard = "reversible"
+values = [1, 3]
+select = { layer = "*" }
+
+[roundtrip.layer_output_line]
+hazard = "reversible"
+values = [2, 4]
+select = { layer = "*" }
+
+# ---- status, display and the rest
+[roundtrip.event_enable]
+hazard = "reversible"
+values = [1, 32]
+
+[roundtrip.service_request_enable]
+hazard = "reversible"
+values = [4, 32]
+
+[roundtrip.status_enable]
+hazard = "reversible"
+values = [0, 512]
+select = { register = "*" }
+
+[roundtrip.display_enabled]
+hazard = "reversible"
+values = "*"
+note = "while off the display and front panel controls are disabled"
+
+[roundtrip.display_text]
+hazard = "reversible"
+values = ["VERIFY"]
+select = { line = "*" }
+
+[roundtrip.display_text_state]
+hazard = "reversible"
+values = "*"
+select = { line = "*" }
+
+[roundtrip.beeper]
+hazard = "reversible"
+values = "*"
+
+[roundtrip.key_click]
+hazard = "reversible"
+values = "*"
