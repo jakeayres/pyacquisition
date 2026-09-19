@@ -13,10 +13,11 @@ from .input_group import InputGroup
 class EndpointPopup:
     """Class to create a popup for FastAPI endpoints."""
 
-    def __init__(self, api_client, path) -> None:
+    def __init__(self, api_client, path, title: str | None = None) -> None:
         self.uuid = dpg.generate_uuid()
         self.api_client = api_client
         self.path = path
+        self.title = title or path.get.summary
         self.input_group = InputGroup()
         self.inputs = []
         self.response_text_area = None
@@ -53,7 +54,7 @@ class EndpointPopup:
     def draw(self) -> None:
         """Draw the popup and its inputs."""
         with dpg.window(
-            label=f"{self.path.get.summary}",
+            label=f"{self.title}",
             width=300,
             height=-1,
             modal=False,

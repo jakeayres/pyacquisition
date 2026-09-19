@@ -205,7 +205,11 @@ class APIClient:
         return self.pollers[name]
 
     def get(
-        self, endpoint: str, params: dict = None, callback: callable = None
+        self,
+        endpoint: str,
+        params: dict = None,
+        callback: callable = None,
+        timeout: float | None = None,
     ) -> dict:
         """
         Sends a GET request to the specified endpoint with optional parameters.
@@ -213,13 +217,17 @@ class APIClient:
         Args:
             endpoint (str): The API endpoint to send the request to.
             params (dict, optional): The query parameters to include in the request.
+            timeout (float, optional): Give up after this many seconds. By default
+                it waits for as long as it takes.
 
         Returns:
             dict: The JSON response from the server.
         """
         logger.debug(f"GET request to {endpoint} with params {params}")
         response = requests.get(
-            f"http://{self.host}:{self.port}{endpoint}", params=params
+            f"http://{self.host}:{self.port}{endpoint}",
+            params=params,
+            timeout=timeout,
         )
         logger.debug(f"Response: {response.json()}")
         data = response.json()
