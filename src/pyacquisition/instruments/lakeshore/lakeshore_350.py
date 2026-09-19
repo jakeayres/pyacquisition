@@ -72,10 +72,10 @@ class DisplayAllInputsSize(BaseEnum):
 
 
 class Lakeshore_350(Instrument):
-    """Class for controlling the Lakeshore 340 temperature controller."""
+    """Class for controlling the Lakeshore 350 temperature controller."""
 
     def __init__(self, *args, **kwargs):
-        """Initializes the Lakeshore 340 instrument."""
+        """Initializes the Lakeshore 350 instrument."""
         super().__init__(*args, **kwargs)
         self.clear()
         self.clear_event_register()
@@ -111,10 +111,13 @@ class Lakeshore_350(Instrument):
     def clear_event_register(self) -> int:
         """Clears the event status register.
 
+        `*ESR?` is a query, and reading the register clears it. The response is
+        read so that it does not stay in the output buffer.
+
         Returns:
-            int: Status code indicating the success of the operation.
+            int: The value the event status register held before it was cleared.
         """
-        return self.command("*ESR")
+        return int(self.query("*ESR?"))
 
     @mark_query
     def get_alarm(self) -> dict:
@@ -151,17 +154,17 @@ class Lakeshore_350(Instrument):
         return float(self.query("AOUT?"))
 
     @mark_command
-    def set_autotune_pid(self, output: OutputChannel, mode: int) -> int:
+    def set_autotune_pid(self, output: OutputChannel, mode: AutotuneMode) -> int:
         """Sets the autotune PID mode for a specific output channel.
 
         Args:
-            output (int): The output channel to configure.
-            mode (int): The autotune mode to set.
+            output (OutputChannel): The output channel to configure.
+            mode (AutotuneMode): The autotune mode to set (P, PI or PID).
 
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command(f"ATUNE {output.raw_value},{mode}")
+        return self.command(f"ATUNE {output.raw_value},{mode.raw_value}")
 
     @mark_command
     def set_display_contrast(self, contrast: int) -> int:

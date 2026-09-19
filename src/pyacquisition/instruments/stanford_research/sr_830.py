@@ -137,7 +137,7 @@ class SR_830(Instrument):
         Returns:
             int: Status code indicating the success of the operation.
         """
-        return self.command("*REST")
+        return self.command("REST")
 
     @mark_command
     def clear(self) -> int:

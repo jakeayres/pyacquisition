@@ -56,24 +56,30 @@ class ModeStatusN(BaseEnum):
 class Mercury_IPS(Instrument):
     """Class for controlling the Oxford Instruments Mercury IPS device."""
 
-
     def _parse_status_string(self, string: str, index: int):
 
         if not isinstance(string, str):
-            raise TypeError(f'Expected to receive a string, got {type(string).__name__}')
+            raise TypeError(
+                f"Expected to receive a string, got {type(string).__name__}"
+            )
 
         elif len(string) not in [12, 15]:
-            raise ValueError(f'Expected status string of length 12 or 15, got {string} (len {len(string)})')
+            raise ValueError(
+                f"Expected status string of length 12 or 15, got {string} (len {len(string)})"
+            )
 
-        elif string[0] != 'X':
-            raise ValueError(f'"X" not found at string[0]. Expected string of form XmnAnCnHnMmnPmn, got {string}')
+        elif string[0] != "X":
+            raise ValueError(
+                f'"X" not found at string[0]. Expected string of form XmnAnCnHnMmnPmn, got {string}'
+            )
 
-        elif string[3] != 'A':
-            raise ValueError(f'"A" not found at string[3]. Expected string of form XmnAnCnHnMmnPmn, got {string}')
+        elif string[3] != "A":
+            raise ValueError(
+                f'"A" not found at string[3]. Expected string of form XmnAnCnHnMmnPmn, got {string}'
+            )
 
         else:
             return string[index]
-          
 
     @mark_query
     def identify(self) -> str:
@@ -110,14 +116,12 @@ class Mercury_IPS(Instrument):
             str: The response.
         """
         return self.query("C3")
-    
 
-    @mark_query 
+    @mark_query
     def get_system_status(self) -> SystemStatusM:
         response = self.query("X")
         response = self._parse_status_string(response, 1)
         return SystemStatusM.from_raw_value(int(response))
-    
 
     @mark_query
     def get_limit_status(self) -> SystemStatusN:
@@ -125,13 +129,11 @@ class Mercury_IPS(Instrument):
         response = self._parse_status_string(response, 2)
         return SystemStatusN.from_raw_value(int(response))
 
-
     @mark_query
     def get_activity_status(self) -> ActivityStatus:
         response = self.query("X")
         response = self._parse_status_string(response, 4)
         return ActivityStatus.from_raw_value(int(response))
-
 
     @mark_query
     def get_remote_status(self) -> RemoteStatus:
@@ -139,13 +141,11 @@ class Mercury_IPS(Instrument):
         response = self._parse_status_string(response, 6)
         return RemoteStatus.from_raw_value(int(response))
 
-
     @mark_query
     def get_switch_heater_status(self) -> SwitchHeaterStatus:
         response = self.query("X")
         response = self._parse_status_string(response, 8)
         return SwitchHeaterStatus.from_raw_value(int(response))
-
 
     @mark_query
     def get_sweep_mode_status(self) -> ModeStatusM:
@@ -153,13 +153,11 @@ class Mercury_IPS(Instrument):
         response = self._parse_status_string(response, 10)
         return ModeStatusM.from_raw_value(int(response))
 
-
     @mark_query
     def get_sweep_status(self) -> ModeStatusN:
         response = self.query("X")
         response = self._parse_status_string(response, 11)
         return ModeStatusN.from_raw_value(int(response))
-
 
     @mark_query
     def get_output_current(self) -> float:
