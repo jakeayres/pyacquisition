@@ -96,7 +96,7 @@ class Instrument(metaclass=QueryCommandProvider):
         return {
             "id": self._uid,
             "class": self.__class__.__name__,
-            "address": self._visa_resource.address(),
+            "address": self._visa_resource.resource_name,
         }
 
     @property

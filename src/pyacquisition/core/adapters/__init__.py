@@ -1,9 +1,13 @@
-from .pyvisa import pyvisa_adapter
 from .mock import mock_adapter
+from .prologix import prologix_adapter
+from .pyvisa import pyvisa_adapter
+from .record import record_adapter
 
 _adapters = {
     "pyvisa": pyvisa_adapter,
     "mock": mock_adapter,
+    "prologix": prologix_adapter,
+    "record": record_adapter,
 }
 
 
