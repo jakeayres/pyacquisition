@@ -142,7 +142,7 @@ class Staircase(Task):
     async def run(self, experiment):
         for setpoint in [40.0, 60.0, 80.0]:
             self.pid.setpoint = setpoint
-            yield f"Setpoint {setpoint}"
+            self.log(f"Setpoint {setpoint}")
             await self.run_subtask(WaitFor(seconds=self.hold_seconds))
 ```
 

@@ -1,0 +1,230 @@
+/* Front-page showcase: the example script in a plain dark code panel, and the command
+   that runs it. Scoped to .pa-ide, .pa-flow, .pa-caption and .pa-step. */
+
+.pa-showcase > p:not(.pa-step):not(.pa-caption) { text-align: center; max-width: 40rem; margin-inline: auto; }
+.pa-caption { text-align: center; margin-top: 1rem !important; font-size: 0.65rem; color: var(--md-default-fg-color--light); }
+
+/* Step labels ---------------------------------------------------------- */
+.pa-step {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 2rem 0 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.pa-step span {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.7rem;
+  color: #06210f;
+  background: var(--pa-green);
+  border-radius: 50%;
+}
+
+/* The code panel: dark, with the file name as its only header ---------- */
+.pa-ide {
+  --ide-bg: #0e131d;
+  --ide-chrome: #0a0e16;
+  --ide-line: rgba(255, 255, 255, 0.08);
+  --ide-dim: #5f6f89;
+
+  --md-code-bg-color: var(--ide-bg);
+  --md-code-fg-color: #d6deeb;
+  --md-code-hl-keyword-color: #ff9f43;
+  --md-code-hl-string-color: #4ade80;
+  --md-code-hl-number-color: #f78c6c;
+  --md-code-hl-function-color: #8fd3ff;
+  --md-code-hl-name-color: #d6deeb;
+  --md-code-hl-variable-color: #d6deeb;
+  --md-code-hl-constant-color: #ff9f43;
+  --md-code-hl-special-color: #ffcb6b;
+  --md-code-hl-operator-color: #89ddff;
+  --md-code-hl-punctuation-color: #9fb0c8;
+  --md-code-hl-comment-color: #5f6f89;
+  --md-code-hl-generic-color: #d6deeb;
+  --md-code-hl-color: rgba(255, 159, 67, 0.13);
+  --md-code-hl-color--light: rgba(255, 159, 67, 0.13);
+
+  overflow: hidden;
+  color: #d6deeb;
+  background: var(--ide-bg);
+  border: 1px solid var(--ide-line);
+  border-radius: 0.8rem;
+  box-shadow: 0 30px 60px -30px rgba(10, 15, 26, 0.65);
+}
+
+.pa-ide span.filename {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: var(--hdr, 2rem);
+  padding: 0 1rem;
+  font-size: 0.6rem;
+  color: var(--ide-dim);
+  background: var(--ide-chrome);
+  border-bottom: 1px solid var(--ide-line);
+}
+
+/* The highlighted code: the theme's copy button and margins are not wanted here. */
+.pa-ide .md-code__nav { display: none; }
+.pa-ide .highlight, .pa-ide .highlighttable { margin: 0; }
+.pa-ide .highlighttable { width: 100%; }
+.pa-ide pre { margin: 0; }
+.pa-ide code, .pa-ide .highlight pre > code {
+  padding: var(--pad, 0.9rem) 1rem;
+  font-size: var(--fs, 0.62rem);
+  line-height: var(--lh, 0.992rem);
+  background: var(--ide-bg);
+  scrollbar-width: thin;
+}
+.pa-ide .linenos, .pa-ide .linenos pre {
+  background: var(--ide-bg);
+  color: #3d4a61;
+  font-size: var(--fs, 0.62rem);
+  line-height: var(--lh, 0.992rem);
+}
+.pa-ide .linenos { padding: var(--pad, 0.9rem) 0 var(--pad, 0.9rem) 0.9rem; }
+.pa-ide .linenos a { color: inherit; }
+
+/* The "run it" command ------------------------------------------------- */
+.pa-flow { display: flex; margin: 0 0 1.4rem; }
+.pa-flow .cmd {
+  position: relative;
+  padding: 0.4rem 1rem;
+  font-family: var(--md-code-font-family, monospace);
+  font-size: 0.65rem;
+  color: #e6e9f0;
+  background: var(--pa-bg);
+  border: 1px solid var(--pa-border);
+  border-radius: 999px;
+  box-shadow: 0 8px 20px -10px rgba(10, 15, 26, 0.6);
+}
+.pa-flow .cmd b { color: var(--pa-green); margin-right: 0.4rem; }
+
+/* The annotated script ------------------------------------------------- *
+ * The code panel is on the left, and notes for its key lines are on the right. Each
+ * note is placed against the lines it describes (--from and --to are line numbers),
+ * so it depends on the header, padding and line height below being exact.          */
+.pa-annot {
+  --hdr: 2rem;
+  --pad: 0.9rem;
+  --fs: 0.58rem;
+  --lh: 0.928rem; /* 1.6 times the code size */
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  margin: 1.2em 0;
+  align-items: start;
+}
+.pa-annot .pa-ide .hll { box-shadow: inset 2px 0 var(--pa-orange); }
+.pa-annot .pa-ide code { padding-right: 0.6rem; }
+
+.pa-annot__notes { position: relative; }
+.pa-note {
+  position: absolute;
+  left: 1.2rem;
+  right: 0;
+  top: calc(1px + var(--hdr) + var(--pad) + (var(--from) - 1) * var(--lh));
+  min-height: calc((var(--to) - var(--from) + 1) * var(--lh));
+  box-sizing: border-box;
+  padding-left: 0.8rem;
+  border-left: 2px solid var(--pa-orange);
+}
+/* The tab that joins the note to its lines in the panel */
+.pa-note::before {
+  content: "";
+  position: absolute;
+  left: -1.2rem;
+  top: calc(var(--lh) / 2 - 1px);
+  width: 1.2rem;
+  height: 2px;
+  background: var(--pa-orange);
+}
+.pa-note b { display: block; font-size: 0.68rem; line-height: 1.25; color: var(--md-default-fg-color); }
+.pa-note span { display: block; font-size: 0.6rem; line-height: 1.3; color: var(--md-default-fg-color--light); }
+.pa-note code { font-size: 0.92em; padding: 0 0.2em; }
+
+/* On narrow screens there is no room beside the code: the notes follow it. */
+@media (max-width: 60em) {
+  .pa-annot { grid-template-columns: minmax(0, 1fr); }
+  .pa-note { position: static; margin-top: 0.8rem; min-height: 0; }
+  .pa-note::before { display: none; }
+}
+
+/* ---------------------------------------------------------------------------
+ * The two ways to write it, as two plain cards. They are the tabs, so choosing a card
+ * shows its code below.
+ * ------------------------------------------------------------------------ */
+
+.pa-showcase .tabbed-labels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.4rem;
+  margin: 1.8rem 0 0;
+  max-width: none;
+  overflow: visible;
+  box-shadow: none;
+}
+.js .md-typeset .pa-showcase .tabbed-labels::before { display: none !important; } /* the theme's sliding underline */
+
+.pa-showcase .tabbed-labels > label {
+  position: relative;
+  display: block;
+  min-width: 0;
+  margin: 0;
+  padding: 1.1rem 1.3rem;
+  white-space: normal; /* the theme keeps tab labels on one line */
+  color: var(--md-default-fg-color);
+  background: #fff;
+  border: 1px solid var(--pa-border);
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.pa-showcase .tabbed-labels > label:hover { border-color: var(--md-default-fg-color--lighter); }
+
+/* The chosen card */
+.pa-showcase .tabbed-set > input:nth-child(1):checked ~ .tabbed-labels > :nth-child(1),
+.pa-showcase .tabbed-set > input:nth-child(2):checked ~ .tabbed-labels > :nth-child(2) {
+  color: var(--md-default-fg-color);
+  background: rgba(21, 128, 61, 0.05);
+  border-color: var(--pa-green-ink);
+  box-shadow: inset 0 0 0 1px var(--pa-green-ink);
+}
+
+/* A quiet "or" on the seam between them */
+.pa-showcase .tabbed-labels > :nth-child(1)::after {
+  content: "or";
+  position: absolute;
+  top: 50%;
+  right: -0.7rem;
+  z-index: 1;
+  padding: 0.15rem 0;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--md-default-fg-color--light);
+  background: #fff;
+  transform: translate(50%, -50%);
+}
+
+.pa-opt { display: block; }
+.pa-opt__kicker {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--md-default-fg-color--light);
+}
+.pa-opt__title { display: block; font-size: 0.95rem; font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; }
+.pa-opt__text { display: block; margin-top: 0.3rem; font-size: 0.65rem; font-weight: 400; color: var(--md-default-fg-color--light); }
+
+@media (max-width: 60em) {
+  .pa-showcase .tabbed-labels { grid-template-columns: 1fr; gap: 0.9rem; }
+  .pa-showcase .tabbed-labels > :nth-child(1)::after { display: none; }
+}

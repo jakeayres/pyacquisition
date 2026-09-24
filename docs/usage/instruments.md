@@ -45,10 +45,9 @@ The id, `"clock"`, identifies the instrument everywhere: in the interface, in th
 
 ## Adding hardware instruments
 
-A hardware instrument also needs a connection to the device. Open the connection with `pyvisa` and pass it to the instrument along with its id.
+A hardware instrument also needs the address of the device. Give it to the instrument along with its id, and the instrument opens the connection itself.
 
 ```python
-import pyvisa
 from pyacquisition import Experiment
 from pyacquisition.instruments import SR_830
 
@@ -56,15 +55,42 @@ from pyacquisition.instruments import SR_830
 class MyExperiment(Experiment):
 
     def setup(self):
-        resource_manager = pyvisa.ResourceManager()
-        resource = resource_manager.open_resource("GPIB0::7::INSTR", timeout=5000) # (1)!
-
-        lockin = SR_830("lockin", resource) # (2)!
+        lockin = SR_830("lockin", "GPIB0::7::INSTR") # (1)!
         self.add_instrument(lockin)
 ```
 
-1. The address of your instrument, and how long (in milliseconds) to wait for it to respond.
-2. Every hardware instrument class takes an id and an open resource.
+1. Every hardware instrument class takes an id and an address. The connection is made here, so a wrong address stops the experiment during `setup()`, with an error that lists the addresses that were found.
+
+### Choosing how to connect
+
+By default the instrument connects with `pyvisa`. To connect another way, give the `adapter`. Any other options are passed on when the connection is opened.
+
+```python
+lockin = SR_830("lockin", "GPIB0::7::INSTR", timeout=10000)
+cryostat = Lakeshore_350("lakeshore", "COM3::12", adapter="prologix")
+```
+
+| Adapter | Use it for | Address |
+|---|---|---|
+| `pyvisa` (the default) | GPIB, USB, serial and Ethernet instruments, through a VISA library | `GPIB0::7::INSTR` |
+| `prologix` | GPIB instruments behind a [Prologix GPIB-USB controller](toml_config.md#instruments-behind-a-prologix-gpib-usb-controller) | `COM3::7` (serial port, then GPIB address) |
+| `mock` | Running the instrument class with no device, to [develop without the hardware](toml_config.md#running-hardware-instruments-without-the-device) | anything |
+
+The options are those of the adapter. For `pyvisa` and `prologix` they include `timeout` (in milliseconds, 5000 by default), `read_termination` and `write_termination`. For `mock` they include `responses`, the replies to give:
+
+```python
+thermometer = Lakeshore_350(
+    "lakeshore", "mock", adapter="mock", responses={"KRDG? A": "4.2"}
+)
+```
+
+### Connections are closed for you
+
+A connection that an instrument opened is closed when the experiment ends, after your `teardown()` has run, so `teardown()` can still talk to the instrument. You do not need to close anything yourself.
+
+If you would rather open the connection yourself, pass an open `pyvisa` resource instead of an address. The instrument uses it as it is, and closing it stays your job. `adapter` and the options only apply to an address.
+
+### Finding the address
 
 To find the address of your instrument, list everything `pyvisa` can see:
 
@@ -91,7 +117,17 @@ x = lockin.get_x()
 
 Inside a task, the experiment is passed to you, so it is `experiment.instruments["lockin"]`. See [Writing tasks](tasks.md).
 
-To remove an instrument again, call `self.remove_instrument("lockin")`. Like adding, this is only possible before the experiment starts running.
+The choices that an instrument's queries and commands take, such as a channel or a range, are enums, and each instrument has them as attributes, so there is nothing to import:
+
+```python
+cryostat = self.instruments["lakeshore"]
+cryostat.set_setpoint(cryostat.OutputChannel.OUTPUT_1, 4.2)
+Measurement("T", cryostat.get_temperature, input_channel="INPUT_A") # (1)!
+```
+
+1. A [measurement](measurements.md#choices-such-as-a-channel) also takes the text that names a member.
+
+To remove an instrument again, call `self.remove_instrument("lockin")`. Like adding, this is only possible before the experiment starts running. The experiment no longer looks after the instrument, so it does not close its connection. Call `close()` on the instrument if you are done with it.
 
 ## Using an instrument from the interface
 

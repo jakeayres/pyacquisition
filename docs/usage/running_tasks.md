@@ -1,5 +1,7 @@
 # Running Tasks
 
+[Lesson 6](queueing_tasks.md) is a hands-on introduction to the queue. This page covers everything in it.
+
 Once tasks are [registered](tasks.md#registering-tasks), you run them by adding them to the **queue**. The task manager takes tasks from the queue one at a time, in the order they were added, and runs each to completion before starting the next.
 
 ## Queueing a task
@@ -17,7 +19,7 @@ The **Task Queue** window shows:
 - **The header**: the name of the task that is running now, and a badge for the state of the task manager: **RUNNING** (green), **PAUSED** (amber), **ABORTING** (red) or **IDLE** (grey).
 - **Queue**: the tasks waiting behind it, in order, with their `description` and `parameters` (if you [wrote them](tasks.md#your-first-task)). The running task is not repeated here. Each waiting task has a **Remove** button, which takes that task out of the queue straight away. It is the task you clicked that is removed, even if the queue has moved on since you last looked, for example because the task in front of it has just started. The two arrows beside it move that task one place **up**, so that it runs sooner, or **down**. The first task in the queue cannot move up, because the place in front of it belongs to the task that is running, and the last cannot move down, so those arrows are greyed out. Like **Remove**, an arrow moves the task you clicked, wherever it now is.
 
-Each step that a task yields appears in the **Logs** window, labelled with the task's name, so you can follow its progress there.
+Everything a task logs with `self.log(...)` appears in the **Logs** window, labelled with the task's name, so you can follow its progress there. So does a task that fails, with the reason.
 
 ## Pause, resume and abort
 
@@ -25,19 +27,22 @@ Use the **Task Manager** menu to control what is running. With [several task man
 
 | Menu item | What it does |
 |---|---|
-| **Pause** | The running task stops at its next step and holds there, with the instruments left as they are. No new task is started. |
-| **Resume** | The running task carries on from where it stopped, and the queue continues. |
-| **Abort Current Task** | The running task stops at its next step, and its `teardown()` runs, leaving the instruments in the safe state you defined. The task manager then **pauses**, so the next task does not start until you press **Resume**. |
+| **Pause** | The running task stops at its next wait and holds there. If it has an [`on_pause()`](tasks.md#pausing-hardware-on_pause-and-on_resume), that is called at once, so a task that controls a magnet can put it on hold. Otherwise the instruments are left as they are. No new task is started. |
+| **Resume** | The task's `on_resume()` is called if it has one, and then the task carries on from where it stopped, and the queue continues. |
+| **Abort Current Task** | The running task stops at once, wherever it is waiting, and its `teardown()` runs, leaving the instruments in the safe state you defined. The task manager then **pauses**, so the next task does not start until you press **Resume**. |
 | **Remove Task** | Removes one task from the queue. Give its position `N`: `0` is the next task to run. The **Remove** buttons in the **Task Queue** window are safer, because the queue can move up between you looking at a position and the request arriving. |
 | **Clear All Tasks** | Empties the queue. It does not stop the task that is running. |
 
-A task can only pause or stop *between steps*, at its `yield` statements (see [How `run()` works](tasks.md#how-run-works)). If a task seems slow to respond, that is because it is in the middle of a step.
+A task pauses at its waits (`self.sleep()`, `self.wait_until()` and so on: see [How `run()` works](tasks.md#how-run-works)), so a pause takes effect when the task next reaches one. An abort does not wait for one.
 
 !!! note "Abort pauses the whole queue"
     Aborting deliberately does not go straight on to the next task. Nothing else runs until you decide, by pressing **Resume**, or by clearing the queue first with **Clear All Tasks**.
 
-!!! note "An abort takes effect at the task's next step"
-    The task is told to stop at once, but it only stops when it reaches its next `yield`, and then runs its `teardown()`. A task that takes a long time over each step therefore takes that long to stop. Until it has, its card is red and reads **ABORTING**.
+!!! note "An abort stops the task at once, and then its `teardown()` runs"
+    The task is stopped wherever it is waiting, and then its `teardown()` runs, which is never interrupted, even by a second press of **Abort**. A `teardown()` that takes a while, for example one that waits for an instrument to settle, therefore keeps the card red, reading **ABORTING**, until it has finished.
+
+!!! note "A task that fails pauses the queue too"
+    If a task raises an error, the error is shown in the **Logs** window, its `teardown()` runs, and the task manager **pauses**, as it does after an abort. The tasks behind it may rely on it having worked, so they do not run on their own. Choose **Resume** to carry on with them, or **Clear All Tasks**. How the last task ended (`completed`, `failed` or `aborted`, and the error) is in `/managers/state`, under `last_result`.
 
 ## Several task managers
 

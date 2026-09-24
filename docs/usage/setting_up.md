@@ -1,37 +1,6 @@
-# Setting Up an Experiment
+# Experiment Options
 
-An experiment is a class that inherits from `Experiment`. You override `setup()` to describe what is in your experiment: which instruments, which measurements and which tasks.
-
-Create a new file called `my_experiment.py`:
-
-```python title="my_experiment.py" linenums="1"
-from pyacquisition import Experiment, Measurement
-from pyacquisition.instruments import Clock
-
-
-class MyExperiment(Experiment):
-
-    def __init__(self):
-        super().__init__(data_path="my_data") # (1)!
-
-    def setup(self): # (2)!
-        clock = Clock("clock") # (3)!
-        self.add_instrument(clock)
-
-        self.add_measurement(Measurement("time", clock.time)) # (4)!
-
-
-if __name__ == "__main__": # (5)!
-    MyExperiment().run()
-```
-
-1. Options such as where to save data are passed to `Experiment.__init__()`. They are listed [below](#experiment-options). Here, data files will go in a folder called `my_data`.
-2. `setup()` is called once, just before the experiment starts running. This is where you add instruments, measurements and tasks.
-3. A `Clock` is a built-in software instrument that reports elapsed time. The text `"clock"` is the instrument's **id**, which must be different for every instrument. The next pages explain [instruments](instruments.md) and [measurements](measurements.md) properly.
-4. This records the clock's `time` query, under the column name `time`, on every cycle.
-5. This line is required. [Running an experiment](running.md#always-use-a-main-guard) explains why.
-
-That is already a complete, working experiment. The [next page](running.md) runs it.
+This page lists the options of an `Experiment`, and the two hooks, `setup()` and `teardown()`, that you can override. [Lesson 1](first_experiment.md) walks through writing and running a complete first experiment.
 
 ## `setup()` and `teardown()`
 
@@ -43,11 +12,24 @@ That is already a complete, working experiment. The [next page](running.md) runs
 | `teardown()` | Once, after the experiment has ended | Clean up, for example put an instrument into a safe state |
 
 !!! warning "Instruments and measurements must be added before the experiment runs"
-    Add them in `setup()` (or in `__init__()`, after the call to `super().__init__()`). Calling `add_instrument()` or `add_measurement()` once the experiment is running raises a `RuntimeError`. The interface builds its menus, and registers each instrument's functions, when the experiment starts, so it could not otherwise know about them.
+    Add them in `setup()`. Calling `add_instrument()` or `add_measurement()` once the experiment is running raises a `RuntimeError`. The interface builds its menus, and registers each instrument's functions, when the experiment starts, so it could not otherwise know about them.
 
 ## Experiment options
 
-Every option has a default, so you only need to pass the ones you want to change.
+Set an option by naming it in the body of your experiment class. Every option has a default, so you only need to set the ones you want to change.
+
+```python
+class MyExperiment(Experiment):
+    root_path = "C:/data"
+    data_path = "cooldown_1"
+    console_log_level = "INFO"
+    measurement_period = 0.5
+
+    def setup(self):
+        ...
+```
+
+This saves data to `C:/data/cooldown_1`, keeps the terminal quiet, and records every half second. There is no `__init__` to write, so there is nothing in it to get wrong.
 
 | Option | Default | Meaning |
 |---|---|---|
@@ -64,14 +46,51 @@ Every option has a default, so you only need to pass the ones you want to change
 | `api_server_host` | `"localhost"` | Address of the local API server. |
 | `api_server_port` | `8000` | Port of the local API server. Use a different port for each experiment running at the same time. |
 | `gui` | `True` | Set to `False` to run without the graphical interface. |
+| `auto_tasks` | `True` | Register the tasks that come with an instrument, such as `RampTemperature` for a Lakeshore, when the instrument is in the experiment. Set to `False` to register the ones you want yourself. See [tasks that are already included](tasks.md#tasks-that-are-already-included). |
+| `sparkline_points` | `100` | How many of the latest points the small graph beside each value in **Live Data** shows, from 2 to 10000. At the default measurement period, 100 points is the last 25 seconds. |
 
-For example, to save data to `C:/data/cooldown_1`, keep the terminal quiet, and record every half second:
+The log levels are `TRACE`, `DEBUG`, `INFO`, `SUCCESS`, `WARNING`, `ERROR` and `CRITICAL`.
+
+### Mistakes are caught
+
+The options are checked when the experiment is created, so a mistake stops it at once with a message, rather than misbehaving later:
+
+```text
+ValueError: `measurement_period` must be a positive number, got 'fast'
+```
+
+A misspelt option would otherwise be ignored without a word, and your data would go to the wrong folder. So a name in your class that is close to an option, but is not one, is refused as soon as the class is defined:
+
+```text
+TypeError: `data_pth` in MyExperiment looks like a misspelling of the option `data_path`, so it would do nothing.
+```
+
+Other names are fine. You can keep your own constants and helper methods in the class, such as `sample_name = "S1"`, as long as they are not close to an option.
+
+### Computing an option
+
+An option can be a property, when its value has to be worked out:
 
 ```python
-super().__init__(
-    root_path="C:/data",
-    data_path="cooldown_1",
-    console_log_level="INFO",
-    measurement_period=0.5,
-)
+from datetime import date
+
+
+class MyExperiment(Experiment):
+
+    @property
+    def data_path(self):
+        return f"data_{date.today():%Y-%m-%d}"
 ```
+
+### Passing options as arguments
+
+Options can also be given as arguments when the experiment is created, and an argument wins over the class attribute. This is handy for running the same experiment two ways:
+
+```python
+MyExperiment(gui=False).run()
+```
+
+If you also describe the rig in a [TOML file](toml_config.md), the file wins over the class attribute, and an argument wins over both. See [the order of precedence](toml_config.md#combining-a-config-file-with-python).
+
+!!! tip "You do not need an `__init__`"
+    Setting the options in the class body means you never have to write `__init__` or call `super().__init__()`. If you do write one, call `super().__init__()` first, and put the rest of your set-up in `setup()`, where it belongs.

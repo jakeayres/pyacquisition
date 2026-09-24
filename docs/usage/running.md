@@ -1,4 +1,6 @@
-# Running an Experiment
+# The Interface and the API
+
+[Lesson 1](first_experiment.md) introduces running an experiment and the window it opens. This page has the detail: every window and menu, running without the interface, and the local web API.
 
 ## Start it
 
@@ -31,33 +33,31 @@ Put `MyExperiment().run()` (and anything else that starts things running) under 
 
 ## The interface
 
-The interface has a menu bar across the top and four windows.
+The interface has a menu down the left edge, and its tabs change what is shown in the left part of the window. The right 58% is a live plot of every numeric measurement against one of the measurements, as points, in the colour of its card in **Live Data**, on the same black as the rest of the interface. It stays as it is whichever tab is shown. Everything the plot offers on a right click is there, and so are **Clear** and the **x-axis** choice. The x axis is always a measurement, since the plot has no time of its own: if you want time, measure it, for example with the clock's `timestamp_ms`. It starts as the measurement called `time` if there is one, or else the first. The legend is a column of small coloured pills to the right of the plot, under the plot's choices: click one to hide its points, and click it again to show them, and tick **Normalise** to draw each measurement from 0 to 1 of its own range, which is what to do when the measurements are of very different sizes. **Autofit**, which starts ticked, keeps the axes fitted to the data as it arrives, with a margin of 5% of the range of the data at each side so that the extreme points are not on the edge. It unticks itself as soon as you drag or scroll the plot or its axes, so that it stays where you put it; tick it again to fit the axes again.
 
-**Windows**
+**Pages**
+
+| Tab | Shows |
+|---|---|
+| **Experiment** | The **Data File** and **Live Data** windows, one under the other. |
+| **Task Queue** | The task queue: for each task manager, whether it is running or paused, the task that is running now, and the tasks waiting behind it, with a **+** card to add one. |
+| **Instruments** | A card for every instrument, with how many endpoints it has. Click a card to list its queries and commands, and click one to open the window that asks for its inputs and sends the request. |
+| **Logs** | The **Log**, filling the page: messages from the experiment as they happen, one line each, with a level tag in colour by severity. Choose the lowest level to show with the buttons under the title. |
+
+**Windows on the Experiment and Task Queue pages**
 
 | Window | Shows |
 |---|---|
-| **Current File** | The data file that is being written, shown large in the header, and its folder. |
-| **Task Queue** | For each task manager: whether it is running or paused, the task that is running now, and the tasks waiting behind it. |
+| **Data File** | The data file that is being written and the name the next one would get, and its folder, with a box and button to start the next file. |
 | **Live Data** | The latest value of every measurement, updating as it arrives. Its header says whether data is arriving. |
-| **Logs** | Messages from the experiment as they happen, in colour by severity. |
 
-Each window has a coloured header, so that its state can be read at a glance. The values in the **Live Data** window are in a card with a green border while measurements arrive, like the card of a running task. The card and its header turn amber, with a **STALE** badge, if none has arrived for a few seconds (for example while measuring is paused), and grey, with **WAITING**, before the first one. The headers in the **Task Queue** window use the same colours for a task manager: green when a task is running, amber when it is paused, red while a task is being aborted, and grey when nothing is running.
+The **Live Data** and **Task Queue** windows have a plain header with a thin line under it. The **Live Data** header turns amber, with a **STALE** badge, if no measurement has arrived for a few seconds, and says **WAITING** before the first one.
 
-**Menus**
+The pause icon at the right of the **Live Data** header pauses the measurements. While they are paused the header and its lines turn amber, and the cards are drawn in muted colours, so that it is clear that nothing is updating. Press it again to resume. In the **Task Queue** window the running task is a green card, and it turns amber while the task manager is paused, and red while the task is being aborted. The tasks waiting behind it are blue cards. The icon at the right of the header pauses and resumes the task manager, and the red X on a card aborts the running task or removes a waiting one.
 
-| Menu | Contains |
-|---|---|
-| **Scribe** | Controls for the data file, including starting a new one. |
-| **Rack** | Pause and resume measuring, and change the measurement period. |
-| **Instruments** | One submenu per instrument, with every query and command it offers. |
-| **Task Manager** | Pause, resume and abort the running task, and manage the queue. |
-| **Tasks** | One entry for every task you have registered. |
-| **Plots** | **New Plot** opens a live plot of your measurements. |
+Clicking an endpoint on the **Instruments** page, or a task in the list from the **+** card, opens a small window that describes what it does, has a box for each input it needs, and a **Send Request** button. The reply appears in the window.
 
-Choosing an item from a menu opens a small window that describes what it does, has a box for each input it needs, and a **Send Request** button. The reply appears in the window.
-
-Try it. Open **Instruments → clock**, choose **Time** and press **Send Request** to read the clock, then open **Plots → New Plot** to watch `time` on a live plot.
+Try it. Open the **Instruments** tab, click the **clock** card, choose **Time** and press **Send Request** to read the clock.
 
 ## Your data
 
@@ -85,10 +85,12 @@ Close the window. This shuts down the whole experiment cleanly, including `teard
 
 ## Running without the interface
 
-Pass `gui=False` to run headless, for example on a computer with no display. Data is still recorded and tasks still run.
+Set `gui = False` to run headless, for example on a computer with no display. Data is still recorded and tasks still run.
 
 ```python
-super().__init__(data_path="my_data", gui=False)
+class MyExperiment(Experiment):
+    data_path = "my_data"
+    gui = False
 ```
 
 ## The API

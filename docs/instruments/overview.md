@@ -1,33 +1,62 @@
-A number of instrument classes have been implemented and are shipped in `pyacquisition`. Instrument classes can be imported from `pyacquisition.instruments`.
+Instrument classes are shipped with `pyacquisition` and imported from `pyacquisition.instruments`. Choose one for its queries and commands, which are documented from the code.
 
-## Software Instruments
+A **hardware** instrument takes an id and an address. A **software** instrument needs only an id. If yours is not here, [write your own](../usage/custom_instruments.md). It takes a few lines.
 
-[`SoftwareInstrument` **Clock**](clock.md) 
+<div class="pa-makers" markdown>
 
-[`SoftwareInstrument` **RandomNumberGenerator**](random_number_generator.md) 
-
-[`SoftwareInstrument` **SignalGenerator**](signal_generator.md) 
+<div class="pa-maker" markdown>
 
 ## Keithley
 
-[`Instrument` **Keithley_2000**](keithley_2000.md)
+-   [**Keithley_2000**](keithley_2000.md)  
+    6½-digit digital multimeter.
+-   [**Keithley_6221**](keithley_6221.md)  
+    AC and DC current source.
 
-[`Instrument` **Keithley_6221**](keithley_6221.md)
+</div>
+
+<div class="pa-maker" markdown>
 
 ## Lakeshore
 
-[`Instrument` **Lakeshore_340**](lakeshore_340.md)
+-   [**Lakeshore_340**](lakeshore_340.md)  
+    Temperature controller.
+-   [**Lakeshore_350**](lakeshore_350.md)  
+    Cryogenic temperature controller.
 
+</div>
 
-[`Instrument` **Lakeshore_350**](lakeshore_350.md) 
-
+<div class="pa-maker" markdown>
 
 ## Oxford Instruments
 
-[`Instrument` **Mercury_IPS**](mercury_ips.md)
+-   [**Mercury_IPS**](mercury_ips.md)  
+    Superconducting magnet power supply.
+
+</div>
+
+<div class="pa-maker" markdown>
 
 ## Stanford Research Systems
 
-[`Instrument` **SR_830**](sr_830.md) 
+-   [**SR_830**](sr_830.md)  
+    DSP lock-in amplifier.
+-   [**SR_860**](sr_860.md)  
+    500 kHz DSP lock-in amplifier.
 
-[`Instrument` **SR_860**](sr_860.md) 
+</div>
+
+<div class="pa-maker pa-maker--wide" markdown>
+
+## Software instruments
+
+-   [**Clock**](clock.md)  
+    Software clock.
+-   [**RandomNumberGenerator**](random_number_generator.md)  
+    Random numbers from common probability distributions.
+-   [**SignalGenerator**](signal_generator.md)  
+    Software waveform generator.
+
+</div>
+
+</div>

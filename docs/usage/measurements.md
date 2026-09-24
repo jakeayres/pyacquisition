@@ -1,5 +1,7 @@
 # Measurements and Data Files
 
+The [lessons](introduction.md) introduce measurements in [lesson 2](simulated_rig.md) and data files in [lesson 3](recording_data.md). This page covers the rest.
+
 A **measurement** is a value that is read on every cycle, shown live and saved to the data file. You make one from a name and a query method of one of your instruments.
 
 ## Adding a measurement
@@ -26,6 +28,30 @@ self.add_measurement(Measurement("sum", calculator.add, x=1.0, y=2.0))
 ```
 
 A keyword argument that the method does not accept is reported straight away, when the measurement is created.
+
+### Choices, such as a channel
+
+Where a method takes a choice (which input to read, which range to use), the choices are an `enum` that the instrument's module defines. You can give the member, or the text that names it:
+
+```python
+from pyacquisition.instruments.lakeshore.lakeshore_350 import InputChannel
+
+Measurement("T", cryo.get_temperature, input_channel=InputChannel.INPUT_A) # (1)!
+Measurement("T", cryo.get_temperature, input_channel=cryo.InputChannel.INPUT_A) # (2)!
+Measurement("T", cryo.get_temperature, input_channel="INPUT_A") # (3)!
+```
+
+1. The member, imported from the instrument's module. Your editor completes the names and checks them.
+2. The same member, reached from the instrument, with nothing to import. Every instrument has the enums that its queries and commands take as attributes of its class, so `Lakeshore_350.OutputChannel.OUTPUT_1` works too. Your editor completes these as well.
+3. The text that names the member. Its name (`"INPUT_A"`) or the label that the interface shows (`"Input A"`) both work, in any case, and spaces and underscores do not matter, so `"input a"` is fine.
+
+All three do the same. Text is worked out when the measurement is created, so a mistake stops the experiment at setup, and says what would have been right:
+
+```text
+ValueError: `input_channel`: 'INPUT_Z' is not one of INPUT_A, INPUT_B, INPUT_C, INPUT_D
+```
+
+The same works in a [TOML file](toml_config.md#measurements-section): `args = {input_channel = "INPUT_A"}`.
 
 ## Slow queries
 

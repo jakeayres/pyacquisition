@@ -42,4 +42,8 @@ Most laboratory instruments (GPIB, USB, serial, Ethernet) are controlled through
 - For **GPIB** instruments you will normally want to install a VISA implementation. [PyVISA recommends the National Instruments implementation](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html), and it is what `pyacquisition` has been tested against.
 - `pyvisa-py`, a pure Python backend, is also installed. It can talk to many serial, USB and Ethernet instruments without a separate VISA installation.
 
-You do **not** need any of this to follow this guide, because it uses a simulated instrument. It matters when you connect [real hardware](instruments.md#adding-hardware-instruments).
+You do **not** need any of this to follow the lessons until [the last one](real_instruments.md), because they use a simulated rig. It matters when you connect [real hardware](real_instruments.md).
+
+## Next
+
+You are ready to [write your first experiment](first_experiment.md).

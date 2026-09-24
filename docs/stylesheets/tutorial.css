@@ -1,0 +1,39 @@
+/* The Basic Usage tutorial: lesson headers and screenshots. */
+
+/* "About 10 minutes · Needs: ..." under a lesson title */
+.md-typeset .pa-meta {
+  margin-top: -0.4rem;
+  font-size: 0.68rem;
+  color: var(--md-default-fg-color--light);
+}
+
+/* Screenshots of the interface: a dark window on a white page, so give them an edge. */
+.md-typeset img.pa-shot {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.8rem auto;
+  border: 1px solid var(--pa-border);
+  border-radius: 0.5rem;
+  box-shadow: 0 12px 30px -16px rgba(10, 15, 26, 0.55);
+}
+
+/* A popup or a menu on its own is small: keep it from stretching. */
+.md-typeset img.pa-shot.pa-small { max-width: min(100%, 22rem); }
+.md-typeset img.pa-shot.pa-medium { max-width: min(100%, 34rem); }
+
+.md-typeset figure { margin: 1.2rem 0; }
+.md-typeset figcaption { font-size: 0.68rem; color: var(--md-default-fg-color--light); }
+
+/* Two screenshots side by side, wrapping on narrow screens. */
+.pa-pair {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: flex-start;
+}
+.pa-pair figure { margin: 0; flex: 0 1 auto; }
+
+/* The lessons table on the introduction page */
+.md-typeset table:not([class]) td:first-child { white-space: nowrap; }

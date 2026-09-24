@@ -1,0 +1,38 @@
+/* The instruments overview: manufacturers as cards, two across. */
+.pa-makers {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 1.2rem 0;
+}
+.pa-maker {
+  padding: 0.8rem 1rem 0.5rem;
+  background: #fff;
+  border: 1px solid var(--pa-border);
+  border-radius: 0.5rem;
+}
+.pa-maker--wide { grid-column: 1 / -1; }
+.md-typeset .pa-maker h2 {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.pa-maker > p { margin: 0 0 0.5rem; font-size: 0.64rem; color: var(--md-default-fg-color--light); }
+.md-typeset .pa-maker ul { margin: 0; padding: 0; list-style: none; }
+.md-typeset .pa-maker li {
+  margin: 0 !important;
+  padding: 0.5rem 0;
+  font-size: 0.66rem;
+  line-height: 1.45;
+  color: var(--md-default-fg-color--light);
+  border-top: 1px solid var(--pa-border);
+}
+.md-typeset .pa-maker li a { font-size: 0.74rem; }
+/* The software instruments, three across */
+.md-typeset .pa-maker--wide ul { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: 1.2rem; }
+
+@media (max-width: 60em) {
+  .pa-makers { grid-template-columns: minmax(0, 1fr); }
+  .md-typeset .pa-maker--wide ul { grid-template-columns: minmax(0, 1fr); }
+}

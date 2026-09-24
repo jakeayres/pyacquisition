@@ -1,5 +1,7 @@
 # Composing Tasks
 
+[Lesson 5](building_a_sweep.md) builds a temperature sweep out of tasks. This page goes further, including running tasks at the same time.
+
 Real procedures are made of stages: start a file, record something, start another file, record something else. Rather than write one long task, write each stage as a small task, and then have a larger task run them in order. Any task can run any other task by calling `await self.run_subtask(...)` from its `run()` method.
 
 ## Example: two distributions
@@ -17,21 +19,11 @@ class SampleUniform(Task):
     high: float
     seconds: int = 10
 
-    @property
-    def description(self):
-        return f"Sample a uniform distribution for {self.seconds} s"
-
-    @property
-    def parameters(self):
-        return {"low": self.low, "high": self.high}
-
     async def run(self, experiment):
         rng = experiment.instruments["rng"]
         rng.use_uniform(self.low, self.high)
-        yield f"Sampling uniformly between {self.low} and {self.high}"
-        for _ in range(self.seconds):
-            await asyncio.sleep(1)
-            yield None
+        self.log(f"Sampling uniformly between {self.low} and {self.high}")
+        await self.sleep(self.seconds)
 
     async def teardown(self, experiment):
         experiment.instruments["rng"].use_gaussian(0.0, 1.0)
@@ -51,25 +43,22 @@ class CompareDistributions(Task):
 
     async def run(self, experiment):
         await self.run_subtask(NewFile(file_name="gaussian")) # (1)!
-        yield None # (2)!
 
         await self.run_subtask(
             SampleGaussian(mean=0.0, sigma=1.0, seconds=self.seconds)
-        ) # (3)!
-        yield "Gaussian numbers recorded"
+        ) # (2)!
+        self.log("Gaussian numbers recorded")
 
         await self.run_subtask(NewFile(file_name="uniform"))
-        yield None
 
         await self.run_subtask(
             SampleUniform(low=0.0, high=1.0, seconds=self.seconds)
         )
-        yield "Uniform numbers recorded"
+        self.log("Uniform numbers recorded")
 ```
 
-1. Create the subtask as you would any object, with the inputs it needs, and run it with `await self.run_subtask(...)`. Nothing else is needed to make it work: `NewFile` is already registered, but you do not have to register a task to use it as a subtask.
-2. `run()` still has to be a generator, so **yield between subtasks**. Yield `None` if there is nothing to log.
-3. Your own tasks work exactly the same way. Subtasks can be given the parent's inputs, so `CompareDistributions` passes its `seconds` on to each of them.
+1. Create the subtask as you would any object, with the inputs it needs, and run it with `await self.run_subtask(...)`. Nothing else is needed to make it work: `NewFile` is already registered, but you do not have to register a task to use it as a subtask. There is nothing to add for pausing or aborting either. Each `run_subtask` is a place where the task can be paused or aborted, and so is everything inside the subtask.
+2. Your own tasks work exactly the same way. Subtasks can be given the parent's inputs, so `CompareDistributions` passes its `seconds` on to each of them.
 
 Register it in `setup()`, next to `SampleGaussian`:
 
@@ -85,7 +74,7 @@ Run **Tasks → Compare Distributions** with `seconds` 10. After twenty seconds 
 ## What `run_subtask()` does
 
 - **The subtask runs completely.** Its `setup()`, `run()` and `teardown()` all run, and its steps are logged under its own name (for example `[SampleGaussian] Sampling a Gaussian with mean 0.0 and sigma 1.0`).
-- **Pausing and aborting reach it.** When you pause or abort the parent, whichever subtask is running at that moment pauses or stops too, however deeply subtasks are nested. You can therefore interrupt a long `WaitFor` inside a larger task. When a task is aborted, the running subtask's `teardown()` runs, then the parent's, and the rest of the parent's `run()` is skipped.
+- **Pausing and aborting reach it.** When you pause or abort the parent, whichever subtask is running at that moment pauses or stops too, however deeply subtasks are nested. You can therefore interrupt a long `WaitFor` inside a larger task. A pause calls the running subtask's [`on_pause()`](tasks.md#pausing-hardware-on_pause-and-on_resume), so the small task that owns the hardware decides what pausing means and the larger task needs no hook. When a task is aborted, the running subtask's `teardown()` runs, then the parent's, and the rest of the parent's `run()` is skipped.
 - **Nothing starts while paused.** A subtask that has not yet begun will not start while the parent is paused or after it has been aborted.
 - **It gets the same experiment.** You do not pass `experiment` on. Subtasks receive the one the parent was given.
 - **Errors stop the parent.** If a subtask raises an error, that error is raised at the `await self.run_subtask(...)` line, the parent stops, and both `teardown()` methods run.
@@ -101,7 +90,7 @@ Some things have to happen together: hold a temperature steady while a field swe
 ```python
 async def run(self, experiment):
     await self.run_subtasks(RampField(target=5.0), RampTemperature(target=2.0)) # (1)!
-    yield "Both ramps finished"
+    self.log("Both ramps finished")
 ```
 
 1. `RampField` and `RampTemperature` stand for two tasks of your own. Each one runs its full lifecycle, and the line ends when the slower of the two is done.
@@ -121,8 +110,7 @@ class DriftSigma(Task):
         while True: # (1)!
             sigma += 0.1
             rng.use_gaussian(0.0, sigma)
-            yield None
-            await asyncio.sleep(1) # (2)!
+            await self.sleep(1) # (2)!
 
     async def teardown(self, experiment):
         experiment.instruments["rng"].use_gaussian(0.0, 1.0)
@@ -139,14 +127,14 @@ class WideningGaussian(Task):
             await self.run_subtask(
                 SampleGaussian(mean=0.0, sigma=1.0, seconds=self.seconds)
             )
-            yield "Sampling finished"
-        yield "The drift has stopped" # (4)!
+            self.log("Sampling finished")
+        self.log("The drift has stopped") # (4)!
 ```
 
 1. This task has no end. That is fine, because `alongside()` stops it for you.
-2. **Every loop needs an `await`.** Tasks running together take turns, and they can only switch at an `await`. A loop with only `yield` in it never lets the others run, and freezes the whole experiment.
+2. **Every loop needs a wait.** Tasks running together take turns, and they can only switch at an `await`. A loop with no `await self.sleep(...)` (or another wait) in it never lets the others run, and freezes the whole experiment.
 3. `DriftSigma` starts when the block starts and runs while the block does.
-4. When the block ends, `DriftSigma` is aborted, finishes its current step, and runs its `teardown()`. The block waits for that, so this line runs after the drift has stopped.
+4. When the block ends, `DriftSigma` is aborted, stops where it is waiting, and runs its `teardown()`. The block waits for that, so this line runs after the drift has stopped.
 
 Give `alongside()` several tasks if you need several things in the background: `self.alongside(HoldTemperature(...), LogPressure(...))`.
 
@@ -180,9 +168,8 @@ class GaussianWidths(Task):
     async def run(self, experiment):
         for sigma in [0.5, 1.0, 2.0]:
             await self.run_subtask(NewFile(file_name=f"gaussian sigma {sigma}"))
-            yield None
             await self.run_subtask(SampleGaussian(mean=0.0, sigma=sigma))
-            yield f"Finished sigma {sigma}"
+            self.log(f"Finished sigma {sigma}")
 ```
 
 Subtasks can themselves run subtasks, so you can build a procedure up in layers, and reuse the same small tasks in many different larger ones.
@@ -195,10 +182,10 @@ Normally an error in a subtask stops everything. If a stage is optional, catch t
 try:
     await self.run_subtask(SampleUniform(low=0.0, high=1.0))
 except Exception as error:
-    yield f"The uniform stage failed, so it was skipped: {error}"
+    self.log(f"The uniform stage failed, so it was skipped: {error}", level="warning")
 ```
 
-Catch `Exception`, as here, and not everything (a bare `except:`). Aborting a task works by raising `asyncio.CancelledError`, which `except Exception` deliberately does not catch. A bare `except:` would catch it, and stop you being able to abort.
+Catch `Exception`, as here, and not everything (a bare `except:`). Aborting a task works by raising `asyncio.CancelledError` inside it, which `except Exception` deliberately does not catch. A bare `except:` would catch it, and stop you being able to abort.
 
 !!! warning "Use `run_subtask()`, not `subtask.start()`"
     It is tempting to write `await SampleGaussian(...).start(experiment=experiment)`, but this will not do what you want. A task started that way cannot be paused or aborted through its parent, so aborting the parent has to wait until the whole subtask has finished, and any error in it is swallowed instead of stopping the parent. `run_subtask()` has neither problem.

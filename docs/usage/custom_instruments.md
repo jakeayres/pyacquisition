@@ -63,16 +63,14 @@ class RandomNumberGenerator(SoftwareInstrument):
 
 Now add it to the experiment, and record its numbers. Make these changes to `my_experiment.py`:
 
-```python title="my_experiment.py" linenums="1" hl_lines="3 13 15 18"
+```python title="my_experiment.py" linenums="1" hl_lines="3 11 13 16"
 from pyacquisition import Experiment, Measurement
 from pyacquisition.instruments import Clock
 from random_number_generator import RandomNumberGenerator
 
 
 class MyExperiment(Experiment):
-
-    def __init__(self):
-        super().__init__(data_path="my_data")
+    data_path = "my_data"
 
     def setup(self):
         clock = Clock("clock")

@@ -146,10 +146,9 @@ class PIDControls(SoftwareInstrument):
 
 class MyExperiment(Experiment):
 
-
-    def __init__(self):
-        super().__init__(data_path='data', log_path='data')
-
+    root_path='data'
+    data_path='data'
+    log_path='logs'
     
     def setup(self):
         
@@ -202,11 +201,6 @@ class MyExperiment(Experiment):
             label="furnace PID",
         )
         self.add_instrument(PIDControls("furnace_pid", pid))
-
-        # The PID never finishes by itself, so it gets a task manager of its own.
-        # Queueing it here starts it when the experiment starts.
-        control = self.add_task_manager("control")
-        control.add_task(pid)
 
         self.add_measurement(Measurement('furnace_temperature', furnace.temperature))
         self.add_measurement(Measurement('furnace_power', lambda: pid.output))

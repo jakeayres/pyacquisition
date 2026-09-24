@@ -1,0 +1,25 @@
+[data]
+path = "my_data"
+
+[instruments.lockin]
+instrument = "SR_830"
+adapter = "pyvisa"
+resource = "GPIB0::7::INSTR"
+
+[instruments.lakeshore]
+instrument = "Lakeshore_350"
+adapter = "pyvisa"
+resource = "GPIB0::12::INSTR"
+
+[measurements.x]
+instrument = "lockin"
+method = "get_x"
+
+[measurements.y]
+instrument = "lockin"
+method = "get_y"
+
+[measurements.T]
+instrument = "lakeshore"
+method = "get_temperature"
+args = {input_channel = "INPUT_A"}

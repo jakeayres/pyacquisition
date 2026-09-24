@@ -10,6 +10,7 @@ General parameters for the experiment.
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
 | `root_path`    | Root directory for the experiment. All other paths are relative to this directory.   | `.`           |
+| `auto_tasks`   | Register the tasks that come with an instrument (`RampTemperature` for a Lakeshore, `SweepMagneticField` for a Mercury IPS) when the instrument is in the `[instruments]` section, so that they can be queued from the interface. Set to `false` to turn this off. | `true`        |
 
 
 ## `[rack]` Section
@@ -48,6 +49,8 @@ my_lockin = {instrument = "SR_830", adapter = "pyvisa", resource = "GPIB0::7::IN
 | instrument       | The name of the instrument class to be instantiated.       | `SR_830`, `Lakeshore_350` |
 | adapter | The communication adapter to use: `pyvisa` for hardware, `prologix` for hardware behind a Prologix GPIB-USB controller, or `mock` to run the instrument without the device | `pyvisa`, `prologix`, `mock` |
 | resource | The resource string associated with the instrumeent | `GPIB0::10:INSTR` |
+
+An instrument that cannot be opened, for example because its address is wrong, is skipped with a warning in the log, and the rest of the experiment still starts. In Python, [the instrument raises an error instead](instruments.md#adding-hardware-instruments).
 
 
 ### Instruments behind a Prologix GPIB-USB controller
@@ -102,7 +105,7 @@ Define the instrument methods to poll. The key is a unique label assigned to the
 | `args`         | (optional) Arguments to call `method` with.      |                  |
 
 !!! Note
-    If a method takes arguments that are members of an `Enum`, you can pass a string that will be resolved against the enum members. For example, one could use pass `method = "instrument_method"` and `grouding = "FLOAT"` if 
+    If a method takes an argument that is a member of an `Enum`, give the text that names it, and it is resolved against the enum's members. Use the member's name (`"FLOAT"`) or its label (`"Float"`), in any case. For example, `args = {grounding = "FLOAT"}` for the method below. A value that names no member is refused, and the message lists the valid ones.
 
 
     ```python
@@ -125,7 +128,7 @@ The `[data]` section describes the configuration of the data files.
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
 | `path`         | Directory for storing data (relative to the experiment `root_path`).          | `.`           |
-| `extension`    | The file extension to use for data files | `.data` |
+| `file_extension` | The file extension to use for data files | `data` |
 | `delimiter`    | Delimiter to use for data files | `,` |
 
 
@@ -136,16 +139,60 @@ The `[api_server]` section defines the properties of the FastAPI backend that ex
 | Parameter Name         | Description                          | Default Value          |
 |------------------------|--------------------------------------|------------------------|
 | `host`                 | Hostname for the API server.         | `localhost`            |
-| `port`                 | Port for the API server.             | `8005`                 |
+| `port`                 | Port for the API server.             | `8000`                 |
 
 
 ## `[logging]` Section
 
-This section defines the various logging levels and location of log files produced during program execution. Allowed values are `DEBUG`, `INFO`, `WARNING`, `ERROR`.
+This section defines the various logging levels and location of log files produced during program execution. Allowed levels are `TRACE`, `DEBUG`, `INFO`, `SUCCESS`, `WARNING`, `ERROR` and `CRITICAL`.
 
 | Parameter Name  | Description                          | Default Value |
 |-----------------|--------------------------------------|---------------|
-| `console_level` | Logging level for console output.    | `INFO`       |
-| `gui_level`     | Logging level for output in the GUI.    | `INFO`       |
+| `path`          | Directory for the log file (relative to the experiment `root_path`). | `.` |
+| `console_level` | Logging level for console output.    | `DEBUG`       |
+| `gui_level`     | Logging level for output in the GUI.    | `DEBUG`       |
 | `file_level`    | Logging level for file output.       | `DEBUG`       |
 | `file_name`     | Name of the log file.                | `debug.log`   |
+
+
+## `[gui]` Section
+
+| Parameter Name | Description                          | Default Value |
+|----------------|--------------------------------------|---------------|
+| `run`          | Set to `false` to run without the graphical interface. | `true` |
+| `sparkline_points` | How many of the latest points the small graph beside each value in the **Live Data** window shows, from 2 to 10000. | `100` |
+
+
+## Mistakes in the file
+
+The `[experiment]`, `[rack]`, `[data]`, `[api_server]`, `[logging]` and `[gui]` sections are checked. A key that is not in the tables above is refused, with a suggestion when it is close to one, and so is a value of the wrong kind, such as `period = "fast"`. A misspelt key would otherwise be ignored and the default used, silently.
+
+```text
+ValueError: Unknown key 'pth' in [data] (did you mean 'path'?). Valid keys: path, file_extension, delimiter.
+```
+
+
+## Combining a config file with Python
+
+Call `from_config` on your own experiment class to combine the two. The class holds the parts that are easier to write in Python (tasks, calculations, options that do not change), and the file describes the rig. It is an ordinary `Experiment` subclass, so its [options](setting_up.md#experiment-options) are class attributes:
+
+```python
+class MyExperiment(Experiment):
+    data_path = "my_data"
+    measurement_period = 0.5
+
+    def setup(self):
+        self.register_task(TemperatureSweep, label="Temperature Sweep")
+
+
+MyExperiment.from_config("rig.toml").run()
+```
+
+An option can come from several places. The first of these that gives one wins:
+
+1. **An argument to `from_config`** (or to the class), for example `from_config("rig.toml", gui=False)`.
+2. **The config file.**
+3. **A class attribute** of your experiment.
+4. **The built-in default.**
+
+So if `rig.toml` sets `[rack] period = 1.0` and the class says `measurement_period = 0.5`, the experiment measures every second, and an option the file does not mention keeps the class's value.
