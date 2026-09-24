@@ -203,6 +203,36 @@ class Keithley_6221(Instrument):
     2182 or 2182A nanovoltmeter connected over the trigger link and RS-232 port.
     """
 
+    # The enums that the queries and commands take, so that they can be reached
+    # from the instrument, as `Keithley_6221.ArmOutput`, without importing them.
+    ArmOutput = ArmOutput
+    ArmSource = ArmSource
+    BypassDirection = BypassDirection
+    DisplayLine = DisplayLine
+    FilterControl = FilterControl
+    InnerShield = InnerShield
+    Key = Key
+    ListParameter = ListParameter
+    MathFormat = MathFormat
+    OutputResponse = OutputResponse
+    PowerOnSetup = PowerOnSetup
+    PowerType = PowerType
+    Ranging = Ranging
+    ReadingElement = ReadingElement
+    ReadingUnits = ReadingUnits
+    State = State
+    StatisticFormat = StatisticFormat
+    StatusRegister = StatusRegister
+    SweepRanging = SweepRanging
+    SweepSpacing = SweepSpacing
+    TimestampFormat = TimestampFormat
+    TraceControl = TraceControl
+    TraceFeed = TraceFeed
+    TriggerLayer = TriggerLayer
+    TriggerOutput = TriggerOutput
+    TriggerSource = TriggerSource
+    WaveFunction = WaveFunction
+
     def __init__(self, *args, **kwargs):
         """Initializes the Keithley 6221 instrument.
 

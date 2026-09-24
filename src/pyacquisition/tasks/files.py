@@ -19,8 +19,6 @@ class NewFile(Task):
         return f"Starting new file: {self.file_name}. Increment block: {self.increment_block}"
 
     async def run(self, experiment):
-        yield None
         experiment._scribe.next_file(
             title=self.file_name, next_block=self.increment_block
         )
-        yield None

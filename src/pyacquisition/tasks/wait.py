@@ -1,14 +1,17 @@
 from ..core import Task
-import asyncio
 import datetime
-import time
 from dataclasses import dataclass
-from ..core.logging import logger
+
+# How often the time left is reported, in seconds.
+REPORT_EVERY = 300
 
 
 @dataclass
 class WaitFor(Task):
     """A task that waits for a specified amount of time.
+
+    The time does not pass while the task is paused, so it is the time that the
+    task spends running.
 
     Attributes:
         hours (int): The number of hours to wait. Defult is 0.
@@ -29,33 +32,25 @@ class WaitFor(Task):
         return f"Wait for {self.hours} hours, {self.minutes} minutes, and {self.seconds} seconds."
 
     async def run(self, experiment):
-        total_seconds = self.hours * 3600 + self.minutes * 60 + self.seconds
-        start_time = time.time()
-        end_time = start_time + total_seconds
-        logger.info(f"[{self.name}] Waiting for {total_seconds} seconds")
+        remaining = self.hours * 3600 + self.minutes * 60 + self.seconds
+        self.log(f"Waiting for {remaining} seconds")
 
-        last_report = None
-        while True:
-            now = time.time()
-            remaining_time = max(0, end_time - now)
-
-            # Report every 5 minutes and at end
-            if int(remaining_time) % 300 == 0 and int(remaining_time) != last_report:
-                yield f"{datetime.timedelta(seconds=int(remaining_time))} remaining"
-                last_report = int(remaining_time)
-
-            else:
-                yield None
-
-            if now >= end_time:
-                break
-
-            await asyncio.sleep(1)
+        while remaining > 0:
+            # wait until the next multiple of five minutes is left, and report it
+            step = min(remaining, remaining % REPORT_EVERY or REPORT_EVERY)
+            await self.sleep(step)
+            remaining -= step
+            if remaining > 0:
+                self.log(f"{datetime.timedelta(seconds=int(remaining))} remaining")
 
 
 @dataclass
 class WaitUntil(Task):
-    """Wait until hh:mm (next occurrence)"""
+    """Wait until hh:mm (next occurrence)
+
+    The clock keeps running while the task is paused, so it waits until that time
+    however long it was paused for.
+    """
 
     hour: int = 0
     minute: int = 0
@@ -74,12 +69,13 @@ class WaitUntil(Task):
         if target_time <= now:
             target_time += datetime.timedelta(days=1)
 
-        logger.info(f"[{self.name}] Waiting until {target_time.strftime('%H:%M')}")
+        self.log(f"Waiting until {target_time.strftime('%H:%M')}")
 
-        while datetime.datetime.now() < target_time:
-            remaining_time = (target_time - datetime.datetime.now()).total_seconds()
-            if int(remaining_time) % 300 == 0:
-                yield f"{datetime.timedelta(seconds=remaining_time):i} remaining"
-            else:
-                yield None
-            await asyncio.sleep(1)
+        while True:
+            remaining = (target_time - datetime.datetime.now()).total_seconds()
+            if remaining <= 0:
+                break
+            await self.sleep(min(remaining, REPORT_EVERY))
+            remaining = (target_time - datetime.datetime.now()).total_seconds()
+            if remaining > 0:
+                self.log(f"{datetime.timedelta(seconds=int(remaining))} remaining")

@@ -56,6 +56,16 @@ class ModeStatusN(BaseEnum):
 class Mercury_IPS(Instrument):
     """Class for controlling the Oxford Instruments Mercury IPS device."""
 
+    # The enums that the queries and commands take, so that they can be reached
+    # from the instrument, as `Mercury_IPS.ActivityStatus`, without importing them.
+    ActivityStatus = ActivityStatus
+    ModeStatusM = ModeStatusM
+    ModeStatusN = ModeStatusN
+    RemoteStatus = RemoteStatus
+    SwitchHeaterStatus = SwitchHeaterStatus
+    SystemStatusM = SystemStatusM
+    SystemStatusN = SystemStatusN
+
     def _parse_status_string(self, string: str, index: int):
 
         if not isinstance(string, str):

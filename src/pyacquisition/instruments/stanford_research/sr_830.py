@@ -112,6 +112,20 @@ class SR_830(Instrument):
     Stanford Research SR-830 Lock-In Amplifier class.
     """
 
+    # The enums that the queries and commands take, so that they can be reached
+    # from the instrument, as `SR_830.DynamicReserve`, without importing them.
+    DynamicReserve = DynamicReserve
+    FilterSlope = FilterSlope
+    InputConfiguration = InputConfiguration
+    InputCoupling = InputCoupling
+    InputGrounding = InputGrounding
+    NotchFilter = NotchFilter
+    ReferenceSlope = ReferenceSlope
+    ReferenceSource = ReferenceSource
+    Sensitivity = Sensitivity
+    SyncFilterState = SyncFilterState
+    TimeConstant = TimeConstant
+
     @mark_query
     def identify(self) -> str:
         """Queries the instrument identification string.

@@ -74,6 +74,12 @@ class DisplayAllInputsSize(BaseEnum):
 class Lakeshore_340(Instrument):
     """Class for controlling the Lakeshore 340 temperature controller."""
 
+    # The enums that the queries and commands take, so that they can be reached
+    # from the instrument, as `Lakeshore_340.InputChannel`, without importing them.
+    InputChannel = InputChannel
+    OutputChannel = OutputChannel
+    State = State
+
     def __init__(self, *args, **kwargs):
         """Initializes the Lakeshore 340 instrument."""
         super().__init__(*args, **kwargs)

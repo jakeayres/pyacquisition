@@ -25,6 +25,7 @@ from contextlib import suppress
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from ..core.adapters import open_resource
 from ..core.adapters.mock import MockResource
 from ..core.adapters.record import RecordingResource
 from ..core.instrument import Instrument
@@ -160,18 +161,10 @@ def open_session(entry, policy, *, dry_run=False):
     if not entry.adapter or not entry.resource:
         raise Unreachable("the inventory gives no adapter and resource")
 
-    from ..core.experiment import Experiment
-
-    args = dict(entry.args)
-    timeout = args.pop("timeout", 5000)
-    adapter = Experiment._get_adapter_class(entry.adapter)
-    resource = Experiment._open_resource(
-        adapter, entry.resource, timeout=timeout, **args
-    )
-    if resource is None:
-        raise Unreachable(
-            f"could not open {entry.resource!r} with adapter {entry.adapter!r}"
-        )
+    try:
+        resource = open_resource(entry.resource, entry.adapter, **entry.args)
+    except ConnectionError as error:
+        raise Unreachable(str(error)) from None
     if entry.record:
         resource = RecordingResource(resource, entry.record, entry.resource)
     return build_session(entry, resource, policy, spec=spec)

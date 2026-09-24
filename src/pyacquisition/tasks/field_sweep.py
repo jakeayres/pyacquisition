@@ -1,292 +1,166 @@
+"""Tasks that sweep a magnet powered by an Oxford Instruments Mercury IPS.
+
+The sweep is a sequence of small tasks. Each one that moves the magnet knows what
+pausing it means: a pause puts the magnet on hold, and a resume sends it on its way
+again, after checking that the system is normal. A task made of them, such as
+`SweepMagneticField`, needs no hooks of its own.
+
+These are also a worked example of writing a task that controls hardware. Every
+value that matters is read back and checked with `self.expect()`.
+"""
+
+from dataclasses import dataclass
+
+from ..core import Task
 from ..instruments.oxford_instruments.mercury_ips import (
     ActivityStatus,
-    SystemStatusM,
+    Mercury_IPS,
     ModeStatusN,
+    SwitchHeaterStatus,
+    SystemStatusM,
 )
-
-from ..core.logging import logger
-from ..core import Task
+from .files import NewFile
 
 
-import asyncio
-from dataclasses import dataclass
+@dataclass
+class RampMagnet(Task):
+    """Sweep the magnet to a field. Pausing holds it, and resuming sends it on."""
+
+    magnet_psu: str
+    setpoint: float
+
+    @property
+    def description(self) -> str:
+        return f"Sweeping field to {self.setpoint} T"
+
+    async def run(self, experiment):
+        psu = experiment.instruments[self.magnet_psu]
+
+        psu.set_target_field(self.setpoint)
+        await self.sleep(1)
+        self.expect(psu.get_setpoint_field(), self.setpoint, "Setpoint")
+
+        psu.to_setpoint()
+        await self.sleep(1)
+        self.expect(psu.get_activity_status(), ActivityStatus.TO_SETPOINT, "Activity")
+
+        self.log(f"Sweeping field to {self.setpoint} T")
+        await self.wait_until(lambda: psu.get_sweep_status() == ModeStatusN.REST)
+        self.log(f"Reached setpoint field of {self.setpoint} T")
+
+    def on_pause(self, experiment):
+        experiment.instruments[self.magnet_psu].hold()
+
+    def on_resume(self, experiment):
+        psu = experiment.instruments[self.magnet_psu]
+        # A quench or a fault while it was held must not be followed by a sweep.
+        self.expect(psu.get_system_status(), SystemStatusM.NORMAL, "System status")
+        psu.to_setpoint()
+
+    async def teardown(self, experiment):
+        experiment.instruments[self.magnet_psu].hold()
+
+
+@dataclass
+class RampMagnetToZero(Task):
+    """Sweep the magnet to zero field. Pausing holds it, and resuming sends it on."""
+
+    magnet_psu: str
+
+    @property
+    def description(self) -> str:
+        return "Sweeping field to 0 T"
+
+    async def run(self, experiment):
+        psu = experiment.instruments[self.magnet_psu]
+
+        psu.to_zero()
+        await self.sleep(1)
+        self.expect(psu.get_activity_status(), ActivityStatus.TO_ZERO, "Activity")
+
+        self.log("Sweeping field to 0 T")
+        await self.wait_until(lambda: psu.get_sweep_status() == ModeStatusN.REST)
+        self.log("Reached zero field")
+
+    def on_pause(self, experiment):
+        experiment.instruments[self.magnet_psu].hold()
+
+    def on_resume(self, experiment):
+        psu = experiment.instruments[self.magnet_psu]
+        self.expect(psu.get_system_status(), SystemStatusM.NORMAL, "System status")
+        psu.to_zero()
+
+    async def teardown(self, experiment):
+        experiment.instruments[self.magnet_psu].hold()
 
 
 @dataclass
 class SweepMagneticField(Task):
-    """Sweep magnetic field to setpoint"""
+    """Sweep magnetic field to setpoint, and then back to zero.
+
+    It checks the magnet before it starts and afterwards, switches the switch heater
+    on and off around the sweep, and reads back and checks what it sets. Pausing
+    holds the magnet, wherever in the sweep it is, and resuming carries on.
+
+    Registered by itself when there is a Mercury IPS.
+
+    Args:
+        magnet_psu (str): The id of the Mercury IPS.
+        setpoint (float): The field to sweep to, in tesla.
+        ramp_rate (float): The sweep rate, in tesla per minute.
+        new_chapter (bool): Not used.
+    """
+
+    applies_to = {"magnet_psu": (Mercury_IPS,)}
 
     magnet_psu: str
     setpoint: float
     ramp_rate: float
     new_chapter: bool = False
 
-    def description(self):
+    @property
+    def description(self) -> str:
         return f"Sweeping field to {self.setpoint} T at {self.ramp_rate} T/min"
 
-    async def check_system_normal(self, magnet_psu):
-        system_status = None
-        wait_time = 1.0
-
-        try:
-            system_status = magnet_psu.get_system_status()
-            await asyncio.sleep(wait_time)
-            logger.info(f"Checking magnet system status: {system_status.name}")
-            await asyncio.sleep(wait_time)
-        except Exception as e:
-            logger.error("Magnet system status was not retrieved")
-            print(e)
-            raise e
-
-        if system_status != SystemStatusM.NORMAL:
-            raise ValueError(
-                f"Magnet system status {system_status}. Expected {SystemStatusM.NORMAL}"
-            )
-
-    async def hold(self, magnet_psu):
-        wait_time = 1.0
-
-        try:
-            logger.info('Setting magnet to "hold"')
-            magnet_psu.hold()
-            await asyncio.sleep(wait_time)
-        except Exception as e:
-            logger.error('Error setting magnet to "hold"')
-            print(e)
-            raise e
-
-    async def check_is_holding(self, magnet_psu):
-        wait_time = 1.0
-
-        try:
-            activity_status = magnet_psu.get_activity_status()
-            await asyncio.sleep(wait_time)
-            logger.info(f"Checking magnet activity status: {activity_status.name}")
-            await asyncio.sleep(wait_time)
-        except Exception as e:
-            logger.error("Magnet activity status was not retrieved")
-            print(e)
-            raise e
-
-        if activity_status != ActivityStatus.HOLD:
-            raise ValueError(
-                f"Magnet activity status {activity_status}. Expected {ActivityStatus.HOLD}"
-            )
-
-    async def check_is_to_setpoint(self, magnet_psu):
-        wait_time = 1.0
-
-        try:
-            activity_status = magnet_psu.get_activity_status()
-            await asyncio.sleep(wait_time)
-            logger.info(f"Checking magnet activity status: {activity_status.name}")
-            await asyncio.sleep(wait_time)
-        except Exception as e:
-            logger.error("Magnet activity status was not retrieved")
-            print(e)
-            raise e
-
-        if activity_status != ActivityStatus.TO_SETPOINT:
-            raise ValueError(
-                f"Magnet activity status {activity_status}. Expected {ActivityStatus.TO_SETPOINT}"
-            )
-
-    async def check_is_to_zero(self, magnet_psu):
-        wait_time = 1.0
-
-        try:
-            activity_status = magnet_psu.get_activity_status()
-            await asyncio.sleep(wait_time)
-            logger.info(f"Checking magnet activity status: {activity_status.name}")
-            await asyncio.sleep(wait_time)
-        except Exception as e:
-            logger.error("Magnet activity status was not retrieved")
-            print(e)
-            raise e
-
-        if activity_status != ActivityStatus.TO_ZERO:
-            raise ValueError(
-                f"Magnet activity status {activity_status}. Expected {ActivityStatus.TO_ZERO}"
-            )
-
-    async def set_ramp_rate(self, magnet_psu, ramp_rate):
-        wait_time = 1.0
-
-        # Set ramp rate
-        try:
-            magnet_psu.set_field_sweep_rate(self.ramp_rate)
-            await asyncio.sleep(wait_time)
-        except Exception as e:
-            logger.error("Error setting ramp rate")
-            raise e
-
-        # Check ramp rate is set to desired value
-        try:
-            rate = magnet_psu.get_field_sweep_rate()
-            await asyncio.sleep(wait_time)
-            logger.info(f"Ramp rate set to {ramp_rate} T/min OK")
-        except Exception as e:
-            logger.error("Error getting ramp rate")
-            raise e
-
-        if rate != self.ramp_rate:
-            raise ValueError(
-                f"Retrieved ramp rate not equal to set value. Set: {self.ramp_rate}. Got: {rate}"
-            )
-
-    async def set_setpoint(self, magnet_psu, setpoint):
-        wait_time = 1.0
-
-        try:
-            magnet_psu.set_target_field(setpoint)
-            await asyncio.sleep(wait_time)
-        except Exception as e:
-            logger.error("Error setting target field")
-            print(e)
-
-        try:
-            retrieved_setpoint = magnet_psu.get_setpoint_field()
-            await asyncio.sleep(wait_time)
-            logger.info(f"Setpoint set to {setpoint} T")
-        except Exception as e:
-            logger.error("Error setting field setpoint")
-            raise e
-
-        if retrieved_setpoint != setpoint:
-            raise ValueError(
-                f"Retrieved setpoint not equal to set value. Set: {setpoint}. Got: {retrieved_setpoint}"
-            )
-
-    async def switch_heater_on(self, magnet_psu):
-        wait_time = 1.0
-
-        try:
-            logger.info("Switching switch heater on")
-            magnet_psu.heater_on()
-            await asyncio.sleep(15)
-        except Exception as e:
-            logger.error("magnet_psu.heater_on() failed")
-            print(e)
-            raise e
-
-        try:
-            magnet_psu.get_switch_heater_status()
-            await asyncio.sleep(wait_time)
-            logger.info("Switch heater switched on OK.")
-        except Exception as e:
-            logger.error("Switch heater status not retrieved")
-            print(e)
-            raise e
-
-    async def switch_heater_off(self, magnet_psu):
-        wait_time = 1.0
-
-        try:
-            logger.info("Switching switch heater off")
-            magnet_psu.heater_off()
-            await asyncio.sleep(15)
-        except Exception as e:
-            logger.error("magnet_psu.heater_off() failed")
-            print(e)
-            raise e
-
-        try:
-            magnet_psu.get_switch_heater_status()
-            await asyncio.sleep(wait_time)
-            logger.info("Switch heater switch off OK.")
-        except Exception as e:
-            logger.error("Switch heater status not retrieved")
-            print(e)
-            raise e
-
-    async def sweep_to_setpoint(self, magnet_psu, setpoint):
-        wait_time = 1.0
-
-        try:
-            await self.set_setpoint(setpoint)
-            await asyncio.sleep(wait_time)
-            magnet_psu.to_setpoint()
-            await asyncio.sleep(wait_time)
-            await self.check_is_to_setpoint()
-            await asyncio.sleep(wait_time)
-            logger.info(f"Sweeping field to {setpoint}")
-            while magnet_psu.get_sweep_status() != ModeStatusN.REST:
-                await asyncio.sleep(wait_time)
-            logger.info(f"Reached setpoint field of {setpoint} T")
-        except Exception as e:
-            logger.error("Error sweeping up to setpoint field")
-            raise e
-
-    async def sweep_to_zero(self, magnet_psu):
-        wait_time = 1.0
-
-        try:
-            magnet_psu.to_zero()
-            await asyncio.sleep(wait_time)
-            await self.check_is_to_zero()
-            await asyncio.sleep(wait_time)
-            logger.info("Sweeping field to 0 T")
-            while magnet_psu.get_sweep_status() != ModeStatusN.REST:
-                await asyncio.sleep(wait_time)
-            logger.info("Reached zero field")
-        except Exception as e:
-            logger.error("Error sweeping down to zero field")
-            raise e
-
-    def log_magnet_status(self, magnet_psu):
-        status = magnet_psu.get_activity_status()
-        logger.info(f"Magnet status: {status.name}")
-
     async def run(self, experiment):
-        magnet_psu = self.experiment.instruments[self.magnet_psu]
-        wait_time = 1.0
+        psu = experiment.instruments[self.magnet_psu]
 
-        await asyncio.sleep(wait_time)
-        yield None
+        # Set the magnet to 'HOLD' (in case it is clamped), and check it is fit to move
+        self.log('Setting magnet to "hold"')
+        psu.hold()
+        await self.sleep(1)
+        self.expect(psu.get_system_status(), SystemStatusM.NORMAL, "System status")
+        self.expect(psu.get_activity_status(), ActivityStatus.HOLD, "Activity")
 
-        try:
-            # Set magnet to 'HOLD' (in case clamped)
-            await self.hold(magnet_psu)
-            yield None
+        self.log("Switching switch heater on")
+        psu.heater_on()
+        await self.sleep(15)
+        self.expect(
+            psu.get_switch_heater_status(), SwitchHeaterStatus.ON, "Switch heater"
+        )
 
-            # Check system status
-            await self.check_system_normal(magnet_psu)
-            yield None
+        psu.set_field_sweep_rate(self.ramp_rate)
+        await self.sleep(1)
+        self.expect(psu.get_field_sweep_rate(), self.ramp_rate, "Ramp rate")
 
-            # Check activity status
-            await self.check_is_holding(magnet_psu)
-            yield None
+        await self.run_subtask(NewFile(file_name=f"Field Sweep to {self.setpoint}T"))
+        await self.run_subtask(RampMagnet(self.magnet_psu, self.setpoint))
 
-            # Turn on switch heater
-            await self.switch_heater_on(magnet_psu)
-            yield None
+        await self.run_subtask(NewFile(file_name="Field Sweep to 0T"))
+        await self.run_subtask(RampMagnetToZero(self.magnet_psu))
 
-            experiment.scribe.next_file("Field Sweep to 0T", next_block=False)
+        self.log("Switching switch heater off")
+        psu.heater_off()
+        await self.sleep(15)
+        self.expect(
+            psu.get_switch_heater_status(),
+            SwitchHeaterStatus.OFF_AT_ZERO,
+            "Switch heater",
+        )
 
-            # Set ramp rate
-            await self.set_ramp_rate(magnet_psu, self.ramp_rate)
-            yield None
-
-            # Go to setpoint
-            await self.sweep_to_setpoint(magnet_psu, self.setpoint)
-            yield None
-
-            experiment.scribe.next_file("Field Sweep to 0T", next_block=False)
-
-            # Go to zero
-            await self.sweep_to_zero(magnet_psu)
-            yield None
-
-            # Turn off switch heater
-            await self.switch_heater_off(magnet_psu)
-
-        except Exception as e:
-            logger.error("Error during field sweep")
-            self.log_magnet_status(magnet_psu)
-            print(e)
-            raise e
-
-        finally:
-            # Raise exception if magnet status isn't normal (eg quenched, fault)
-            await self.check_system_normal(magnet_psu)
-            yield None
+    async def teardown(self, experiment):
+        psu = experiment.instruments[self.magnet_psu]
+        psu.hold()  # however it ended, the magnet must not be left sweeping
+        self.log(f"Magnet status: {psu.get_activity_status().name}")
+        # A quench or a fault shows here, and fails the task.
+        self.expect(psu.get_system_status(), SystemStatusM.NORMAL, "System status")

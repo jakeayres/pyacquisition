@@ -58,8 +58,8 @@ def test_init_clears_status_and_selects_ascii(visa, k):
 
 def test_every_public_method_is_a_query_or_a_command():
     for name, member in vars(Keithley_6221).items():
-        if name.startswith("_") or not callable(member):
-            continue
+        if name.startswith("_") or not callable(member) or isinstance(member, type):
+            continue  # the enums that the class exposes are not methods
         assert hasattr(member, "_is_query") ^ hasattr(member, "_is_command"), name
         assert member.__doc__, name
 

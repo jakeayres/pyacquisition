@@ -234,6 +234,32 @@ class Keithley_2000(Instrument):
     and scan methods.
     """
 
+    # The enums that the queries and commands take, so that they can be reached
+    # from the instrument, as `Keithley_2000.BandwidthFunction`, without importing them.
+    BandwidthFunction = BandwidthFunction
+    DigitsFunction = DigitsFunction
+    FilterControl = FilterControl
+    FilterFunction = FilterFunction
+    Function = Function
+    Key = Key
+    MathFormat = MathFormat
+    NplcFunction = NplcFunction
+    PowerOnSetup = PowerOnSetup
+    RangeFunction = RangeFunction
+    ReferenceFunction = ReferenceFunction
+    ReferenceJunction = ReferenceJunction
+    ScanMode = ScanMode
+    State = State
+    StatisticFormat = StatisticFormat
+    StatusRegister = StatusRegister
+    TemperatureUnit = TemperatureUnit
+    ThermocoupleType = ThermocoupleType
+    ThresholdFunction = ThresholdFunction
+    TraceControl = TraceControl
+    TraceFeed = TraceFeed
+    TriggerSource = TriggerSource
+    VoltageUnit = VoltageUnit
+
     def __init__(self, *args, **kwargs):
         """Initializes the Keithley 2000 instrument.
 

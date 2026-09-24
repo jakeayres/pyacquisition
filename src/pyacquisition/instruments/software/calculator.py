@@ -27,6 +27,12 @@ class Calculator(SoftwareInstrument):
     Mainly used as a test instrument for the pyacquisition framework.
     """
 
+    # The enums that the queries and commands take, so that they can be reached
+    # from the instrument, as `Calculator.AngleUnit`, without importing them.
+    AngleUnit = AngleUnit
+    InputChannel = InputChannel
+    TrigFunction = TrigFunction
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._units = 1  # Default to radians

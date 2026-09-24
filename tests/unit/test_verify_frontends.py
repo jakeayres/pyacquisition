@@ -12,7 +12,6 @@ from fake_instrument import (
     make_spec,
 )
 
-from pyacquisition import Experiment
 from pyacquisition.core.instrument import Instrument
 from pyacquisition.verify import (
     Bench,
@@ -229,10 +228,12 @@ def test_the_inventorys_limit_reaches_the_session(tmp_path):
 
 def test_an_instrument_that_cannot_be_opened_is_unreachable(tmp_path, monkeypatch):
     (entry,) = load_inventory(write_inventory(tmp_path, KEITHLEY))
-    monkeypatch.setattr(
-        Experiment, "_open_resource", staticmethod(lambda *a, **k: None)
-    )
-    with pytest.raises(Unreachable, match="could not open"):
+
+    def refuse(*args, **kwargs):
+        raise ConnectionError("Could not open 'GPIB0::12::INSTR'")
+
+    monkeypatch.setattr(inventory, "open_resource", refuse)
+    with pytest.raises(Unreachable, match="Could not open"):
         open_session(entry, Policy())
 
 
