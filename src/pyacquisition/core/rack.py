@@ -189,6 +189,30 @@ class Rack(Broadcaster):
                 },
             }
 
+        @api_server.app.get("/rack/measurement_sources", tags=["rack"])
+        async def measurement_sources():
+            """
+            Where each measurement comes from, as `instrument.method`.
+            """
+            return {
+                "status": "success",
+                "sources": {
+                    name: measurement.source
+                    for name, measurement in self.measurements.items()
+                },
+            }
+
+        @api_server.app.get("/rack/state", tags=["rack"])
+        async def state():
+            """
+            Whether the measurements are paused, and the time between them.
+            """
+            return {
+                "status": "success",
+                "paused": not self._pause_event.is_set(),
+                "period": self.period,
+            }
+
         @api_server.app.get("/rack/pause/", tags=["rack"])
         async def pause():
             """

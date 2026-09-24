@@ -15,11 +15,11 @@ from .task_manager.task import Task
 from .scribe import Scribe
 from ..gui import Gui
 from ..instruments import instrument_map
-from ..tasks import standard_tasks
+from ..tasks import instrument_tasks, standard_tasks
 from .measurement import Measurement
-from .instrument import Instrument, SoftwareInstrument
-from .adapters import get_adapter
+from .instrument import Instrument, SoftwareInstrument, resolve_enum_kwargs
 from .config_parser import ConfigParser
+from . import settings
 
 
 class Experiment:
@@ -30,72 +30,113 @@ class Experiment:
     It includes functionality for configuring logging, starting an API server, and managing
     tasks in an asynchronous task group.
 
+    The options below are class attributes, so a subclass sets one by naming it,
+    with no `__init__` needed:
+
+        class MyExperiment(Experiment):
+            data_path = "my_data"
+            measurement_period = 0.5
+
+    A value is taken from the first of these that gives one: an argument to
+    `Experiment(...)` or `Experiment.from_config(...)`, then the TOML file, then the
+    class attribute of the subclass, then the default shown here. A value that is
+    not valid, or an attribute whose name is a near miss of an option
+    (`data_pth`), raises an error.
+
     Attributes:
-        root_path (Path): The root directory for the experiment.
-        data_path (Path): The directory where experiment data will be stored.
-        log_path (Path): The directory where logs will be stored.
-        log_file_name (Path): The name of the log file.
-        console_log_level (str): The logging level for console output.
-        file_log_level (str): The logging level for file output.
-        gui_log_level (str): The logging level for GUI output.
-        api_server_host (str): The host address for the API server.
-        api_server_port (int): The port number for the API server.
-        measurement_period (float): The time interval between measurements in seconds.
+        root_path (str): The base folder for the data and log folders. Defaults to ".".
+        data_path (str): The folder for data files, inside `root_path`. Defaults to ".".
+        data_file_extension (str): The extension of data files. Defaults to "data".
+        data_delimiter (str): The column separator in data files. Defaults to ",".
+        log_path (str): The folder for the log file, inside `root_path`. Defaults to ".".
+        log_file_name (str): The name of the log file. Defaults to "debug.log".
+        console_log_level (str): The logging level for console output. Defaults to "DEBUG".
+        file_log_level (str): The logging level for file output. Defaults to "DEBUG".
+        gui_log_level (str): The logging level for GUI output. Defaults to "DEBUG".
+        api_server_host (str): The host address for the API server. Defaults to "localhost".
+        api_server_port (int): The port number for the API server. Defaults to 8000.
+        measurement_period (float): The time between measurements in seconds. Defaults to 0.25.
+        gui (bool): Whether to run the GUI. Defaults to True.
+        sparkline_points (int): How many of the latest points the small graph beside
+            each value in the GUI's Live Data window shows. Defaults to 100.
+        auto_tasks (bool): Whether the tasks that come with an instrument are
+            registered by themselves when it is in the experiment, such as
+            `RampTemperature` with a Lakeshore. Defaults to True.
     """
+
+    def __init_subclass__(cls, **kwargs) -> None:
+        super().__init_subclass__(**kwargs)
+        settings.check_subclass(cls)
 
     def __init__(
         self,
-        root_path: str = ".",
-        data_path: str = ".",
-        data_file_extension: str = "data",
-        data_delimiter: str = ",",
-        log_path: str = ".",
-        console_log_level: str = "DEBUG",
-        file_log_level: str = "DEBUG",
-        gui_log_level: str = "DEBUG",
-        log_file_name: str = "debug.log",
-        api_server_host: str = "localhost",
-        api_server_port: int = 8000,
-        measurement_period: float = 0.25,
-        gui: bool = True,
+        root_path: str | None = None,
+        data_path: str | None = None,
+        data_file_extension: str | None = None,
+        data_delimiter: str | None = None,
+        log_path: str | None = None,
+        console_log_level: str | None = None,
+        file_log_level: str | None = None,
+        gui_log_level: str | None = None,
+        log_file_name: str | None = None,
+        api_server_host: str | None = None,
+        api_server_port: int | None = None,
+        measurement_period: float | None = None,
+        gui: bool | None = None,
+        sparkline_points: int | None = None,
+        auto_tasks: bool | None = None,
     ) -> None:
         """
         Initializes the Experiment instance.
-        Args:
-            root_path (str): The root directory for the experiment. Defaults to ".".
-            data_path (str): The directory where experiment data will be stored. Defaults to ".".
-            data_file_extension (str): The file extension for data files. Defaults to ".data".
-            log_path (str): The directory where logs will be stored. Defaults to ".".
-            console_log_level (str): The logging level for console output. Defaults to "DEBUG".
-            file_log_level (str): The logging level for file output. Defaults to "DEBUG".
-            gui_log_level (str): The logging level for GUI output. Defaults to "DEBUG".
-            log_file_name (str): The name of the log file. Defaults to "debug.log".
-            api_server_host (str): The host address for the API server. Defaults to "localhost".
-            api_server_port (int): The port number for the API server. Defaults to 8000.
-            measurement_period (float): The time interval between measurements in seconds. Defaults to 0.25.
-            ui (bool): Whether to run the GUI. Defaults to True.
+
+        Every argument is optional, and one that is left out takes the value of the
+        class attribute of the same name. See the class docstring for the options.
+
+        Raises:
+            ValueError: If a value is not valid.
         """
-        self._root_path: Path = Path(root_path)
-        self._data_path: Path = self._root_path / Path(data_path)
-        self._log_path: Path = self._root_path / Path(log_path)
-        self._log_file_name: Path = Path(log_file_name)
+        options = settings.resolve(
+            self,
+            {
+                "root_path": root_path,
+                "data_path": data_path,
+                "data_file_extension": data_file_extension,
+                "data_delimiter": data_delimiter,
+                "log_path": log_path,
+                "console_log_level": console_log_level,
+                "file_log_level": file_log_level,
+                "gui_log_level": gui_log_level,
+                "log_file_name": log_file_name,
+                "api_server_host": api_server_host,
+                "api_server_port": api_server_port,
+                "measurement_period": measurement_period,
+                "gui": gui,
+                "sparkline_points": sparkline_points,
+                "auto_tasks": auto_tasks,
+            },
+        )
+
+        self._root_path: Path = Path(options["root_path"])
+        self._data_path: Path = self._root_path / Path(options["data_path"])
+        self._log_path: Path = self._root_path / Path(options["log_path"])
+        self._log_file_name: Path = Path(options["log_file_name"])
 
         # configure logging
         logger.configure(
             root_path=self._log_path,
-            console_level=console_log_level,
-            file_level=file_log_level,
-            gui_level=gui_log_level,
+            console_level=options["console_log_level"],
+            file_level=options["file_log_level"],
+            gui_level=options["gui_log_level"],
             file_name=self._log_file_name,
         )
 
         self._api_server = APIServer(
-            host=api_server_host,
-            port=api_server_port,
+            host=options["api_server_host"],
+            port=options["api_server_port"],
         )
 
         self._rack = Rack(
-            period=measurement_period,
+            period=options["measurement_period"],
         )
 
         self._calculations = Calculations()
@@ -107,14 +148,20 @@ class Experiment:
         # Tasks registered on every task manager, kept so that a task manager added
         # later gets them too.
         self._shared_tasks = []
+        self._registered_tasks = set()  # the classes, so as not to register one twice
+        self._auto_tasks = options["auto_tasks"]
 
-        self._run_gui = gui
-        self._gui = Gui(host=api_server_host, port=api_server_port)
+        self._run_gui = options["gui"]
+        self._gui = Gui(
+            host=options["api_server_host"],
+            port=options["api_server_port"],
+            sparkline_points=options["sparkline_points"],
+        )
 
         self._scribe = Scribe(
             root_path=self._data_path,
-            delimiter=data_delimiter,
-            extension=data_file_extension,
+            delimiter=options["data_delimiter"],
+            extension=options["data_file_extension"],
         )
 
         self._calculations.subscribe_to(self._rack)
@@ -181,70 +228,31 @@ class Experiment:
                 f"Instrument '{instrument_name}' not found in instrument map."
             )
 
-    @staticmethod
-    def _get_adapter_class(adapter_name: str):
-        """
-        Get the adapter class by name.
-
-        Args:
-            adapter_name (str): The name of the adapter.
-
-        Returns:
-            Adapter: The adapter class.
-
-        Raises:
-            ValueError: If the adapter is not found in the adapter map.
-        """
-        try:
-            return get_adapter(adapter_name)
-        except KeyError:
-            raise ValueError(f"Adapter '{adapter_name}' not found in adapter map.")
-
-    @staticmethod
-    def _open_resource(adapter, resource: str, timeout: int = 5000, **kwargs):
-        """
-        Open a resource using the appropriate adapter.
-
-        Args:
-            resource (str): The resource to open.
-
-        Returns:
-            Resource: The opened resource.
-
-        Raises:
-            ValueError: If the resource cannot be opened.
-        """
-        try:
-            available_resources = adapter.list_resources()
-            logger.debug(f"Available resources: {adapter.list_resources()}")
-            if resource not in available_resources:
-                logger.warning(f"Resource '{resource}' not found.")
-                return None
-            else:
-                logger.debug(f"Opening resource '{resource}'")
-                return adapter.open_resource(resource, timeout=timeout, **kwargs)
-        except Exception as e:
-            logger.warning(f"Failed to open resource '{resource}': {e}")
-            return None
-
     @classmethod
-    def from_config(cls, toml_file: str) -> "Experiment":
+    def from_config(cls, toml_file: str, **overrides) -> "Experiment":
         """
         Creates an Experiment instance from a TOML configuration file.
 
+        Called on a subclass, the options the file leaves out come from the
+        subclass's class attributes. Options the file sets win over them, and
+        `overrides` win over the file.
+
         Args:
             toml_file (str): Path to the TOML configuration file.
+            **overrides: Options to set whatever the file says, by their class
+                attribute names, for example `gui=False`.
 
         Returns:
             Experiment: An instance of the Experiment class.
 
         Raises:
-            ValueError: If the TOML file cannot be loaded or parsed.
+            ValueError: If the TOML file cannot be loaded or parsed, or holds an
+                option that is not valid.
         """
         config = ConfigParser.parse(toml_file)
 
         try:
-            experiment = cls._initialize_experiment(config)
+            experiment = cls._initialize_experiment(config, overrides)
             cls._configure_instruments(experiment, config)
             cls._configure_measurements(experiment, config)
             return experiment
@@ -252,38 +260,24 @@ class Experiment:
             raise ValueError(f"Failed to configure instruments or measurements: {e}")
 
     @classmethod
-    def _initialize_experiment(cls, config: dict) -> "Experiment":
+    def _initialize_experiment(
+        cls, config: dict, overrides: dict | None = None
+    ) -> "Experiment":
         """
         Initializes the Experiment instance from the configuration.
 
+        Only the options the configuration sets are passed on, so the others keep
+        the class attributes of `cls`.
+
         Args:
             config (dict): The parsed TOML configuration.
+            overrides (dict): Options that win over the configuration.
 
         Returns:
             Experiment: An initialized Experiment instance.
         """
         try:
-            return cls(
-                root_path=config.get("experiment", {}).get("root_path", "."),
-                data_path=config.get("data", {}).get("path", "."),
-                data_file_extension=config.get("data", {}).get(
-                    "file_extension", "data"
-                ),
-                data_delimiter=config.get("data", {}).get("delimiter", ","),
-                log_path=config.get("logging", {}).get("path", "."),
-                console_log_level=config.get("logging", {}).get(
-                    "console_level", "DEBUG"
-                ),
-                file_log_level=config.get("logging", {}).get("file_level", "DEBUG"),
-                gui_log_level=config.get("logging", {}).get("gui_level", "DEBUG"),
-                log_file_name=config.get("logging", {}).get("file_name", "debug.log"),
-                api_server_host=config.get("api_server", {}).get("host", "localhost"),
-                api_server_port=config.get("api_server", {}).get("port", 8000),
-                measurement_period=config.get("rack", {}).get("period", 0.25),
-                gui=config.get("gui", {}).get("run", True),
-            )
-        except KeyError as e:
-            raise ValueError(f"Missing required configuration key: {e}")
+            return cls(**{**settings.from_config(config), **(overrides or {})})
         except Exception as e:
             raise ValueError(f"Failed to create Experiment instance: {e}")
 
@@ -309,22 +303,17 @@ class Experiment:
                     logger.debug(
                         f"Creating instrument '{name}' with adapter '{instrument['adapter']}'"
                     )
-                    adapter_class = cls._get_adapter_class(instrument["adapter"])
-                    kwargs = instrument.get("args", {})
-                    resource = cls._open_resource(
-                        adapter_class,
-                        instrument.get("resource", None),
-                        timeout=5000,
-                        **kwargs,
+                    if instrument.get("resource") is None:
+                        raise ValueError("it has an adapter but no `resource`")
+                    # An instrument that cannot be reached is skipped with a
+                    # warning, so the rest of the rig still comes up.
+                    inst = instrument_class(
+                        name,
+                        instrument["resource"],
+                        adapter=instrument["adapter"],
+                        **instrument.get("args", {}),
                     )
-
-                    if resource:
-                        inst = instrument_class(name, resource)
-                        experiment.add_instrument(inst)
-                    else:
-                        logger.warning(
-                            f"Failed to open resource '{instrument.get('resource', None)}' for instrument '{name}'"
-                        )
+                    experiment.add_instrument(inst)
             except Exception as e:
                 logger.warning(f"Failed to configure instrument '{name}': {e}")
 
@@ -381,20 +370,21 @@ class Experiment:
             Callable: The method with resolved arguments.
         """
         method_hints = inspect.signature(method).parameters
-        resolved_args = {}
-        for arg_name, arg_type in method_hints.items():
-            if arg_name in args:
-                arg_value = args[arg_name]
-                if inspect.isclass(arg_type.annotation) and issubclass(
-                    arg_type.annotation, Enum
-                ):
-                    logger.debug(
-                        f"Resolving Enum type for argument '{arg_name}': {arg_value}"
-                    )
-                    resolved_args[arg_name] = arg_type.annotation[arg_value]
-                else:
-                    logger.debug(f"Resolving argument '{arg_name}': {arg_value}")
-                    resolved_args[arg_name] = arg_value
+        given = {name: args[name] for name in method_hints if name in args}
+        # A string for an enum, such as "INPUT_A", becomes the member it names.
+        resolved_args = resolve_enum_kwargs(method, given)
+        for arg_name, arg_value in resolved_args.items():
+            annotation = method_hints[arg_name].annotation
+            if (
+                inspect.isclass(annotation)
+                and issubclass(annotation, Enum)
+                and not isinstance(arg_value, annotation)
+            ):
+                raise ValueError(
+                    f"`{arg_name}` must name a member of {annotation.__name__}, "
+                    f"got {arg_value!r}"
+                )
+            logger.debug(f"Resolved argument '{arg_name}': {arg_value}")
         return partial(method, **resolved_args)
 
     @property
@@ -457,6 +447,9 @@ class Experiment:
 
         Must be called before the experiment starts running, for example in `setup()`.
 
+        A hardware instrument opens its own connection from the address it is
+        given, and the experiment closes it when the experiment ends.
+
         Args:
             instrument (Instrument | SoftwareInstrument): The instrument to add.
 
@@ -466,6 +459,9 @@ class Experiment:
         Example:
             clock = Clock("clock")
             experiment.add_instrument(clock)
+
+            lockin = SR_830("lockin", "GPIB0::7::INSTR")
+            experiment.add_instrument(lockin)
         """
         self._check_not_started("add an instrument")
         self._rack.add_instrument(instrument)
@@ -637,6 +633,7 @@ class Experiment:
         try:
             self._register_endpoints(self._api_server)
             self.setup()
+            self._register_instrument_tasks()
             self._started = True
             try:
                 if self._run_gui:
@@ -692,7 +689,23 @@ class Experiment:
             except Exception as e:
                 logger.error(f"Error during experiment teardown: {e}")
                 raise
-            self.teardown()
+            try:
+                self.teardown()
+            finally:
+                self._close_instruments()
+
+    def _close_instruments(self) -> None:
+        """
+        Closes the connections that the instruments opened themselves.
+
+        Runs after `teardown()`, so that it can still talk to the instruments.
+        A failure to close one does not stop the others from closing.
+        """
+        for uid, instrument in self._rack.instruments.items():
+            try:
+                instrument.close()
+            except Exception as e:
+                logger.warning(f"Failed to close instrument '{uid}': {e}")
 
     def run(self) -> None:
         """
@@ -712,6 +725,38 @@ class Experiment:
             logger.error(f"An error occurred while running the experiment: {e}")
 
         logger.info("Experiment ended")
+
+    def _register_instrument_tasks(self) -> None:
+        """
+        Registers the tasks that come with an instrument, for the instruments that
+        the experiment has. It runs when `setup()` has added them.
+
+        A task is registered when every instrument it is for is present. The input
+        that holds the instrument's id is fixed to it, so the form does not ask, if
+        there is exactly one such instrument. With several, the form asks which. A
+        task that has already been registered is left as it is, and nothing is done
+        if `auto_tasks` is off.
+        """
+        if not self._auto_tasks:
+            return
+        for task in instrument_tasks:
+            if task in self._registered_tasks:
+                continue
+            found = {}
+            for field, types in (task.applies_to or {}).items():
+                ids = [
+                    uid
+                    for uid, instrument in self.instruments.items()
+                    if isinstance(instrument, types)
+                ]
+                if not ids:
+                    break
+                found[field] = ids
+            else:
+                fixed = {field: ids[0] for field, ids in found.items() if len(ids) == 1}
+                label = re.sub(r"(?<!^)(?=[A-Z])", " ", task.__name__)
+                logger.debug(f"Registering '{label}' for {sorted(found.values())}")
+                self.register_task(task, label=label, **fixed)
 
     def register_task(self, task: Task, manager=None, **kwargs) -> None:
         """
@@ -738,6 +783,7 @@ class Experiment:
             experiment.register_task(HoldTemperature, manager="control")
 
         """
+        self._registered_tasks.add(task)
         if manager is None:
             self._shared_tasks.append((task, kwargs))
             for task_manager in self._task_managers.values():
@@ -790,3 +836,10 @@ class Experiment:
             logger.info("Shutting down the experiment")
             self._shutdown_event.set()
             return {"status": "success", "message": "Experiment shutdown initiated."}
+
+
+# The options are class attributes, so that a subclass can set them by name. Their
+# defaults are kept with the rest of their description in `settings`.
+for _setting in settings.SETTINGS.values():
+    setattr(Experiment, _setting.name, _setting.default)
+del _setting

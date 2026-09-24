@@ -256,13 +256,22 @@ def test_the_state_of_every_task_manager_is_available_in_one_call(experiment):
         "status": "Running",
         "current_task": None,
         "aborting": False,
+        "last_result": None,
         "queue": [],
     }
     assert response["data"]["control"] == {
         "status": "Paused",
         "current_task": None,
         "aborting": False,
-        "queue": [{"id": ANY, "name": "Hold", "description": None, "parameters": None}],
+        "last_result": None,
+        "queue": [
+            {
+                "id": ANY,
+                "name": "Hold",
+                "description": "Hold the temperature.",
+                "parameters": {"kelvin": 4.2},
+            }
+        ],
     }
 
 
@@ -282,8 +291,8 @@ async def test_the_state_shows_the_running_task_and_the_queue_behind_it():
         assert state["current_task"] == {
             "id": ANY,
             "name": "Ticker",
-            "description": None,
-            "parameters": None,
+            "description": "Takes a step every 50 ms, and records its lifecycle in a shared log.",
+            "parameters": {"label": "first", "count": LONG, "log": ANY},
         }
         assert [task["name"] for task in state["queue"]] == ["Ticker"], (
             "The running task is not in the queue."
@@ -830,7 +839,11 @@ def test_registering_a_task_on_a_manager_queues_it_there_only(experiment):
     assert list(control._task_queue._queue) == [Hold(kelvin=5.0)]
     assert experiment._task_manager._task_queue.empty()
     assert client.get("/managers/control/task_list").json()["data"] == [
-        {"name": "Hold", "description": None, "parameters": None}
+        {
+            "name": "Hold",
+            "description": "Hold the temperature.",
+            "parameters": {"kelvin": 5.0},
+        }
     ]
     assert client.get("/task_manager/task_list").json()["data"] == []
 

@@ -44,6 +44,7 @@ class TaskManager:
         self._api_tag = "Task Manager" if name == "main" else f"Task Manager: {name}"
 
         self._current_task: Task = None
+        self._last_result: dict | None = None
         self._task_queue = asyncio.Queue()
         self._pause_event = asyncio.Event()
         self._pause_event.set()
@@ -80,19 +81,39 @@ class TaskManager:
                 logger.error(f"{self._tag} Error getting task from queue: {e}")
 
             if self._current_task:
-                logger.info(
-                    f"{self._tag} Task fetched from queue: {self._current_task.name}"
-                )
+                task = self._current_task
+                logger.info(f"{self._tag} Task fetched from queue: {task.name}")
                 try:
-                    await self._current_task.start(experiment=experiment)
+                    await task.start(experiment=experiment)
                 except Exception as e:
-                    logger.error(f"Error running task {self._current_task}: {e}")
+                    logger.error(f"Error running task {task}: {e}")
                 finally:
                     self._current_task = None
+                    self._finished(task)
                     logger.info(f"{self._tag} Waiting for task to appear on queue")
 
             if self._shutdown_event.is_set():
                 break
+
+    def _finished(self, task: Task) -> None:
+        """
+        Notes how a task ended. A task that failed pauses the queue, like an abort
+        does, so that the tasks behind it, which may rely on it having worked, do
+        not run on their own. Resume the task manager to carry on with them.
+        """
+        outcome = task.outcome or "failed"
+        error = task.failure
+        self._last_result = {
+            "name": task.name,
+            "outcome": outcome,
+            "error": None if error is None else f"{type(error).__name__}: {error}",
+        }
+        if outcome == "failed" and not self._shutdown_event.is_set():
+            logger.error(
+                f"{self._tag} {task.name} failed, so the task manager is paused. "
+                "Resume it to carry on with the queue."
+            )
+            self.pause()
 
     async def teardown(self):
         """
@@ -196,6 +217,7 @@ class TaskManager:
             "status": "Running" if self._pause_event.is_set() else "Paused",
             "current_task": self._display(task) if task else None,
             "aborting": bool(task and task._abort_event.is_set()),
+            "last_result": self._last_result,
             "queue": [self._display(queued) for queued in self._task_queue._queue],
         }
 
@@ -319,7 +341,9 @@ class TaskManager:
                 experiment, task_manager=self, tasks_path=self._tasks_path, **kwargs
             )
             self._task_registry[task.__class__.__name__] = task
-            logger.debug(f"Task '{task.name}' registered with the experiment")
+            # A task is registered as a class, and `name` is a property of its instances.
+            name = task.__name__ if isinstance(task, type) else task.name
+            logger.debug(f"Task '{name}' registered with the experiment")
         except Exception as e:
             logger.error(f"Error registering task {task.__class__.__name__}: {e}")
             raise
@@ -403,7 +427,9 @@ class TaskManager:
             tags=[self._api_tag],
             include_in_schema=False,
         )
-        async def move_queued_task(task_id: str, direction: Literal["up", "down"]) -> dict:
+        async def move_queued_task(
+            task_id: str, direction: Literal["up", "down"]
+        ) -> dict:
             """
             Move the task with this id one place up (sooner) or down (later) the
             queue. Its id is in the queue in `/managers/state`.

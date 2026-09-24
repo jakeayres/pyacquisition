@@ -5,7 +5,7 @@ import pytest
 from pyvisa.errors import InvalidSession, VisaIOError
 
 from pyacquisition import Experiment
-from pyacquisition.core.adapters import get_adapter, prologix
+from pyacquisition.core.adapters import get_adapter, open_resource, prologix
 from pyacquisition.core.adapters.mock import MockResource
 from pyacquisition.core.adapters.prologix import (
     SENTINEL,
@@ -282,12 +282,19 @@ def test_listing_resources(bus):
     assert "nonsense" not in resources
 
 
-def test_experiment_opens_a_resource_through_the_listing(bus):
-    resource = Experiment._open_resource(
-        get_adapter("prologix"), "COM9::12", timeout=3000
-    )
-    assert resource is not None
-    assert Experiment._open_resource(get_adapter("prologix"), "COM8::12") is None
+def test_an_address_opens_through_the_shared_helper(bus):
+    resource = open_resource("COM9::12", "prologix", timeout=3000)
+    assert resource.timeout == 3000
+
+
+def test_a_missing_port_says_which_ports_there_are(monkeypatch, bus):
+    def open_serial(name):
+        raise OSError(f"could not open port {name!r}")
+
+    monkeypatch.setattr(prologix, "_open_serial", open_serial)
+    with pytest.raises(ConnectionError, match="COM8::12") as error:
+        open_resource("COM8::12", "prologix")
+    assert "Available resources: COM4, COM9." in str(error.value)
 
 
 # -------------------------------------------------------------- writing

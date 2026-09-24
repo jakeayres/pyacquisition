@@ -2,7 +2,7 @@ import pytest
 from pyvisa.errors import InvalidSession, VisaIOError
 
 from pyacquisition import Experiment
-from pyacquisition.core.adapters import get_adapter
+from pyacquisition.core.adapters import get_adapter, open_resource
 from pyacquisition.core.adapters.mock import MockResource, MockResourceManager
 from pyacquisition.instruments import Keithley_6221, Lakeshore_350
 from pyacquisition.instruments.keithley.keithley_6221 import State, WaveFunction
@@ -164,11 +164,8 @@ def test_the_adapter_is_registered_by_name():
     assert isinstance(get_adapter("mock"), MockResourceManager)
 
 
-def test_experiment_opens_a_mock_resource_that_was_never_listed():
-    resource = Experiment._open_resource(
-        get_adapter("mock"), "GPIB0::7::INSTR", timeout=5000
-    )
-    assert resource is not None
+def test_a_mock_resource_opens_without_ever_being_listed():
+    resource = open_resource("GPIB0::7::INSTR", "mock", timeout=5000)
     assert resource.query("*IDN?") == "MOCK,GPIB0::7::INSTR,0,0"
 
 

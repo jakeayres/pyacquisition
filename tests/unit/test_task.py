@@ -308,7 +308,7 @@ async def test_pause_blocks_between_steps_until_resumed():
     running = asyncio.create_task(task.start())
     await spin()
 
-    assert task.log == ["r:setup", "r:0"], "Only the first step runs before the pause."
+    assert task.log == ["r:setup"], "run() does not begin while the task is paused."
     assert not running.done(), "The task should be waiting while paused."
 
     task.resume()
@@ -328,7 +328,7 @@ async def test_abort_while_paused_unblocks_and_stops():
     task.abort()
     await asyncio.wait_for(running, timeout=1)
 
-    assert task.log == ["r:setup", "r:0", "r:teardown"]
+    assert task.log == ["r:setup", "r:teardown"]
 
 
 @pytest.mark.asyncio
@@ -502,6 +502,21 @@ async def test_subtask_receives_the_experiment_the_parent_was_started_with():
     await Composite(children=[child], log=log).start(experiment=experiment)
 
     assert child.experiment_seen is experiment
+
+
+@pytest.mark.asyncio
+async def test_a_subtasks_own_subtasks_receive_the_experiment_too():
+    # Three levels: the innermost task is run by a subtask, not by the started task.
+    log = []
+    grandchild = Recorder("g", 1, log)
+    child = Composite(label="child", children=[grandchild], log=log)
+    experiment = object()
+
+    await Composite(label="parent", children=[child], log=log).start(
+        experiment=experiment
+    )
+
+    assert grandchild.experiment_seen is experiment
 
 
 @pytest.mark.asyncio

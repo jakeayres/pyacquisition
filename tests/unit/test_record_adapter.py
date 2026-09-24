@@ -3,8 +3,7 @@ import json
 import pytest
 from pyvisa.errors import VisaIOError
 
-from pyacquisition import Experiment
-from pyacquisition.core.adapters import get_adapter
+from pyacquisition.core.adapters import get_adapter, open_resource
 from pyacquisition.core.adapters.mock import MockResource
 from pyacquisition.core.adapters.record import (
     RecordingResource,
@@ -82,10 +81,10 @@ def test_the_adapter_is_registered_and_opens_through_another(transcript):
     assert events(transcript)[0]["message"] == "*IDN?"
 
 
-def test_experiment_opens_a_recorded_resource_that_was_never_listed(transcript):
-    resource = Experiment._open_resource(
-        get_adapter("record"),
+def test_a_recorded_resource_opens_without_ever_being_listed(transcript):
+    resource = open_resource(
         "GPIB0::12::INSTR",
+        "record",
         timeout=5000,
         inner="mock",
         transcript=str(transcript),

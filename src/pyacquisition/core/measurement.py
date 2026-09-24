@@ -1,5 +1,7 @@
+from .instrument import resolve_enum_kwargs
 from .logging import logger
 import inspect
+from functools import partial
 
 
 class Measurement:
@@ -17,7 +19,16 @@ class Measurement:
             name (str): The name of the measurement.
             function (callable): The function to be called for the measurement.
             call_every (int): Call the function every Nth time. Default is 1.
-            **kwargs: Additional keyword arguments to pass to the function.
+            **kwargs: Additional keyword arguments to pass to the function. Where
+                the function takes an enum, give the member (`InputChannel.INPUT_A`)
+                or the text that names it (`"INPUT_A"`, or its label `"Input A"`).
+
+        Raises:
+            ValueError: If a keyword argument is not one the function takes, or text
+                given for an enum does not name a member.
+
+        Example:
+            Measurement("T", cryo.get_temperature, input_channel="INPUT_A")
         """
         self._name = name
         self._function = function
@@ -27,7 +38,25 @@ class Measurement:
 
         # Validate kwargs against the function's signature
         self._validate_kwargs(function, kwargs)
-        self._kwargs = kwargs  # Store additional keyword arguments
+        # Text such as "INPUT_A" becomes the enum member that it names, here, so that
+        # a mistake stops the experiment at setup instead of failing every cycle.
+        self._kwargs = resolve_enum_kwargs(function, kwargs)
+
+    @property
+    def source(self) -> str:
+        """
+        Where the value comes from, as `instrument.method`, for showing above its
+        name. It is empty if the function is not a method of an instrument.
+        """
+        function, owner = self._function, None
+        while isinstance(function, partial):
+            if function.args:
+                owner = function.args[0]  # `partial(query, instrument)`
+            function = function.func
+        owner = getattr(function, "__self__", owner)  # a bound method
+        uid = getattr(owner, "_uid", None)
+        name = getattr(function, "__name__", "")
+        return f"{uid}.{name}" if uid and name else ""
 
     @staticmethod
     def _validate_kwargs(function: callable, kwargs: dict) -> None:
