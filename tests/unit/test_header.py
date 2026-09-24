@@ -418,3 +418,38 @@ def test_fit_to_leaves_room_for_a_scroll_bar(window, monkeypatch):
     header.fit_to(window)
 
     assert header.width == 420 - 16 - 14
+
+
+def test_fit_to_leaves_room_for_the_border_of_a_frame(window):
+    header = PaneHeader(window, 100, title="X")
+
+    header.fit_to(window, inset=4)
+
+    assert header.width == 420 - 16 - 4
+
+
+def test_a_flat_header_has_no_tint_but_a_line_along_its_bottom(window):
+    header = PaneHeader(window, 200, title="X", style="running", flat=True)
+
+    assert dpg.get_item_configuration(header._background)["fill"][3] == 0
+    rule = dpg.get_item_configuration(header._rule)
+    assert rule["show"] is True
+    assert rule["p1"][1] == rule["p2"][1] == header.height - 1
+    assert rule["p2"][0] == 200
+
+
+def test_a_flat_header_keeps_its_line_when_it_changes_width_and_state(window):
+    header = PaneHeader(window, 200, title="X", flat=True)
+
+    header.resize(150)
+    header.update(title="X", style="paused")
+
+    assert dpg.get_item_configuration(header._rule)["p2"][0] == 150
+    assert dpg.get_item_configuration(header._background)["fill"][3] == 0
+
+
+def test_an_ordinary_header_is_tinted_and_has_no_line(window):
+    header = PaneHeader(window, 200, title="X")
+
+    assert dpg.get_item_configuration(header._background)["fill"][3] == 1
+    assert dpg.get_item_configuration(header._rule)["show"] is False

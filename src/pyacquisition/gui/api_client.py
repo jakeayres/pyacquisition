@@ -1,10 +1,60 @@
 import json
 import queue
 import threading
+import time
+from dataclasses import dataclass
 import requests
 from websockets.exceptions import ConnectionClosed
 from websockets.sync.client import connect
 from ..core.logging import logger
+
+
+@dataclass
+class Reply:
+    """
+    What came back from a request, or why nothing did.
+
+    Attributes:
+        ok (bool): Whether the server answered without an error.
+        data: The decoded JSON of the answer, if it had any.
+        error (str | None): What went wrong, in words, if `ok` is false.
+        status_code (int | None): The HTTP status, if the server answered.
+        elapsed (float): How long it took, in seconds.
+    """
+
+    ok: bool
+    data: object = None
+    error: str | None = None
+    status_code: int | None = None
+    elapsed: float = 0.0
+
+
+def describe_error(status_code: int, body) -> str:
+    """
+    Say what an error response means. FastAPI reports a bad input as a list of
+    problems, each with the name of the input, and other errors as a single message.
+
+    Args:
+        status_code (int): The HTTP status.
+        body: The decoded JSON of the response, or its text if it was not JSON.
+    """
+    detail = body.get("detail") if isinstance(body, dict) else None
+    if isinstance(detail, list):
+        problems = []
+        for problem in detail:
+            if not isinstance(problem, dict):
+                problems.append(str(problem))
+                continue
+            where = [str(part) for part in problem.get("loc", ())]
+            name = where[-1] if where and where[0] in ("query", "path") else ""
+            message = problem.get("msg", "invalid")
+            problems.append(f"{name}: {message}" if name else message)
+        return "\n".join(problems)
+    if isinstance(detail, str):
+        return detail
+    if status_code >= 500:
+        return f"The server had an error handling the request (HTTP {status_code})."
+    return f"HTTP {status_code}: {str(body)[:200]}"
 
 
 class _Source:
@@ -153,6 +203,9 @@ class APIClient:
         self.port = port
         self.streams = {}
         self.pollers = {}
+        # The client is pickled with the Gui, when it is sent to the GUI process, and a
+        # queue cannot be pickled. So it is made when the first request is sent.
+        self._replies = None
 
     def start(self) -> None:
         """
@@ -175,6 +228,16 @@ class APIClient:
         """
         for source in [*self.streams.values(), *self.pollers.values()]:
             source.dispatch()
+
+        while self._replies is not None:
+            try:
+                callback, reply = self._replies.get_nowait()
+            except queue.Empty:
+                return
+            try:
+                callback(reply)
+            except Exception as e:
+                logger.error(f"Error in a request callback: {e}")
 
     def add_stream(self, name: str, url: str) -> Stream:
         """
@@ -203,6 +266,59 @@ class APIClient:
         full_url = f"http://{self.host}:{self.port}{url}"
         self.pollers[name] = Poller(name, full_url, params, period)
         return self.pollers[name]
+
+    def get_async(
+        self,
+        endpoint: str,
+        callback: callable,
+        params: dict = None,
+        timeout: float = 30.0,
+    ) -> None:
+        """
+        Sends a GET request without waiting for it, so a slow instrument cannot
+        freeze the GUI.
+
+        The request is made on a worker thread. `callback` is called with a `Reply`
+        on the GUI thread, from `dispatch`, whether the request worked or not.
+
+        Args:
+            endpoint (str): The API endpoint to send the request to.
+            callback (callable): Called with the `Reply`.
+            params (dict, optional): The query parameters to include in the request.
+            timeout (float, optional): Give up after this many seconds.
+        """
+        url = f"http://{self.host}:{self.port}{endpoint}"
+        if self._replies is None:
+            self._replies = queue.Queue()
+        replies = self._replies
+
+        def work() -> None:
+            replies.put((callback, self._request(url, params, timeout)))
+
+        threading.Thread(target=work, name=f"GET {endpoint}", daemon=True).start()
+
+    @staticmethod
+    def _request(url: str, params: dict | None, timeout: float) -> Reply:
+        """Make a request, and report how it went. It never raises."""
+        started = time.monotonic()
+        try:
+            response = requests.get(url, params=params, timeout=timeout)
+            try:
+                body = response.json()
+            except ValueError:
+                body = response.text
+            elapsed = time.monotonic() - started
+            if response.ok:
+                return Reply(True, body, None, response.status_code, elapsed)
+            error = describe_error(response.status_code, body)
+            return Reply(False, body, error, response.status_code, elapsed)
+        except requests.Timeout:
+            error = f"No answer after {timeout:g} s."
+        except requests.ConnectionError:
+            error = "Could not reach the experiment. Is it still running?"
+        except Exception as e:
+            error = str(e)
+        return Reply(False, None, error, None, time.monotonic() - started)
 
     def get(
         self,

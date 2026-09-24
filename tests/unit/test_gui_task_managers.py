@@ -10,11 +10,20 @@ import pytest
 
 from pyacquisition import Experiment, Task
 from pyacquisition.gui import Gui
+from pyacquisition.gui.components.endpoint_popup import EndpointPopup
 from pyacquisition.gui.components.task_manager_window import (
-    GAP_ABOVE_QUEUE,
+    ACCENT_WIDTH,
     GAP_BELOW_QUEUE,
+    CARD_SPACING,
+    X_ARROW_GAP,
+    X_SIZE,
     TaskManagerWindow,
     format_value,
+)
+from pyacquisition.gui.constants import (
+    QUEUED_ACCENT,
+    QUEUED_BACKGROUND,
+    DEFAULT_PAGE_WIDTH,
 )
 from pyacquisition.gui.managers import control_path, management_paths, task_paths
 from pyacquisition.gui.openapi import Schema
@@ -227,10 +236,10 @@ def test_with_one_manager_the_window_has_a_header_and_the_queue(gui_context):
     ), "There is no dropdown bar."
     header = panel.header
     assert (header.title, header.subtitle, header.badge, header.style) == (
-        "TASK QUEUE",
+        "Task Queue",
         "WaitFor",
-        "RUNNING",
-        "running",
+        None,
+        "idle",
     )
     assert not header.collapsible, "There is only one section to collapse."
     shown = texts(panel.queue_tag)
@@ -245,15 +254,15 @@ def test_with_several_managers_each_has_a_section_showing_its_state(gui_context)
 
     main, control = window.panels["main"].header, window.panels["control"].header
     assert (main.title, main.subtitle, main.badge, main.style) == (
-        "MAIN",
+        "Main",
         "WaitFor",
-        "RUNNING",
-        "running",
+        None,
+        "idle",
     )
     assert (control.title, control.subtitle, control.badge, control.style) == (
-        "CONTROL",
+        "Control",
         "nothing running",
-        "IDLE",
+        None,
         "idle",
     )
 
@@ -266,7 +275,7 @@ def test_each_section_shows_its_own_queue(gui_context):
     main_texts = texts(window.panels["main"].queue_tag)
     control_texts = texts(window.panels["control"].queue_tag)
     assert "NewFile" in main_texts and "Hold" in main_texts
-    assert control_texts == ["QUEUE", "empty"]
+    assert control_texts == []
 
 
 def test_a_section_follows_changes_in_its_manager(gui_context):
@@ -283,7 +292,7 @@ def test_a_section_follows_changes_in_its_manager(gui_context):
     control = window.panels["control"]
     assert (control.header.badge, control.header.style) == ("PAUSED", "paused")
     assert control.header.subtitle == "nothing running"
-    assert texts(control.queue_tag) == ["QUEUE", "empty"]
+    assert texts(control.queue_tag) == []
 
 
 def test_the_queue_is_not_rebuilt_when_nothing_has_changed(gui_context):
@@ -306,7 +315,7 @@ def test_a_manager_missing_from_the_update_is_left_alone(gui_context):
     window.update({"main": BUSY})  # no state for control: no error
 
     header = window.panels["control"].header
-    assert header.title == "CONTROL"
+    assert header.title == "Control"
     assert header.badge is None, "It has not been given a state yet."
 
 
@@ -322,54 +331,43 @@ def spacers(item):
     ]
 
 
-def test_a_queue_in_a_section_is_labelled_with_how_many_are_waiting(gui_context):
-    window = TaskManagerWindow(["main", "control"])
+def test_a_queue_has_no_label_of_its_own(gui_context):
+    """Nothing breaks up the active task from the tasks waiting behind it."""
+    for names in (["main", "control"], ["main"]):
+        window = TaskManagerWindow(names)
+        window.update({"main": QUEUED, **({"control": IDLE} if len(names) > 1 else {})})
 
-    window.update({"main": QUEUED, "control": IDLE})
+        shown = texts(window.panels["main"].queue_tag)
 
-    assert texts(window.panels["main"].queue_tag)[:2] == ["QUEUE", "2 waiting"]
-    assert texts(window.panels["control"].queue_tag) == ["QUEUE", "empty"]
-
-
-def test_the_queue_label_follows_the_queue(gui_context):
-    window = TaskManagerWindow(["main", "control"])
-    window.update({"main": QUEUED, "control": IDLE})
-
-    window.update({"main": {**QUEUED, "queue": QUEUE[:1]}, "control": IDLE})
-    assert texts(window.panels["main"].queue_tag)[:2] == ["QUEUE", "1 waiting"]
-
-    window.update({"main": IDLE, "control": IDLE})
-    assert texts(window.panels["main"].queue_tag) == ["QUEUE", "empty"]
+        assert "QUEUE" not in shown and "Queue:" not in texts(window.window_tag)
+        assert not any("waiting" in t for t in shown)
 
 
-def test_the_queue_is_further_from_the_next_section_than_from_its_own_card(gui_context):
-    """It must read as belonging to the card above it, not to the header below."""
-    window = TaskManagerWindow(["main", "control"])
+def test_an_empty_queue_shows_nothing(gui_context):
+    window = TaskManagerWindow(["main"])
+    window.update({"main": IDLE})
 
-    for state in (IDLE, QUEUED):
-        window.update({"main": state, "control": IDLE})
-        above, *_, below = spacers(window.panels["main"].queue_tag)
-        assert (above, below) == (GAP_ABOVE_QUEUE, GAP_BELOW_QUEUE)
-        assert below >= above * 8, "Much further from the next section than from its card."
+    assert texts(window.panels["main"].queue_tag) == []
+    assert "-" not in texts(window.window_tag)
 
 
-def test_the_gap_below_a_queue_is_the_last_thing_in_it(gui_context):
+def test_the_gap_below_a_queue_in_a_section_is_the_last_thing_in_the_section(gui_context):
     window = TaskManagerWindow(["main", "control"])
     window.update({"main": QUEUED, "control": IDLE})
+    panel = window.panels["main"]
 
-    last = dpg.get_item_children(window.panels["main"].queue_tag, 1)[-1]
+    last = dpg.get_item_children(panel.section_tag, 1)[-1]
 
     assert dpg.get_item_type(last).endswith("mvSpacer")
-    assert dpg.get_item_configuration(last)["height"] >= 12
+    assert dpg.get_item_configuration(last)["height"] == GAP_BELOW_QUEUE
 
 
-def test_with_one_manager_the_queue_has_no_extra_label_or_gap(gui_context):
+def test_with_one_manager_the_queue_has_no_gap_below_it(gui_context):
     window = TaskManagerWindow()
 
     window.update({"main": QUEUED})
 
-    assert "QUEUE" not in texts(window.panels["main"].queue_tag)
-    assert GAP_BELOW_QUEUE not in spacers(window.panels["main"].queue_tag)
+    assert window.panels["main"].gap_tag is None
 
 
 # --- the header of each task manager ---
@@ -382,8 +380,8 @@ def header_of(window, name):
 @pytest.mark.parametrize(
     "state, badge, style",
     [
-        (IDLE, "IDLE", "idle"),
-        (BUSY, "RUNNING", "running"),
+        (IDLE, None, "idle"),
+        (BUSY, None, "idle"),
         ({**BUSY, "status": "Paused"}, "PAUSED", "paused"),
         ({**IDLE, "status": "Paused"}, "PAUSED", "paused"),
         ({**BUSY, "status": "Paused", "aborting": True}, "ABORTING", "aborting"),
@@ -399,14 +397,19 @@ def test_the_badge_and_colour_show_the_state(gui_context, state, badge, style):
     assert (header.badge, header.style) == (badge, style)
 
 
-def test_the_header_and_the_card_agree_on_colour(gui_context):
+def test_the_header_is_only_coloured_when_the_task_is_paused_or_aborting(gui_context):
+    """Like the Live Data header, it is plain grey while all is well, and the card
+    below it is the colour of the state."""
     window = TaskManagerWindow(["main", "control"])
 
-    for state in (BUSY, {**BUSY, "status": "Paused"}, ABORTING, IDLE):
+    for state, style in (
+        (BUSY, "idle"),
+        ({**BUSY, "status": "Paused"}, "paused"),
+        (ABORTING, "aborting"),
+        (IDLE, "idle"),
+    ):
         window.update({"main": state, "control": IDLE})
-        panel = window.panels["main"]
-        if panel.header.style != "paused" or state is not IDLE:
-            assert panel.header.style == panel.card_style
+        assert window.panels["main"].header.style == style
 
 
 def test_the_header_names_the_running_task(gui_context):
@@ -419,9 +422,9 @@ def test_the_header_names_the_running_task(gui_context):
     assert header_of(window, "main").subtitle == "nothing running"
 
 
-def test_the_names_of_the_task_managers_are_in_capitals(gui_context):
+def test_the_names_of_the_task_managers_start_with_a_capital(gui_context):
     window = TaskManagerWindow(["main", "furnace_pid"])
-    assert header_of(window, "furnace_pid").title == "FURNACE_PID"
+    assert header_of(window, "furnace_pid").title == "Furnace_pid"
 
 
 def test_the_window_has_no_title_bar_of_its_own(gui_context):
@@ -464,15 +467,16 @@ def test_the_header_is_as_wide_as_the_window_allows(gui_context, monkeypatch):
     header = header_of(window, "main")
 
     window.update({"main": IDLE, "control": IDLE})
-    assert header.width == 400 - 16, "The window's width less its padding."
+    page = DEFAULT_PAGE_WIDTH  # there is no viewport to lay it out in
+    assert header.width == page - 16, "The window's width less its padding."
 
     monkeypatch.setattr(dpg, "get_y_scroll_max", lambda item: 500)  # a scroll bar
     window.update({"main": IDLE, "control": IDLE})
-    assert header.width == 400 - 16 - 14, "It must not make the window scroll sideways."
+    assert header.width == page - 16 - 14, "It must not make the window scroll sideways."
 
     monkeypatch.setattr(dpg, "get_y_scroll_max", lambda item: 0)
     window.update({"main": IDLE, "control": IDLE})
-    assert header.width == 400 - 16
+    assert header.width == page - 16
 
 
 # --- the card that shows the active task ---
@@ -482,8 +486,11 @@ def card_texts(panel):
     return texts(panel.card_tag)
 
 
-def card_theme(panel):
-    return dpg.get_item_theme(panel.card_tag)
+def card_colors(style):
+    """The strip and the tint of the card of a state."""
+    from pyacquisition.gui.constants import STATE_STYLES
+
+    return STATE_STYLES[style]["border"], STATE_STYLES[style]["background"]
 
 
 def test_the_active_task_is_shown_in_full_in_a_card(gui_context):
@@ -529,7 +536,7 @@ def test_the_card_is_green_while_running(gui_context):
 
     panel = window.panels["main"]
     assert panel.card_style == "running"
-    assert card_theme(panel) == panel._themes["running"]
+    assert panel.card_colors == card_colors("running")
 
 
 def test_the_card_is_amber_while_paused(gui_context):
@@ -538,7 +545,7 @@ def test_the_card_is_amber_while_paused(gui_context):
 
     panel = window.panels["main"]
     assert panel.card_style == "paused"
-    assert card_theme(panel) == panel._themes["paused"]
+    assert panel.card_colors == card_colors("paused")
     assert "PAUSED" in card_texts(panel)
     assert "RUNNING" not in card_texts(panel)
 
@@ -552,7 +559,7 @@ def test_the_card_is_red_while_the_task_is_being_aborted(gui_context):
 
     panel = window.panels["main"]
     assert panel.card_style == "aborting"
-    assert card_theme(panel) == panel._themes["aborting"]
+    assert panel.card_colors == card_colors("aborting")
     assert "ABORTING" in card_texts(panel)
     assert "PAUSED" not in card_texts(panel), "It is not just paused."
 
@@ -578,7 +585,7 @@ def test_the_card_is_grey_when_nothing_is_running(gui_context):
 
     control = window.panels["control"]
     assert control.card_style == "idle"
-    assert card_theme(control) == control._themes["idle"]
+    assert control.card_colors == card_colors("idle")
     assert card_texts(control) == ["Idle: nothing is running"]
 
 
@@ -608,7 +615,7 @@ def test_the_card_follows_the_task_through_its_states(gui_context):
     assert panel.card_style == "paused"
     window.update({"main": BUSY, "control": IDLE})
     assert panel.card_style == "running"
-    assert card_theme(panel) == panel._themes["running"]
+    assert panel.card_colors == card_colors("running")
 
 
 def test_the_card_shows_live_values_as_they_change(gui_context):
@@ -634,28 +641,29 @@ def test_a_task_with_no_description_or_parameters_still_gets_a_card(gui_context)
     assert card_texts(window.panels["main"]) == ["RUNNING", "Bare"]
 
 
-# --- the pause and resume button on the card ---
+# --- the pause and resume icon in the header ---
 
 
 def toggle_label(panel):
-    return dpg.get_item_label(panel.toggle_tag)
+    """The icon in the header: `pause` offers to pause, and `play` to resume."""
+    return panel.header.action
 
 
 def press(panel):
-    """Press the button, as a click would."""
-    dpg.get_item_callback(panel.toggle_tag)(panel.toggle_tag, None, None)
+    """Press the icon in the header, as a click would."""
+    panel.header.on_action()
 
 
 def test_the_button_offers_to_pause_a_running_task_manager(gui_context):
     window = TaskManagerWindow(["main", "control"])
     window.update({"main": BUSY, "control": IDLE})
-    assert toggle_label(window.panels["main"]) == "Pause"
+    assert toggle_label(window.panels["main"]) == "pause"
 
 
 def test_the_button_offers_to_resume_a_paused_task_manager(gui_context):
     window = TaskManagerWindow(["main", "control"])
     window.update({"main": {**BUSY, "status": "Paused"}, "control": IDLE})
-    assert toggle_label(window.panels["main"]) == "Resume"
+    assert toggle_label(window.panels["main"]) == "play"
 
 
 def test_an_idle_task_manager_has_a_button_too(gui_context):
@@ -668,8 +676,8 @@ def test_an_idle_task_manager_has_a_button_too(gui_context):
         }
     )
 
-    assert toggle_label(window.panels["main"]) == "Pause"
-    assert toggle_label(window.panels["control"]) == "Resume"
+    assert toggle_label(window.panels["main"]) == "pause"
+    assert toggle_label(window.panels["control"]) == "play"
 
 
 def test_the_button_follows_the_task_manager_between_pause_and_resume(gui_context):
@@ -677,9 +685,9 @@ def test_the_button_follows_the_task_manager_between_pause_and_resume(gui_contex
     panel = window.panels["main"]
 
     for status, label in [
-        ("Running", "Pause"),
-        ("Paused", "Resume"),
-        ("Running", "Pause"),
+        ("Running", "pause"),
+        ("Paused", "play"),
+        ("Running", "pause"),
     ]:
         window.update({"main": {**BUSY, "status": status}, "control": IDLE})
         assert toggle_label(panel) == label
@@ -691,13 +699,13 @@ def test_the_button_is_not_rebuilt_when_the_card_is_refreshed(gui_context):
     window = TaskManagerWindow(["main", "control"])
     panel = window.panels["main"]
     window.update({"main": BUSY, "control": IDLE})
-    button, title, body = panel.toggle_tag, panel.title_tag, panel.body_tag
+    button, title, body = panel.abort_tag, panel.title_tag, panel.body_tag
 
     for value in (1.0, 2.0, 3.0):
         task = {**RUNNING_TASK, "parameters": {"value": value}}
         window.update({"main": {**BUSY, "current_task": task}, "control": IDLE})
 
-    assert panel.toggle_tag == button
+    assert panel.abort_tag == button
     assert dpg.does_item_exist(button)
     assert (panel.title_tag, panel.body_tag) == (title, body)
     assert "3" in [t.strip() for t in card_texts(panel)], "The card itself did refresh."
@@ -763,7 +771,8 @@ def test_each_queued_task_has_a_remove_button(gui_context):
     panel = window.panels["main"]
     assert set(panel.remove_tags) == {"id-a", "id-b"}
     for button in panel.remove_tags.values():
-        assert dpg.get_item_label(button) == "Remove"
+        assert dpg.get_item_label(button) == "X"
+        assert dpg.get_item_theme(button) == window.panels["main"]._x_theme
 
 
 def test_an_empty_queue_has_no_remove_buttons(gui_context):
@@ -1018,17 +1027,46 @@ def test_a_queued_task_without_an_id_gets_no_arrows(gui_context):
     assert set(window.panels["main"].move_tags) == {"id-a"}
 
 
-def test_the_arrows_sit_beside_the_remove_button(gui_context):
-    pressed = []
+def test_the_arrows_are_one_above_the_other_under_the_remove_button(gui_context):
     window = TaskManagerWindow(
-        ["main", "control"], on_move=lambda *a: None, on_remove=lambda *a: pressed.append(a)
+        ["main", "control"], on_move=lambda *a: None, on_remove=lambda *a: None
     )
     window.update({"main": THREE_QUEUED, "control": IDLE})
 
     panel = window.panels["main"]
     up, down = arrows(panel, "id-b")
     remove = panel.remove_tags["id-b"]
-    assert dpg.get_item_parent(up) == dpg.get_item_parent(down) == dpg.get_item_parent(remove)
+    assert dpg.get_item_parent(up) == dpg.get_item_parent(down)
+    for button in (up, down):
+        assert dpg.get_item_configuration(button)["width"] == X_SIZE, "One column."
+    assert dpg.get_item_configuration(up)["direction"] == dpg.mvDir_Up
+    assert dpg.get_item_configuration(down)["direction"] == dpg.mvDir_Down
+    column = dpg.get_item_parent(remove)
+    below = dpg.get_item_children(column, 1)
+    assert below[0] == remove and below[-1] == dpg.get_item_parent(up)
+    (gap,) = [i for i in below[1:-1]]
+    assert dpg.get_item_type(gap).endswith("mvSpacer")
+    assert dpg.get_item_configuration(gap)["height"] == X_ARROW_GAP > 0
+    assert dpg.get_item_children(dpg.get_item_parent(up), 1) == [up, down]
+
+
+def test_a_line_under_the_active_card_matches_the_one_under_the_header(gui_context):
+    window = TaskManagerWindow(["main", "control"])
+    window.update({"main": BUSY, "control": IDLE})
+    panel = window.panels["main"]
+
+    children = dpg.get_item_children(panel.section_tag, 1)
+    assert children.index(panel._rule_list) == children.index(panel.card_tag) + 1
+    assert dpg.get_item_configuration(panel._rule_list)["height"] == 1
+    assert dpg.get_item_configuration(panel._rule_list)["width"] == panel.header.width
+    grey = dpg.get_item_configuration(panel._rule)["color"]
+    assert grey == dpg.get_item_configuration(panel.header._rule)["color"]
+
+    window.update({"main": {**BUSY, "status": "Paused"}, "control": IDLE})
+    assert dpg.get_item_configuration(panel._rule)["color"] != grey
+    assert dpg.get_item_configuration(panel._rule)["color"] == (
+        dpg.get_item_configuration(panel.header._rule)["color"]
+    )
 
 
 def test_the_queue_is_empty_of_arrows_when_nothing_is_waiting(gui_context):
@@ -1074,9 +1112,13 @@ def press_abort(panel):
     dpg.get_item_callback(panel.abort_tag)(panel.abort_tag, None, None)
 
 
-def test_the_abort_button_is_labelled_abort(gui_context):
+def test_the_abort_button_is_a_red_square_with_an_x(gui_context):
     window = TaskManagerWindow(["main", "control"])
-    assert dpg.get_item_label(window.panels["main"].abort_tag) == "Abort"
+    panel = window.panels["main"]
+    config = dpg.get_item_configuration(panel.abort_tag)
+    assert dpg.get_item_label(panel.abort_tag) == "X"
+    assert config["width"] == config["height"], "A square."
+    assert dpg.get_item_theme(panel.abort_tag) == panel._x_theme
 
 
 def test_the_abort_button_works_while_a_task_is_running_or_paused(gui_context):
@@ -1169,27 +1211,56 @@ def test_the_abort_button_is_not_rebuilt_when_the_card_is_refreshed(gui_context)
     assert panel.abort_tag == button and dpg.does_item_exist(button)
 
 
-def test_the_buttons_sit_side_by_side(gui_context):
-    window = TaskManagerWindow(["main", "control"])
-    panel = window.panels["main"]
-    assert dpg.get_item_parent(panel.toggle_tag) == dpg.get_item_parent(panel.abort_tag)
+# --- with one task manager, the running task is shown in full too ---
 
 
-def test_with_one_manager_there_is_no_abort_button(gui_context):
-    window = TaskManagerWindow()
-    assert not hasattr(window.panels["main"], "abort_tag")
-
-
-def test_with_one_manager_there_is_no_button(gui_context):
-    window = TaskManagerWindow()
-    assert not hasattr(window.panels["main"], "toggle_tag")
-
-
-def test_with_one_manager_there_is_no_card(gui_context):
+def test_with_one_manager_the_running_task_is_shown_in_full(gui_context):
+    """It used to be in the header only: its name, and nothing of what it was doing."""
     window = TaskManagerWindow()
     window.update({"main": BUSY})
 
-    assert not hasattr(window.panels["main"], "card_tag")
+    shown = [t.strip() for t in card_texts(window.panels["main"])]
+
+    assert "WaitFor" in shown
+    assert "Wait for 0 hours, 5 minutes" in shown, "its description"
+    assert {"minutes", "5", "value", "37.31"} <= set(shown), "and its inputs"
+
+
+def test_with_one_manager_the_card_is_coloured_by_the_state(gui_context):
+    window = TaskManagerWindow()
+    panel = window.panels["main"]
+
+    window.update({"main": BUSY})
+    assert panel.card_colors == card_colors("running")
+
+    window.update({"main": {**BUSY, "status": "Paused"}})
+    assert panel.card_colors == card_colors("paused")
+
+    window.update({"main": IDLE})
+    assert panel.card_colors == card_colors("idle")
+    assert "Idle: nothing is running" in [t.strip() for t in card_texts(panel)]
+
+
+def test_with_one_manager_the_header_has_pause_and_the_card_abort(gui_context):
+    pressed = []
+    window = TaskManagerWindow(
+        on_toggle=lambda name, paused: pressed.append(("toggle", name, paused)),
+        on_abort=lambda name, task: pressed.append(("abort", name, task)),
+    )
+    window.update({"main": BUSY})
+    panel = window.panels["main"]
+
+    press(panel)
+    dpg.get_item_callback(panel.abort_tag)(panel.abort_tag, None, None)
+
+    assert pressed == [("toggle", "main", False), ("abort", "main", "WaitFor")]
+    assert panel.header.action == "pause"
+
+
+def test_with_one_manager_the_header_is_not_collapsible(gui_context):
+    window = TaskManagerWindow()
+
+    assert not window.panels["main"].header.collapsible
 
 
 @pytest.mark.parametrize(
@@ -1212,178 +1283,7 @@ def test_format_value(value, shown):
 def test_the_window_fills_the_height_of_the_viewport(gui_context):
     window = TaskManagerWindow(["main", "control"])
     window.update({"main": IDLE, "control": IDLE})
-    assert dpg.get_item_configuration(window.window_tag)["height"] == 800
-
-
-# ---------------------------------------------------------------------------
-# The menus
-# ---------------------------------------------------------------------------
-
-
-def menu_tree(label):
-    """The labels in a menu of the viewport menu bar, as nested lists."""
-
-    def walk(item):
-        entries = []
-        for child in dpg.get_item_children(item, 1) or []:
-            kind = dpg.get_item_type(child)
-            if kind.endswith("mvMenu"):
-                entries.append((dpg.get_item_label(child).strip(), walk(child)))
-            elif kind.endswith("mvMenuItem"):
-                entries.append(dpg.get_item_label(child).strip())
-        return entries
-
-    for item in dpg.get_all_items():
-        if dpg.get_item_type(item).endswith("mvMenu") and (
-            dpg.get_item_label(item) == label
-        ):
-            return walk(item)
-    raise AssertionError(f"No {label} menu")
-
-
-def menu_items(label):
-    """Every menu item under a menu, by label."""
-    found = {}
-
-    def walk(item):
-        for child in dpg.get_item_children(item, 1) or []:
-            kind = dpg.get_item_type(child)
-            if kind.endswith("mvMenuItem"):
-                found[dpg.get_item_label(child).strip()] = child
-            elif kind.endswith("mvMenu"):
-                walk(child)
-
-    for item in dpg.get_all_items():
-        if dpg.get_item_type(item).endswith("mvMenu") and (
-            dpg.get_item_label(item) == label
-        ):
-            walk(item)
-    return found
-
-
-SUMMARIES = {
-    "Pause",
-    "Resume",
-    "Abort Current Task",
-    "Remove Task",
-    "Clear All Tasks",
-    "Status",
-    "Current Task",
-    "Task List",
-}
-
-
-def test_with_one_manager_the_menus_are_flat_as_before(gui_context, schema):
-    gui = Gui()
-    gui._populate_task_manager(schema, ["main"])
-    gui._populate_tasks(schema, ["main"])
-
-    assert set(menu_tree("Task Manager")) == SUMMARIES
-    tasks = menu_tree("Tasks")
-    assert {"Newfile", "Waitfor", "Waituntil", "Hold"} <= set(tasks)
-    assert not any(isinstance(entry, tuple) for entry in tasks), "No submenus."
-
-
-def test_with_one_manager_popups_are_titled_as_before(gui_context, schema):
-    gui = Gui()
-    gui._populate_task_manager(schema, ["main"])
-
-    pause = menu_items("Task Manager")["Pause"]
-    assert dpg.get_item_user_data(pause)["title"] is None
-
-
-def test_with_several_managers_each_has_a_submenu_of_controls(gui_context, schema):
-    gui = Gui()
-    gui._populate_task_manager(schema, ["main", "control"])
-
-    tree = dict(menu_tree("Task Manager"))
-    assert set(tree) == {"main", "control"}
-    assert set(tree["main"]) == SUMMARIES
-    assert set(tree["control"]) == SUMMARIES
-
-
-def test_each_manager_has_a_submenu_of_the_tasks_registered_on_it(gui_context, schema):
-    gui = Gui()
-    gui._populate_tasks(schema, ["main", "control"])
-
-    tree = dict(menu_tree("Tasks"))
-    assert {"Newfile", "Waitfor", "Waituntil", "Hold"} == set(tree["main"])
-    assert {"Newfile", "Waitfor", "Waituntil", "Hold", "Tune"} == set(tree["control"])
-
-
-def test_a_manager_with_no_tasks_has_no_submenu_in_the_tasks_menu(gui_context, schema):
-    gui = Gui()
-
-    gui._populate_tasks(schema, ["main", "control", "empty"])  # "empty" has none
-
-    assert set(dict(menu_tree("Tasks"))) == {"main", "control"}
-
-
-def test_popups_are_titled_with_their_manager_so_they_can_be_told_apart(
-    gui_context, schema
-):
-    gui = Gui()
-    gui._populate_task_manager(schema, ["main", "control"])
-    gui._populate_tasks(schema, ["main", "control"])
-
-    pauses = [
-        dpg.get_item_user_data(item)
-        for item in dpg.get_all_items()
-        if dpg.get_item_type(item).endswith("mvMenuItem")
-        and dpg.get_item_label(item).strip() == "Pause"
-    ]
-    assert {p["title"] for p in pauses} == {"main: Pause", "control: Pause"}
-
-    hold = [
-        dpg.get_item_user_data(item)
-        for item in dpg.get_all_items()
-        if dpg.get_item_type(item).endswith("mvMenuItem")
-        and dpg.get_item_label(item).strip() == "Hold"
-    ]
-    assert {h["title"] for h in hold} == {"main: Hold", "control: Hold"}
-    # and the path each one sends its request to is the right one
-    assert {h["path"].path for h in hold} == {
-        "/tasks/hold",
-        "/managers/control/tasks/hold",
-    }
-
-
-def test_an_instrument_menu_does_not_include_a_longer_named_instrument(
-    gui_context, tmp_path
-):
-    """'furnace' must not pick up the endpoints of 'furnace_pid'."""
-    from pyacquisition.instruments.software import Clock
-
-    experiment = Experiment(root_path=str(tmp_path), gui=False)
-    for uid in ["furnace", "furnace_pid"]:
-        Clock(uid).register_endpoints(experiment._api_server)
-    schema = Schema(experiment._api_server.app.openapi())
-
-    gui = Gui()
-    gui._fetch_instruments = lambda: {"furnace": {}, "furnace_pid": {}}
-    gui._populate_instruments(schema)
-
-    for uid in ["furnace", "furnace_pid"]:
-        entries = {
-            dpg.get_item_user_data(child)["path"].path
-            for child in dpg.get_item_children(_submenu("Instruments", uid), 1)
-            if dpg.get_item_type(child).endswith("mvMenuItem")
-        }
-        assert entries, uid
-        assert all(path.startswith(f"/{uid}/") for path in entries), uid
-
-
-def _submenu(menu_label, submenu_label):
-    for item in dpg.get_all_items():
-        if dpg.get_item_type(item).endswith("mvMenu") and (
-            dpg.get_item_label(item) == menu_label
-        ):
-            for child in dpg.get_item_children(item, 1):
-                if dpg.get_item_type(child).endswith("mvMenu") and (
-                    dpg.get_item_label(child).strip() == submenu_label
-                ):
-                    return child
-    raise AssertionError(f"No {submenu_label} in {menu_label}")
+    assert dpg.get_item_configuration(window.window_tag)["height"] == 900 - 40
 
 
 # ---------------------------------------------------------------------------
@@ -1720,3 +1620,158 @@ def test_a_failed_move_is_logged_and_does_not_raise():
     gui._move_queued_task("control", "id-b", "Second", "up")  # no error
 
     assert gui.task_window.updates == []
+
+
+
+# --- a queued task is a grey card with a bold edge, with its lines packed close ---
+
+
+def ancestors(item):
+    while item:
+        yield item
+        item = dpg.get_item_parent(item)
+
+
+def queued_window(*tasks, **options):
+    window = TaskManagerWindow(["main"], **options)
+    window.update({"main": {"status": "Running", "current_task": None, "queue": list(tasks)}})
+    return window
+
+
+def task(id_, name="Hold", description="Hold it", parameters=None):
+    return {"id": id_, "name": name, "description": description, "parameters": parameters}
+
+
+def test_each_queued_task_is_a_card(gui_context):
+    window = queued_window(task("a"), task("b"), task("c"))
+
+    panel = window.panels["main"]
+
+    assert len(panel.card_tags) == 3
+    for card in panel.card_tags:
+        assert dpg.get_item_type(card).endswith("mvTable")
+        assert dpg.get_item_parent(card) == panel.queue_tag
+
+
+def test_a_card_has_a_bold_edge_at_its_left_and_a_grey_background(gui_context, monkeypatch):
+    """The edge and the background are the two cells of the card, coloured."""
+    coloured = []
+    monkeypatch.setattr(dpg, "highlight_table_cell", lambda *args: coloured.append(args))
+
+    window = queued_window(task("a"))
+
+    (card,) = window.panels["main"].card_tags
+    assert [c for c in coloured if c[0] == card] == [
+        (card, 0, 0, QUEUED_ACCENT),
+        (card, 0, 1, QUEUED_BACKGROUND),
+    ]
+    edge, body = dpg.get_item_children(card, 0)
+    assert dpg.get_item_configuration(edge)["width_fixed"] is True
+    assert dpg.get_item_configuration(edge)["init_width_or_weight"] == ACCENT_WIDTH
+    assert dpg.get_item_configuration(body)["width_stretch"] is True
+
+
+def test_the_edge_is_as_bold_as_the_accent_of_a_header_and_blue():
+    """As thick as a header's edge, and a brighter blue than the card."""
+    assert ACCENT_WIDTH == 5
+    r, g, b = QUEUED_ACCENT
+    assert b > r and b > g, "Blue."
+    assert b > QUEUED_BACKGROUND[2] + 60, "Brighter than the card, so that it shows."
+
+
+def test_the_background_is_a_dark_blue():
+    r, g, b = QUEUED_BACKGROUND
+    assert b > r and 20 < b < 70, "Blue, and lighter than the window."
+
+
+def test_a_queued_card_is_blue_and_the_active_card_is_green(gui_context):
+    window = queued_window(task("a"))
+    window.update(
+        {"main": {**BUSY, "queue": [task("a")]}}
+    )
+    panel = window.panels["main"]
+
+    assert panel.card_colors == card_colors("running")
+    assert panel.card_colors[0][1] > panel.card_colors[0][0], "Green."
+    assert QUEUED_ACCENT[2] > QUEUED_ACCENT[1] > QUEUED_ACCENT[0], "Blue."
+
+
+def test_the_header_is_flat_with_a_white_title(gui_context):
+    window = TaskManagerWindow(["main"])
+    header = window.panels["main"].header
+
+    assert header.flat
+    assert dpg.get_item_configuration(header._accent)["show"] is False
+    assert dpg.get_item_configuration(header._rule)["show"] is True
+
+
+def test_the_text_of_a_task_is_in_its_card(gui_context):
+    window = queued_window(
+        task("a", "SetTemperature", "Ramp and hold.", {"kelvin": 4.5, "hold": 600})
+    )
+
+    (card,) = window.panels["main"].card_tags
+
+    shown = [t.strip() for t in texts(card)]
+    assert {"[0]", "SetTemperature", "Ramp and hold.", "kelvin", "4.5", "hold", "600"} <= set(shown)
+
+
+def test_the_buttons_of_a_task_are_in_its_card(gui_context):
+    window, _ = window_with_remove(names=("main",), on_move=lambda *a: None)
+    window.update({"main": QUEUED})
+
+    panel = window.panels["main"]
+    for card, (task_id, remove) in zip(panel.card_tags, panel.remove_tags.items()):
+        assert card in ancestors(remove)
+        up, down = panel.move_tags[task_id]
+        assert card in ancestors(up) and card in ancestors(down)
+
+
+def test_the_lines_of_a_card_are_packed_close(gui_context):
+    """Four pixels apart is the default. It took too much room in a long queue."""
+    window = queued_window(task("a", parameters={"kelvin": 4.5}))
+    panel = window.panels["main"]
+    (card,) = panel.card_tags
+
+    theme = dpg.get_item_theme(card)
+    (component,) = dpg.get_item_children(theme, 1)
+    styles = [list(dpg.get_value(i)) for i in dpg.get_item_children(component, 1)]
+
+    assert theme == panel._card_theme
+    assert [6.0, 1.0] in styles, "The lines are one pixel apart."
+    assert [0.0, 0.0] in styles, "The cells have no padding, so the colour fills them."
+
+
+def test_the_cards_are_as_close_together_as_in_the_live_data_window(gui_context):
+    window = queued_window(task("a"), task("b"))
+
+    assert spacers(window.panels["main"].queue_tag) == [], "Only the spacing between."
+    component = dpg.get_item_children(window._spacing_theme, 1)[0]
+    (spacing,) = dpg.get_item_children(component, 1)
+    assert list(dpg.get_value(spacing))[:2] == [6.0, float(CARD_SPACING)]
+    assert CARD_SPACING == 1
+
+
+def test_a_task_with_no_description_or_inputs_is_only_its_name(gui_context):
+    window = queued_window(task("a", "Hold", description="", parameters=None))
+
+    (card,) = window.panels["main"].card_tags
+
+    assert [t.strip() for t in texts(card)] == ["[0]", "Hold"]
+
+
+def test_the_cards_are_made_again_when_the_queue_changes(gui_context):
+    window = queued_window(task("a"), task("b"))
+    old = list(window.panels["main"].card_tags)
+
+    window.update({"main": {"status": "Running", "current_task": None, "queue": [task("b")]}})
+
+    panel = window.panels["main"]
+    assert len(panel.card_tags) == 1
+    assert not any(dpg.does_item_exist(card) for card in old)
+
+
+def test_an_empty_queue_has_no_cards(gui_context):
+    window = queued_window()
+
+    assert window.panels["main"].card_tags == []

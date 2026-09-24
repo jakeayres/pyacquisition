@@ -5,6 +5,7 @@ from ..constants import STATE_STYLES, WHITE
 CAPTION_COLOR = (150, 170, 200)
 SUBTITLE_COLOR = (190, 190, 190)
 BADGE_TEXT_COLOR = (10, 10, 10)
+ACTION_WIDTH = 34  # the space at the right that the play or pause icon takes
 
 # The default font is a small pixel font, 7 pixels a character and 13 high. It is
 # only sharp at that size and on whole pixels, so everything in a header is drawn at
@@ -35,6 +36,21 @@ def fit(text: str, max_width: int) -> str:
         return text
     keep = int(max_width // CHAR_WIDTH) - 3
     return text[:keep] + "..." if keep > 0 else ""
+
+
+def fit_start(text: str, max_width: int) -> str:
+    """
+    Shorten text with `...` at its start so that it fits in a width, keeping its end,
+    which is what tells one path from another. It is unchanged if it fits.
+
+    Args:
+        text (str): The text.
+        max_width (int): The width available, in pixels.
+    """
+    if text_width(text) <= max_width:
+        return text
+    keep = int(max_width // CHAR_WIDTH) - 3
+    return "..." + text[-keep:] if keep > 0 else ""
 
 
 class PaneHeader:
@@ -69,6 +85,11 @@ class PaneHeader:
         style: str = "neutral",
         collapsible: bool = False,
         on_collapse=None,
+        flat: bool = False,
+        title_font=None,
+        title_size: int = TEXT_HEIGHT,
+        on_action=None,
+        action: str = "pause",
     ) -> None:
         """
         Args:
@@ -84,7 +105,24 @@ class PaneHeader:
             collapsible (bool): Whether clicking the header collapses the pane. It
                 is shown by a chevron.
             on_collapse: Called with whether the pane is now collapsed.
+            flat (bool): Draw no tinted background, but a line along the bottom in
+                the colour of the state. For a header inside a frame that is coloured
+                by the same state, which it is then a part of. It has no bar at its
+                left either.
+            title_font: A font for the title, which is then larger, or `None` for
+                the default font. The default font is only sharp at its own size.
+            title_size (int): The height of the text of `title_font`, in pixels, for
+                placing it.
+            on_action: If given, the header has a play or pause icon at its right, and
+                this is called, with no arguments, when it is clicked.
+            action (str): Which icon it starts with: `pause`, two bars, for something
+                that is running, or `play`, a triangle, for something that is paused.
         """
+        self.flat = flat
+        self.title_font = title_font
+        self.title_size = title_size
+        self.on_action = on_action
+        self.action = action
         self.width = width
         self.height = self.HEIGHT_WITH_CAPTION if caption is not None else self.HEIGHT
         self.collapsible = collapsible
@@ -102,6 +140,10 @@ class PaneHeader:
                 dpg.add_theme_style(
                     dpg.mvStyleVar_WindowPadding, 0, 0, category=dpg.mvThemeCat_Core
                 )
+                if flat:  # nothing behind it, so it is as clear as the pane
+                    dpg.add_theme_color(
+                        dpg.mvThemeCol_ChildBg, (0, 0, 0, 0), category=dpg.mvThemeCat_Core
+                    )
         self.container = dpg.add_child_window(
             parent=parent,
             width=width,
@@ -120,12 +162,20 @@ class PaneHeader:
         self._accent = dpg.draw_rectangle(
             (0, 0), (5, self.height), parent=self.drawlist
         )
+        self._rule = dpg.draw_line(
+            (0, 0), (0, 0), thickness=1, show=flat, parent=self.drawlist
+        )
         self._caption = dpg.draw_text(
             (0, 0), "", size=TEXT_HEIGHT, color=CAPTION_COLOR, parent=self.drawlist
         )
         self._title = dpg.draw_text(
             (0, 0), "", size=TEXT_HEIGHT, color=WHITE, parent=self.drawlist
         )
+        self._title_item = None
+        if title_font is not None:
+            # A drawing cannot take a font, so the title is a text on top of it.
+            self._title_item = dpg.add_text("", color=WHITE, parent=self.container)
+            dpg.bind_item_font(self._title_item, title_font)
         self._subtitle = dpg.draw_text(
             (0, 0), "", size=TEXT_HEIGHT, color=SUBTITLE_COLOR, parent=self.drawlist
         )
@@ -142,9 +192,21 @@ class PaneHeader:
             self._chevron = dpg.draw_triangle(
                 (0, 0), (0, 0), (0, 0), color=WHITE, fill=WHITE, parent=self.drawlist
             )
+        # The icon is a triangle for play and two bars for pause, of which only one
+        # kind is shown.
+        self._play = dpg.draw_triangle(
+            (0, 0), (0, 0), (0, 0), color=WHITE, fill=WHITE, show=False, parent=self.drawlist
+        )
+        self._bars = [
+            dpg.draw_rectangle(
+                (0, 0), (0, 0), color=WHITE, fill=WHITE, show=False, parent=self.drawlist
+            )
+            for _ in range(2)
+        ]
+        if collapsible or on_action is not None:
             with dpg.item_handler_registry() as self._handlers:
                 dpg.add_item_clicked_handler(
-                    button=dpg.mvMouseButton_Left, callback=self._toggle
+                    button=dpg.mvMouseButton_Left, callback=self._clicked
                 )
             dpg.bind_item_handler_registry(self.drawlist, self._handlers)
 
@@ -192,19 +254,43 @@ class PaneHeader:
         dpg.configure_item(self.drawlist, width=width)
         self._layout()
 
-    def fit_to(self, window) -> None:
+    def fit_to(self, window, inset: int = 0) -> None:
         """
         Make the header the width of the space in a window, allowing for its scroll
         bar, so that it never makes the window scroll sideways.
 
         Args:
             window: The window that holds the header.
+            inset (int): How much narrower the header is than the window's own space,
+                because it is in a frame with a border, for example.
         """
-        width = dpg.get_item_configuration(window)["width"] - 16  # window padding
+        width = (
+            dpg.get_item_configuration(window)["width"] - 16 - inset
+        )  # window padding
         if dpg.get_y_scroll_max(window) > 0:
             width -= 14  # the scroll bar
         if width > 60 and width != self.width:
             self.resize(width)
+
+    def set_action(self, action: str) -> None:
+        """
+        Show the play or pause icon.
+
+        Args:
+            action (str): `pause` or `play`.
+        """
+        self.action = action
+        self._layout()
+
+    def _clicked(self, sender=None, app_data=None, user_data=None) -> None:
+        """The header was clicked: on the icon, if it has one, or anywhere else."""
+        if self.on_action is not None:
+            x, _ = dpg.get_drawing_mouse_pos()
+            if x >= self.width - ACTION_WIDTH:
+                self.on_action()
+                return
+        if self.collapsible:
+            self._toggle()
 
     def _toggle(self, sender=None, app_data=None, user_data=None) -> None:
         """The header was clicked."""
@@ -219,13 +305,48 @@ class PaneHeader:
         colours = STATE_STYLES[self.style]
         accent, tint = colours["border"], colours["background"]
 
+        if self.flat:
+            clear = (0, 0, 0, 0)
+            dpg.configure_item(
+                self._background, pmax=(width, height), color=clear, fill=clear
+            )
+            dpg.configure_item(
+                self._rule, p1=(0, height - 1), p2=(width, height - 1), color=accent
+            )
+        else:
+            dpg.configure_item(
+                self._background, pmax=(width, height), color=tint, fill=tint
+            )
         dpg.configure_item(
-            self._background, pmax=(width, height), color=tint, fill=tint
+            self._accent,
+            pmax=(5, height),
+            color=accent,
+            fill=accent,
+            show=not self.flat,
         )
-        dpg.configure_item(self._accent, pmax=(5, height), color=accent, fill=accent)
 
         left = 36 if self.collapsible else 16
         right = width - 10
+
+        playing = self.action == "play"
+        if self.on_action is not None:
+            # Two bars if it is running, and a triangle if it is paused.
+            x, y = width - ACTION_WIDTH + 10, height // 2
+            dpg.configure_item(
+                self._play,
+                p1=(x, y - 7),
+                p2=(x, y + 7),
+                p3=(x + 12, y),
+                show=playing,
+            )
+            for i, bar in enumerate(self._bars):
+                dpg.configure_item(
+                    bar,
+                    pmin=(x + i * 8, y - 7),
+                    pmax=(x + i * 8 + 4, y + 7),
+                    show=not playing,
+                )
+            right = width - ACTION_WIDTH
 
         if self._chevron is not None:
             # Pointing down while the pane is open, and right when it is collapsed.
@@ -238,7 +359,7 @@ class PaneHeader:
 
         if self.badge:
             badge_width = text_width(self.badge) + 18
-            x = width - badge_width - 10
+            x = right - badge_width
             y = (height - self.BADGE_HEIGHT) // 2
             dpg.configure_item(
                 self._badge_rect,
@@ -267,9 +388,23 @@ class PaneHeader:
             dpg.configure_item(self._caption, show=False)
 
         title = fit(self.title, right - left)
-        dpg.configure_item(self._title, pos=(left, title_y), text=title)
+        if self._title_item is not None:
+            dpg.set_value(self._title_item, title)
+            dpg.set_item_pos(
+                self._title_item, (left, (height - self.title_size) // 2)
+            )
+            dpg.configure_item(self._title, show=False)
+        else:
+            dpg.configure_item(self._title, pos=(left, title_y), text=title)
 
-        subtitle_left = left + text_width(title) + 14
+        title_width = text_width(title)
+        if self._title_item is not None:
+            # The font is monospace, and a character of it is a little over half as
+            # wide as the text is high.
+            title_width = round(len(title) * self.title_size * 0.6)
+        subtitle_left = left + title_width + 14
+        if self._title_item is not None:
+            title_y = (height - TEXT_HEIGHT) // 2  # level with the middle of the title
         subtitle = fit(self.subtitle, right - subtitle_left) if self.subtitle else ""
         dpg.configure_item(
             self._subtitle,

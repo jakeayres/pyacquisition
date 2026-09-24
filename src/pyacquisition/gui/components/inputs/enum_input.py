@@ -11,7 +11,7 @@ class EnumInput(BaseInput):
         """
         Initialize the EnumInput.
 
-        :param label: The label for the dropdown.
+        :param label: The name of the parameter.
         :param options: A list of valid options for the dropdown.
         :param default_value: The default selected value (must be in options).
         """
@@ -23,12 +23,6 @@ class EnumInput(BaseInput):
         super().__init__(label, default_value)
         self.options = options
 
-    def draw(self) -> None:
+    def draw(self, parent: str | None = None, width: int = -1) -> None:
         """Draw the enum input (dropdown) on the specified parent."""
-        dpg.add_combo(
-            label=self.label,
-            items=self.options,
-            default_value=self.default_value,
-            indent=10,
-            tag=self.uuid,
-        )
+        return dpg.add_combo(items=self.options, **self._options(parent, width))

@@ -8,11 +8,6 @@ class IntegerInput(BaseInput):
     def __init__(self, label: str, default_value: int = 0) -> None:
         super().__init__(label, default_value)
 
-    def draw(self) -> None:
+    def draw(self, parent: str | None = None, width: int = -1) -> None:
         """Draw the integer input on the specified parent."""
-        dpg.add_input_int(
-            label=self.label,
-            default_value=self.default_value,
-            indent=10,
-            tag=self.uuid,
-        )
+        return dpg.add_input_int(**self._options(parent, width), step=0)
