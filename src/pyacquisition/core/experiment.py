@@ -14,6 +14,7 @@ from .task_manager.task_manager import TaskManager
 from .task_manager.task import Task
 from .scribe import Scribe
 from .history import History
+from .log_history import LogHistory
 from ..gui import Gui
 from .. import new_gui
 from ..instruments import instrument_map
@@ -135,6 +136,10 @@ class Experiment:
         self._log_path: Path = self._root_path / Path(options["log_path"])
         self._log_file_name: Path = Path(options["log_file_name"])
 
+        # The recent log messages, for the new GUI. Made before logging is
+        # configured, so the first messages are kept too.
+        self._log_history = LogHistory(logger)
+
         # configure logging
         logger.configure(
             root_path=self._log_path,
@@ -207,6 +212,10 @@ class Experiment:
 
         self._api_server.add_websocket_endpoint("/data")
         self._api_server.websocket_endpoints["/data"].subscribe_to(self._rack)
+
+        self._api_server.add_websocket_endpoint(
+            "/stream/logs", encode=lambda entry: entry
+        ).subscribe_to(self._log_history)
 
         self._api_server.add_websocket_endpoint("/logs")
         self._api_server.websocket_endpoints["/logs"].subscribe_to(logger)
@@ -709,6 +718,7 @@ class Experiment:
                 tg.create_task(self._run_component(self._calculations))
                 tg.create_task(self._run_component(self._scribe))
                 tg.create_task(self._run_component(self._history))
+                tg.create_task(self._run_component(self._log_history))
                 for task_manager in self._task_managers.values():
                     tg.create_task(self._run_component(task_manager))
                 if self._run_gui:
@@ -724,6 +734,7 @@ class Experiment:
                 await self._calculations.shutdown()
                 await self._scribe.shutdown()
                 await self._history.shutdown()
+                await self._log_history.shutdown()
                 for task_manager in self._task_managers.values():
                     await task_manager.shutdown()
 

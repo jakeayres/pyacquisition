@@ -1,9 +1,14 @@
 from loguru import logger as loguru_logger
 from threading import Lock
+from collections import deque
 import sys
 import time
 from pathlib import Path
 from .broadcaster import Broadcaster
+
+# How many of the latest broadcast messages the logger keeps, so a listener that
+# starts late (the new GUI's log history, see core/log_history.py) can catch up.
+RECENT_MESSAGES = 5000
 
 
 class Logger(Broadcaster):
@@ -39,6 +44,8 @@ class Logger(Broadcaster):
         super().__init__()
         self._initialized = True
         self._gui_level = "NONE"
+        self.sent = 0  # the number of messages broadcast so far
+        self._recent = deque(maxlen=RECENT_MESSAGES)  # (number, message)
         self._sinks = []  # the loguru handlers added by the last `configure`
 
     def _should_broadcast(self, level: str) -> bool:
@@ -47,8 +54,16 @@ class Logger(Broadcaster):
         )
 
     def _send(self, level: str, message: str) -> None:
-        """Broadcasts the message."""
-        self.broadcast_sync({"time": time.time(), "message": message, "level": level})
+        """Keeps the message among the recent ones, and broadcasts it."""
+        sent = {"time": time.time(), "message": message, "level": level}
+        self.sent += 1
+        self._recent.append((self.sent, sent))
+        self.broadcast_sync(sent)
+
+    def recent_since(self, number: int) -> list[dict]:
+        """The messages broadcast after the one numbered `number` (as `sent` was
+        then), as far back as they are still kept."""
+        return [message for n, message in self._recent if n > number]
 
     def configure(
         self,
