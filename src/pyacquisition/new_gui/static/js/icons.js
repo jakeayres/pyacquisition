@@ -99,6 +99,18 @@ export const FolderIcon = () =>
 
 export const PauseIcon = () => stroke(html`<path d="M9 5v14M15 5v14" />`, { width: 2.25 });
 
+// Six dots: a handle to drag something by.
+export const GripIcon = () => html`
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <circle cx="9" cy="6" r="1.6" />
+    <circle cx="15" cy="6" r="1.6" />
+    <circle cx="9" cy="12" r="1.6" />
+    <circle cx="15" cy="12" r="1.6" />
+    <circle cx="9" cy="18" r="1.6" />
+    <circle cx="15" cy="18" r="1.6" />
+  </svg>
+`;
+
 export const PlusIcon = () => stroke(html`<path d="M12 5v14M5 12h14" />`);
 
 // Aborting a task.

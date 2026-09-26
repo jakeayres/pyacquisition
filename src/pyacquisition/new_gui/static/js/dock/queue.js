@@ -1,20 +1,24 @@
 // The Queue tab: each task manager, with its state, the task it is running and
 // the tasks waiting, and the controls the classic Task Queue page has: pause and
 // resume, abort (after asking), and remove or move a queued task. Clearing the
-// queue is here too, after asking.
+// queue is here too, after asking, and so are dragging a task to a new place and
+// duplicating one (milestone 11).
 //
 // The state is polled (useManagers), and fetched again straight after anything
 // done here, so it shows at once.
-import { useState } from "preact/hooks";
+import { useLayoutEffect, useRef, useState } from "preact/hooks";
 import { html } from "../html.js";
 import { usePolled } from "../hooks.js";
 import { managerAction, managerStates } from "../api.js";
 import { ConfirmDialog } from "../confirm.js";
 import { AddTaskDialog } from "./add-task.js";
+import { dropIndex, reorder, useQueueDrag } from "./queue-drag.js";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   CloseIcon,
+  CopyIcon,
+  GripIcon,
   PauseIcon,
   PlayIcon,
   PlusIcon,
@@ -22,6 +26,9 @@ import {
 } from "../icons.js";
 
 const CHECK = 1000; // milliseconds between checks of the task managers
+// How long a new order made here is shown before the server's is trusted again,
+// if the server never catches up (the move was refused, say).
+const PENDING_FOR = 3000;
 
 // Every task manager's state, by name, kept current while connected.
 export function useManagers(connection) {
@@ -51,6 +58,13 @@ export function formatParameter(value) {
 }
 
 const title = (name) => name.charAt(0).toUpperCase() + name.slice(1);
+
+// The tasks in the order of `ids`, with any not in it (queued since) after them.
+function inOrder(tasks, ids) {
+  const byId = new Map(tasks.map((t) => [t.id, t]));
+  const ordered = ids.filter((id) => byId.has(id)).map((id) => byId.get(id));
+  return [...ordered, ...tasks.filter((t) => !ids.includes(t.id))];
+}
 
 function Parameters({ parameters }) {
   const entries = Object.entries(parameters ?? {});
@@ -101,7 +115,7 @@ function LastResult({ manager }) {
   `;
 }
 
-function RunningTask({ manager, state, onAbort }) {
+function RunningTask({ manager, state, onAbort, onDuplicate }) {
   const task = manager.current_task;
   if (!task) {
     return html`
@@ -116,6 +130,14 @@ function RunningTask({ manager, state, onAbort }) {
         <span class="state-badge" data-state=${state}>${STATE_LABELS[state]}</span>
         <span class="task-name">${task.name}</span>
         <button
+          class="icon-button running-again"
+          aria-label=${`Queue ${task.name} again`}
+          title="Queue again, to run next"
+          onClick=${() => onDuplicate(task)}
+        >
+          <${CopyIcon} />
+        </button>
+        <button
           class="button button-small button-danger-quiet"
           disabled=${manager.aborting}
           onClick=${onAbort}
@@ -129,9 +151,26 @@ function RunningTask({ manager, state, onAbort }) {
   `;
 }
 
-function QueuedTask({ task, index, count, onMove, onRemove }) {
+function QueuedTask({ task, index, count, drag, onDragStart, onKey, onMove, onRemove, onDuplicate }) {
+  const dragged = drag?.id === task.id;
+  // The line where a dragged task would go: before this row, or after the last.
+  const moves = drag && dropIndex(drag.from, drag.gap) !== drag.from;
+  const lineBefore = moves && drag.gap === index;
+  const lineAfter = moves && drag.gap === count && index === count - 1;
   return html`
-    <li class="queued-task" data-task-id=${task.id}>
+    <li
+      class="queued-task ${dragged ? "dragged" : ""} ${lineBefore ? "drop-before" : ""} ${lineAfter ? "drop-after" : ""}"
+      data-task-id=${task.id}
+    >
+      <button
+        class="drag-handle"
+        aria-label=${`Drag ${task.name} to a new place`}
+        title="Drag to reorder (or use the arrow keys)"
+        onPointerDown=${(event) => onDragStart(event, task.id, index)}
+        onKeyDown=${(event) => onKey(event, task, index)}
+      >
+        <${GripIcon} />
+      </button>
       <span class="queued-index">${index + 1}</span>
       <div class="queued-body">
         <span class="task-name" title=${task.description ?? ""}>${task.name}</span>
@@ -157,6 +196,14 @@ function QueuedTask({ task, index, count, onMove, onRemove }) {
           <${ChevronDownIcon} />
         </button>
         <button
+          class="icon-button"
+          aria-label=${`Duplicate ${task.name}`}
+          title="Duplicate (the copy goes straight after it)"
+          onClick=${() => onDuplicate(task)}
+        >
+          <${CopyIcon} />
+        </button>
+        <button
           class="icon-button remove-button"
           aria-label=${`Remove ${task.name}`}
           title="Remove from the queue"
@@ -172,8 +219,44 @@ function QueuedTask({ task, index, count, onMove, onRemove }) {
 function ManagerPanel({ name, manager, single, act, ask, onAdd }) {
   const state = stateOf(manager);
   const paused = manager.status === "Paused";
-  const queue = manager.queue ?? [];
   const label = single ? "Task queue" : title(name);
+  const list = useRef(null);
+  const refocus = useRef(null); // the task whose handle had the focus, as it moved
+
+  // A new order made here is shown at once, until the server's state has it.
+  // Checked at each render, which the polling brings every second.
+  const [pending, setPending] = useState(null); // {ids, since}
+  const served = manager.queue ?? [];
+  const showing =
+    pending &&
+    pending.ids.join() !== served.map((t) => t.id).join() &&
+    Date.now() - pending.since < PENDING_FOR;
+  const queue = showing ? inOrder(served, pending.ids) : served;
+  const ids = queue.map((t) => t.id);
+
+  const place = (id, from, to) => {
+    setPending({ ids: reorder(ids, from, to), since: Date.now() });
+    act(name, "place_queued_task", { task_id: id, index: to });
+  };
+  const { drag, start } = useQueueDrag(list, place);
+
+  // On a handle: the arrow keys move the task a place, and Home and End to
+  // either end, keeping the focus on it as it goes.
+  const onKey = (event, task, index) => {
+    const to = { ArrowUp: index - 1, ArrowDown: index + 1, Home: 0, End: queue.length - 1 }[event.key];
+    if (to === undefined) return;
+    event.preventDefault();
+    if (to < 0 || to >= queue.length || to === index) return;
+    refocus.current = task.id;
+    place(task.id, index, to);
+  };
+  useLayoutEffect(() => {
+    if (!refocus.current) return;
+    list.current?.querySelector(`[data-task-id="${refocus.current}"] .drag-handle`)?.focus();
+    refocus.current = null;
+  });
+
+  const duplicate = (task) => act(name, "duplicate_queued_task", { task_id: task.id });
 
   const abort = () =>
     ask({
@@ -223,7 +306,7 @@ function ManagerPanel({ name, manager, single, act, ask, onAdd }) {
         </div>
       </header>
       <${LastResult} manager=${manager} />
-      <${RunningTask} manager=${manager} state=${state} onAbort=${abort} />
+      <${RunningTask} manager=${manager} state=${state} onAbort=${abort} onDuplicate=${duplicate} />
       <div class="queue-head">
         <span class="queue-count">
           ${queue.length === 0 ? "Nothing queued" : `${queue.length} queued`}
@@ -233,7 +316,7 @@ function ManagerPanel({ name, manager, single, act, ask, onAdd }) {
       </div>
       ${queue.length > 0 &&
       html`
-        <ol class="queued-tasks" aria-label=${`${label}: queued tasks`}>
+        <ol class="queued-tasks ${drag ? "dragging" : ""}" ref=${list} aria-label=${`${label}: queued tasks`}>
           ${queue.map(
             (task, index) => html`
               <${QueuedTask}
@@ -241,6 +324,10 @@ function ManagerPanel({ name, manager, single, act, ask, onAdd }) {
                 task=${task}
                 index=${index}
                 count=${queue.length}
+                drag=${drag}
+                onDragStart=${start}
+                onKey=${onKey}
+                onDuplicate=${duplicate}
                 onMove=${(t, direction) =>
                   act(name, "move_queued_task", { task_id: t.id, direction })}
                 onRemove=${(t) => act(name, "remove_queued_task", { task_id: t.id })}
