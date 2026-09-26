@@ -67,7 +67,8 @@ def test_the_dock_has_four_tabs_with_values_open(page):
 def test_a_tab_shows_its_panel(page):
     page.page.get_by_role("tab", name="Logs").click()
 
-    expect(page.page.get_by_role("tabpanel")).to_contain_text("live log")
+    panel = page.page.get_by_role("tabpanel", name="Logs")
+    expect(panel.get_by_role("list", name="Log messages")).to_be_visible()
 
 
 def test_arrow_keys_move_between_tabs(page):

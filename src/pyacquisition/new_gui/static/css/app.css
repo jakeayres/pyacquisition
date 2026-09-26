@@ -923,6 +923,12 @@ body.resizing-dock {
   display: none;
 }
 
+/* A tab that scrolls itself (the Logs tab). */
+.dock-panel-fill {
+  overflow: hidden;
+  padding: 0;
+}
+
 .placeholder {
   margin: 0;
   color: var(--text-faint);
@@ -1022,6 +1028,310 @@ body.resizing-dock {
   stroke: var(--quantity, var(--series-other));
   stroke-width: 1.25;
   stroke-linejoin: round;
+}
+
+/* ----------------------------------------------------------------- logs tab */
+
+.logs {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.logs-toolbar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.level-filter {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+/* Each level's colour, for its badge, filter button and row. */
+[data-level="trace"] { --level: var(--level-trace); }
+[data-level="debug"] { --level: var(--level-debug); }
+[data-level="info"] { --level: var(--level-info); }
+[data-level="warning"] { --level: var(--level-warning); }
+[data-level="error"] { --level: var(--level-error); }
+[data-level="exception"] { --level: var(--level-exception); }
+
+.level-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.level-toggle:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.level-toggle[aria-pressed="true"] {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.level-dot {
+  width: 8px;
+  height: 8px;
+  border: 1.5px solid var(--level);
+  border-radius: 50%;
+}
+
+.level-toggle[aria-pressed="true"] .level-dot {
+  background: var(--level);
+}
+
+.level-count {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.level-toggle[aria-pressed="false"] .level-count {
+  color: var(--text-faint);
+}
+
+.logs-search {
+  display: inline-flex;
+  flex: 0 1 260px;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  min-width: 140px;
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--text-faint);
+}
+
+.logs-search:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.logs-search svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.logs-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: var(--text-sm);
+}
+
+.logs-count {
+  margin-left: auto;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.logs-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.logs-list {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  /* The tab keeps its own place as rows come and go (dock/logs.js). */
+  overflow-anchor: none;
+}
+
+.logs-list:focus-visible {
+  outline-offset: -2px;
+}
+
+.logs-spacer {
+  position: relative;
+  min-width: 100%;
+}
+
+.log-row {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--log-row-height);
+  padding: 0 var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  cursor: default;
+}
+
+.log-row:hover {
+  background: var(--surface-hover);
+}
+
+/* Warnings and errors stand out from the run of the log, faintly. */
+.log-row[data-level="warning"],
+.log-row[data-level="error"],
+.log-row[data-level="exception"] {
+  background: color-mix(in srgb, var(--level) 7%, transparent);
+}
+
+.log-row[data-level="warning"]:hover,
+.log-row[data-level="error"]:hover,
+.log-row[data-level="exception"]:hover {
+  background: color-mix(in srgb, var(--level) 12%, transparent);
+}
+
+.log-row.selected {
+  background: var(--accent-soft);
+  box-shadow: inset 2px 0 var(--accent);
+}
+
+.log-time {
+  flex: none;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.log-level {
+  flex: none;
+  width: 68px;
+  padding: 0 var(--space-1);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--level) 14%, transparent);
+  color: color-mix(in oklab, var(--level) 75%, var(--text));
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-strong);
+  line-height: 16px;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.log-source {
+  flex: none;
+  color: var(--text-muted);
+}
+
+.log-message {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--text);
+  text-overflow: ellipsis;
+}
+
+.log-row mark,
+.log-detail mark {
+  border-radius: 2px;
+  background: color-mix(in srgb, var(--warn) 30%, transparent);
+  color: inherit;
+}
+
+.logs-empty {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Shown while the list is held, away from the bottom. */
+.logs-latest {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: 14px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-overlay);
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.logs-latest:hover {
+  background: var(--surface-hover);
+}
+
+.logs-latest svg {
+  width: 14px;
+  height: 14px;
+}
+
+.logs-newer {
+  color: var(--text-muted);
+  font-weight: var(--weight-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.log-detail {
+  flex: none;
+  max-height: 40%;
+  overflow: auto;
+  padding: var(--space-2) var(--space-3);
+  border-top: var(--border-width) solid var(--border);
+  background: var(--bg);
+}
+
+.log-detail-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.log-detail-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+}
+
+.log-copied {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.log-detail-message {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
 }
 
 /* ------------------------------------------------------------------ dialogs */

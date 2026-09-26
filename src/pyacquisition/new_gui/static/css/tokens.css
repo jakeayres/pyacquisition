@@ -40,11 +40,21 @@
   --dock-min-height: 120px; /* the dock's smallest open height */
   --plot-min-height: 160px; /* the least the dock may leave for the plots */
   --resize-handle: 6px; /* the grab area along the dock's top edge */
+  --log-row-height: 22px; /* each line of the log (dock/logs.js reads it) */
 
   /* Motion */
   --duration-fast: 90ms;
   --duration: 160ms;
   --easing: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Log levels, from the status colours of whichever theme is on. A level is
+     always named in its badge too, never shown by colour alone. */
+  --level-trace: var(--text-faint);
+  --level-debug: var(--text-muted);
+  --level-info: var(--accent);
+  --level-warning: var(--warn);
+  --level-error: var(--bad);
+  --level-exception: var(--bad);
 }
 
 :root,

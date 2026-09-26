@@ -97,16 +97,38 @@ function asNumber(value) {
   return undefined;
 }
 
-export class DataStore {
+// Something components watch (with useStore): its listeners are told of changes
+// at most once a frame, however many there are.
+export class Watched {
   constructor() {
+    this.version = 0; // goes up with every change
+    this.listeners = new Set();
+    this.frame = null;
+  }
+
+  subscribe(listener) {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  changed() {
+    this.version += 1;
+    if (this.frame !== null) return;
+    this.frame = requestAnimationFrame(() => {
+      this.frame = null;
+      for (const listener of this.listeners) listener(this);
+    });
+  }
+}
+
+export class DataStore extends Watched {
+  constructor() {
+    super();
     this.seq = 0;
     this.maxRows = Infinity;
     this.latest = {}; // the last value of every column, numeric or not
     this.previous = null;
     this.current = new Segment();
-    this.version = 0; // goes up with every change
-    this.listeners = new Set();
-    this.frame = null;
   }
 
   get segments() {
@@ -181,19 +203,5 @@ export class DataStore {
 
   previousRows() {
     return this.previous ? this.previous.rows : 0;
-  }
-
-  subscribe(listener) {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
-  }
-
-  changed() {
-    this.version += 1;
-    if (this.frame !== null) return;
-    this.frame = requestAnimationFrame(() => {
-      this.frame = null;
-      for (const listener of this.listeners) listener(this);
-    });
   }
 }

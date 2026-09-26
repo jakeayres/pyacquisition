@@ -180,7 +180,7 @@ export function Dock({ tabs }) {
         </div>
       </div>
       <div
-        class="dock-panel"
+        class="dock-panel ${current.fill ? "dock-panel-fill" : ""}"
         id="dock-panel"
         role="tabpanel"
         aria-labelledby="dock-tab-${active}"

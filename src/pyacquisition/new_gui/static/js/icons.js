@@ -78,6 +78,14 @@ export const CopyIcon = () =>
 
 export const CloseIcon = () => stroke(html`<path d="M18 6L6 18M6 6l12 12" />`);
 
+export const SearchIcon = () =>
+  stroke(html`
+    <circle cx="11" cy="11" r="7" />
+    <path d="M20 20l-3.5-3.5" />
+  `);
+
+export const ArrowDownIcon = () => stroke(html`<path d="M12 5v14M6 13l6 6 6-6" />`);
+
 export const ChartIcon = () =>
   stroke(html`
     <path d="M3 3v18h18" />

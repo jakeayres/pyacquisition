@@ -3,8 +3,10 @@ import { useEffect, useState } from "preact/hooks";
 import { html } from "./html.js";
 import { columnInfo, experimentInfo } from "./api.js";
 import { DataStore } from "./store.js";
-import { startFeed } from "./feed.js";
+import { LogStore } from "./logs.js";
+import { dataFeed, logFeed } from "./feed.js";
 import { ValuesTab } from "./dock/values.js";
+import { LogsTab } from "./dock/logs.js";
 import { useConnection } from "./connection.js";
 import { useTheme } from "./theme.js";
 import { Dock } from "./dock.js";
@@ -19,8 +21,9 @@ const CONNECTION_LABELS = {
 };
 
 // The dock's tabs. Each milestone replaces one placeholder with the real thing.
+// A tab that `fill`s its panel scrolls itself, with no padding around it.
 const placeholder = (text) => html`<p class="placeholder">${text}</p>`;
-const dockTabs = ({ store, columns }) => [
+const dockTabs = ({ store, logs, columns }) => [
   {
     id: "values",
     label: "Values",
@@ -39,18 +42,19 @@ const dockTabs = ({ store, columns }) => [
   {
     id: "logs",
     label: "Logs",
-    content: placeholder("The live log arrives in milestone 7."),
+    fill: true,
+    content: html`<${LogsTab} store=${logs} />`,
   },
 ];
 
-// The data, kept up to date for as long as the page is open. The store is also
-// `window.pyacquisition.store`, for the browser tests and for poking at in the
-// developer tools.
-function useData() {
-  const [store] = useState(() => new DataStore());
+// A store, kept up to date by a feed for as long as the page is open, whichever
+// tab is showing. It is also `window.pyacquisition[name]`, for the browser tests
+// and for poking at in the developer tools.
+function useFed(name, Store, feed) {
+  const [store] = useState(() => new Store());
   useEffect(() => {
-    window.pyacquisition = { ...window.pyacquisition, store };
-    return startFeed(store, {
+    window.pyacquisition = { ...window.pyacquisition, [name]: store };
+    return feed(store, {
       onStatus: (status) => {
         store.status = status; // connecting, live or reconnecting
         store.changed();
@@ -59,6 +63,9 @@ function useData() {
   }, [store]);
   return store;
 }
+
+const useData = () => useFed("store", DataStore, dataFeed);
+const useLogs = () => useFed("logs", LogStore, logFeed);
 
 // What the experiment says about each column (its source and unit), fetched
 // again each time it connects, as it may have restarted with other columns.
@@ -116,6 +123,7 @@ export function App() {
   const name = useExperimentName(connection);
   const { theme, toggle } = useTheme();
   const store = useData();
+  const logs = useLogs();
   const columns = useColumns(connection);
   return html`
     <div class="app">
@@ -126,7 +134,7 @@ export function App() {
         onToggleTheme=${toggle}
       />
       <${PlotArea} store=${store} columns=${columns} theme=${theme} />
-      <${Dock} tabs=${dockTabs({ store, columns })} />
+      <${Dock} tabs=${dockTabs({ store, logs, columns })} />
     </div>
     <${CloseDialog} />
   `;
