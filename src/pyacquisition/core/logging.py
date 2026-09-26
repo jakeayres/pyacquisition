@@ -39,11 +39,16 @@ class Logger(Broadcaster):
         super().__init__()
         self._initialized = True
         self._gui_level = "NONE"
+        self._sinks = []  # the loguru handlers added by the last `configure`
 
     def _should_broadcast(self, level: str) -> bool:
         return (
             self.LOG_LEVELS[level.upper()] >= self.LOG_LEVELS[self._gui_level.upper()]
         )
+
+    def _send(self, level: str, message: str) -> None:
+        """Broadcasts the message."""
+        self.broadcast_sync({"time": time.time(), "message": message, "level": level})
 
     def configure(
         self,
@@ -64,22 +69,34 @@ class Logger(Broadcaster):
         """
         self._gui_level = gui_level
 
+        # Configuring again replaces the console and file output, rather than
+        # adding to them. (Each experiment configures the logger, and each sink
+        # has a thread of its own, so a process that made many experiments, as
+        # the tests do, wrote every message hundreds of times over.)
+        for sink in self._sinks:
+            loguru_logger.remove(sink)
+        self._sinks = []
+
         if console_level is not None:
-            loguru_logger.add(
-                sink=sys.stdout,
-                colorize=True,
-                level=console_level,
-                enqueue=True,
-                # format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+            self._sinks.append(
+                loguru_logger.add(
+                    sink=sys.stdout,
+                    colorize=True,
+                    level=console_level,
+                    enqueue=True,
+                    # format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+                )
             )
 
         if file_level is not None:
             log_file_path = root_path / file_name
-            loguru_logger.add(
-                sink=log_file_path,
-                level=file_level,
-                format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
-                enqueue=True,
+            self._sinks.append(
+                loguru_logger.add(
+                    sink=log_file_path,
+                    level=file_level,
+                    format="{time:YYYY-MM-DD at HH:mm:ss} | {level} | {message}",
+                    enqueue=True,
+                )
             )
         else:
             log_file_path = None
@@ -88,6 +105,11 @@ class Logger(Broadcaster):
         self.info(
             f"Logging configured: console level={console_level}, file level={file_level}, file name={log_file_path}, gui level={self._gui_level}"
         )
+
+    def flush(self) -> None:
+        """Waits until every message so far is written to the console and the
+        log file, which happens on a thread of their own."""
+        loguru_logger.complete()
 
     def info(self, message: str) -> None:
         """
@@ -98,9 +120,7 @@ class Logger(Broadcaster):
         """
         loguru_logger.info(message)
         if self._should_broadcast("INFO"):
-            self.broadcast_sync(
-                {"time": time.time(), "message": message, "level": "info"}
-            )
+            self._send("info", message)
 
     def debug(self, message: str) -> None:
         """
@@ -111,9 +131,7 @@ class Logger(Broadcaster):
         """
         loguru_logger.debug(message)
         if self._should_broadcast("DEBUG"):
-            self.broadcast_sync(
-                {"time": time.time(), "message": message, "level": "debug"}
-            )
+            self._send("debug", message)
 
     def trace(self, message: str) -> None:
         """
@@ -124,9 +142,7 @@ class Logger(Broadcaster):
         """
         loguru_logger.trace(message)
         if self._should_broadcast("TRACE"):
-            self.broadcast_sync(
-                {"time": time.time(), "message": message, "level": "trace"}
-            )
+            self._send("trace", message)
 
     def warning(self, message: str) -> None:
         """
@@ -137,9 +153,7 @@ class Logger(Broadcaster):
         """
         loguru_logger.warning(message)
         if self._should_broadcast("WARNING"):
-            self.broadcast_sync(
-                {"time": time.time(), "message": message, "level": "warning"}
-            )
+            self._send("warning", message)
 
     def error(self, message: str) -> None:
         """
@@ -150,9 +164,7 @@ class Logger(Broadcaster):
         """
         loguru_logger.error(message)
         if self._should_broadcast("ERROR"):
-            self.broadcast_sync(
-                {"time": time.time(), "message": message, "level": "error"}
-            )
+            self._send("error", message)
 
     def exception(self, message: str) -> None:
         """
@@ -163,9 +175,7 @@ class Logger(Broadcaster):
         """
         loguru_logger.exception(message)
         if self._should_broadcast("EXCEPTION"):
-            self.broadcast(
-                {"time": time.time(), "message": message, "level": "exception"}
-            )
+            self._send("exception", message)
 
 
 # Singleton instance

@@ -73,6 +73,7 @@ def test_logger_debug(temp_log_dir, logger_instance):
 
     logger_instance.debug("This is a debug message")
 
+    logger_instance.flush()  # written on a thread of its own
     log_file_path = os.path.join(temp_log_dir, log_file_name)
     with open(log_file_path, "r") as log_file:
         log_contents = log_file.read()
@@ -91,6 +92,7 @@ def test_logger_info(temp_log_dir, logger_instance):
 
     logger_instance.info("This is an info message")
 
+    logger_instance.flush()  # written on a thread of its own
     log_file_path = os.path.join(temp_log_dir, log_file_name)
     with open(log_file_path, "r") as log_file:
         log_contents = log_file.read()
@@ -109,6 +111,7 @@ def test_logger_debug_when_info(temp_log_dir, logger_instance):
 
     logger_instance.debug("This is a debug message")
 
+    logger_instance.flush()  # written on a thread of its own
     log_file_path = os.path.join(temp_log_dir, log_file_name)
     with open(log_file_path, "r") as log_file:
         log_contents = log_file.read()
@@ -129,6 +132,7 @@ def test_logger_warning(temp_log_dir, logger_instance):
 
     logger_instance.warning("This is a warning message")
 
+    logger_instance.flush()  # written on a thread of its own
     log_file_path = os.path.join(temp_log_dir, log_file_name)
     with open(log_file_path, "r") as log_file:
         log_contents = log_file.read()
@@ -149,6 +153,7 @@ def test_logger_error(temp_log_dir, logger_instance):
 
     logger_instance.error("This is an error message")
 
+    logger_instance.flush()  # written on a thread of its own
     log_file_path = os.path.join(temp_log_dir, log_file_name)
     with open(log_file_path, "r") as log_file:
         log_contents = log_file.read()
@@ -172,6 +177,7 @@ def test_logger_exception(temp_log_dir, logger_instance):
     except ValueError:
         logger_instance.exception("An exception occurred")
 
+    logger_instance.flush()  # written on a thread of its own
     log_file_path = os.path.join(temp_log_dir, log_file_name)
     with open(log_file_path, "r") as log_file:
         log_contents = log_file.read()
@@ -181,3 +187,17 @@ def test_logger_exception(temp_log_dir, logger_instance):
         assert "ValueError: This is a test exception" in log_contents, (
             "Exception details were not logged"
         )
+
+
+def test_configuring_again_replaces_the_output(temp_log_dir, logger_instance):
+    """Each experiment configures the logger; the output must not pile up."""
+    from loguru import logger as loguru_logger
+
+    for name in ("first.log", "second.log", "third.log"):
+        logger_instance.configure(root_path=temp_log_dir, file_name=name)
+
+    assert len(loguru_logger._core.handlers) == 2  # the console and third.log
+    logger_instance.info("only in the last file")
+    logger_instance.flush()
+    assert "only in the last file" in (temp_log_dir / "third.log").read_text()
+    assert "only in the last file" not in (temp_log_dir / "first.log").read_text()
