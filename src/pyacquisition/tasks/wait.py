@@ -14,7 +14,7 @@ class WaitFor(Task):
     task spends running.
 
     Attributes:
-        hours (int): The number of hours to wait. Defult is 0.
+        hours (int): The number of hours to wait. Default is 0.
         minutes (int): The number of minutes to wait. Default is 0.
         seconds (int): The number of seconds to wait. Default is 0.
 

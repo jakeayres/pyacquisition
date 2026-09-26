@@ -6,13 +6,14 @@ import weakref
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, fields, is_dataclass
 from enum import Enum
-from inspect import Signature, Parameter
-from typing import ClassVar, get_type_hints
+from inspect import Signature
+from typing import ClassVar
 
 from fastapi import HTTPException
 
-from ..instrument import enum_classes, resolve_enum_kwargs
+from ..instrument import resolve_enum_kwargs
 from ..logging import logger
+from .inputs import input_parameters
 
 # Runners that have been cancelled. Several tasks can share one runner (a subtask
 # that runs inside its parent does), so a cancel is sent once, however many of them
@@ -792,27 +793,12 @@ class Task:
                 not offered by the endpoint.
         """
 
-        try:
-            hints = get_type_hints(cls)
-        except Exception:  # noqa: BLE001 - fall back on the annotations as written
-            hints = {}
-        # An input that is an enum is asked for as text, which is resolved to the
-        # member (`"OUTPUT_1"`), because the form and the API offer only plain types.
-        fields_dict = {
-            field.name: (
-                str
-                if enum_classes(hints.get(field.name, field.type))
-                else hints.get(field.name, field.type)
-            )
-            for field in fields(cls)
-        }
         # Inputs that are fixed for this registration may be text for an enum too.
         fixed_kwargs = resolve_enum_kwargs(cls, fixed_kwargs)
-        params = [
-            Parameter(name, Parameter.POSITIONAL_OR_KEYWORD, annotation=type_)
-            for name, type_ in fields_dict.items()
-            if name not in fixed_kwargs
-        ]
+        # Each input with its default, what it is for and any choices, so that a
+        # form can be built from the API schema (see inputs.py). An enum is asked
+        # for as text (`"OUTPUT_1"`), which is resolved to the member.
+        params, fields_dict = input_parameters(cls, experiment, fixed_kwargs)
 
         async def task_endpoint(**kwargs):
             """
@@ -825,7 +811,12 @@ class Task:
                 kwargs = resolve_enum_kwargs(cls, kwargs)
             except ValueError as error:
                 raise HTTPException(status_code=422, detail=str(error)) from error
-            task = cls(**fixed_kwargs, **kwargs)
+            try:
+                task = cls(**fixed_kwargs, **kwargs)
+            except (TypeError, ValueError) as error:
+                # A task that checks its inputs as it is made (in __post_init__)
+                # says what is wrong with them, which is worth showing as it is.
+                raise HTTPException(status_code=422, detail=str(error)) from error
             queue = (
                 task_manager if task_manager is not None else experiment._task_manager
             )
@@ -852,4 +843,7 @@ class Task:
             task_endpoint,
             methods=["GET"],
             tags=["tasks"],
+            # The task's own name, rather than FastAPI's title case of it
+            # ("Waitfor"), for the interfaces' lists of tasks.
+            summary=task_endpoint.__name__,
         )
