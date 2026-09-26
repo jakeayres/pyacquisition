@@ -57,6 +57,19 @@ def _port(name, value):
     return value
 
 
+def _ports(name, value):
+    """A list of port numbers (a TOML array, or a list or tuple in Python)."""
+    if isinstance(value, (str, bytes)) or not isinstance(value, (list, tuple)):
+        raise ValueError(f"`{name}` must be a list of port numbers, got {value!r}")
+    for port in value:
+        if isinstance(port, bool) or not isinstance(port, int) or not 1 <= port <= 65535:
+            raise ValueError(
+                f"`{name}` must be a list of port numbers from 1 to 65535, "
+                f"got {port!r} in it"
+            )
+    return tuple(value)
+
+
 def _seconds(name, value):
     if (
         isinstance(value, bool)
@@ -147,6 +160,9 @@ SETTINGS = {
         Setting("gui_log_level", "DEBUG", _level, "logging", "gui_level"),
         Setting("api_server_host", "localhost", _text, "api_server", "host"),
         Setting("api_server_port", 8000, _port, "api_server", "port"),
+        Setting(
+            "api_server_fallback_ports", (), _ports, "api_server", "fallback_ports"
+        ),
         Setting("measurement_period", 0.25, _seconds, "rack", "period"),
         Setting("gui", True, _gui, "gui", "run"),
         Setting("auto_tasks", True, _flag, "experiment", "auto_tasks"),

@@ -141,6 +141,17 @@ The `[api_server]` section defines the properties of the FastAPI backend that ex
 |------------------------|--------------------------------------|------------------------|
 | `host`                 | Hostname for the API server.         | `localhost`            |
 | `port`                 | Port for the API server.             | `8000`                 |
+| `fallback_ports`       | Ports to try in turn if `port` is taken by another program. | `[]` (none) |
+
+With fallback ports, an experiment that finds its port taken, for example by another experiment already running, moves to the first free one instead of failing to start. The port it ends up on is logged, and the GUI connects to it by itself:
+
+```toml
+[api_server]
+port = 8000
+fallback_ports = [8001, 8002, 8003]
+```
+
+If every one of them is taken, the experiment stops before setting anything up, with an error that lists each port and why it couldn't be used.
 
 
 ## `[logging]` Section

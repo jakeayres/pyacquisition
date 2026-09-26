@@ -42,6 +42,16 @@ class Gui:
         self._popups = {}  # the endpoint window of each address
         self.pages = {}  # the windows of each page, by its name
 
+    @property
+    def port(self) -> int:
+        """The API server's port. The experiment sets it once the server has
+        claimed one, which may be a fallback port."""
+        return self.api_client.port
+
+    @port.setter
+    def port(self, value: int) -> None:
+        self.api_client.port = value
+
     def _fetch_openapi_schema(self):
         try:
             logger.debug("Fetching OpenAPI schema")

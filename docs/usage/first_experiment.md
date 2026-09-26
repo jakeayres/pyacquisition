@@ -85,7 +85,7 @@ Run it again and look in `my_data`. This time there is also a `01.00 start.data`
 ??? failure "Something not working?"
     - **`ModuleNotFoundError: No module named 'pyacquisition'`.** You ran the script with a Python that does not have it installed. Run it with `uv run my_experiment.py` from the project folder you made in [installation](installation.md).
     - **An error about a new process and bootstrapping (Windows).** The `if __name__ == "__main__":` line is missing, or `.run()` is outside it.
-    - **An error that an address is already in use.** Another experiment (or another program) is using the API port. Close it, or give this one a different port by adding `api_server_port = 8001` to your experiment class.
+    - **An error that the API server can't listen, because every port is taken.** Another experiment (or another program) is using the API port. Close it, or give this one a different port by adding `api_server_port = 8001` to your experiment class. To have it move to a free port by itself, list some to try: `api_server_fallback_ports = [8001, 8002, 8003]`.
     - **No window appears.** Look at the terminal for an error. The experiment needs a graphical desktop, unless you turn the interface off with `gui=False`.
 
 ## What you learned

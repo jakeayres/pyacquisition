@@ -3,6 +3,9 @@ from websockets.exceptions import ConnectionClosed
 import uvicorn
 import inspect
 import asyncio
+import errno
+import socket
+import sys
 from .logging import logger
 from .consumer import Consumer
 from . import windows_asyncio
@@ -88,6 +91,59 @@ class WebsocketEndpoint:
             pass
 
 
+class PortsUnavailable(OSError):
+    """None of the ports the API server may use could be had."""
+
+
+def bind_sockets(host: str, port: int) -> list[socket.socket]:
+    """Sockets bound to `port` on every address `host` names, as asyncio's own
+    `create_server` would bind them: "localhost" is both 127.0.0.1 and ::1, so
+    another program on either one means the port can't be used. All of them are
+    bound, or none: an address that can't be had closes those already bound, and
+    raises.
+
+    An address whose family the machine doesn't have (IPv6 turned off) is left
+    out, as asyncio does.
+    """
+    infos = socket.getaddrinfo(
+        host or None, port, type=socket.SOCK_STREAM, flags=socket.AI_PASSIVE
+    )
+    sockets = []
+    try:
+        seen = set()
+        for family, kind, proto, _, address in infos:
+            if (family, address) in seen:
+                continue
+            seen.add((family, address))
+            try:
+                sock = socket.socket(family, kind, proto)
+            except OSError:
+                continue  # a family this machine doesn't have
+            sockets.append(sock)
+            if sys.platform != "win32":
+                # As asyncio does: a port left in TIME_WAIT by the last run can
+                # be used again at once. (On Windows it would let another program
+                # take a port in use, and a restart works there without it.)
+                sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            if family == socket.AF_INET6:
+                sock.setsockopt(socket.IPPROTO_IPV6, socket.IPV6_V6ONLY, 1)
+            try:
+                sock.bind(address)
+            except OSError as e:
+                if e.errno == errno.EADDRNOTAVAIL:
+                    sockets.pop().close()  # the family isn't turned on
+                    continue
+                raise
+            sock.setblocking(False)
+        if not sockets:
+            raise OSError(errno.EADDRNOTAVAIL, f"no address to listen on for {host!r}")
+    except BaseException:
+        for sock in sockets:
+            sock.close()
+        raise
+    return sockets
+
+
 # Seconds that the server waits, once asked to stop, for its connections to close,
 # before it stops anyway. Without a limit, uvicorn waits for ever, and on Windows
 # a client that drops its connection at the wrong moment (such as a GUI window
@@ -101,10 +157,21 @@ class APIServer:
         self,
         host: str = "localhost",
         port: int = 8000,
+        fallback_ports: tuple[int, ...] = (),
         # allowed_cors_origins: list = ["http://localhost:3000"],
     ):
+        """
+        Args:
+            host (str): The address to listen on.
+            port (int): The port to listen on. Once `bind` has run, the port it
+                actually listens on.
+            fallback_ports (tuple[int, ...]): Ports to try in turn if `port` is
+                taken by another program.
+        """
         self.host = host
         self.port = port
+        self.fallback_ports = tuple(fallback_ports)
+        self._sockets = None  # bound by `bind`, then served by uvicorn
 
         self.app = FastAPI(
             title="PyAcquisition API",
@@ -174,23 +241,70 @@ class APIServer:
         logger.debug(f"[FastApi] Server setup started at {self.host}:{self.port}")
         logger.debug("[FastApi] Server setup completed")
 
+    def bind(self) -> int:
+        """
+        Claims the port to listen on: `port` if it is free, otherwise the first
+        free one of `fallback_ports`. Done before anything else starts (the GUI
+        needs to know the port), and by binding, not by checking, so nothing can
+        take the port in between. Calling it again changes nothing.
+
+        Returns:
+            int: The port, which `port` is now.
+
+        Raises:
+            PortsUnavailable: If none of the ports can be had.
+        """
+        if self._sockets is not None:
+            return self.port
+        wanted = self.port
+        refused = []
+        for port in dict.fromkeys((wanted, *self.fallback_ports)):
+            try:
+                self._sockets = bind_sockets(self.host, port)
+            except OSError as e:
+                refused.append(f"{port} ({e.strerror or e})")
+                logger.warning(f"[FastApi] Can't listen on port {port}: {e.strerror or e}")
+                continue
+            self.port = port
+            if port != wanted:
+                logger.warning(
+                    f"[FastApi] Port {wanted} is in use, so the API server is on "
+                    f"port {port} instead"
+                )
+            return port
+        raise PortsUnavailable(
+            f"The API server can't listen on {self.host}: every port it may use is "
+            f"taken: {', '.join(refused)}. Close whatever is using one, or choose "
+            "others with `api_server_port` and `api_server_fallback_ports`.",
+        )
+
+    def release(self) -> None:
+        """Lets go of the port, if the server claimed it and never ran (the
+        server closes it itself when it stops)."""
+        for sock in self._sockets or []:
+            sock.close()
+
     def run(self, experiment=None):
         """
-        A coroutine that runs the FastAPI server.
+        A coroutine that runs the FastAPI server, on the port `bind` claimed
+        (claiming it once it starts, if it hasn't been).
         """
+        return self._serve()
+
+    async def _serve(self) -> None:
+        self.bind()
+        config = uvicorn.Config(
+            self.app,
+            host=self.host,
+            port=self.port,
+            log_level="warning",
+            timeout_graceful_shutdown=SHUTDOWN_TIMEOUT,
+        )
+        self.server = uvicorn.Server(config)
         try:
-            config = uvicorn.Config(
-                self.app,
-                host=self.host,
-                port=self.port,
-                log_level="warning",
-                timeout_graceful_shutdown=SHUTDOWN_TIMEOUT,
-            )
-            self.server = uvicorn.Server(config)
-            return self.server.serve()
+            await self.server.serve(sockets=self._sockets)
         except Exception as e:
             logger.error(f"[FastApi] An error occurred while running the server: {e}")
-            return None
 
     async def teardown(self):
         """

@@ -65,6 +65,10 @@ class Experiment:
         gui_log_level (str): The logging level for GUI output. Defaults to "DEBUG".
         api_server_host (str): The host address for the API server. Defaults to "localhost".
         api_server_port (int): The port number for the API server. Defaults to 8000.
+        api_server_fallback_ports (list[int]): Ports to try in turn if
+            `api_server_port` is taken by another program, such as another
+            experiment. The port it ends up on is logged, and the GUI uses it.
+            Defaults to none, so a taken port stops the experiment starting.
         measurement_period (float): The time between measurements in seconds. Defaults to 0.25.
         gui (bool | str): Which GUI to run: True for the default one (the classic
             GUI for now), False for none, or "classic" or "new" by name. The new GUI
@@ -95,6 +99,7 @@ class Experiment:
         log_file_name: str | None = None,
         api_server_host: str | None = None,
         api_server_port: int | None = None,
+        api_server_fallback_ports: list[int] | tuple[int, ...] | None = None,
         measurement_period: float | None = None,
         gui: bool | str | None = None,
         sparkline_points: int | None = None,
@@ -124,6 +129,7 @@ class Experiment:
                 "log_file_name": log_file_name,
                 "api_server_host": api_server_host,
                 "api_server_port": api_server_port,
+                "api_server_fallback_ports": api_server_fallback_ports,
                 "measurement_period": measurement_period,
                 "gui": gui,
                 "sparkline_points": sparkline_points,
@@ -152,6 +158,7 @@ class Experiment:
         self._api_server = APIServer(
             host=options["api_server_host"],
             port=options["api_server_port"],
+            fallback_ports=options["api_server_fallback_ports"],
         )
 
         self._rack = Rack(
@@ -688,6 +695,14 @@ class Experiment:
 
         The main logic of the experiment is executed within this coroutine.
         """
+        # The port first, before anything is set up: if none can be had, the
+        # experiment stops here with nothing to undo. And the GUI must be told the
+        # port the server ends up on. (`run` logs the PortsUnavailable error,
+        # which says which ports were tried.)
+        port = self._api_server.bind()
+        self._gui.port = port
+        logger.info(f"[Experiment] API server on port {port}")
+
         try:
             self._register_endpoints(self._api_server)
             self.setup()
@@ -744,6 +759,7 @@ class Experiment:
                 for subexception in e.exceptions:
                     logger.exception(f"Subexception details: {e}")
         finally:
+            self._api_server.release()  # if it never got as far as serving
             try:
                 self._stop_gui()
             except Exception as e:
