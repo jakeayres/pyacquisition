@@ -10,12 +10,14 @@ import { html } from "../html.js";
 import { usePolled } from "../hooks.js";
 import { managerAction, managerStates } from "../api.js";
 import { ConfirmDialog } from "../confirm.js";
+import { AddTaskDialog } from "./add-task.js";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
   CloseIcon,
   PauseIcon,
   PlayIcon,
+  PlusIcon,
   StopIcon,
 } from "../icons.js";
 
@@ -167,7 +169,7 @@ function QueuedTask({ task, index, count, onMove, onRemove }) {
   `;
 }
 
-function ManagerPanel({ name, manager, single, act, ask }) {
+function ManagerPanel({ name, manager, single, act, ask, onAdd }) {
   const state = stateOf(manager);
   const paused = manager.status === "Paused";
   const queue = manager.queue ?? [];
@@ -208,6 +210,13 @@ function ManagerPanel({ name, manager, single, act, ask }) {
           ${STATE_LABELS[state]}
         </span>
         <div class="manager-actions">
+          <button
+            class="button button-small"
+            aria-label=${single ? "Add a task" : `Add a task to ${label}`}
+            onClick=${() => onAdd(name, label)}
+          >
+            <${PlusIcon} /> Add task
+          </button>
           <button class="button button-small" onClick=${() => act(name, paused ? "resume" : "pause")}>
             ${paused ? html`<${PlayIcon} /> Resume` : html`<${PauseIcon} /> Pause`}
           </button>
@@ -246,6 +255,7 @@ function ManagerPanel({ name, manager, single, act, ask }) {
 
 export function QueueTab({ managers }) {
   const [asking, setAsking] = useState(null); // the question being asked
+  const [adding, setAdding] = useState(null); // {name, label} of the manager being added to
   const [error, setError] = useState("");
   const states = managers.states;
 
@@ -275,10 +285,20 @@ export function QueueTab({ managers }) {
               single=${names.length === 1}
               act=${act}
               ask=${setAsking}
+              onAdd=${(name, label) => setAdding({ name, label })}
             />
           `,
         )}
       </div>
+      ${adding &&
+      html`
+        <${AddTaskDialog}
+          manager=${adding.name}
+          label=${names.length === 1 ? "" : adding.label}
+          onAdded=${managers.refresh}
+          onClose=${() => setAdding(null)}
+        />
+      `}
       ${asking &&
       html`
         <${ConfirmDialog}

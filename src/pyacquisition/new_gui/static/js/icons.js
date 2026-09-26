@@ -99,6 +99,8 @@ export const FolderIcon = () =>
 
 export const PauseIcon = () => stroke(html`<path d="M9 5v14M15 5v14" />`, { width: 2.25 });
 
+export const PlusIcon = () => stroke(html`<path d="M12 5v14M5 12h14" />`);
+
 // Aborting a task.
 export const StopIcon = () => stroke(html`<rect x="6" y="6" width="12" height="12" rx="1.5" />`);
 

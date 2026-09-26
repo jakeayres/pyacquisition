@@ -1546,6 +1546,170 @@ body.resizing-dock {
   color: var(--bad);
 }
 
+/* ------------------------------------------------------- adding a task, forms */
+
+.dialog.task-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(820px, 100%);
+  height: min(600px, 100%);
+  padding: var(--space-4);
+}
+
+.task-dialog-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.task-dialog-head h2 {
+  margin: 0;
+}
+
+.task-picker {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 260px minmax(0, 1fr);
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+.task-list-pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+}
+
+/* Two classes, to win over .logs-search's flex, which in a column would be a
+   height. */
+.logs-search.task-search {
+  flex: none;
+}
+
+.form-help code,
+.task-form-description code,
+.task-option-description code {
+  padding: 0 3px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-hover);
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+}
+
+.task-list {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.task-option {
+  display: flex;
+  flex-direction: column;
+  padding: 6px var(--space-2);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.task-option:hover {
+  background: var(--surface-hover);
+}
+
+.task-option[aria-selected="true"] {
+  background: var(--accent-soft);
+  box-shadow: inset 2px 0 var(--accent);
+}
+
+.task-option-name {
+  font-weight: var(--weight-medium);
+}
+
+.task-option-description {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.task-none {
+  padding: var(--space-2);
+}
+
+.task-form-pane {
+  min-height: 0;
+  overflow: auto;
+  padding-right: var(--space-1);
+}
+
+.task-form-title {
+  margin: 0;
+  font-size: var(--text-lg);
+}
+
+.dialog .task-form-description {
+  margin: var(--space-1) 0 var(--space-3);
+}
+
+.endpoint-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  max-width: 420px;
+  font-size: var(--text-sm);
+}
+
+.form-field > label {
+  font-weight: var(--weight-medium);
+}
+
+.form-required {
+  color: var(--bad);
+}
+
+.form-field .text-input[aria-invalid="true"] {
+  border-color: var(--bad);
+}
+
+.number-input {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.dialog .form-help,
+.form-help {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.dialog .form-error,
+.form-error {
+  margin: 0;
+  color: var(--bad);
+  font-size: var(--text-sm);
+}
+
+.form-buttons {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.dialog .form-added {
+  margin: var(--space-2) 0 0;
+  color: var(--good);
+  font-size: var(--text-sm);
+}
+
 /* ----------------------------------------------------------------- logs tab */
 
 .logs {

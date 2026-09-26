@@ -9,16 +9,35 @@ export async function get(path, { params, timeout = 5000 } = {}) {
   return response.json();
 }
 
-// The error for a request that failed: the server's own reason where it gives
-// one as text (FastAPI's `detail`), which is worth showing as it is.
+// The error for a request that failed, saying what the server said, as the
+// classic client's `describe_error` does: FastAPI gives a bad input as a list of
+// problems, each naming the input, which are also kept as `error.problems`
+// ([{name, message}]) so a form can show each by its field. Any other reason
+// it gives as text is shown as it is.
 async function failure(path, response) {
+  const status = response.status;
   try {
     const { detail } = await response.json();
     if (typeof detail === "string") return new Error(detail);
+    if (Array.isArray(detail)) {
+      const problems = detail.map((problem) => {
+        const where = (problem?.loc ?? []).map(String);
+        const name = ["query", "path"].includes(where[0]) ? where.at(-1) : "";
+        return { name, message: problem?.msg ?? "invalid" };
+      });
+      const error = new Error(
+        problems.map((p) => (p.name ? `${p.name}: ${p.message}` : p.message)).join("\n"),
+      );
+      error.problems = problems;
+      return error;
+    }
   } catch {
     // Not JSON: fall through to the status.
   }
-  return new Error(`${path} failed with status ${response.status}`);
+  if (status >= 500) {
+    return new Error(`The server had an error handling the request (HTTP ${status}).`);
+  }
+  return new Error(`${path} failed with status ${status}`);
 }
 
 export async function getBinary(path, { params, timeout = 5000 } = {}) {
