@@ -1,7 +1,9 @@
 from ..logging import logger
 from .task import Task
 import asyncio
+import dataclasses
 import math
+from fastapi import HTTPException
 from typing import Literal
 
 
@@ -79,6 +81,13 @@ class TaskManager:
                 pass
             except Exception as e:
                 logger.error(f"{self._tag} Error getting task from queue: {e}")
+
+            if self._current_task and not self._pause_event.is_set():
+                # Paused while waiting for a task: it goes back to the front of
+                # the queue, to start when the task manager is resumed.
+                self._task_queue._queue.appendleft(self._current_task)
+                self._current_task = None
+                continue
 
             if self._current_task:
                 task = self._current_task
@@ -320,6 +329,71 @@ class TaskManager:
         logger.info(f"{self._tag} Moved a task {direction} the queue")
         return True
 
+    def place_queued_task(self, task_id: str, index: int) -> bool:
+        """
+        Move a task to a place in the queue, given its id: 0 is the front, where it
+        runs next. An index past either end puts it at that end.
+
+        Like `move_queued_task`, it picks the task by its id, so it moves the right
+        one even if the queue has moved on since it was looked at.
+
+        Args:
+            task_id (str): The id of the task, as given in `state()`.
+            index (int): Where it goes, counting from 0 at the front.
+
+        Returns:
+            bool: Whether it moved. It does not if it is there already, or is no
+                longer in the queue because it has started or been removed.
+        """
+        queue = self._task_queue._queue
+        tasks = list(queue)
+        current = next((i for i, task in enumerate(tasks) if task._id == task_id), None)
+        if current is None:
+            logger.info(f"{self._tag} Task {task_id} is no longer in the queue")
+            return False
+        index = max(0, min(index, len(tasks) - 1))
+        if index == current:
+            return False
+        tasks.insert(index, tasks.pop(current))
+        queue.clear()
+        queue.extend(tasks)
+        logger.info(f"{self._tag} Moved a task to place {index + 1} in the queue")
+        return True
+
+    def duplicate_queued_task(self, task_id: str) -> str | None:
+        """
+        Queue a copy of a task, with the same inputs, straight after it. The copy
+        of the running task goes at the front of the queue, so it runs again next.
+
+        Args:
+            task_id (str): The id of the task, as given in `state()`.
+
+        Returns:
+            str | None: The copy's id, or None if the task is neither running nor
+                in the queue any more.
+
+        Raises:
+            TypeError: If the task can't be copied (it is not a dataclass, or has
+                inputs that aren't set when it is made).
+        """
+        queue = self._task_queue._queue
+        tasks = list(queue)
+        if self._current_task is not None and self._current_task._id == task_id:
+            original, index = self._current_task, 0
+        else:
+            found = next((i for i, task in enumerate(tasks) if task._id == task_id), None)
+            if found is None:
+                logger.info(f"{self._tag} Task {task_id} is no longer in the queue")
+                return None
+            original, index = tasks[found], found + 1
+        # A new task made from the same inputs, with an id and state of its own.
+        copy = dataclasses.replace(original)
+        tasks.insert(index, copy)
+        queue.clear()
+        queue.extend(tasks)
+        logger.info(f"{self._tag} Duplicated {original.name} in the queue")
+        return copy._id
+
     async def clear_tasks(self):
         """
         Clear all tasks from the queue.
@@ -441,6 +515,47 @@ class TaskManager:
                 "message": f"Task moved {direction}."
                 if moved
                 else "That task could not be moved.",
+            }
+
+        @api_server.app.get(
+            f"{self._path}/place_queued_task",
+            tags=[self._api_tag],
+            include_in_schema=False,
+        )
+        async def place_queued_task(task_id: str, index: int) -> dict:
+            """
+            Move the task with this id to a place in the queue, 0 being the front.
+            Its id is in the queue in `/managers/state`.
+            """
+            moved = self.place_queued_task(task_id, index)
+            return {
+                "status": "success",
+                "moved": moved,
+                "message": "Task moved." if moved else "That task was not moved.",
+            }
+
+        @api_server.app.get(
+            f"{self._path}/duplicate_queued_task",
+            tags=[self._api_tag],
+            include_in_schema=False,
+        )
+        async def duplicate_queued_task(task_id: str) -> dict:
+            """
+            Queue a copy of the task with this id straight after it (or at the front,
+            for the running task). Its id is in `/managers/state`.
+            """
+            try:
+                copy = self.duplicate_queued_task(task_id)
+            except (TypeError, ValueError) as error:
+                raise HTTPException(
+                    status_code=422, detail=f"That task can't be copied: {error}"
+                ) from error
+            return {
+                "status": "success",
+                "id": copy,
+                "message": "Task duplicated."
+                if copy
+                else "That task is no longer in the queue.",
             }
 
         @api_server.app.get(f"{self._path}/clear_tasks", tags=[self._api_tag])
