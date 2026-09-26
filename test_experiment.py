@@ -150,7 +150,8 @@ class MyExperiment(Experiment):
     data_path='data'
     log_path='logs'
     gui='new'
-    
+    api_server_fallback_ports=[8001, 8002, 8003]
+
     def setup(self):
         
         clock = Clock("clock")
