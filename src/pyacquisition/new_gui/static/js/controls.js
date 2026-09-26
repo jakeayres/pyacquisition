@@ -2,7 +2,7 @@
 // one), the measurements (pause, resume and how often), and shutting down.
 import { useEffect, useRef, useState } from "preact/hooks";
 import { html } from "./html.js";
-import { usePopover } from "./hooks.js";
+import { usePolled, usePopover } from "./hooks.js";
 import {
   nextFile,
   pauseRack,
@@ -40,28 +40,8 @@ export const formatPeriod = (seconds) => `${Number(seconds.toPrecision(3))} s`;
 // while connected (something else, such as a task, may change them), and at
 // once after a change made here.
 export function useRack(connection) {
-  const [state, setState] = useState(null);
-  const [version, setVersion] = useState(0);
-  useEffect(() => {
-    if (connection !== "connected") return;
-    let stopped = false;
-    let timer;
-    const check = async () => {
-      try {
-        const now = await rackState();
-        if (!stopped) setState(now);
-      } catch {
-        // Checked again shortly.
-      }
-      if (!stopped) timer = setTimeout(check, RACK_CHECK);
-    };
-    check();
-    return () => {
-      stopped = true;
-      clearTimeout(timer);
-    };
-  }, [connection, version]);
-  return { state, refresh: () => setVersion((v) => v + 1) };
+  const { value, refresh } = usePolled(connection, rackState, RACK_CHECK);
+  return { state: value, refresh };
 }
 
 // Where the data is written (see /scribe/state), fetched on connecting and

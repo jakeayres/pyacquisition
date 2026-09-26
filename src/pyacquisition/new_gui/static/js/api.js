@@ -51,6 +51,24 @@ export async function ping() {
   }
 }
 
+// Every task manager's state, by name, main first (see /managers/state): its
+// status, running task, whether it is aborting, its last result and its queue.
+export async function managerStates() {
+  const { data } = await get("/managers/state", { timeout: 3000 });
+  return data;
+}
+
+// The address of an action on a task manager: the main one keeps the original
+// paths (/task_manager/...), and the others are under /managers/<name>/.
+export const managerPath = (name, action) =>
+  name === "main"
+    ? `/task_manager/${action}`
+    : `/managers/${encodeURIComponent(name)}/${action}`;
+
+// pause, resume, abort, clear_tasks, remove_queued_task or move_queued_task.
+export const managerAction = (name, action, params) =>
+  get(managerPath(name, action), { params });
+
 // The running task of each task manager, as "name" for the main one and
 // "name (manager)" for the others.
 export async function runningTasks() {

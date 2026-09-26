@@ -102,7 +102,9 @@ def test_clicking_the_open_tab_collapses_the_dock(page):
 
     page.page.get_by_role("tab", name="Queue").click()
 
-    expect(page.page.get_by_role("tabpanel")).to_contain_text("task queue")
+    expect(
+        page.page.get_by_role("tabpanel").get_by_role("region", name="Task queue")
+    ).to_be_visible()
 
 
 def test_dragging_the_top_edge_resizes_the_dock(page):

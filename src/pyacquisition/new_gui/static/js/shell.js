@@ -7,6 +7,7 @@ import { LogStore } from "./logs.js";
 import { dataFeed, logFeed } from "./feed.js";
 import { ValuesTab } from "./dock/values.js";
 import { LogsTab } from "./dock/logs.js";
+import { QueueTab, useManagers } from "./dock/queue.js";
 import { useConnection } from "./connection.js";
 import { useStore } from "./hooks.js";
 import {
@@ -31,7 +32,7 @@ const CONNECTION_LABELS = {
 // The dock's tabs. Each milestone replaces one placeholder with the real thing.
 // A tab that `fill`s its panel scrolls itself, with no padding around it.
 const placeholder = (text) => html`<p class="placeholder">${text}</p>`;
-const dockTabs = ({ store, logs, columns }) => [
+const dockTabs = ({ store, logs, columns, managers }) => [
   {
     id: "values",
     label: "Values",
@@ -40,7 +41,7 @@ const dockTabs = ({ store, logs, columns }) => [
   {
     id: "queue",
     label: "Queue",
-    content: placeholder("The task queue arrives in milestone 9."),
+    content: html`<${QueueTab} managers=${managers} />`,
   },
   {
     id: "instruments",
@@ -140,6 +141,7 @@ export function App() {
   const { theme, toggle } = useTheme();
   const store = useData();
   const logs = useLogs();
+  const managers = useManagers(connection);
   const columns = useColumns(connection);
   return html`
     <div class="app">
@@ -151,7 +153,7 @@ export function App() {
         store=${store}
       />
       <${PlotArea} store=${store} columns=${columns} theme=${theme} />
-      <${Dock} tabs=${dockTabs({ store, logs, columns })} />
+      <${Dock} tabs=${dockTabs({ store, logs, columns, managers })} />
     </div>
     <${CloseDialog} />
   `;
