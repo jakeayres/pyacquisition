@@ -336,8 +336,9 @@ class APIServer:
             return {"status": 200, "data": method(**kwargs)}
 
         endpoint_func.__name__ = method.__name__
-        endpoint_func.__annotations__ = method.__annotations__
-        endpoint_func.__annotations__["return"] = dict
+        # A copy: the method's own annotations are the class's, and setting the
+        # return type on them changed it for everything else that reads them.
+        endpoint_func.__annotations__ = {**method.__annotations__, "return": dict}
         endpoint_func.__signature__ = inspect.signature(method)
         endpoint_func.__doc__ = method.__doc__
 

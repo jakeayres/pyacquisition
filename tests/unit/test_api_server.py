@@ -90,3 +90,15 @@ def test_enum_to_selected_dict():
         "OPTION_THREE": {"value": 3, "selected": False},
     }
     assert result == expected_result
+
+
+def test_making_an_endpoint_leaves_the_methods_annotations_alone(api_server):
+    """They belong to the method's class: an instrument's getter must still say
+    what it returns after its endpoint is made."""
+
+    def get_level(channel: int) -> float:
+        return 1.0
+
+    api_server.create_endpoint_function(get_level)
+
+    assert get_level.__annotations__ == {"channel": int, "return": float}
