@@ -6,7 +6,7 @@ import pytest
 
 pytest.importorskip("playwright")
 
-from conftest import Page, Running
+from ui_helpers import Page, Running
 from playwright.sync_api import expect
 
 from pyacquisition import Experiment, Measurement
