@@ -1,5 +1,6 @@
 import time
 import asyncio
+from fastapi import Query
 from .logging import logger
 from .measurement import Measurement
 from .broadcaster import Broadcaster
@@ -240,9 +241,9 @@ class Rack(Broadcaster):
             return {"status": "success", "message": "Measurements resumed."}
 
         @api_server.app.get("/rack/period/set/", tags=["rack"])
-        async def set_period(period: float):
+        async def set_period(period: float = Query(gt=0)):
             """
-            Sets the period for the measurements.
+            Sets the period for the measurements, in seconds (above zero).
             """
             self.period = period
             return {"status": "success", "period": self.period}

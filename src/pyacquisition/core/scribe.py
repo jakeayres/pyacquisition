@@ -2,7 +2,22 @@ from .consumer import Consumer
 from .logging import logger
 import asyncio
 import pandas as pd
+from fastapi import HTTPException
 from pathlib import Path
+
+# Characters Windows does not allow in a file name.
+FORBIDDEN_IN_TITLE = '<>:"/\\|?*'
+
+
+def title_problem(title: str) -> str | None:
+    """What is wrong with a data file title, or None if it can be used."""
+    if not title.strip():
+        return "The title is empty."
+    bad = sorted({c for c in title if c in FORBIDDEN_IN_TITLE or ord(c) < 32})
+    if bad:
+        shown = " ".join(c if ord(c) >= 32 else repr(c) for c in bad)
+        return f"A title can't contain {shown}"
+    return None
 
 
 class Scribe(Consumer):
@@ -113,9 +128,11 @@ class Scribe(Consumer):
         Get the current directory for the data file.
 
         Returns:
-            Path: The path of the current directory.
+            str: The full path of the current directory (a relative data path is
+                given from the working directory), so that it means the same to
+                whoever reads it, and can be copied or opened.
         """
-        return f"{self.root_path}"
+        return f"{Path(self.root_path).absolute()}"
 
     def current_file(self) -> Path:
         """
@@ -124,6 +141,28 @@ class Scribe(Consumer):
         Returns:
         """
         return f"{self.block}.{self.step} {self.title}.{self.extension}"
+
+    def state(self) -> dict:
+        """
+        Where the data is being written, and what the next file would be called
+        with each way of starting one (`{title}` stands for its title).
+
+        Returns:
+            dict: `directory`, `file`, `block`, `step`, `title`, `extension`,
+                `next_step` and `next_block`.
+        """
+        next_step = str(int(self.step) + 1).zfill(2)
+        next_block = str(int(self.block) + 1).zfill(2)
+        return {
+            "directory": self.current_directory(),
+            "file": self.current_file(),
+            "block": self.block,
+            "step": self.step,
+            "title": self.title,
+            "extension": self.extension,
+            "next_step": f"{self.block}.{next_step} {{title}}.{self.extension}",
+            "next_block": f"{next_block}.00 {{title}}.{self.extension}",
+        }
 
     def _increment_block(self) -> None:
         """
@@ -246,11 +285,24 @@ class Scribe(Consumer):
                 "data": f"{self.current_directory()}",
             }
 
+        @api_server.app.get("/scribe/state", tags=["scribe"])
+        async def state():
+            """
+            The data directory and current file, the parts of its name, and the
+            name the next file would have as the next step or the next block
+            (with `{title}` where its title goes).
+            """
+            return {"status": 200, "data": self.state()}
+
         @api_server.app.get("/scribe/next_file", tags=["scribe"])
         async def next_file_endpoint(title: str, next_block: bool = False):
             """
-            Start a new file with the given title.
+            Start a new file with the given title. A title that could not be part
+            of a file name (empty, or with any of `<>:"/\\|?*`) is refused.
             """
+            problem = title_problem(title)
+            if problem:
+                raise HTTPException(status_code=422, detail=problem)
             self.next_file(title, next_block)
             return {
                 "status": 200,
