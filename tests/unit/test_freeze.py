@@ -170,6 +170,17 @@ def test_pyvisa_and_dearpygui_are_always_collected(fake_pyinstaller, config, tmp
     assert set(collected) == {"pyvisa", "pyvisa_py", "dearpygui"}
 
 
+def test_the_new_gui_page_is_always_collected(fake_pyinstaller, config, tmp_path):
+    # The API server serves it whichever GUI runs, and does not start without it.
+    freeze.build_app(toml_file=str(config), out_dir=tmp_path)
+
+    (command,) = fake_pyinstaller
+    collected = [
+        command[i + 1] for i, arg in enumerate(command) if arg == "--collect-data"
+    ]
+    assert collected == ["pyacquisition.new_gui"]
+
+
 def test_onefile_by_default(fake_pyinstaller, config, tmp_path):
     freeze.build_app(toml_file=str(config), out_dir=tmp_path)
     assert "--onefile" in fake_pyinstaller[0]

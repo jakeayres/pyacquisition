@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from enum import Enum
 from fastapi.testclient import TestClient
-from pyacquisition.core.api_server import APIServer
+from pyacquisition.core.api_server import APIServer, SHUTDOWN_TIMEOUT
 
 
 @pytest.fixture
@@ -37,6 +37,36 @@ def test_server_run(api_server):
     """
     coroutine = api_server.run()
     assert asyncio.iscoroutine(coroutine)
+    coroutine.close()
+
+
+@pytest.mark.asyncio
+async def test_shutdown_finishes_even_if_a_connection_is_never_released():
+    """
+    On Windows, a client that drops its connection at the wrong moment can leave
+    asyncio counting a connection that is gone, so that waiting for the server's
+    connections to close never ends. The server must stop anyway.
+    """
+    import socket
+
+    with socket.socket() as s:
+        s.bind(("localhost", 0))
+        port = s.getsockname()[1]
+
+    api_server = APIServer(port=port)
+    serving = asyncio.create_task(api_server.run())
+    while not getattr(api_server, "server", None) or not api_server.server.started:
+        await asyncio.sleep(0.05)
+
+    async def never_closes():
+        await asyncio.Event().wait()
+
+    for server in api_server.server.servers:  # what the leaked connection causes
+        server.wait_closed = never_closes
+
+    await api_server.shutdown()
+
+    await asyncio.wait_for(serving, timeout=SHUTDOWN_TIMEOUT + 5)
 
 
 class SampleEnum(Enum):

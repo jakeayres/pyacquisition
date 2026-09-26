@@ -80,10 +80,37 @@ def _count(name, value, minimum=2, maximum=10_000):
     return value
 
 
+def _history_points(name, value):
+    return _count(name, value, minimum=100, maximum=100_000_000)
+
+
 def _flag(name, value):
     if not isinstance(value, bool):
         raise ValueError(f"`{name}` must be True or False, got {value!r}")
     return value
+
+
+GUIS = ("classic", "new")
+DEFAULT_GUI = "classic"  # the GUI that `gui = True` runs
+
+
+def _gui(name, value):
+    """True (the default GUI), False (none), or the name of a GUI."""
+    if isinstance(value, str) and value.lower() in GUIS:
+        return value.lower()
+    if not isinstance(value, bool):
+        raise ValueError(
+            f"`{name}` must be True, False, {' or '.join(map(repr, GUIS))}, "
+            f"got {value!r}"
+        )
+    return value
+
+
+def gui_to_run(value) -> str | None:
+    """The name of the GUI that the value of the `gui` option runs, or None."""
+    if value is True:
+        return DEFAULT_GUI
+    return value or None
 
 
 @dataclass(frozen=True)
@@ -112,6 +139,7 @@ SETTINGS = {
         Setting("data_path", ".", _path, "data", "path"),
         Setting("data_file_extension", "data", _text, "data", "file_extension"),
         Setting("data_delimiter", ",", _text, "data", "delimiter"),
+        Setting("history_points", 500_000, _history_points, "data", "history_points"),
         Setting("log_path", ".", _path, "logging", "path"),
         Setting("log_file_name", "debug.log", _text, "logging", "file_name"),
         Setting("console_log_level", "DEBUG", _level, "logging", "console_level"),
@@ -120,7 +148,7 @@ SETTINGS = {
         Setting("api_server_host", "localhost", _text, "api_server", "host"),
         Setting("api_server_port", 8000, _port, "api_server", "port"),
         Setting("measurement_period", 0.25, _seconds, "rack", "period"),
-        Setting("gui", True, _flag, "gui", "run"),
+        Setting("gui", True, _gui, "gui", "run"),
         Setting("auto_tasks", True, _flag, "experiment", "auto_tasks"),
         Setting("sparkline_points", 100, _count, "gui", "sparkline_points"),
     )

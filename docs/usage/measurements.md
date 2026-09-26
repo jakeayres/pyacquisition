@@ -15,6 +15,18 @@ self.add_measurement(Measurement("random", rng.random_number))
 
 Add measurements in `setup()`, after the instruments they use. Once the experiment is running, the set of measurements is fixed.
 
+## Units
+
+Give a measurement a `unit` to show it beside the value in the interface and on plot axes:
+
+```python
+self.add_measurement(Measurement("T", cryo.get_temperature, unit="K"))
+```
+
+The unit is for display only. The data file holds the same numbers, with the same column header, either way. `unit` must be text (any text: `"K"`, `"mV"`, `"Ω"`), and like `call_every` it belongs to the measurement, not to the query, so it is never passed to the query.
+
+In a TOML file, add `unit` to the measurement: `T = {instrument = "cryo", method = "get_temperature", unit = "K"}`. Calculated columns can have units too; see [Calculations](calculations.md#units).
+
 ## Queries with arguments
 
 If the query needs arguments, pass them to `Measurement` as keyword arguments. They are used on every call:

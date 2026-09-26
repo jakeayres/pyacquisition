@@ -149,6 +149,7 @@ class MyExperiment(Experiment):
     root_path='data'
     data_path='data'
     log_path='logs'
+    gui='new'
     
     def setup(self):
         

@@ -41,6 +41,20 @@ from pyacquisition import RollingMean, Sum
 | `Sum("a", "b", name="total")` | The sum of two or more columns. `name` is optional, and defaults to `a+b`. |
 | `RollingMean("a", window=10)` | The mean of the last 10 values of `a`, in a column called `a_mean10`. Give `name=` to choose a different name. It is `NaN` until 10 values have been seen. |
 
+## Units
+
+Give the new columns units with `units`, a dict of column name to unit. They are shown beside the values in the interface and on plot axes, and do not change the data file:
+
+```python
+self.add_calculation(
+    lambda row: {"power": row["voltage"] * row["current"]},
+    units={"power": "W"},
+)
+self.add_calculation(RollingMean("power", window=10, unit="W"))
+```
+
+The built-in calculations take a single `unit=` for the column they make. A `Calculation` subclass can set `units` itself, as it sets `columns`.
+
 ## Keeping state between rows
 
 A function can only see the current row. For anything that remembers earlier rows, such as a filter, write a class that inherits from `Calculation` and set `columns` to the names of the columns it makes:

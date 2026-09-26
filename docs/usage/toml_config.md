@@ -103,6 +103,7 @@ Define the instrument methods to poll. The key is a unique label assigned to the
 | `instrument`   | The name of the instrument           | `my_clock`       |
 | `method`       | The method to poll                   | `timestamp_ms`   |
 | `args`         | (optional) Arguments to call `method` with.      |                  |
+| `unit`         | (optional) The unit, shown beside the value in the interface. Display only. | `"K"` |
 
 !!! Note
     If a method takes an argument that is a member of an `Enum`, give the text that names it, and it is resolved against the enum's members. Use the member's name (`"FLOAT"`) or its label (`"Float"`), in any case. For example, `args = {grounding = "FLOAT"}` for the method below. A value that names no member is refused, and the message lists the valid ones.

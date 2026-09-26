@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PyAcquisition</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <script>
+      // The theme, set before the first paint so the page never flashes the
+      // wrong one. theme.js takes over from here.
+      document.documentElement.dataset.theme = matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches
+        ? "dark"
+        : "light";
+    </script>
+    <link rel="stylesheet" href="vendor/uplot/uPlot.min.css" />
+    <link rel="stylesheet" href="css/tokens.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "preact": "./vendor/preact/preact.module.js",
+          "preact/hooks": "./vendor/preact/hooks.module.js",
+          "htm": "./vendor/htm/htm.module.js",
+          "uplot": "./vendor/uplot/uPlot.esm.js"
+        }
+      }
+    </script>
+    <script type="module" src="js/main.js"></script>
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+</html>

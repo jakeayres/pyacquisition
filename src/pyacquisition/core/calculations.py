@@ -1,11 +1,21 @@
 from .broadcaster import Broadcaster
 from .consumer import Consumer
 from .logging import logger
+from .measurement import check_unit
 from collections import deque
 import asyncio
 
 
 NAN = float("nan")
+
+
+def _units(units: dict) -> dict:
+    """The units that are given, checked, leaving out the columns without one."""
+    checked = {
+        column: check_unit(unit, f"the unit of column '{column}'")
+        for column, unit in units.items()
+    }
+    return {column: unit for column, unit in checked.items() if unit}
 
 
 def _number(value):
@@ -30,9 +40,11 @@ class Calculation:
 
     Attributes:
         columns (tuple[str, ...]): The names of the columns this calculation adds.
+        units (dict[str, str]): The unit of each column that has one, for display.
     """
 
     columns: tuple = ()
+    units: dict = {}  # replaced, never changed, by the subclasses that set units
 
     def __call__(self, row: dict) -> dict:
         """
@@ -56,18 +68,22 @@ class Sum(Calculation):
         experiment.add_calculation(Sum("a", "b", name="total"))
     """
 
-    def __init__(self, *inputs: str, name: str | None = None) -> None:
+    def __init__(
+        self, *inputs: str, name: str | None = None, unit: str | None = None
+    ) -> None:
         """
         Args:
             *inputs (str): The columns to add together.
             name (str | None): The name of the new column. Defaults to the input
                 names joined with `+`.
+            unit (str | None): The unit of the new column, for display.
         """
         if not inputs:
             raise ValueError("Sum needs at least one column.")
         self.inputs = inputs
         self.name = name or "+".join(inputs)
         self.columns = (self.name,)
+        self.units = _units({self.name: unit})
 
     def __call__(self, row: dict) -> dict:
         return {self.name: sum(_number(row[column]) for column in self.inputs)}
@@ -84,13 +100,20 @@ class RollingMean(Calculation):
         experiment.add_calculation(RollingMean("voltage", window=10))
     """
 
-    def __init__(self, column: str, window: int, name: str | None = None) -> None:
+    def __init__(
+        self,
+        column: str,
+        window: int,
+        name: str | None = None,
+        unit: str | None = None,
+    ) -> None:
         """
         Args:
             column (str): The column to average.
             window (int): The number of values to average over.
             name (str | None): The name of the new column. Defaults to
                 `<column>_mean<window>`.
+            unit (str | None): The unit of the new column, for display.
         """
         if not isinstance(window, int) or window < 1:
             raise ValueError("window must be a whole number of at least 1.")
@@ -98,6 +121,7 @@ class RollingMean(Calculation):
         self.window = window
         self.name = name or f"{column}_mean{window}"
         self.columns = (self.name,)
+        self.units = _units({self.name: unit})
         self._values = deque(maxlen=window)
 
     def __call__(self, row: dict) -> dict:
@@ -133,8 +157,13 @@ class Calculations(Broadcaster, Consumer):
         self._calculations = []
         self._columns = None
         self._dropped = set()
+        # The columns the calculations are known to add, in order, with the unit
+        # of each that has one. A plain function's columns are only known once it
+        # has run, unless it is given units.
+        self.known_columns = []
+        self.units = {}
 
-    def add_calculation(self, calculation) -> None:
+    def add_calculation(self, calculation, units: dict | None = None) -> None:
         """
         Adds a calculation.
 
@@ -143,15 +172,27 @@ class Calculations(Broadcaster, Consumer):
         Args:
             calculation (callable): Called with a row (a dict of column name to
                 value). Returns a dict of new columns.
+            units (dict | None): The unit of each new column that has one, for
+                display, such as `{"power": "W"}`. They add to the `units` of a
+                `Calculation`.
 
         Raises:
-            TypeError: If the calculation is not callable.
+            TypeError: If the calculation is not callable, or a unit is not text.
         """
         if not callable(calculation):
             raise TypeError(
                 "A calculation must be callable, taking a row (a dict) and "
                 f"returning a dict of new columns, not {type(calculation).__name__}."
             )
+        if units is not None and not isinstance(units, dict):
+            raise TypeError(
+                'units must be a dict of column name to unit, such as {"power": "W"}'
+            )
+        added = {**getattr(calculation, "units", {}), **_units(units or {})}
+        for column in [*getattr(calculation, "columns", ()), *added]:
+            if column not in self.known_columns:
+                self.known_columns.append(column)
+        self.units.update(added)
         self._calculations.append(calculation)
 
     def _calculate(self, calculation, row: dict) -> dict:

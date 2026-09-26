@@ -100,6 +100,10 @@ class ConfigParser:
             raise InvalidMeasurementError(
                 "Config contains measurements with instruments that do not exist."
             )
+        if not ConfigParser.all_measurement_units_are_text(config):
+            raise InvalidMeasurementError(
+                'Config contains a measurement whose unit is not text, such as "K".'
+            )
         return config
 
     @staticmethod
@@ -172,6 +176,18 @@ class ConfigParser:
             if "instrument" not in values:
                 logger.warning(
                     f"Measurement '{measurement}' dictionary does not contain 'instrument' key."
+                )
+                return False
+        return True
+
+    @staticmethod
+    def all_measurement_units_are_text(config: dict) -> bool:
+        """Check that every measurement's unit, where one is given, is text."""
+        for measurement, values in config.get("measurements", {}).items():
+            if "unit" in values and not isinstance(values["unit"], str):
+                logger.warning(
+                    f"Measurement '{measurement}' has a unit that is not text: "
+                    f"{values['unit']!r}."
                 )
                 return False
         return True

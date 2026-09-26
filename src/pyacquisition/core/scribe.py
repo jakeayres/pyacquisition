@@ -36,6 +36,21 @@ class Scribe(Consumer):
         self._pause_event = asyncio.Event()
         self._pause_event.set()
         self._shutdown_event = asyncio.Event()
+        self._file_listeners = []
+
+    def add_file_listener(self, listener) -> None:
+        """
+        Calls `listener(file_name)` as each data file starts: once at setup, with
+        the first file, and again whenever the file changes.
+        """
+        self._file_listeners.append(listener)
+
+    def _file_started(self) -> None:
+        for listener in self._file_listeners:
+            try:
+                listener(self.current_file())
+            except Exception as e:
+                logger.error(f"[Scribe] Error telling a listener of the new file: {e}")
 
     def _set_next_unused_block(self) -> str:
         """
@@ -80,6 +95,7 @@ class Scribe(Consumer):
         else:
             self._increment_step()
         logger.info(f"[Scribe] New file: '{self.current_path()}'")
+        self._file_started()
 
     def current_path(self) -> Path:
         """
@@ -170,6 +186,7 @@ class Scribe(Consumer):
         logger.debug("[Scribe] Setup started")
         self._make_directory(self.root_path)
         self._set_next_unused_block()
+        self._file_started()
 
         logger.debug("[Scribe] Setup completed")
 

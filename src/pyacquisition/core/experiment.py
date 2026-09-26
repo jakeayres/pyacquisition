@@ -13,13 +13,19 @@ from .calculations import Calculations
 from .task_manager.task_manager import TaskManager
 from .task_manager.task import Task
 from .scribe import Scribe
+from .history import History
 from ..gui import Gui
+from .. import new_gui
 from ..instruments import instrument_map
 from ..tasks import instrument_tasks, standard_tasks
 from .measurement import Measurement
 from .instrument import Instrument, SoftwareInstrument, resolve_enum_kwargs
 from .config_parser import ConfigParser
 from . import settings
+
+# Seconds that the new GUI's window is given to close by itself, once the
+# experiment has stopped, before its process is terminated.
+GUI_CLOSE_TIMEOUT = 5.0
 
 
 class Experiment:
@@ -48,6 +54,9 @@ class Experiment:
         data_path (str): The folder for data files, inside `root_path`. Defaults to ".".
         data_file_extension (str): The extension of data files. Defaults to "data".
         data_delimiter (str): The column separator in data files. Defaults to ",".
+        history_points (int): The most rows kept in memory for the new GUI (the
+            current data file and the one before it), from 100 to 100,000,000. Each
+            numeric column takes 8 bytes a row. Defaults to 500,000.
         log_path (str): The folder for the log file, inside `root_path`. Defaults to ".".
         log_file_name (str): The name of the log file. Defaults to "debug.log".
         console_log_level (str): The logging level for console output. Defaults to "DEBUG".
@@ -56,7 +65,10 @@ class Experiment:
         api_server_host (str): The host address for the API server. Defaults to "localhost".
         api_server_port (int): The port number for the API server. Defaults to 8000.
         measurement_period (float): The time between measurements in seconds. Defaults to 0.25.
-        gui (bool): Whether to run the GUI. Defaults to True.
+        gui (bool | str): Which GUI to run: True for the default one (the classic
+            GUI for now), False for none, or "classic" or "new" by name. The new GUI
+            can also be opened in a browser at the API server's address, whichever
+            is chosen. Defaults to True.
         sparkline_points (int): How many of the latest points the small graph beside
             each value in the GUI's Live Data window shows. Defaults to 100.
         auto_tasks (bool): Whether the tasks that come with an instrument are
@@ -74,6 +86,7 @@ class Experiment:
         data_path: str | None = None,
         data_file_extension: str | None = None,
         data_delimiter: str | None = None,
+        history_points: int | None = None,
         log_path: str | None = None,
         console_log_level: str | None = None,
         file_log_level: str | None = None,
@@ -82,7 +95,7 @@ class Experiment:
         api_server_host: str | None = None,
         api_server_port: int | None = None,
         measurement_period: float | None = None,
-        gui: bool | None = None,
+        gui: bool | str | None = None,
         sparkline_points: int | None = None,
         auto_tasks: bool | None = None,
     ) -> None:
@@ -102,6 +115,7 @@ class Experiment:
                 "data_path": data_path,
                 "data_file_extension": data_file_extension,
                 "data_delimiter": data_delimiter,
+                "history_points": history_points,
                 "log_path": log_path,
                 "console_log_level": console_log_level,
                 "file_log_level": file_log_level,
@@ -151,12 +165,25 @@ class Experiment:
         self._registered_tasks = set()  # the classes, so as not to register one twice
         self._auto_tasks = options["auto_tasks"]
 
-        self._run_gui = options["gui"]
-        self._gui = Gui(
-            host=options["api_server_host"],
-            port=options["api_server_port"],
-            sparkline_points=options["sparkline_points"],
-        )
+        # The new GUI's page is served whichever GUI runs, so that it can be opened
+        # in a browser too.
+        new_gui.mount(self._api_server.app)
+
+        # With no GUI to run, the classic one is still made (but not started), as
+        # it always has been.
+        gui_name = settings.gui_to_run(options["gui"])
+        self._run_gui = gui_name is not None
+        if gui_name == "new":
+            self._gui = new_gui.NewGui(
+                host=options["api_server_host"],
+                port=options["api_server_port"],
+            )
+        else:
+            self._gui = Gui(
+                host=options["api_server_host"],
+                port=options["api_server_port"],
+                sparkline_points=options["sparkline_points"],
+            )
 
         self._scribe = Scribe(
             root_path=self._data_path,
@@ -164,8 +191,19 @@ class Experiment:
             extension=options["data_file_extension"],
         )
 
+        # The recent rows, for the new GUI: kept since the current file started
+        # (and the file before), and streamed with a number for each event.
+        self._history = History(max_rows=options["history_points"])
+
         self._calculations.subscribe_to(self._rack)
         self._scribe.subscribe_to(self._calculations)
+        self._history.subscribe_to(self._calculations)
+        self._scribe.add_file_listener(self._history.new_file)
+
+        # History's events are sent as they are, since they are made to be JSON.
+        self._api_server.add_websocket_endpoint(
+            "/stream/data", encode=lambda event: event
+        ).subscribe_to(self._history)
 
         self._api_server.add_websocket_endpoint("/data")
         self._api_server.websocket_endpoints["/data"].subscribe_to(self._rack)
@@ -178,6 +216,9 @@ class Experiment:
 
         self._shutdown_event = asyncio.Event()
         self._started = False
+        # What the interface calls the experiment. `from_config` names a plain
+        # Experiment after its TOML file instead.
+        self._name = type(self).__name__
 
         logger.info("[Experiment] Fully initialized")
 
@@ -253,6 +294,8 @@ class Experiment:
 
         try:
             experiment = cls._initialize_experiment(config, overrides)
+            if cls is Experiment:
+                experiment._name = Path(toml_file).stem
             cls._configure_instruments(experiment, config)
             cls._configure_measurements(experiment, config)
             return experiment
@@ -353,7 +396,9 @@ class Experiment:
                 if args:
                     method = cls._resolve_method_args(method, args)
 
-                experiment.add_measurement(Measurement(name, method))
+                experiment.add_measurement(
+                    Measurement(name, method, unit=measurement.get("unit"))
+                )
             except Exception as e:
                 logger.warning(f"Failed to configure measurement '{name}': {e}")
 
@@ -514,7 +559,7 @@ class Experiment:
         self._check_not_started("remove a measurement")
         self._rack.remove_measurement(name)
 
-    def add_calculation(self, calculation) -> None:
+    def add_calculation(self, calculation, units: dict | None = None) -> None:
         """
         Adds a calculation, which makes new columns from the measurements.
 
@@ -529,17 +574,21 @@ class Experiment:
         Args:
             calculation (callable): A function, lambda or `Calculation` such as
                 `RollingMean`.
+            units (dict | None): The unit of each new column that has one, for
+                display in the interface, such as `{"power": "W"}`.
 
         Raises:
             RuntimeError: If the experiment has already started running.
-            TypeError: If the calculation is not callable.
+            TypeError: If the calculation is not callable, or a unit is not text.
 
         Example:
-            experiment.add_calculation(lambda row: {"power": row["v"] * row["i"]})
-            experiment.add_calculation(RollingMean("power", window=10))
+            experiment.add_calculation(
+                lambda row: {"power": row["v"] * row["i"]}, units={"power": "W"}
+            )
+            experiment.add_calculation(RollingMean("power", window=10, unit="W"))
         """
         self._check_not_started("add a calculation")
-        self._calculations.add_calculation(calculation)
+        self._calculations.add_calculation(calculation, units=units)
 
     def add_task_manager(self, name: str) -> TaskManager:
         """
@@ -659,8 +708,11 @@ class Experiment:
                 tg.create_task(self._run_component(self._rack))
                 tg.create_task(self._run_component(self._calculations))
                 tg.create_task(self._run_component(self._scribe))
+                tg.create_task(self._run_component(self._history))
                 for task_manager in self._task_managers.values():
                     tg.create_task(self._run_component(task_manager))
+                if self._run_gui:
+                    tg.create_task(self._watch_gui(self._ui_process))
                 logger.debug("All experiment tasks started")
 
                 await self._shutdown_event.wait()
@@ -671,6 +723,7 @@ class Experiment:
                 await self._rack.shutdown()
                 await self._calculations.shutdown()
                 await self._scribe.shutdown()
+                await self._history.shutdown()
                 for task_manager in self._task_managers.values():
                     await task_manager.shutdown()
 
@@ -681,11 +734,7 @@ class Experiment:
                     logger.exception(f"Subexception details: {e}")
         finally:
             try:
-                if self._run_gui:
-                    logger.debug("Waiting for GUI process to finish")
-                    self._ui_process.terminate()
-                    self._ui_process.join()
-                    logger.debug("GUI process terminated")
+                self._stop_gui()
             except Exception as e:
                 logger.error(f"Error during experiment teardown: {e}")
                 raise
@@ -693,6 +742,47 @@ class Experiment:
                 self.teardown()
             finally:
                 self._close_instruments()
+
+    async def _watch_gui(self, process, period: float = 0.25) -> None:
+        """
+        Shuts the experiment down if the GUI's process ends, so that it never runs
+        on with no GUI to see it by. The GUI normally asks for the shutdown itself
+        before it closes, and then this does nothing more.
+
+        Args:
+            process: The GUI's process.
+            period (float): The time between checks, in seconds.
+        """
+        while not self._shutdown_event.is_set():
+            if not process.is_alive():
+                logger.warning(
+                    "[Experiment] The GUI has closed, so the experiment is shutting down"
+                )
+                self._shutdown_event.set()
+                return
+            try:
+                await asyncio.wait_for(self._shutdown_event.wait(), timeout=period)
+            except TimeoutError:
+                pass
+
+    def _stop_gui(self) -> None:
+        """
+        Ends the GUI's process, if it was started, and waits for it.
+
+        The new GUI's window is told to close, and given a moment to, and only
+        terminated if it has not.
+        """
+        process = getattr(self, "_ui_process", None)
+        if process is None:
+            return
+        logger.debug("Waiting for GUI process to finish")
+        if isinstance(self._gui, new_gui.NewGui):
+            self._gui.close()
+            process.join(timeout=GUI_CLOSE_TIMEOUT)
+        if process.is_alive():
+            process.terminate()
+        process.join()
+        logger.debug("GUI process finished")
 
     def _close_instruments(self) -> None:
         """
@@ -801,10 +891,54 @@ class Experiment:
         for name in names:
             self._task_managers[name].register_task(self, task, **kwargs)
 
+    def _column_info(self) -> list[dict]:
+        """What is known about each column of the data (see /experiment/columns)."""
+        columns = [
+            {
+                "name": name,
+                "kind": "measurement",
+                "source": measurement.source,
+                "unit": measurement.unit,
+            }
+            for name, measurement in self._rack.measurements.items()
+        ]
+        measured = {column["name"] for column in columns}
+        columns += [
+            {
+                "name": name,
+                "kind": "calculation",
+                "source": "",
+                "unit": self._calculations.units.get(name),
+            }
+            for name in self._calculations.known_columns
+            if name not in measured
+        ]
+        return columns
+
     def _register_endpoints(self, api_server):
         """
         Register the endpoints for the experiment.
         """
+
+        @api_server.app.get("/experiment/info", tags=["experiment"])
+        async def experiment_info():
+            """
+            Endpoint for what the interface shows about the experiment: its name,
+            which is the name of its class, or of its TOML file for a plain
+            `Experiment.from_config`.
+            """
+            return {"status": 200, "data": {"name": self._name}}
+
+        @api_server.app.get("/experiment/columns", tags=["experiment"])
+        async def experiment_columns():
+            """
+            Endpoint describing the columns of the data: each measurement, then each
+            calculated column that is known, in order, with its `kind`
+            ("measurement" or "calculation"), its `source` (`instrument.method`,
+            or empty) and its `unit` (or null). A calculated column from a plain
+            function is only listed if it was given a unit.
+            """
+            return {"status": 200, "data": self._column_info()}
 
         @api_server.app.get("/managers", tags=["experiment"])
         async def list_task_managers():

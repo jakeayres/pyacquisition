@@ -1,0 +1,1111 @@
+/* The app shell: top bar, plot area and dock. Every value comes from tokens.css. */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: var(--line-height);
+  -webkit-font-smoothing: antialiased;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.app {
+  display: grid;
+  grid-template-rows: var(--topbar-height) minmax(0, 1fr) auto;
+  height: 100%;
+}
+
+/* ------------------------------------------------------------------ top bar */
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: 0 var(--space-2) 0 var(--space-4);
+  border-bottom: var(--border-width) solid var(--border);
+  background: var(--surface);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.brand-mark {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--accent);
+}
+
+.brand-name {
+  overflow: hidden;
+  font-weight: var(--weight-strong);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* Where the data file and the experiment's controls go (milestone 8). */
+.topbar-middle {
+  flex: 1;
+  min-width: 0;
+}
+
+.topbar-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.connection {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 var(--space-2);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+}
+
+.connection-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--warn);
+}
+
+.connection[data-state="connecting"] .connection-dot {
+  animation: pulse 1.2s var(--easing) infinite;
+}
+
+.connection[data-state="connected"] .connection-dot {
+  background: var(--good);
+}
+
+.connection[data-state="disconnected"] {
+  color: var(--bad);
+}
+
+.connection[data-state="disconnected"] .connection-dot {
+  background: var(--bad);
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.icon-button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--easing),
+    color var(--duration-fast) var(--easing);
+}
+
+.icon-button:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.icon-button:active {
+  background: var(--surface-active);
+}
+
+.icon-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ---------------------------------------------------------------- plot area */
+
+.plot-area {
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.empty-state {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.empty-state svg {
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--space-1);
+  color: var(--border-strong);
+}
+
+.empty-state h2 {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+}
+
+.empty-state p {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+/* --------------------------------------------------------------------- plot */
+
+.plot-area-panels {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Above the panels: adding one, linking their x axes, and the file key. */
+.plot-area-bar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.plot-area-bar .file-keys {
+  margin-left: auto;
+}
+
+.bar-button {
+  height: 28px;
+  padding: 0 var(--space-3);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.bar-button:hover:not(:disabled) {
+  background: var(--surface-hover);
+}
+
+.bar-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* The panels, with a hairline between them (the gap shows the border colour). */
+.plot-grid {
+  display: grid;
+  flex: 1;
+  gap: var(--border-width);
+  min-height: 0;
+  background: var(--border);
+}
+
+.plot-cell {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.plot-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.plot-toolbar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  padding: var(--space-3) var(--space-4) 0;
+}
+
+.picker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.picker select {
+  height: 28px;
+  max-width: 220px;
+  padding: 0 var(--space-6) 0 var(--space-2);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a909b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")
+    no-repeat right 8px center / 14px;
+  color: var(--text);
+  font: inherit;
+  font-weight: var(--weight-medium);
+  appearance: none;
+  cursor: pointer;
+}
+
+.picker select:hover {
+  border-color: var(--text-faint);
+}
+
+.file-keys {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  margin-left: auto;
+  min-width: 0;
+}
+
+.file-key {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.file-key-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.file-key-previous {
+  cursor: pointer;
+}
+
+.file-key-previous:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.file-key-previous.hidden .file-key-name {
+  text-decoration: line-through;
+}
+
+.file-key svg {
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+/* A short stroke of the series colour, as the lines are drawn. */
+.key-line {
+  flex: none;
+  width: 16px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--series-1);
+}
+
+.key-line-previous {
+  height: 1px;
+  opacity: var(--previous-opacity);
+}
+
+/* The file key is about solid against faded, not about a colour. */
+.key-line-file {
+  background: var(--text-muted);
+}
+
+.series-key {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+  min-width: 0;
+}
+
+.series-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.series-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 100%;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.series-toggle:hover {
+  background: var(--surface-hover);
+}
+
+.series-chip.hidden .series-name {
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+.series-chip.hidden .key-line {
+  opacity: 0.3;
+}
+
+.series-remove {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-left: var(--border-width) solid var(--border);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: transparent;
+  color: var(--text-faint);
+  font-size: var(--text-md);
+  cursor: pointer;
+}
+
+.series-remove:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.series-add {
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: var(--border-width) dashed var(--border-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  appearance: none;
+}
+
+.series-add:hover:not(:disabled) {
+  border-color: var(--text-faint);
+  color: var(--text);
+}
+
+.series-add:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.toolbar-end {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin-left: auto;
+  min-width: 0;
+}
+
+.toolbar-end .file-keys {
+  margin-left: 0;
+}
+
+.toggles {
+  display: inline-flex;
+  gap: var(--space-1);
+}
+
+.toggle {
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.toggle[aria-pressed="true"] {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: var(--weight-medium);
+}
+
+/* Lines / Points / Both: one control, three buttons. */
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.segmented button {
+  height: 22px;
+  padding: 0 var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.segmented button:hover {
+  color: var(--text);
+}
+
+.segmented button[aria-pressed="true"] {
+  background: var(--surface-active);
+  color: var(--text);
+  font-weight: var(--weight-medium);
+}
+
+.axes-control {
+  position: relative;
+}
+
+.axes-button {
+  position: relative;
+}
+
+.axes-button[aria-pressed="true"],
+.axes-button[aria-expanded="true"] {
+  color: var(--text);
+}
+
+/* Something is set (limits fixed, or a log axis). */
+.axes-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border: 1.5px solid var(--bg);
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.axes-log {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: var(--space-2);
+  padding-left: var(--space-3);
+  border-left: var(--border-width) solid var(--border);
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.axes-menu {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: max-content;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-overlay);
+}
+
+.axes-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.axes-name {
+  width: 14px;
+  font-weight: var(--weight-strong);
+}
+
+.axes-auto {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  width: 58px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.axes-input {
+  width: 110px;
+  height: 28px;
+  padding: 0 var(--space-2);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.axes-input:disabled {
+  color: var(--text-faint);
+  background: transparent;
+}
+
+.axes-to {
+  color: var(--text-faint);
+}
+
+.axes-error {
+  margin: 0;
+  color: var(--bad);
+  font-size: var(--text-sm);
+}
+
+.axes-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.axes-buttons .button {
+  height: 28px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+/* Two classes, so it wins over .button wherever that is in this file. */
+.button.button-primary {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.button.button-primary:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+}
+
+.plot-frame {
+  position: relative;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.plot-canvas {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.plot-canvas .u-over {
+  cursor: crosshair;
+  touch-action: none;
+}
+
+/* Shown while an axis is not scaling to the data (zoomed, panned or fixed),
+   with the way back. The data still arrives and is drawn meanwhile. */
+.autoscale-off {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-5);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 30px;
+  padding: 0 3px 0 var(--space-3);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-overlay);
+  font-size: var(--text-sm);
+}
+
+.autoscale-state {
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.autoscale-button {
+  height: 24px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.autoscale-button:hover {
+  background: var(--accent-hover);
+}
+
+/* The zoom box, and the readout under the pointer. */
+.plot-selection {
+  position: absolute;
+  display: none;
+  border: var(--border-width) solid var(--accent);
+  background: var(--accent-soft);
+  pointer-events: none;
+}
+
+.plot-crosshair {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 1px;
+  background: var(--text-faint);
+  pointer-events: none;
+}
+
+.plot-dot {
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--bg); /* a ring in the surface colour */
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.plot-tip {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  min-width: 140px;
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-overlay);
+  font-size: var(--text-sm);
+  pointer-events: none;
+}
+
+.plot-tip-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.plot-tip-row:first-child {
+  margin-bottom: var(--space-1);
+  padding-bottom: var(--space-1);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.plot-tip-row strong {
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-strong);
+}
+
+.plot-tip-key {
+  flex: none;
+  align-self: center;
+  width: 12px;
+  height: 2px;
+  border-radius: 1px;
+}
+
+.plot-tip-unit {
+  color: var(--text-muted);
+}
+
+.plot-tip-name {
+  margin-left: auto;
+  padding-left: var(--space-3);
+  color: var(--text-muted);
+}
+
+.plot-tip-note {
+  margin-bottom: var(--space-1);
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+}
+
+/* --------------------------------------------------------------------- dock */
+
+.dock {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: var(--dock-height);
+  border-top: var(--border-width) solid var(--border);
+  background: var(--surface);
+  transition: height var(--duration) var(--easing);
+}
+
+.dock.collapsed {
+  height: calc(var(--dock-tabs-height) + var(--border-width));
+}
+
+.dock.resizing {
+  transition: none;
+}
+
+/* The grab area straddles the dock's top edge. */
+.dock-resize {
+  position: absolute;
+  z-index: 1;
+  top: calc(var(--resize-handle) / -2 - var(--border-width));
+  right: 0;
+  left: 0;
+  height: var(--resize-handle);
+  cursor: row-resize;
+  touch-action: none;
+}
+
+.dock-resize::after {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: transparent;
+  content: "";
+  transform: translateY(-50%);
+  transition: background var(--duration-fast) var(--easing);
+}
+
+.dock-resize:hover::after,
+.dock-resize:focus-visible::after,
+.dock.resizing .dock-resize::after {
+  background: var(--accent);
+}
+
+.dock-resize:focus-visible {
+  outline: none;
+}
+
+body.resizing-dock {
+  cursor: row-resize;
+  user-select: none;
+}
+
+.dock-tabs {
+  display: flex;
+  flex: none;
+  align-items: stretch;
+  gap: var(--space-1);
+  height: var(--dock-tabs-height);
+  padding: 0 var(--space-2);
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.dock.collapsed .dock-tabs {
+  border-bottom-color: transparent;
+}
+
+.dock-tab {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-3);
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: color var(--duration-fast) var(--easing);
+}
+
+.dock-tab:hover,
+.dock-tab[aria-selected="true"] {
+  color: var(--text);
+}
+
+.dock-tab[aria-selected="true"]::after {
+  position: absolute;
+  right: var(--space-3);
+  bottom: calc(-1 * var(--border-width));
+  left: var(--space-3);
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+  content: "";
+}
+
+.dock.collapsed .dock-tab[aria-selected="true"] {
+  color: var(--text-muted);
+}
+
+.dock.collapsed .dock-tab[aria-selected="true"]::after {
+  display: none;
+}
+
+.dock-tabs-end {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.dock-panel {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--space-4);
+}
+
+.dock.collapsed .dock-panel {
+  display: none;
+}
+
+.placeholder {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+/* --------------------------------------------------------------- values tab */
+
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3);
+}
+
+.value-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-3);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.value-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* The quantity's colour, as a short line like the plots' legend keys. */
+.value-key {
+  flex: none;
+  align-self: center;
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--quantity, var(--series-other));
+}
+
+.value-name {
+  overflow: hidden;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.value-source {
+  overflow: hidden;
+  margin-left: auto;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.value-reading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.value-number {
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--text-value);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.value-text {
+  font-family: var(--font-sans);
+  font-size: var(--text-lg);
+}
+
+.value-unit {
+  color: var(--text-muted);
+  font-size: var(--text-md);
+}
+
+.spark {
+  display: block;
+  width: 100%;
+  height: 24px;
+  margin-top: var(--space-1);
+  overflow: visible;
+}
+
+.spark path {
+  fill: none;
+  stroke: var(--quantity, var(--series-other));
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+}
+
+/* ------------------------------------------------------------------ dialogs */
+
+.overlay {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: var(--overlay);
+}
+
+.dialog {
+  width: min(420px, 100%);
+  padding: var(--space-5);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-overlay);
+}
+
+.dialog h2 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-strong);
+}
+
+.dialog p {
+  margin: 0 0 var(--space-2);
+  color: var(--text-muted);
+}
+
+.dialog strong {
+  color: var(--text);
+  font-weight: var(--weight-medium);
+}
+
+.dialog-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-5);
+}
+
+.button {
+  height: 32px;
+  padding: 0 var(--space-4);
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition:
+    background var(--duration-fast) var(--easing),
+    border-color var(--duration-fast) var(--easing);
+}
+
+.button:hover {
+  background: var(--surface-hover);
+}
+
+.button-danger {
+  border-color: var(--bad);
+  background: var(--bad);
+  color: var(--on-bad);
+}
+
+.button-danger:hover {
+  border-color: var(--bad-hover);
+  background: var(--bad-hover);
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

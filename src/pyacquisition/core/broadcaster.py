@@ -34,7 +34,9 @@ class Broadcaster:
         Args:
             message (Any): The message to broadcast.
         """
-        for subscriber in self._subscribers:
+        # A copy, because consumers come and go (a websocket client connecting or
+        # leaving) while messages are being sent.
+        for subscriber in list(self._subscribers):
             await subscriber.queue.put(message)
 
     def broadcast_sync(self, message):
@@ -44,5 +46,5 @@ class Broadcaster:
         Args:
             message (Any): The message to broadcast.
         """
-        for subscriber in self._subscribers:
+        for subscriber in list(self._subscribers):
             subscriber.queue.put_nowait(message)

@@ -4,13 +4,31 @@ import inspect
 from functools import partial
 
 
+def check_unit(unit, what: str) -> str | None:
+    """A unit as it is kept: text, or None for no unit (as is empty text).
+
+    Raises:
+        TypeError: If the unit is not text. `what` says whose unit it is.
+    """
+    if unit is None:
+        return None
+    if not isinstance(unit, str):
+        raise TypeError(f'{what} must be text, such as "K", not {unit!r}')
+    return unit.strip() or None
+
+
 class Measurement:
     """
     A class to represent a measurement that can be periodically called.
     """
 
     def __init__(
-        self, name: str, function: callable, call_every: int = 1, **kwargs
+        self,
+        name: str,
+        function: callable,
+        call_every: int = 1,
+        unit: str | None = None,
+        **kwargs,
     ) -> None:
         """
         Initializes the Measurement instance.
@@ -19,6 +37,9 @@ class Measurement:
             name (str): The name of the measurement.
             function (callable): The function to be called for the measurement.
             call_every (int): Call the function every Nth time. Default is 1.
+            unit (str | None): The unit of the value, such as `"K"`, shown beside it
+                in the interface and on plot axes. It is for display only: the data
+                file is unchanged. Default is no unit.
             **kwargs: Additional keyword arguments to pass to the function. Where
                 the function takes an enum, give the member (`InputChannel.INPUT_A`)
                 or the text that names it (`"INPUT_A"`, or its label `"Input A"`).
@@ -26,15 +47,17 @@ class Measurement:
         Raises:
             ValueError: If a keyword argument is not one the function takes, or text
                 given for an enum does not name a member.
+            TypeError: If `unit` is not text.
 
         Example:
-            Measurement("T", cryo.get_temperature, input_channel="INPUT_A")
+            Measurement("T", cryo.get_temperature, unit="K", input_channel="INPUT_A")
         """
         self._name = name
         self._function = function
         self._call_every = call_every
         self._call_counter = call_every
         self._result = None
+        self.unit = check_unit(unit, f"the unit of measurement '{name}'")
 
         # Validate kwargs against the function's signature
         self._validate_kwargs(function, kwargs)

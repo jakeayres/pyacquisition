@@ -25,6 +25,10 @@ from .core.config_parser import ConfigParser
 # and dearpygui's bundled native module and default font.
 _COLLECT_ALL = ("pyvisa", "pyvisa_py", "dearpygui")
 
+# Files that are read rather than imported, so the analysis does not see them: the
+# new GUI's page, which the API server always serves.
+_COLLECT_DATA = ("pyacquisition.new_gui",)
+
 # The entry point for a --toml build. It is the same every time: it looks for its
 # configuration beside the executable, under a fixed name, whatever the original
 # file was called. `build_app` copies it there after PyInstaller has run.
@@ -146,6 +150,8 @@ def build_app(
         command += ["--icon", str(icon)]
     for package in _COLLECT_ALL:
         command += ["--collect-all", package]
+    for package in _COLLECT_DATA:
+        command += ["--collect-data", package]
 
     result = subprocess.run(command, check=False)  # returncode is handled below
     if result.returncode != 0:
