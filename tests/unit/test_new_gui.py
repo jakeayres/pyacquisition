@@ -357,3 +357,44 @@ def test_a_running_experiment_stops_when_its_gui_process_ends(tmp_path):
     assert experiment._shutdown_event.is_set()
     assert not experiment._ui_process.is_alive()
     assert time.monotonic() - started < 15
+
+
+# -------------------------------------------------------------- the data folder
+def test_the_data_folder_is_the_one_the_experiment_names(monkeypatch, tmp_path):
+    import io
+    import json
+
+    from pyacquisition.new_gui import window
+
+    asked = []
+
+    def urlopen(url, timeout):
+        asked.append(url)
+        return io.BytesIO(json.dumps({"status": 200, "data": str(tmp_path)}).encode())
+
+    monkeypatch.setattr(window.urllib.request, "urlopen", urlopen)
+
+    assert window.data_folder("http://localhost:8123") == str(tmp_path)
+    assert asked == ["http://localhost:8123/scribe/current_directory"]
+
+
+def test_there_is_no_data_folder_while_the_experiment_does_not_answer():
+    from pyacquisition.new_gui import window
+
+    with socket.socket() as s:
+        s.bind(("localhost", 0))
+        port = s.getsockname()[1]
+    assert window.data_folder(f"http://localhost:{port}") is None
+
+
+def test_a_folder_is_opened_only_if_it_exists(monkeypatch, tmp_path):
+    from pyacquisition.new_gui import window
+
+    opened = []
+    monkeypatch.setattr(window.sys, "platform", "win32")
+    monkeypatch.setattr(window.os, "startfile", opened.append, raising=False)
+
+    assert window.open_folder(str(tmp_path)) is True
+    assert window.open_folder(str(tmp_path / "missing")) is False
+    assert window.open_folder(None) is False
+    assert opened == [str(tmp_path)]

@@ -5,10 +5,20 @@ export async function get(path, { params, timeout = 5000 } = {}) {
   const response = await fetch(`${path}${query}`, {
     signal: AbortSignal.timeout(timeout),
   });
-  if (!response.ok) {
-    throw new Error(`${path} failed with status ${response.status}`);
-  }
+  if (!response.ok) throw await failure(path, response);
   return response.json();
+}
+
+// The error for a request that failed: the server's own reason where it gives
+// one as text (FastAPI's `detail`), which is worth showing as it is.
+async function failure(path, response) {
+  try {
+    const { detail } = await response.json();
+    if (typeof detail === "string") return new Error(detail);
+  } catch {
+    // Not JSON: fall through to the status.
+  }
+  return new Error(`${path} failed with status ${response.status}`);
 }
 
 export async function getBinary(path, { params, timeout = 5000 } = {}) {
@@ -16,9 +26,7 @@ export async function getBinary(path, { params, timeout = 5000 } = {}) {
   const response = await fetch(`${path}${query}`, {
     signal: AbortSignal.timeout(timeout),
   });
-  if (!response.ok) {
-    throw new Error(`${path} failed with status ${response.status}`);
-  }
+  if (!response.ok) throw await failure(path, response);
   return response.arrayBuffer();
 }
 
@@ -65,3 +73,24 @@ export async function experimentInfo() {
 export async function shutdownExperiment() {
   await get("/experiment/shutdown");
 }
+
+// Where the data is written, and what the next file would be called (see
+// /scribe/state).
+export async function scribeState() {
+  const { data } = await get("/scribe/state");
+  return data;
+}
+
+export async function nextFile(title, nextBlock = false) {
+  await get("/scribe/next_file", { params: { title, next_block: nextBlock } });
+}
+
+// {paused, period}
+export async function rackState() {
+  const { paused, period } = await get("/rack/state", { timeout: 2000 });
+  return { paused, period };
+}
+
+export const pauseRack = () => get("/rack/pause/");
+export const resumeRack = () => get("/rack/resume/");
+export const setRackPeriod = (period) => get("/rack/period/set/", { params: { period } });

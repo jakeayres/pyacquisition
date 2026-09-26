@@ -10,8 +10,11 @@ The window and the experiment live and die together:
   `Experiment._watch_gui`).
 """
 
+import json
 import os
 import signal
+import subprocess
+import sys
 import threading
 import time
 import urllib.request
@@ -113,6 +116,37 @@ class _Api:
         """Closes the window without asking. The page calls it once it has asked,
         and has stopped the experiment."""
         self._owner.close()
+
+    def open_data_folder(self) -> bool:
+        """Opens the experiment's data folder in the file manager. Returns whether
+        it could."""
+        return open_folder(data_folder(self._owner.server))
+
+
+def data_folder(server: str) -> str | None:
+    """The experiment's data folder, as it says, so the page can't ask for any
+    other folder to be opened."""
+    try:
+        with urllib.request.urlopen(f"{server}/scribe/current_directory", timeout=2) as r:
+            return json.load(r)["data"]
+    except Exception:  # noqa: BLE001 - gone, or not answering: nothing to open
+        return None
+
+
+def open_folder(path: str | None) -> bool:
+    """Opens a folder in the system's file manager."""
+    if not path or not os.path.isdir(path):
+        return False
+    try:
+        if sys.platform == "win32":
+            os.startfile(path)  # noqa: S606 - a folder the experiment writes to
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", path])
+        else:
+            subprocess.Popen(["xdg-open", path])
+        return True
+    except OSError:
+        return False
 
 
 class _Window:

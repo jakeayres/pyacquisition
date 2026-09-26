@@ -86,6 +86,28 @@ export const SearchIcon = () =>
 
 export const ArrowDownIcon = () => stroke(html`<path d="M12 5v14M6 13l6 6 6-6" />`);
 
+export const FileIcon = () =>
+  stroke(html`
+    <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+    <path d="M14 3v5h5M9 13h6M9 17h6" />
+  `);
+
+export const FolderIcon = () =>
+  stroke(html`
+    <path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+  `);
+
+export const PauseIcon = () => stroke(html`<path d="M9 5v14M15 5v14" />`, { width: 2.25 });
+
+export const PlayIcon = () => stroke(html`<path d="M7 4.5v15L19 12z" />`);
+
+// Stopping the experiment.
+export const PowerIcon = () =>
+  stroke(html`
+    <path d="M12 3v8" />
+    <path d="M6.3 6.8a8 8 0 1 0 11.4 0" />
+  `);
+
 export const ChartIcon = () =>
   stroke(html`
     <path d="M3 3v18h18" />

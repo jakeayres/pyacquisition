@@ -8,6 +8,14 @@ import { dataFeed, logFeed } from "./feed.js";
 import { ValuesTab } from "./dock/values.js";
 import { LogsTab } from "./dock/logs.js";
 import { useConnection } from "./connection.js";
+import { useStore } from "./hooks.js";
+import {
+  FileControl,
+  RackControl,
+  ShutdownButton,
+  useRack,
+  useScribe,
+} from "./controls.js";
 import { useTheme } from "./theme.js";
 import { Dock } from "./dock.js";
 import { CloseDialog } from "./close-dialog.js";
@@ -91,7 +99,11 @@ function useExperimentName(connection) {
   return name;
 }
 
-function TopBar({ name, connection, theme, onToggleTheme }) {
+function TopBar({ name, connection, theme, onToggleTheme, store }) {
+  useStore(store); // for the data file, which the data stream announces
+  const file = store.current.file;
+  const scribe = useScribe(connection, file);
+  const rack = useRack(connection);
   const next = theme === "dark" ? "light" : "dark";
   return html`
     <header class="topbar">
@@ -99,7 +111,10 @@ function TopBar({ name, connection, theme, onToggleTheme }) {
         <${LogoMark} />
         <span class="brand-name">${name ?? "PyAcquisition"}</span>
       </div>
-      <div class="topbar-middle"></div>
+      <div class="topbar-middle">
+        <${FileControl} scribe=${scribe} file=${file} />
+        <${RackControl} rack=${rack.state} onChanged=${rack.refresh} />
+      </div>
       <div class="topbar-actions">
         <span class="connection" data-state=${connection} role="status">
           <span class="connection-dot"></span>
@@ -113,6 +128,7 @@ function TopBar({ name, connection, theme, onToggleTheme }) {
         >
           ${theme === "dark" ? html`<${SunIcon} />` : html`<${MoonIcon} />`}
         </button>
+        <${ShutdownButton} />
       </div>
     </header>
   `;
@@ -132,6 +148,7 @@ export function App() {
         connection=${connection}
         theme=${theme}
         onToggleTheme=${toggle}
+        store=${store}
       />
       <${PlotArea} store=${store} columns=${columns} theme=${theme} />
       <${Dock} tabs=${dockTabs({ store, logs, columns })} />

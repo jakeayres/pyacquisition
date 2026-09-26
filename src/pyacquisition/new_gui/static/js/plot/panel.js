@@ -2,8 +2,9 @@
 // what against, how to draw it, log axes, fixed limits, and the plot, with a
 // way back to autoscaling once it is zoomed. The plot area (area.js) arranges
 // the panels.
-import { useEffect, useRef, useState } from "preact/hooks";
+import { useRef, useState } from "preact/hooks";
 import { html } from "../html.js";
+import { usePopover } from "../hooks.js";
 import { AxesIcon, CopyIcon, CloseIcon } from "../icons.js";
 import { colourVar, isTimeColumn } from "../colours.js";
 import { Plot } from "./plot.js";
@@ -208,18 +209,7 @@ function AxesMenu({ limits, logX, logY, scalesRef, onApply }) {
     setError("");
   };
   const close = () => setDraft(null);
-
-  useEffect(() => {
-    if (!draft) return;
-    const outside = (event) => menu.current && !menu.current.contains(event.target) && close();
-    const escape = (event) => event.key === "Escape" && close();
-    document.addEventListener("pointerdown", outside);
-    document.addEventListener("keydown", escape);
-    return () => {
-      document.removeEventListener("pointerdown", outside);
-      document.removeEventListener("keydown", escape);
-    };
-  }, [!!draft]);
+  usePopover(menu, !!draft, close);
 
   const edit = (axis, change) => setDraft((d) => ({ ...d, [axis]: { ...d[axis], ...change } }));
   const apply = () => {
