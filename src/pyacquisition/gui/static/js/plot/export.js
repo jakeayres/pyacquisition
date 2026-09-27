@@ -121,8 +121,14 @@ function hexColour(colour) {
 // The plot's settings, as /experiment/plot_script takes them: the series shown,
 // each in its colour on screen, and both axes' ranges as they show now
 // (`scales`) if either axis is `held` (by a zoom, a pan or fixed limits), or
-// neither, to fit the data.
-export function scriptSettings({ x, series, marks, logX, logY, showPrevious }, scales, held) {
+// neither, to fit the data. `style` is "screen" (as it looks) or "aps" (a
+// figure for an APS journal).
+export function scriptSettings(
+  { x, series, marks, logX, logY, showPrevious },
+  scales,
+  held,
+  style = "screen",
+) {
   const range = (axis) => (held ? [scales[axis].min, scales[axis].max] : null);
   return {
     x,
@@ -135,6 +141,7 @@ export function scriptSettings({ x, series, marks, logX, logY, showPrevious }, s
     x_limits: range("x"),
     y_limits: range("y"),
     previous: !!showPrevious,
+    style,
   };
 }
 

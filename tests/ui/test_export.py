@@ -208,13 +208,18 @@ def colour_of(page, slot):
     )
 
 
-def test_the_menu_offers_the_image_the_data_and_a_script(context, rig):
+def test_the_menu_offers_the_image_the_data_a_script_and_a_figure(context, rig):
     page = open_page(context, rig)
 
     page.page.get_by_role("button", name="Export").click()
 
     expect(page.page.get_by_role("menu", name="Export").get_by_role("menuitem")).to_have_text(
-        ["Image of the plot (PNG)", "Data in view (CSV)", "Python script (matplotlib)"]
+        [
+            "Image of the plot (PNG)",
+            "Data in view (CSV)",
+            "Python script (matplotlib)",
+            "Publication figure (APS style)",
+        ]
     )
 
 
@@ -303,3 +308,36 @@ def test_a_script_the_server_refuses_says_why(context, rig):
     page.page.get_by_role("menuitem", name="Python script (matplotlib)").click()
 
     expect(page.page.locator(".export-message")).to_have_text(f"Couldn't export: {reason}")
+
+
+# -------------------------------------------------------------- the figure
+def test_the_figure_is_named_apart_and_drawn_in_the_journal_style(context, rig):
+    page = open_page(context, rig)
+    hold_still(rig, page)
+
+    download = export(page, "Publication figure (APS style)")
+
+    assert download.suggested_filename.endswith(" - wave vs time - figure.py")
+    script = script_of(download)
+    current = rig.get("/scribe/current_file").json()["data"]
+    assert f'FILE = "{current}"' in script
+    assert '"font.family": "STIXGeneral",' in script and "WIDTH = 3.375" in script
+    colour = colour_of(page, 1).lower()
+    assert f'color="{colour}", label="wave")' in script
+    assert 'fig.savefig(Path(__file__).with_suffix(".pdf")' in script
+    assert page.errors == []
+
+
+def test_with_x_fixed_the_figure_sets_both_axes(context, rig):
+    page = open_page(context, rig, rows=60)
+    hold_still(rig, page)
+    (segment,) = history(rig)
+    times = segment["columns"]["time"]
+    low, high = times[10], times[30]
+    fix_x(page, low, high)
+    page.page.wait_for_function(f"window.pyacquisition.plot.scales.x.min === {low}")
+
+    script = script_of(export(page, "Publication figure (APS style)"))
+
+    assert f"ax.set_xlim({float(low)!r}, {float(high)!r})" in script
+    assert "ax.set_ylim(" in script

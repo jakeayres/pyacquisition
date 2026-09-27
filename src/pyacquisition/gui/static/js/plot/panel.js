@@ -305,8 +305,9 @@ function AxesMenu({ limits, logX, logY, scalesRef, onApply }) {
 }
 
 // Exporting the plot: as an image of it, the data in view as CSV (export.js), or
-// a Python script that draws it with matplotlib (written by the server). A
-// message says where it went, for a few seconds.
+// a Python script that draws it with matplotlib (written by the server), as it
+// looks or as a figure for a paper. A message says where it went, for a few
+// seconds.
 function ExportMenu({ store, plotRef, scalesRef, what }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState(null); // {text, failed}
@@ -325,15 +326,21 @@ function ExportMenu({ store, plotRef, scalesRef, what }) {
     try {
       const u = plotRef.current;
       if (!u) throw new Error("there is no plot yet");
+      const held = manualAxes(what.view, what.limits).length > 0;
       const content =
         kind === "png"
           ? await plotImage(u, what)
-          : kind === "py"
-            ? await plotScript(
-                scriptSettings(what, scalesRef.current(), manualAxes(what.view, what.limits).length > 0),
-              )
-            : viewCsv(store, { ...what, range: scalesRef.current().x });
-      const where = await saveFile(exportName(store, what, kind), content);
+          : kind === "csv"
+            ? viewCsv(store, { ...what, range: scalesRef.current().x })
+            : await plotScript(
+                scriptSettings(what, scalesRef.current(), held, kind === "aps" ? "aps" : "screen"),
+              );
+      // The figure's script is named apart from the plain one of the same plot.
+      const name =
+        kind === "aps"
+          ? exportName(store, what, "py").replace(/\.py$/, " - figure.py")
+          : exportName(store, what, kind);
+      const where = await saveFile(name, content);
       if (where) tell(`Saved ${where}`);
     } catch (error) {
       tell(`Couldn't export: ${error.message ?? error}`, true);
@@ -362,6 +369,9 @@ function ExportMenu({ store, plotRef, scalesRef, what }) {
           </button>
           <button class="export-item" role="menuitem" onClick=${() => run("py")}>
             Python script (matplotlib)
+          </button>
+          <button class="export-item" role="menuitem" onClick=${() => run("aps")}>
+            Publication figure (APS style)
           </button>
         </div>
       `}

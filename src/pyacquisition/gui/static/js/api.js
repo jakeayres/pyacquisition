@@ -53,7 +53,7 @@ export async function post(path, body, { timeout = 5000 } = {}) {
 
 // A Python script that draws a plot with matplotlib, from its settings (see
 // /experiment/plot_script): {x, series: [{name, colour}], marks, log_x, log_y,
-// x_limits, y_limits, previous}.
+// x_limits, y_limits, previous, style}.
 export async function plotScript(body) {
   const { data } = await post("/experiment/plot_script", body);
   return data;

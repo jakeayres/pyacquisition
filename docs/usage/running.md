@@ -50,7 +50,7 @@ The window is a page served by the experiment itself, so you can also open it in
 
 **The plots**
 
-Each plot shows one or more columns against another. The chips along its top are the columns plotted, each in its own colour (the same colour as its tile in the **Values** tab): click one to hide or show it, click its **×** to take it off, and use **+ Add** to add another. **against** chooses the horizontal axis. **Lines**, **Points** and **Both** choose how it is drawn. The axis button sets fixed limits or a log scale for either axis, the download button saves the plot as a picture, the data in view as a CSV file, or a Python script that draws it, and the last buttons copy or remove the plot.
+Each plot shows one or more columns against another. The chips along its top are the columns plotted, each in its own colour (the same colour as its tile in the **Values** tab): click one to hide or show it, click its **×** to take it off, and use **+ Add** to add another. **against** chooses the horizontal axis. **Lines**, **Points** and **Both** choose how it is drawn. The axis button sets fixed limits or a log scale for either axis, the download button saves the plot as a picture, the data in view as a CSV file, or a Python script that draws it, as it looks or as a figure for a paper, and the last buttons copy or remove the plot.
 
 - **Zoom** by dragging a box. A thin box zooms one axis only. **Pan** by dragging with Shift or the middle button, or by scrolling. Ctrl and the scroll wheel zoom about the pointer.
 - While zoomed or panned, the plot holds that view as data arrives, and says **Autoscale off**. **Autoscale** there, or a double-click, sets it following the data again.
@@ -58,6 +58,9 @@ Each plot shows one or more columns against another. The chips along its top are
 - **+ Add plot** adds another (up to six), and **Link x-axes** zooms and pans the x axes of plots against the same column together.
 - The plots show the whole of the current data file, and the file before it, drawn fainter (the key at the top right hides or shows it). Calculated columns can be plotted too.
 - **Export**, then **Python script (matplotlib)**, saves a script that draws the plot again with matplotlib, for a paper or a slide: the same columns, labels, log axes, marks and colours, and the same limits if the plot was zoomed or had fixed limits. It reads the data files where they are (or beside itself, if they have moved), and draws the whole of each file as it stands when you run it, not only what the plot held. It needs pandas and matplotlib (`pip install pandas matplotlib`). It is plain code, meant to be changed: fonts, sizes, labels, anything.
+- **Publication figure (APS style)** saves a script like it that draws a figure for a paper, in the style of APS journals (PRB, PRL): one column (3.375 in) wide and square, serif fonts, ticks inward on all four sides, and each axis scaled so its numbers are short, with the SI prefix in its unit (`x (mV)`, not `x (V)` with numbers like 0.0024). Running it saves the figure as a PDF beside the script. The size, the labels, the scales and every part of the style are plain lines at the top of the script, to change as you like.
+
+    ![A figure of x and y against T through a transition, one APS column wide, from the simulated rig](../images/plots/publication-figure.png){ .pa-shot .pa-small }
 
 **The dock**
 
