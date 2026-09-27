@@ -49,6 +49,8 @@ def render(config: dict, text: str | None = None) -> str:
     Raises:
         ConfigWriteError: If the result wouldn't read back as `config`.
     """
+    if text is not None and _reads_as(text, config):
+        return text  # nothing to change, so nothing is
     if text is None:
         document = _new_document()
     else:
@@ -63,6 +65,13 @@ def render(config: dict, text: str | None = None) -> str:
     if not same(back, config):
         raise ConfigWriteError("The config would not read back as it was given.")
     return result
+
+
+def _reads_as(text: str, config: dict) -> bool:
+    try:
+        return same(tomllib.loads(text), config)
+    except tomllib.TOMLDecodeError:
+        return False
 
 
 def write(path: str | Path, config: dict) -> str:
@@ -218,17 +227,72 @@ def _normalise(document, text: str) -> None:
 
     A super table's children are left as they are: a comment in a super table
     gives it a header. `_rearrange_super` finds their comments itself.
+
+    First, a table written in parts (`[instruments.x]` again at the end of the
+    file, after other tables, which TOML allows) is gathered into its first
+    part: its entries can't otherwise be changed as one. That moves those parts
+    in the text, with their comments, so it is left undone unless something in
+    the file changes (see `render`).
     """
     if tomlkit.dumps(document) != text:
         return  # tomlkit doesn't give the text back as it was: leave it be
+    _gather(document)
+    expected = tomlkit.dumps(document)
     snapshot = _snapshot(document)
     try:
         _hoist(document)
     except Exception:  # noqa: BLE001 - a layout this doesn't expect: leave it be
         _restore(snapshot)
         return
-    if tomlkit.dumps(document) != text:
+    if tomlkit.dumps(document) != expected:
         _restore(snapshot)
+
+
+def _gather(container: Container) -> None:
+    """Joins each table written in parts into its first part: the later parts'
+    values before the first part's own tables, and their tables at its end, each
+    with the comments written above it."""
+    result, first, changed = [], {}, False
+    for key, item in _entries(container):
+        name = key.key if key is not None else None
+        if name in first and _is_table(item) and _is_table(first[name]):
+            run = _leading_run(result + [(key, item)], len(result))
+            result = result[: len(result) - len(run)]
+            if not run and result and result[-1][0] is not None and _is_table(result[-1][1]):
+                # Its comments are at the end of the table before it.
+                run = _detach_trailing_comments(result[-1][1])
+            _join(first[name], item, run)
+            changed = True
+            continue
+        if name is not None and name not in first:
+            first[name] = item
+        result.append((key, item))
+    if changed:
+        _set_body(container, result)
+    for key, item in _entries(container):
+        if _is_table(item):
+            _gather(_container(item))
+
+
+def _join(target: Table, part: Table, run: list) -> None:
+    """Adds a later part of a table to its first part. If the first part ended
+    with a blank line, before the next section, it still does."""
+    ended_blank = _ends_blank(target)
+    inner = _container(target)
+    entries = _entries(inner)
+    parts = _entries(_container(part))
+    split = next((i for i, (k, v) in enumerate(parts) if k is not None and _is_table(v)), len(parts))
+    values, tables = parts[:split], parts[split:]
+    at = next((i for i, (k, v) in enumerate(entries) if k is not None and _is_table(v)), len(entries))
+    entries = entries[:at] + values + entries[at:]
+    if tables:
+        _set_body(inner, entries)
+        if not _ends_blank(target):
+            _append_to_tail(target, [(None, Whitespace("\n"))])
+        entries = _entries(inner) + run + tables
+    _set_body(inner, entries)
+    if ended_blank and not _ends_blank(target):
+        _append_to_tail(target, [(None, Whitespace("\n"))])
 
 
 def _snapshot(document) -> list:

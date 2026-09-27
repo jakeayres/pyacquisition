@@ -210,6 +210,50 @@ def test_reordered_calculations_take_their_comments():
     assert "[calculations]" not in result  # still no header of its own
 
 
+# ------------------------------------------------------------ a table in parts
+IN_PARTS = """\
+[instruments]
+clock = {instrument = "Clock"}
+
+[measurements]
+t = {instrument = "clock", method = "time"}
+
+[rack]
+period = 0.5
+
+# Added later, by hand.
+[instruments.random]
+instrument = "RandomNumberGenerator"
+"""
+
+
+def test_a_table_in_parts_is_kept_as_it_is_when_nothing_changes():
+    assert render(config(IN_PARTS), IN_PARTS) == IN_PARTS
+
+
+def test_a_table_in_parts_is_gathered_when_something_changes():
+    new = config(IN_PARTS)
+    new["rack"]["period"] = 0.25
+    new["instruments"]["signal"] = {"instrument": "SignalGenerator"}
+
+    result = render(new, IN_PARTS)
+
+    assert same(tomllib.loads(result), new)
+    assert result.index("# Added later, by hand.") < result.index("[instruments.random]")
+    assert result.index("[instruments.random]") < result.index("[measurements]")
+    assert "period = 0.25" in result
+
+
+def test_a_table_in_parts_can_lose_its_later_part():
+    new = config(IN_PARTS)
+    del new["instruments"]["random"]
+
+    result = render(new, IN_PARTS)
+
+    assert same(tomllib.loads(result), new)
+    assert "random" not in result and "Added later" not in result
+
+
 # ------------------------------------------------------------ a new file
 def test_a_new_file_has_a_header_and_reads_back():
     new = config()
