@@ -102,3 +102,21 @@ def test_making_an_endpoint_leaves_the_methods_annotations_alone(api_server):
     api_server.create_endpoint_function(get_level)
 
     assert get_level.__annotations__ == {"channel": int, "return": float}
+
+
+def test_an_endpoint_from_a_method_that_returns_a_number_answers(api_server):
+    """The endpoint wraps the result in a dict, so it must not be checked
+    against the method's own return type (every call failed with a 500)."""
+    from fastapi.testclient import TestClient
+
+    def get_level(channel: int) -> float:
+        return 2.5 * channel
+
+    api_server.app.add_api_route(
+        "/probe/get_level", api_server.create_endpoint_function(get_level), methods=["GET"]
+    )
+
+    response = TestClient(api_server.app).get("/probe/get_level", params={"channel": 2})
+
+    assert response.status_code == 200, response.text
+    assert response.json() == {"status": 200, "data": 5.0}

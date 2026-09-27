@@ -339,7 +339,12 @@ class APIServer:
         # A copy: the method's own annotations are the class's, and setting the
         # return type on them changed it for everything else that reads them.
         endpoint_func.__annotations__ = {**method.__annotations__, "return": dict}
-        endpoint_func.__signature__ = inspect.signature(method)
+        # The endpoint answers with a dict holding the method's result, so that is
+        # its return type. FastAPI checks the answer against the signature's, and
+        # the method's own (`-> float`) would fail every call.
+        endpoint_func.__signature__ = inspect.signature(method).replace(
+            return_annotation=dict
+        )
         endpoint_func.__doc__ = method.__doc__
 
         return endpoint_func
