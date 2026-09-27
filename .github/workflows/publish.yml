@@ -16,6 +16,9 @@ permissions: {}
 jobs:
   build:
     name: Build distributions
+    # Only from the public repository, which PyPI trusts. The private one, that
+    # it is made from (publish-public.yml), gets the same tags first.
+    if: github.repository == 'jakeayres/pyacquisition'
     runs-on: ubuntu-latest
     permissions:
       contents: read
