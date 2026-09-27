@@ -55,7 +55,12 @@ def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="pyacquisition", description="Run or freeze an experiment."
     )
-    subparsers = parser.add_subparsers(dest="command", required=True)
+    # `new` is left out of the help until the setup page is finished (see
+    # specs/setup-page.md, in the repository): it has no `help`, so it isn't
+    # listed, and the metavar keeps it out of the usage line.
+    subparsers = parser.add_subparsers(
+        dest="command", required=True, metavar="{run,build}"
+    )
 
     run_parser = subparsers.add_parser("run", help="Run an experiment.")
     _add_source_arguments(run_parser)
@@ -88,6 +93,20 @@ def _build_parser() -> argparse.ArgumentParser:
         type=str,
         default=None,
         help="An .ico file for the application's icon.",
+    )
+
+    new_parser = subparsers.add_parser(
+        "new", description="Build or change an experiment's config in a window."
+    )
+    new_parser.add_argument("config", type=str, help="Path to the TOML config file.")
+    new_parser.add_argument(
+        "--port",
+        type=int,
+        default=None,
+        help=(
+            "The port for the setup page, and for the experiment it runs. "
+            "Defaults to the file's own, or 8000."
+        ),
     )
 
     return parser
@@ -123,6 +142,16 @@ def _build(args: argparse.Namespace) -> None:
     print(f"Built {app_dir}")
 
 
+def _new(config: str, port: int | None) -> None:
+    path = Path(config)
+    if not path.is_file():
+        raise SystemExit(f"pyacquisition new: {config} doesn't exist.")
+    # Imported here, so that running an experiment doesn't load it.
+    from .core.setup import open_setup
+
+    open_setup(path, port=port)
+
+
 def main(*args) -> None:
     """
     The `pyacquisition` command: `run` an experiment, or `build` a standalone
@@ -138,12 +167,14 @@ def main(*args) -> None:
     subcommand) still works, as `pyacquisition run --toml <path>`.
     """
     argv = list(args) if args else sys.argv[1:]
-    if not argv or argv[0] not in ("run", "build"):
+    if not argv or argv[0] not in ("run", "build", "new"):
         argv = ["run", *argv]
 
     parsed = _build_parser().parse_args(argv)
 
     if parsed.command == "run":
         _run(parsed.toml, parsed.py)
+    elif parsed.command == "new":
+        _new(parsed.config, parsed.port)
     else:
         _build(parsed)

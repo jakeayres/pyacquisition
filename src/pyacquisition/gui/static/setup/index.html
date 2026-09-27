@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PyAcquisition setup</title>
+    <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
+    <script>
+      // The theme, set before the first paint, as on the experiment's page.
+      document.documentElement.dataset.theme = matchMedia(
+        "(prefers-color-scheme: dark)",
+      ).matches
+        ? "dark"
+        : "light";
+    </script>
+    <link rel="stylesheet" href="../css/tokens.css" />
+    <link rel="stylesheet" href="../css/app.css" />
+    <script type="module" src="../js/setup/main.js"></script>
+  </head>
+  <body>
+    <!-- A placeholder until the real page (milestone 4 of specs/setup-page.md). -->
+    <main class="empty-state">
+      <h2>Set up an experiment</h2>
+      <p id="setup-path"></p>
+      <p id="setup-error" class="popover-error" role="alert" hidden></p>
+      <button id="setup-run" class="button button-primary" disabled>Run</button>
+      <p id="setup-status" role="status"></p>
+    </main>
+  </body>
+</html>

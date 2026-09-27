@@ -180,6 +180,48 @@ def test_the_freeze_module_is_not_imported_just_to_run(no_run, tmp_path):
     assert "pyacquisition.freeze" not in sys.modules
 
 
+# --------------------------------------------------------------------- new
+@pytest.fixture
+def no_setup(monkeypatch):
+    """Stops the setup page from opening, and hands back what it was asked."""
+    opened = []
+    monkeypatch.setattr(
+        "pyacquisition.core.setup.open_setup",
+        lambda path, port=None: opened.append((path, port)),
+    )
+    return opened
+
+
+def test_new_opens_the_setup_page_for_a_file(no_setup, tmp_path):
+    config = tmp_path / "rig.toml"
+    config.write_text("")
+
+    main("new", str(config), "--port", "8123")
+
+    assert no_setup == [(config, 8123)]
+
+
+def test_new_needs_a_path(capsys):
+    with pytest.raises(SystemExit):
+        main("new")
+    assert "required" in capsys.readouterr().err.lower()
+
+
+def test_new_needs_the_file_to_exist_for_now(no_setup, tmp_path):
+    with pytest.raises(SystemExit, match="doesn't exist"):
+        main("new", str(tmp_path / "missing.toml"))
+    assert no_setup == []
+
+
+def test_new_is_not_in_the_help_until_it_is_finished(capsys):
+    from pyacquisition import _build_parser
+
+    assert "new" not in _build_parser().format_help()
+    with pytest.raises(SystemExit):
+        main("--help")
+    assert "new" not in capsys.readouterr().out
+
+
 # ------------------------------------------------------------ freeze_support
 def test_pyacquisition_calls_freeze_support_on_import(monkeypatch):
     """So a frozen build's spawned child does not re-run the whole script instead
