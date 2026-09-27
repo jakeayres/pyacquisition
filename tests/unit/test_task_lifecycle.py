@@ -1,6 +1,7 @@
 """Pause, resume and abort of a task: hooks, cancellation, outcomes and the toolkit."""
 
 import asyncio
+import time
 from dataclasses import dataclass, field
 from unittest.mock import Mock
 
@@ -905,6 +906,7 @@ async def test_a_failed_task_pauses_the_queue_until_it_is_resumed():
             "name": "Boom",
             "outcome": "failed",
             "error": "RuntimeError: boom",
+            "finished_at": pytest.approx(time.time(), abs=5),
         }
 
         manager.resume()

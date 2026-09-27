@@ -2,6 +2,7 @@ from ..logging import logger
 from .task import Task
 import asyncio
 import dataclasses
+import time
 import math
 from fastapi import HTTPException
 from typing import Literal
@@ -119,6 +120,9 @@ class TaskManager:
             "name": task.name,
             "outcome": outcome,
             "error": None if error is None else f"{type(error).__name__}: {error}",
+            # When it ended, which also tells two results alike apart (the
+            # interface raises an alert for each failure).
+            "finished_at": time.time(),
         }
         if outcome == "failed" and not self._shutdown_event.is_set():
             logger.error(

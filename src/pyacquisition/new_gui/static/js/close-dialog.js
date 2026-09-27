@@ -41,6 +41,8 @@ export function CloseDialog() {
 
   const stop = async () => {
     setStopping(true);
+    // The connection dropping now is expected, so it raises no alert (alerts.js).
+    window.pyacquisition.stopping = true;
     try {
       await shutdownExperiment();
     } catch {

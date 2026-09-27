@@ -10,6 +10,7 @@ import { LogsTab } from "./dock/logs.js";
 import { InstrumentsTab } from "./dock/instruments.js";
 import { QueueTab, useManagers } from "./dock/queue.js";
 import { RunningSummary } from "./progress.js";
+import { AlertBell, AlertStore, AlertToasts, useAlertWatch } from "./alerts.js";
 import { useConnection } from "./connection.js";
 import { useStore } from "./hooks.js";
 import {
@@ -102,11 +103,10 @@ function useExperimentName(connection) {
   return name;
 }
 
-function TopBar({ name, connection, theme, onToggleTheme, store, managers }) {
+function TopBar({ name, connection, theme, onToggleTheme, store, managers, rack, alerts }) {
   useStore(store); // for the data file, which the data stream announces
   const file = store.current.file;
   const scribe = useScribe(connection, file);
-  const rack = useRack(connection);
   const next = theme === "dark" ? "light" : "dark";
   return html`
     <header class="topbar">
@@ -120,6 +120,7 @@ function TopBar({ name, connection, theme, onToggleTheme, store, managers }) {
         <${RunningSummary} states=${managers.states} />
       </div>
       <div class="topbar-actions">
+        <${AlertBell} alerts=${alerts} />
         <span class="connection" data-state=${connection} role="status">
           <span class="connection-dot"></span>
           ${CONNECTION_LABELS[connection]}
@@ -145,7 +146,10 @@ export function App() {
   const store = useData();
   const logs = useLogs();
   const managers = useManagers(connection);
+  const rack = useRack(connection);
   const columns = useColumns(connection);
+  const [alerts] = useState(() => new AlertStore());
+  useAlertWatch({ alerts, connection, store, logs, managers, rack });
   return html`
     <div class="app">
       <${TopBar}
@@ -155,10 +159,13 @@ export function App() {
         onToggleTheme=${toggle}
         store=${store}
         managers=${managers}
+        rack=${rack}
+        alerts=${alerts}
       />
       <${PlotArea} store=${store} columns=${columns} theme=${theme} />
       <${Dock} tabs=${dockTabs({ store, logs, columns, managers })} />
     </div>
+    <${AlertToasts} alerts=${alerts} />
     <${CloseDialog} />
   `;
 }
