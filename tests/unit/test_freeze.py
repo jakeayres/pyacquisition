@@ -236,7 +236,9 @@ def test_pyinstaller_available_reflects_the_path(monkeypatch):
     shutil.which("pyinstaller") is None, reason="pyinstaller is not installed"
 )
 def test_a_real_toml_build(tmp_path):
-    """Freezes a genuine, tiny experiment and checks the result runs."""
+    """Freezes a genuine, tiny experiment and checks the result runs and serves
+    the new GUI's page. (It runs without a window: the window itself was checked
+    by hand, in milestone 19 of SPEC.md.)"""
     # A port away from 8000, which the docs server commonly occupies during dev.
     port = 8193
     base = f"http://localhost:{port}"
@@ -254,6 +256,24 @@ def test_a_real_toml_build(tmp_path):
     exe = app_dir / "RigSmoke.exe"
     assert exe.exists()
     assert (app_dir / "config.toml").exists()
+
+    # What the new GUI's window needs, which is found at runtime rather than
+    # imported: pywebview's WebView2 libraries, pythonnet's .NET runtime and its
+    # loader, and the page itself.
+    from PyInstaller.archive.readers import CArchiveReader
+
+    bundled = {name.replace("\\", "/") for name in CArchiveReader(str(exe)).toc}
+    for name in (
+        "webview/lib/Microsoft.Web.WebView2.Core.dll",
+        "webview/lib/Microsoft.Web.WebView2.WinForms.dll",
+        "webview/lib/runtimes/win-x64/native/WebView2Loader.dll",
+        "pythonnet/runtime/Python.Runtime.dll",
+        "clr_loader/ffi/dlls/amd64/ClrLoader.dll",
+        "pyacquisition/new_gui/static/index.html",
+        "pyacquisition/new_gui/static/js/main.js",
+        "pyacquisition/new_gui/static/vendor/preact/preact.module.js",
+    ):
+        assert name in bundled, f"{name} is missing from the build"
 
     import time
 
@@ -277,6 +297,13 @@ def test_a_real_toml_build(tmp_path):
                 raise AssertionError("the frozen app never answered /ping")
 
             assert requests.get(f"{base}/ping", timeout=2).json() == "pong"
+            # The page, as the window loads it: its scripts as modules.
+            page = requests.get(f"{base}/", timeout=5)
+            assert page.status_code == 200 and 'type="module"' in page.text
+            for path in ("/ui/js/main.js", "/ui/vendor/uplot/uPlot.esm.js"):
+                script = requests.get(f"{base}{path}", timeout=5)
+                assert script.status_code == 200
+                assert script.headers["content-type"].startswith("text/javascript")
             try:
                 requests.get(f"{base}/experiment/shutdown", timeout=5)
             except requests.exceptions.RequestException:

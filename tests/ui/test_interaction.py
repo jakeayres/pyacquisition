@@ -71,7 +71,11 @@ def y_range(page):
 
 
 def over(page):
-    return page.locator(".u-over").bounding_box()
+    # Waited for: changing what is plotted draws the plot afresh, and for a
+    # moment there is none.
+    surface = page.locator(".u-over")
+    surface.wait_for(state="visible")
+    return surface.bounding_box()
 
 
 def drag(page, start, end, button="left", shift=False):
@@ -219,7 +223,7 @@ def test_shift_dragging_pans_and_turns_autoscale_off(plot_page):
 
 def test_the_middle_button_pans_too(plot_page):
     page = plot_page.page
-    before = y_range(page)
+    _, before = held(page)
 
     drag(page, (0.5, 0.4), (0.5, 0.6), button="middle")
 

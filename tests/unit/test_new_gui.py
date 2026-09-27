@@ -519,3 +519,93 @@ def test_without_windows_forms_the_dialog_is_shown_directly(monkeypatch):
     dialog = FakeDialogWindow("/tmp/chosen.csv")
 
     assert window.ask_where_to_save(dialog, save_filename="a.csv") == "/tmp/chosen.csv"
+
+
+# -------------------------------------------------------------- without WebView2
+def fake_winforms(monkeypatch, renderer):
+    import sys
+    from types import ModuleType
+
+    fake = ModuleType("webview.platforms.winforms")
+    fake.renderer = renderer
+    monkeypatch.setitem(sys.modules, "webview.platforms.winforms", fake)
+    monkeypatch.delenv("PYWEBVIEW_GUI", raising=False)
+    monkeypatch.setattr(sys, "platform", "win32")
+
+
+def test_internet_explorers_engine_is_noticed(monkeypatch):
+    from pyacquisition.new_gui import window
+
+    fake_winforms(monkeypatch, "mshtml")
+    assert window.needs_webview2() is True
+
+    fake_winforms(monkeypatch, "edgechromium")
+    assert window.needs_webview2() is False
+
+
+def test_an_engine_chosen_for_pywebview_is_followed(monkeypatch):
+    from pyacquisition.new_gui import window
+
+    fake_winforms(monkeypatch, "edgechromium")
+    monkeypatch.setenv("PYWEBVIEW_GUI", "mshtml")
+    assert window.needs_webview2() is True
+    monkeypatch.setenv("PYWEBVIEW_GUI", "cef")
+    assert window.needs_webview2() is False
+
+
+def test_webview2_is_windows_only(monkeypatch):
+    import sys
+
+    from pyacquisition.new_gui import window
+
+    monkeypatch.setattr(sys, "platform", "linux")
+    assert window.needs_webview2() is False
+
+
+def run_main(monkeypatch, needs):
+    """Runs the window process's `main` with a fake pywebview, and returns what
+    the window was made with."""
+    import sys
+    from types import ModuleType, SimpleNamespace
+
+    from pyacquisition.new_gui import window
+
+    made = {}
+    fake = ModuleType("webview")
+
+    class Events:  # `window.events.closing += handler`
+        def __init__(self):
+            self.closing = self
+
+        def __iadd__(self, handler):
+            return self
+
+    def create_window(title, **options):
+        made.update(options, title=title)
+        return SimpleNamespace(events=Events())
+
+    fake.create_window = create_window
+    fake.start = lambda *args, **kwargs: None
+    monkeypatch.setitem(sys.modules, "webview", fake)
+    monkeypatch.setattr(window.signal, "signal", lambda *args: None)
+    monkeypatch.setattr(window, "needs_webview2", lambda: needs)
+    window.main("http://localhost:8123")
+    return made
+
+
+def test_the_window_shows_the_page(monkeypatch):
+    made = run_main(monkeypatch, needs=False)
+
+    assert made["url"] == "http://localhost:8123/ui/"
+    assert "html" not in made
+
+
+def test_without_webview2_the_window_says_what_to_do(monkeypatch):
+    from pyacquisition.new_gui import window
+
+    made = run_main(monkeypatch, needs=True)
+
+    assert "url" not in made
+    assert "WebView2 Runtime" in made["html"]
+    assert window.WEBVIEW2_DOWNLOAD in made["html"]
+    assert "http://localhost:8123" in made["html"]  # to open in a browser meanwhile

@@ -41,6 +41,50 @@ _REQUEST_CLOSE = (
 BACKGROUND = {"light": "#f4f5f7", "dark": "#0e1014"}
 
 
+# Where the WebView2 Runtime can be installed from (Microsoft's "Evergreen
+# Bootstrapper").
+WEBVIEW2_DOWNLOAD = "https://go.microsoft.com/fwlink/p/?LinkId=2124703"
+
+
+def needs_webview2() -> bool:
+    """Whether the window would be shown by Internet Explorer's engine, which
+    can't run the page: pywebview falls back to it on Windows without the
+    Microsoft Edge WebView2 Runtime (Windows 11 has it, and so does Windows 10
+    with a current Edge). Elsewhere, False."""
+    if sys.platform != "win32":
+        return False
+    # An engine chosen through pywebview's own setting is the one used. (Its
+    # Windows module reads the setting only if imported after `webview.start`.)
+    forced = os.environ.get("PYWEBVIEW_GUI", "").lower()
+    if forced:
+        return forced == "mshtml"
+    try:
+        from webview.platforms import winforms
+    except Exception:  # noqa: BLE001 - it can't tell, and pywebview says why itself
+        return False
+    return winforms.renderer == "mshtml"
+
+
+def webview2_notice(server: str, theme: str) -> str:
+    """The page shown instead, saying what to install, and that the experiment
+    runs regardless and can be seen in a browser."""
+    background = BACKGROUND[theme]
+    text = "#e6e8eb" if theme == "dark" else "#1d2127"
+    return f"""<!doctype html>
+<html><head><meta charset="utf-8"><title>{TITLE}</title></head>
+<body style="margin:0;padding:48px;background:{background};color:{text};
+  font-family:'Segoe UI',sans-serif;font-size:14px;line-height:1.5">
+  <h1 style="font-size:18px;font-weight:600;margin:0 0 12px">
+    This window needs the Microsoft Edge WebView2 Runtime</h1>
+  <p>The experiment is running, but this PC can't show its window without the
+    runtime. Install it from Microsoft, then start the experiment again:</p>
+  <p style="font-family:Consolas,monospace;user-select:all">{WEBVIEW2_DOWNLOAD}</p>
+  <p>Until then, open this address in Edge, Chrome or Firefox to see it:</p>
+  <p style="font-family:Consolas,monospace;user-select:all">{server}</p>
+  <p>Closing this window stops the experiment.</p>
+</body></html>"""
+
+
 def system_theme() -> str:
     """The theme Windows is set to for apps, "dark" or "light". Elsewhere, "light"."""
     try:
@@ -286,14 +330,22 @@ def main(server: str, told_to_close=None) -> None:
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
     app = _Window(server)
+    theme = system_theme()
+    # Without the WebView2 Runtime the page can't run here: the window says so
+    # instead of staying blank.
+    shown = (
+        {"html": webview2_notice(server, theme)}
+        if needs_webview2()
+        else {"url": f"{server}/ui/"}
+    )
     app.window = webview.create_window(
         TITLE,
-        f"{server}/ui/",
+        **shown,
         js_api=_Api(app),
         width=1600,
         height=900,
         min_size=(900, 600),
-        background_color=BACKGROUND[system_theme()],
+        background_color=BACKGROUND[theme],
     )
     app.window.events.closing += app.on_closing
     webview.start(

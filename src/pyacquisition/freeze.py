@@ -12,6 +12,11 @@ PyInstaller's static analysis sees whatever it imports (a sibling module, a
 third-party package your own instrument needs) and bundles that too. Building
 our own wrapper around it, the way the TOML path does, would hide those imports
 from PyInstaller and they would silently be missing from the built application.
+
+The PC a built application runs on needs no Python. For the new GUI (`gui =
+"new"`) it needs the Microsoft Edge WebView2 Runtime, which Windows 11 has, and
+Windows 10 has with a current Edge. Without it the window says what to install,
+and the page can still be opened in a browser.
 """
 
 import shutil
