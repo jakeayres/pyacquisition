@@ -20,7 +20,7 @@ path = "data_sub"
 
 [api_server]
 host = "localhost"
-port = 8005
+port = 8006
 
 [logging]
 path = "logs"

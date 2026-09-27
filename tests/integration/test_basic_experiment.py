@@ -28,7 +28,12 @@ def running_experiment(basic_experiment):
     server_thread.start()
     asyncio.run(asyncio.sleep(2))
     yield  # Yield control to the test
-    server_thread.join(timeout=1)
+    # Stopped, so that its port is free for the next module's experiment.
+    try:
+        requests.get("http://localhost:8005/experiment/shutdown", timeout=5)
+    except requests.exceptions.RequestException:
+        pass
+    server_thread.join(timeout=15)
 
 
 @pytest.mark.asyncio
