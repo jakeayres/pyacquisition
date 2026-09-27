@@ -1,6 +1,6 @@
 # Magnet sweeps
 
-`SweepMagneticField` sweeps a magnet powered by an Oxford Instruments [Mercury IPS](../instruments/mercury_ips.md) to a field and back to zero. **It is registered by itself when there is a Mercury IPS in the experiment**, as **Sweep Magnetic Field** in the **Tasks** menu.
+`SweepMagneticField` sweeps a magnet powered by an Oxford Instruments [Mercury IPS](../instruments/mercury_ips.md) to a field and back to zero. **It is registered by itself when there is a Mercury IPS in the experiment**, and listed as **Sweep Magnetic Field** in **Add task**.
 
 ```python
 from pyacquisition.instruments import Mercury_IPS

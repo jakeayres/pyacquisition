@@ -85,18 +85,18 @@ See [Adding hardware instruments](instruments.md#adding-hardware-instruments) fo
 
 Run it without any tasks first.
 
-1. **Just measure.** Comment out the three `register_task` lines, and run the experiment. Look at **Live Data** and compare each number with the instrument's own display. Does `T` match the front panel? Is `x` what the lock-in shows?
-2. **Try a query and a command by hand.** Use the **Instruments** menu, exactly as in [lesson 2](simulated_rig.md#talk-to-an-instrument). Query first, and change only harmless settings.
+1. **Just measure.** Comment out the three `register_task` lines, and run the experiment. Look at the **Values** tab and compare each number with the instrument's own display. Does `T` match the front panel? Is `x` what the lock-in shows?
+2. **Try a query and a command by hand.** Use the **Instruments** tab, exactly as in [lesson 2](simulated_rig.md#talk-to-an-instrument). Query first, and change only harmless settings.
 3. **Then a small task.** Put the tasks back, and queue **Set Temperature** for a temperature a degree or two from where you are, with a gentle `ramp_rate`.
 
-Real instruments differ from the simulation in ways it cannot warn you about. A real temperature controller responds slowly and overshoots, a real lock-in has a sensitivity and a time constant that you must set for your signal (both are commands in the **Instruments** menu), and a real sample is noisier.
+Real instruments differ from the simulation in ways it cannot warn you about. A real temperature controller responds slowly and overshoots, a real lock-in has a sensitivity and a time constant that you must set for your signal (both are commands in the **Instruments** tab), and a real sample is noisier.
 
 ## Before you run a task
 
 `SetTemperature` sets a ramp rate and a setpoint on **Output 1** of the controller. That is the right thing to do only if your controller is configured for it.
 
 - **Check the output.** `OutputChannel.OUTPUT_1` must be the loop that controls your sample. If it is not, change it in the task.
-- **Know what appears in the Tasks menu.** A task that comes with an instrument, here **Ramp Temperature** for the Lakeshore, is registered for you when the instrument is in the experiment, so it is in the **Tasks** menu without you writing anything. Like `SetTemperature`, it changes the ramp rate and the setpoint of the output you name, so treat it the same way. To keep it out, set `auto_tasks = False` in your experiment class (see [tasks that are already included](tasks.md#tasks-that-are-already-included)).
+- **Know what can be queued.** A task that comes with an instrument, here **Ramp Temperature** for the Lakeshore, is registered for you when the instrument is in the experiment, so it is in **Add task** without you writing anything. Like `SetTemperature`, it changes the ramp rate and the setpoint of the output you name, so treat it the same way. To keep it out, set `auto_tasks = False` in your experiment class (see [tasks that are already included](tasks.md#tasks-that-are-already-included)).
 - **Check the limits.** The controller has its own setpoint limits and heater ranges. Set them to suit your cryostat, and do not rely on the task to protect the hardware. A task does exactly what you wrote.
 - **Choose a safe `ramp_rate`.** The `30` in the example is a kelvin per minute that suits the simulation, not your cryostat. Use a rate your system tolerates.
 - **Test `teardown()` on the real thing.** Abort a task on purpose, and check that the instrument ends up somewhere you are happy with. [Lesson 6](queueing_tasks.md) shows how.
@@ -106,7 +106,7 @@ Real instruments differ from the simulation in ways it cannot warn you about. A 
 `pyacquisition` includes a verification tool that runs each supported instrument's queries and commands against real hardware and checks the replies, with read-only and reversible modes. Use it when you set up a new instrument. See [Verifying hardware](../dev/verifying_hardware.md).
 
 !!! success "Checkpoint"
-    With the real instruments connected, **Live Data** shows the temperature and lock-in readings you see on the instruments themselves, and **Instruments → lakeshore** and **lockin** list the same queries and commands you used in the simulation.
+    With the real instruments connected, the **Values** tab shows the temperature and lock-in readings you see on the instruments themselves, and **lakeshore** and **lockin** in the **Instruments** tab list the same queries and commands you used in the simulation.
 
 ## What you learned
 

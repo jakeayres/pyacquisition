@@ -29,7 +29,7 @@ Every experiment has this same shape, so it is worth reading slowly once. The no
 
 </div>
 
-Two options are set in the class body. `data_path = "my_data"` says where data files go, and `gui_log_level = "INFO"` keeps the log window readable, because by default it shows every debugging message, which is very chatty. All the options are listed on the [Experiment options](setting_up.md#experiment-options) page.
+Two options are set in the class body. `data_path = "my_data"` says where data files go, and `gui_log_level = "INFO"` keeps the **Logs** tab readable, because by default it shows every debugging message, which is very chatty. All the options are listed on the [Experiment options](setting_up.md#experiment-options) page.
 
 An **instrument** is a Python object that represents something you can read from or control. A `Clock` is a built-in software instrument that reports elapsed time, and the text `"clock"` is its **id**. A **measurement** records one of an instrument's queries, here under the column name `time`, on every cycle. You give the measurement the *method* and it calls it for you, over and over.
 
@@ -52,11 +52,10 @@ Take a tour of what you are looking at:
 
 | Part | What it is |
 |---|---|
-| **Data File** | The file that data is being written to, and its folder. The **Next File** card shows the name the next file would get. Type a name in the box under it and press **Next File** to start that file, or tick **Increment Block** first to start a new block instead of the next step. |
-| **Task Queue** | The procedures that are running or waiting. Nothing yet, so it is **IDLE**. |
-| **Live Data** | A card for each measurement, updating as it arrives: its name in white, the instrument and method it comes from in grey under it, and its latest value at the right, in the colour of its bar. The header goes amber, and says `STALE`, if no data has arrived for a few seconds, and the icon at its right pauses and resumes the measurements. **Loop Time**, in the darker card at the bottom, is how long the last cycle took. |
-| **Log** | What the experiment is doing, as it does it, one line per message. The buttons under the title choose the lowest level that is shown (Debug, Info, Warning or Error), and the title says how many messages are hidden. It starts at Info. |
-| **Menu bar** | **Scribe** controls the data file, **Rack** controls measuring, **Instruments** lists everything each instrument can do, **Task Manager** and **Tasks** run procedures, and **Plots** opens live graphs. You will use all of them in the next lessons. |
+| **Top bar** | The file that data is being written to (`00.00 start.data`), and how often everything is measured (**Every 0.25 s**), with a button to pause measuring. Click either for more. At the right: alerts, whether the experiment is answering, the keyboard shortcuts, the theme, and stopping. |
+| **Plot** | A live graph, here of `time` against itself, since it is the only column. You will choose what it shows in the next lesson. |
+| **Values** | A tile for each measurement, updating as it arrives: its name, the instrument and query it comes from, its latest value, and a small graph of its recent values. |
+| **Queue**, **Instruments**, **Logs** | The other tabs of the dock: the procedures that are running or waiting (nothing yet), everything each instrument can do, and what the experiment is doing, one line per message. Press ++1++ to ++4++ to switch between the tabs. You will use all of them in the next lessons. |
 
 Everything in that window was generated from a dozen lines of Python. There is no GUI code in your script.
 
@@ -75,18 +74,19 @@ Every measurement you add becomes another column. You will add some in the next 
 
 ## Stop it
 
-Close the window. This shuts everything down cleanly.
+Close the window, and choose **Stop experiment** when it asks. This shuts everything down cleanly.
 
 Run it again and look in `my_data`. This time there is also a `01.00 start.data`. Every run starts a new *block*, so a run never overwrites the data of an earlier one. [Lesson 3](recording_data.md) explains the file names.
 
 !!! success "Checkpoint"
-    You have a window with a **Live Data** card showing `time` counting up, and a `00.00 start.data` file in `my_data` that grew while it ran.
+    You have a window with a **Values** tile showing `time` counting up, and a `00.00 start.data` file in `my_data` that grew while it ran.
 
 ??? failure "Something not working?"
     - **`ModuleNotFoundError: No module named 'pyacquisition'`.** You ran the script with a Python that does not have it installed. Run it with `uv run my_experiment.py` from the project folder you made in [installation](installation.md).
     - **An error about a new process and bootstrapping (Windows).** The `if __name__ == "__main__":` line is missing, or `.run()` is outside it.
     - **An error that the API server can't listen, because every port is taken.** Another experiment (or another program) is using the API port. Close it, or give this one a different port by adding `api_server_port = 8001` to your experiment class. To have it move to a free port by itself, list some to try: `api_server_fallback_ports = [8001, 8002, 8003]`.
-    - **No window appears.** Look at the terminal for an error. The experiment needs a graphical desktop, unless you turn the interface off with `gui=False`.
+    - **No window appears.** Look at the terminal for an error. The experiment needs a graphical desktop, unless you turn the window off with `gui=False` (and open [http://localhost:8000](http://localhost:8000) in a browser instead).
+    - **The window says it needs the Microsoft Edge WebView2 Runtime.** Some older Windows 10 PCs do not have it. Install it from the address the window gives, and run the experiment again. Until then the experiment runs regardless, and the other address it gives shows it in a browser.
 
 ## What you learned
 

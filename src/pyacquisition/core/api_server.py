@@ -9,22 +9,15 @@ import sys
 from .logging import logger
 from .consumer import Consumer
 from . import windows_asyncio
-from enum import Enum
 
 # Clients that reset their connections (a browser window closing) must not leave
 # tracebacks behind, or hold up the server's shutdown. See windows_asyncio.
 windows_asyncio.install()
 
 
-def enum_choices(message):
-    """What the classic GUI expects: each enum in a dict of values becomes all of
-    its enum's members, with the one it is marked as selected."""
-    if not isinstance(message, dict):
-        return message
-    return {
-        key: APIServer._enum_to_selected_dict(value) if isinstance(value, Enum) else value
-        for key, value in message.items()
-    }
+def as_it_is(message):
+    """Sends a message unchanged: for messages that are made to be JSON."""
+    return message
 
 
 class WebsocketEndpoint:
@@ -36,7 +29,7 @@ class WebsocketEndpoint:
     message, and nothing piles up while no client is connected.
     """
 
-    def __init__(self, encode=enum_choices):
+    def __init__(self, encode=as_it_is):
         """
         Args:
             encode (callable): Turns a message into what is sent as JSON.
@@ -192,28 +185,14 @@ class APIServer:
 
         self._shutdown_event = asyncio.Event()
 
-    @staticmethod
-    def _enum_to_selected_dict(enum_instance):
-        """
-        Converts an enum instance to a dictionary with enum names as keys and their values as values.
-        """
-        return {
-            item.name: {
-                "value": item.value,
-                "selected": item == enum_instance,
-            }
-            for item in enum_instance.__class__
-        }
-
-    def add_websocket_endpoint(self, url: str, encode=enum_choices):
+    def add_websocket_endpoint(self, url: str, encode=as_it_is):
         """
         Adds a WebSocket endpoint to the FastAPI app.
 
         Args:
             url (str): The URL path for the WebSocket endpoint.
-            encode (callable): Turns a message into what is sent as JSON. The
-                default replaces enums with their choices, as the classic GUI
-                expects.
+            encode (callable): Turns a message into what is sent as JSON. By
+                default it is sent as it is.
 
         Returns:
             WebsocketEndpoint: The endpoint, to subscribe to what it streams.

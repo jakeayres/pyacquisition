@@ -1,6 +1,6 @@
 # Ramp Temperature
 
-`RampTemperature` ramps the setpoint of a Lakeshore 340 or 350 output to a temperature, at a rate, and waits until the setpoint has got there. **It is registered by itself when there is a Lakeshore in the experiment**, as **Ramp Temperature** in the **Tasks** menu.
+`RampTemperature` ramps the setpoint of a Lakeshore 340 or 350 output to a temperature, at a rate, and waits until the setpoint has got there. **It is registered by itself when there is a Lakeshore in the experiment**, and listed as **Ramp Temperature** in **Add task**.
 
 ```python
 from pyacquisition.instruments import Lakeshore_350

@@ -83,7 +83,7 @@ If a query raises an error (for example, an instrument times out), the error is 
 
 The target time between cycles is the `measurement_period` option (0.25 seconds by default). If reading all of the measurements takes longer than the period, cycles simply run back to back.
 
-You can pause and resume measuring, and change the period, while the experiment runs, using the **Rack** menu.
+You can pause and resume measuring, and change the period, while the experiment runs, from **Every 0.25 s** (or whatever the period is) in the top bar of the interface, and the button beside it. It also shows how long the loops really take, and says so if measuring is slower than the period.
 
 ## Data files
 
@@ -110,7 +110,7 @@ Files are named `<block>.<step> <title>.<extension>`, for example `00.01 gaussia
 
 It is good practice to save each stage of an experiment (a sweep, a cooldown, one condition) to its own file. Start a new file:
 
-- from the interface, with **Scribe → Next File Endpoint**. Enter a `title`, and tick `next_block` if you want to start a new block instead of a new step.
+- from the interface, with the file name in the top bar. Enter a title, and tick **Start a new block** if you want to start a new block instead of a new step. It shows the name the file will get.
 - from a task, using the built-in `NewFile` task. See [Composing tasks](composing_tasks.md).
 
 Data goes to the new file from the next cycle. The **Current File** window always shows where data is going.
@@ -130,4 +130,4 @@ Plot it with whatever you prefer, for example `matplotlib` (which you would need
 
 ## Viewing data live
 
-Everything that is measured is shown in the **Live Data** window. For a graph, choose **Plots → New Plot**. Use the plot's **x-axis** menu to choose what goes on the horizontal axis, and **Clear** to empty it. You can open as many plots as you like.
+Everything that is measured (and calculated) is shown in the **Values** tab, and can be plotted: choose what to plot with the plot's chips and **+ Add**, and what goes on the horizontal axis with **against**. **+ Add plot** adds more plots, up to six. The plots show the whole of the current data file and the one before it. See [the interface](running.md#the-interface) for the rest.

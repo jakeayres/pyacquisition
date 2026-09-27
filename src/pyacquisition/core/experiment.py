@@ -17,8 +17,9 @@ from .history import History
 from .log_history import LogHistory
 from .sequences import Sequences
 from .layout import Layout
+# The module's names, since `gui` is also an option here.
 from ..gui import Gui
-from .. import new_gui
+from ..gui import mount as serve_gui
 from ..instruments import instrument_map
 from ..tasks import instrument_tasks, standard_tasks
 from .measurement import Measurement
@@ -26,7 +27,7 @@ from .instrument import Instrument, SoftwareInstrument, resolve_enum_kwargs
 from .config_parser import ConfigParser
 from . import settings
 
-# Seconds that the new GUI's window is given to close by itself, once the
+# Seconds that the GUI's window is given to close by itself, once the
 # experiment has stopped, before its process is terminated.
 GUI_CLOSE_TIMEOUT = 5.0
 
@@ -57,7 +58,7 @@ class Experiment:
         data_path (str): The folder for data files, inside `root_path`. Defaults to ".".
         data_file_extension (str): The extension of data files. Defaults to "data".
         data_delimiter (str): The column separator in data files. Defaults to ",".
-        history_points (int): The most rows kept in memory for the new GUI (the
+        history_points (int): The most rows kept in memory for the GUI (the
             current data file and the one before it), from 100 to 100,000,000. Each
             numeric column takes 8 bytes a row. Defaults to 500,000.
         log_path (str): The folder for the log file, inside `root_path`. Defaults to ".".
@@ -72,12 +73,9 @@ class Experiment:
             experiment. The port it ends up on is logged, and the GUI uses it.
             Defaults to none, so a taken port stops the experiment starting.
         measurement_period (float): The time between measurements in seconds. Defaults to 0.25.
-        gui (bool | str): Which GUI to run: True for the default one (the classic
-            GUI for now), False for none, or "classic" or "new" by name. The new GUI
-            can also be opened in a browser at the API server's address, whichever
-            is chosen. Defaults to True.
-        sparkline_points (int): How many of the latest points the small graph beside
-            each value in the GUI's Live Data window shows. Defaults to 100.
+        gui (bool | str): Whether to show the GUI in a window of its own: True
+            (or "new", its name) or False. It can also be opened in a browser at the
+            API server's address, whether or not it has a window. Defaults to True.
         auto_tasks (bool): Whether the tasks that come with an instrument are
             registered by themselves when it is in the experiment, such as
             `RampTemperature` with a Lakeshore. Defaults to True.
@@ -104,7 +102,6 @@ class Experiment:
         api_server_fallback_ports: list[int] | tuple[int, ...] | None = None,
         measurement_period: float | None = None,
         gui: bool | str | None = None,
-        sparkline_points: int | None = None,
         auto_tasks: bool | None = None,
     ) -> None:
         """
@@ -134,7 +131,6 @@ class Experiment:
                 "api_server_fallback_ports": api_server_fallback_ports,
                 "measurement_period": measurement_period,
                 "gui": gui,
-                "sparkline_points": sparkline_points,
                 "auto_tasks": auto_tasks,
             },
         )
@@ -144,7 +140,7 @@ class Experiment:
         self._log_path: Path = self._root_path / Path(options["log_path"])
         self._log_file_name: Path = Path(options["log_file_name"])
 
-        # The recent log messages, for the new GUI. Made before logging is
+        # The recent log messages, for the GUI. Made before logging is
         # configured, so the first messages are kept too.
         self._log_history = LogHistory(logger)
 
@@ -181,25 +177,15 @@ class Experiment:
         self._registered_tasks = set()  # the classes, so as not to register one twice
         self._auto_tasks = options["auto_tasks"]
 
-        # The new GUI's page is served whichever GUI runs, so that it can be opened
-        # in a browser too.
-        new_gui.mount(self._api_server.app)
-
-        # With no GUI to run, the classic one is still made (but not started), as
-        # it always has been.
-        gui_name = settings.gui_to_run(options["gui"])
-        self._run_gui = gui_name is not None
-        if gui_name == "new":
-            self._gui = new_gui.NewGui(
-                host=options["api_server_host"],
-                port=options["api_server_port"],
-            )
-        else:
-            self._gui = Gui(
-                host=options["api_server_host"],
-                port=options["api_server_port"],
-                sparkline_points=options["sparkline_points"],
-            )
+        # The GUI's page is served whether or not it has a window, so that it can
+        # be opened in a browser too. Its window is made either way, but only
+        # started if asked for.
+        serve_gui(self._api_server.app)
+        self._run_gui = settings.gui_to_run(options["gui"]) is not None
+        self._gui = Gui(
+            host=options["api_server_host"],
+            port=options["api_server_port"],
+        )
 
         self._scribe = Scribe(
             root_path=self._data_path,
@@ -207,7 +193,7 @@ class Experiment:
             extension=options["data_file_extension"],
         )
 
-        # The recent rows, for the new GUI: kept since the current file started
+        # The recent rows, for the GUI: kept since the current file started
         # (and the file before), and streamed with a number for each event.
         self._history = History(max_rows=options["history_points"])
 
@@ -216,20 +202,12 @@ class Experiment:
         self._history.subscribe_to(self._calculations)
         self._scribe.add_file_listener(self._history.new_file)
 
-        # History's events are sent as they are, since they are made to be JSON.
-        self._api_server.add_websocket_endpoint(
-            "/stream/data", encode=lambda event: event
-        ).subscribe_to(self._history)
+        # History's events (and the log's) are made to be JSON, so sent as they are.
+        self._api_server.add_websocket_endpoint("/stream/data").subscribe_to(self._history)
 
-        self._api_server.add_websocket_endpoint("/data")
-        self._api_server.websocket_endpoints["/data"].subscribe_to(self._rack)
-
-        self._api_server.add_websocket_endpoint(
-            "/stream/logs", encode=lambda entry: entry
-        ).subscribe_to(self._log_history)
-
-        self._api_server.add_websocket_endpoint("/logs")
-        self._api_server.websocket_endpoints["/logs"].subscribe_to(logger)
+        self._api_server.add_websocket_endpoint("/stream/logs").subscribe_to(
+            self._log_history
+        )
 
         for task in standard_tasks:
             self.register_task(task)
@@ -239,7 +217,7 @@ class Experiment:
         # What the interface calls the experiment. `from_config` names a plain
         # Experiment after its TOML file instead.
         self._name = type(self).__name__
-        # The new GUI's layout, kept by name (from_config renames it afterwards).
+        # The GUI's layout, kept by name (from_config renames it afterwards).
         self._layout = Layout(self._root_path, lambda: self._name)
 
         logger.info("[Experiment] Fully initialized")
@@ -802,16 +780,15 @@ class Experiment:
         """
         Ends the GUI's process, if it was started, and waits for it.
 
-        The new GUI's window is told to close, and given a moment to, and only
-        terminated if it has not.
+        The window is told to close, and given a moment to, and only terminated
+        if it has not.
         """
         process = getattr(self, "_ui_process", None)
         if process is None:
             return
         logger.debug("Waiting for GUI process to finish")
-        if isinstance(self._gui, new_gui.NewGui):
-            self._gui.close()
-            process.join(timeout=GUI_CLOSE_TIMEOUT)
+        self._gui.close()
+        process.join(timeout=GUI_CLOSE_TIMEOUT)
         if process.is_alive():
             process.terminate()
         process.join()

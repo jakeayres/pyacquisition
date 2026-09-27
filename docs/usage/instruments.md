@@ -5,7 +5,7 @@ An **instrument** is a Python object that represents a device. It offers two kin
 - **Queries** read something from the device: a voltage, a temperature, the time.
 - **Commands** make the device do something: set a frequency, start a ramp.
 
-Every function of every instrument is available in the interface under the **Instruments** menu, and can be used from your own code and from tasks.
+Every function of every instrument is available in the interface, in the **Instruments** tab, and can be used from your own code and from tasks.
 
 ## Instruments that are included
 
@@ -131,6 +131,6 @@ To remove an instrument again, call `self.remove_instrument("lockin")`. Like add
 
 ## Using an instrument from the interface
 
-Open the **Instruments** menu. Each instrument has a submenu listing all of its queries and commands. Choose one, fill in any inputs, and press **Send Request**. The reply is shown in the same window.
+Open the **Instruments** tab. Pick an instrument to list all of its queries and commands, pick one, fill in any inputs, and press **Read** (or **Send**, for a command). The reply is shown beside the form, with the replies before it. ++ctrl+k++ finds any of them from anywhere.
 
 Reading values continuously and saving them to file is done with a [measurement](measurements.md).

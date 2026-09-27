@@ -24,8 +24,6 @@ Version `0.1.x` is still undergoing basic development with much of the testing b
 
 **Settle on a definitive public API**. Once the public API has been fully decided upon, `pyacqusition` will advance to version `1.0.0`. This will be the first version in which we will absolutely strive to maintain backwards compatibility between versions and minimize breaking changes.
 
-**`pyacquisition.gui` submodule refactor**. The GUI is entirely beyond the concern of users of `pyacqusition` and is highly functional. For developers, the `gui` submodule leaves a lot to be desired.
-
 **A `pyacquisition.beta` submodule** will be included for modules that are not garuanteed to maintain backwards compatibility in future versions. This will likely be added in version `1.0.0` given that everything is effectively in beta in verion `0.1.x`.
 
 

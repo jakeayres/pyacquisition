@@ -1,4 +1,4 @@
-"""The new GUI's layout, kept by the experiment for the next run (milestone 15)."""
+"""The GUI's layout, kept by the experiment for the next run (milestone 15)."""
 
 import json
 

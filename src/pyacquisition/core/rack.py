@@ -1,10 +1,13 @@
 import time
 import asyncio
+from collections import deque
 from fastapi import Query
 from .logging import logger
 from .measurement import Measurement
 from .broadcaster import Broadcaster
 from .instrument import Instrument
+
+LOOPS_AVERAGED = 5  # the latest loops that the loop time is the average of
 
 
 class Rack(Broadcaster):
@@ -21,6 +24,8 @@ class Rack(Broadcaster):
         self._pause_event = asyncio.Event()
         self._pause_event.set()
         self._shutdown_event = asyncio.Event()
+        # When each of the latest loops started, for the loop time.
+        self._loop_starts = deque(maxlen=LOOPS_AVERAGED + 1)
 
     async def measure(self) -> dict:
         """
@@ -52,6 +57,7 @@ class Rack(Broadcaster):
                     break
 
                 t0 = time.time()
+                self._loop_starts.append(time.monotonic())
                 await self.measure()
                 t1 = time.time()
                 await asyncio.sleep(max(0, self.period - (t1 - t0)))
@@ -77,6 +83,7 @@ class Rack(Broadcaster):
         Pauses the measurements.
         """
         self._pause_event.clear()
+        self._loop_starts.clear()  # the time paused is not a loop
         logger.info("Measurements paused.")
 
     def resume(self):
@@ -85,6 +92,18 @@ class Rack(Broadcaster):
         """
         self._pause_event.set()
         logger.info("Measurements resumed.")
+
+    @property
+    def loop_time(self) -> float | None:
+        """
+        The time the latest loops actually took, start to start, on average: the
+        period, unless measuring takes longer than it. None until two loops have
+        run since the measurements started or were last resumed.
+        """
+        starts = self._loop_starts
+        if len(starts) < 2:
+            return None
+        return (starts[-1] - starts[0]) / (len(starts) - 1)
 
     @property
     def period(self) -> float:
@@ -206,12 +225,17 @@ class Rack(Broadcaster):
         @api_server.app.get("/rack/state", tags=["rack"])
         async def state():
             """
-            Whether the measurements are paused, and the time between them.
+            Whether the measurements are paused, the time between them that was
+            set (`period`), and the time the latest loops actually took on
+            average (`loop_time`, null until two have run since they started or
+            were resumed), which is longer if measuring takes longer than the
+            period. In seconds.
             """
             return {
                 "status": "success",
                 "paused": not self._pause_event.is_set(),
                 "period": self.period,
+                "loop_time": self.loop_time,
             }
 
         @api_server.app.get("/rack/pause/", tags=["rack"])

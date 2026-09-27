@@ -152,7 +152,7 @@ The interface cannot change these while it runs, because a PID is created in cod
 
 ## What the PID is doing
 
-In the **Task Queue** window, the PID's card shows its setpoint and gains, and once it is running, the latest measured `value`, `output` and `error`, refreshed about once a second.
+In the **Queue** tab, the PID's card shows its setpoint and gains, and once it is running, the latest measured `value`, `output` and `error`, refreshed about once a second.
 
 `pid.process_value`, `pid.output` and `pid.error` are the last measured value, output and error. Use them in a measurement, as in the example, to record them in the data file alongside everything else: `Measurement("power", lambda: pid.output)`. The value is `nan` until the PID has read for the first time.
 

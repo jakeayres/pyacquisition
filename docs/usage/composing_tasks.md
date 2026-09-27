@@ -66,7 +66,7 @@ Register it in `setup()`, next to `SampleGaussian`:
 self.register_task(CompareDistributions, label="Compare Distributions")
 ```
 
-Run **Tasks → Compare Distributions** with `seconds` 10. After twenty seconds you have two new data files, `gaussian` and `uniform`, each holding ten seconds of numbers from its own distribution, and **Current Task** in the **Task Queue** window reads `CompareDistributions` throughout. The **Logs** window shows the progress of each stage, labelled with the subtask's own name.
+Queue **Compare Distributions** with `seconds` 10. After twenty seconds you have two new data files, `gaussian` and `uniform`, each holding ten seconds of numbers from its own distribution, and the **Queue** tab shows `CompareDistributions` running throughout, with the subtask it is running under it. The **Logs** tab shows the progress of each stage, labelled with the subtask's own name.
 
 !!! note "Each subtask cleans up after itself"
     `SampleGaussian` ends by running its own `teardown()`, which puts the generator back to its default distribution. That happens as soon as *that subtask* finishes, not when the whole parent does. Here it makes no difference, because the next subtask chooses its own distribution first. Keep it in mind when a subtask's `teardown()` changes something the next stage relies on. In that case, do the clean-up in the parent's `teardown()` instead.
@@ -154,7 +154,7 @@ Give `alongside()` several tasks if you need several things in the background: `
     Aborting a task inside `run_subtasks()` is different: the others are aborted too, because the parent cannot finish without it.
 - **They take turns on one thread.** The tasks switch only when one of them awaits, so a task that blocks (a slow instrument query, `time.sleep()`) holds all of the others up for as long as it blocks. The upside is that instrument calls never overlap, so you do not need locks. It is still up to you not to have two tasks change the same setting.
 - **Each task object runs once at a time.** Passing the same task object twice, or running one that is already running, raises a `ValueError`. Make a second object instead.
-- **The interface shows the parent.** **Current Task** in the **Task Queue** window shows the task you queued, not its subtasks. Their steps appear in the **Logs** window under their own names.
+- **The interface shows the parent.** The running task in the **Queue** tab is the task you queued, with the subtasks it is running listed under it. Their steps appear in the **Logs** tab under their own names.
 
 ## Loops and conditions
 

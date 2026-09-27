@@ -100,7 +100,7 @@ The interface, the recording and the data files are generated either way.
 ///
 
 <!-- A screenshot of the running interface goes here. Suggested caption:
-     "The interface is generated from the experiment above: a menu for every instrument query and command, live data, logs and live plots." -->
+     "The interface is generated from the experiment above: live plots and values, every instrument query and command, the task queue and the log." -->
 
 </div>
 
@@ -124,7 +124,7 @@ The interface, the recording and the data files are generated either way.
 
 -   :material-monitor-dashboard:{ .middle } **A GUI for free**
 
-    A control panel generated from your code: every instrument query and command in a menu, live values and plots, a task queue with pause and abort, and a scrolling log. There is no GUI code to write.
+    A control panel generated from your code: live plots and values, every instrument query and command, a task queue with pause and abort, and the log. There is no GUI code to write, and it opens in a browser too.
 
     [The interface](usage/running.md)
 

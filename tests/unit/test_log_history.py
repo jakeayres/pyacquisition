@@ -1,4 +1,4 @@
-"""The log history: recent log messages kept in memory for the new GUI, and
+"""The log history: recent log messages kept in memory for the GUI, and
 streamed with a number for each, so a client can merge a snapshot with the
 stream (milestone 7)."""
 

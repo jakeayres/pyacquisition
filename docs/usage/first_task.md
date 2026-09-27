@@ -8,13 +8,13 @@ So far you have driven the rig by clicking. In this lesson you will write a **ta
 
 A task is a procedure that you want to run on your experiment: ramp a temperature, wait an hour, start a new file, sweep a field. Tasks are run from a queue, one at a time, and can be paused or aborted while they run.
 
-You write a task as a class with a `run()` method. Everything else (the queue, the buttons, the log messages, the form in the **Tasks** menu) comes for free.
+You write a task as a class with a `run()` method. Everything else (the queue, the buttons, the log messages, the form to queue it with) comes for free.
 
-A few tasks are already included. Open the **Tasks** menu:
+A few tasks are already included. Open the **Queue** tab (press ++2++) and press **Add task**:
 
-![The Tasks menu with the standard tasks](../images/tutorial/tasks-menu.png){ .pa-shot .pa-small }
+![The Add a task window, with the standard tasks](../images/tutorial/add-task.png){ .pa-shot .pa-medium }
 
-`Newfile` starts a new data file, `Waitfor` waits for a time, and `Waituntil` waits until a clock time. Your own tasks will join them in a moment.
+`NewFile` starts a new data file, `WaitFor` waits for a time, and `WaitUntil` waits until a clock time. Your own tasks will join them in a moment. Press **Done** to close it.
 
 ## Write the task
 
@@ -31,10 +31,10 @@ Add this to `my_experiment.py`, above your `MyExperiment` class. The notes besid
 </div>
 
 <div class="pa-annot__notes" markdown="0">
-<div class="pa-note" style="--from: 1; --to: 3" data-contains="class SetTemperature"><b>A task is a dataclass</b><span>Every task is a <code>@dataclass</code> that inherits <code>Task</code>. The first line of its docstring is shown in the Tasks menu.</span></div>
-<div class="pa-note" style="--from: 5; --to: 6" data-contains="ramp_rate"><b>Inputs</b><span>Annotated attributes become boxes in the Tasks menu: int, float, str or bool.</span></div>
+<div class="pa-note" style="--from: 1; --to: 3" data-contains="class SetTemperature"><b>A task is a dataclass</b><span>Every task is a <code>@dataclass</code> that inherits <code>Task</code>. Its docstring describes it when you queue it.</span></div>
+<div class="pa-note" style="--from: 5; --to: 6" data-contains="ramp_rate"><b>Inputs</b><span>Annotated attributes become its form: int, float, str or bool.</span></div>
 <div class="pa-note" style="--from: 8; --to: 10" data-contains="description"><b>Describe it</b><span>Shown for a task waiting in the queue. Optional, but worth writing.</span></div>
-<div class="pa-note" style="--from: 12; --to: 16" data-contains="self.log"><b>The work</b><span><code>run()</code> is <code>async</code>. Instrument calls are ordinary calls, and <code>self.log</code> writes to the Logs window.</span></div>
+<div class="pa-note" style="--from: 12; --to: 16" data-contains="self.log"><b>The work</b><span><code>run()</code> is <code>async</code>. Instrument calls are ordinary calls, and <code>self.log</code> writes to the log.</span></div>
 <div class="pa-note" style="--from: 18; --to: 22" data-contains="wait_until"><b>Wait, never sleep</b><span><code>wait_until</code> checks every second, and it is where the task can be paused or aborted.</span></div>
 <div class="pa-note" style="--from: 24; --to: 28" data-contains="teardown"><b>Always runs</b><span><code>teardown()</code> runs however the task ends: finished, aborted or failed. Here it stops the ramp where the sample is.</span></div>
 </div>
@@ -58,13 +58,13 @@ Read `run()` again with those rules in mind. It sets the ramp rate and the setpo
 
 ## Register it
 
-A task must be registered in `setup()` to appear in the **Tasks** menu. Add the imports the task needs at the top of the file, and this line at the end of `setup()`:
+A task must be registered in `setup()` to be queued from the interface. Add the imports the task needs at the top of the file, and this line at the end of `setup()`:
 
 ```python
 self.register_task(SetTemperature, label="Set Temperature")
 ```
 
-Pass the class itself, not an instance: no brackets. `label` is the name shown in the menu. Here is the whole file, with everything that is new highlighted:
+Pass the class itself, not an instance: no brackets. `label` is the name it is listed by. Here is the whole file, with everything that is new highlighted:
 
 ```python title="my_experiment.py" linenums="1" hl_lines="2 4 6-10 14-16 18-19 21-23 25-29 31-35 37-41 71"
 --8<-- "examples/tutorial/step_4_first_task.py"
@@ -76,36 +76,34 @@ Pass the class itself, not an instance: no brackets. `label` is the name shown i
 uv run my_experiment.py
 ```
 
-Open **Tasks → Set Temperature**. The window has a box for each input, with the docstring as its description.
+Open the **Queue** tab, press **Add task**, and pick **Set Temperature**. Its form has a box for each input, under the docstring. `Ramp Rate` already says `30`, its default in your code, and `Kelvin` is marked with a star because it has none. Type `4` into `Kelvin`.
 
-![The Set Temperature window, with kelvin 4 and ramp_rate 30](../images/tutorial/set-temperature-popup.png){ .pa-shot .pa-small }
+![Set Temperature in the Add a task window, with kelvin 4 and ramp_rate 30](../images/tutorial/set-temperature-form.png){ .pa-shot .pa-medium }
 
-Fill in **both** boxes: `kelvin` `4` and `ramp_rate` `30`. The form does not use the defaults from your code, so a `ramp_rate` left at `0` is sent as zero, not as the `30` in the code. Press **Send Request**.
+Press **Add to queue**, then **Done**. The task joins the queue and starts at once. Look at what happened:
 
-The task joins the queue and starts at once. Look at what happened:
+![The Queue tab shows SetTemperature running, and the plot shows T falling](../images/tutorial/task-running.png){ .pa-shot }
 
-![The Task Queue shows SetTemperature running, and the log shows its first step](../images/tutorial/task-running.png){ .pa-shot }
+- The **Queue** tab shows `SetTemperature` running, with its description, its inputs and how long it has been running. Its name is in the top bar too, whichever tab is open.
+- The plot shows `T` falling.
+- The **Logs** tab (press ++4++) follows the task: the task manager took it from the queue, the task started, and then the message you logged, `Ramping to 4.0 K`.
 
-- The **Task Queue** header turns green and reads **RUNNING**, with the name of the task.
-- **Live Data** shows `T` falling, and `x` climbing as it goes.
-- The **Logs** window follows the task: the task manager took it from the queue, the task started, and then the message you logged, `Ramping to 4.0 K`.
-
-About forty seconds later the log reads `Arrived at 4.0 K`, the header goes grey and **IDLE**, and the task is done. Run it again with `kelvin` `20` to warm back up.
+About forty seconds later the log reads `Arrived at 4.0 K`, the queue says **Nothing is running**, and the task is done. Queue it again with `Kelvin` `20` to warm back up.
 
 !!! success "Checkpoint"
-    Running **Set Temperature** with `kelvin` 4 takes `T` from 20 K down to 4 K, the log shows `Ramping to 4.0 K` and then `Arrived at 4.0 K`, and the **Task Queue** goes back to **IDLE**.
+    Running **Set Temperature** with `kelvin` 4 takes `T` from 20 K down to 4 K, the log shows `Ramping to 4.0 K` and then `Arrived at 4.0 K`, and the **Queue** tab goes back to **Nothing is running**.
 
 ??? failure "Something not working?"
-    - **`T` dives to the target in a few seconds instead of ramping for about forty.** You left `ramp_rate` at `0`, and the simulated controller treats a rate of zero as "no ramp, jump to the setpoint". Fill in every box.
+    - **`T` dives to the target in a few seconds instead of ramping for about forty.** `ramp_rate` was `0`, and the simulated controller treats a rate of zero as "no ramp, jump to the setpoint". Leave it at `30`.
     - **The task never finishes.** It is waiting for `T` to be within 0.05 K of `kelvin`. Check that `kelvin` is a temperature the simulated cryostat can reach, such as 4 or 20.
-    - **`Set Temperature` is not in the menu.** Check that the `register_task` line is inside `setup()`, and that you passed the class and not `SetTemperature()`.
-    - **The task ends at once, and the queue pauses.** An error inside a task does not crash the experiment. It is shown in the **Logs** window as `Task failed: ...`, with the reason. The queue pauses, so that nothing else runs on top of a task that failed. Fix the cause, and choose **Resume**.
+    - **`Set Temperature` is not in the list.** Check that the `register_task` line is inside `setup()`, and that you passed the class and not `SetTemperature()`.
+    - **The task ends at once, and the queue pauses.** An error inside a task does not crash the experiment. An alert says which task failed and why, and the **Logs** tab has it as `Task failed: ...`. The queue pauses, so that nothing else runs on top of a task that failed. Fix the cause, and press **Resume** in the **Queue** tab.
 
 ## What you learned
 
 - A **task** is a `@dataclass` class with an `async def run()`.
 - **Wait with `await self.sleep()` and `await self.wait_until()`** (that is where it can be paused and aborted), **say what is happening with `self.log()`**, and put safe-state code in **`teardown()`**.
-- Task inputs become the form in the **Tasks** menu. Fill in every box.
+- Task inputs become its form, which starts at their defaults.
 - Register a task in `setup()` to run it from the interface.
 
 Everything about how tasks run and what can go wrong is in [Writing tasks](tasks.md).

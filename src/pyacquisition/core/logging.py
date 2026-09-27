@@ -7,7 +7,7 @@ from pathlib import Path
 from .broadcaster import Broadcaster
 
 # How many of the latest broadcast messages the logger keeps, so a listener that
-# starts late (the new GUI's log history, see core/log_history.py) can catch up.
+# starts late (the GUI's log history, see core/log_history.py) can catch up.
 RECENT_MESSAGES = 5000
 
 

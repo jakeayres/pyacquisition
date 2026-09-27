@@ -77,7 +77,7 @@ self.register_task(RecordAt, label="Record At")
 self.register_task(TemperatureSweep, label="Temperature Sweep")
 ```
 
-`SetTemperature` and `RecordAt` are useful on their own from the **Tasks** menu, but only the sweep needs to be there. You do not have to register a task to use it as a subtask.
+`SetTemperature` and `RecordAt` are useful on their own from **Add task**, but only the sweep needs to be there. You do not have to register a task to use it as a subtask.
 
 Here is the whole file, so that you can check yours against it:
 
@@ -93,27 +93,27 @@ Here is the whole file, so that you can check yours against it:
 uv run my_experiment.py
 ```
 
-Open **Tasks → Temperature Sweep**, and fill in **every** box: `low` `4`, `high` `20`, `step` `4` and `dwell` `10`. That is five temperatures (4, 8, 12, 16 and 20 K), and ten seconds at each.
+In the **Queue** tab, press **Add task** and pick **Temperature Sweep**. Fill in `low` `4`, `high` `20` and `step` `4`, and change `dwell` from its default of `60` to `10`. That is five temperatures (4, 8, 12, 16 and 20 K), and ten seconds at each.
 
-![The Temperature Sweep window, filled in](../images/tutorial/sweep-popup.png){ .pa-shot .pa-small }
+![Temperature Sweep in the Add a task window, filled in](../images/tutorial/sweep-form.png){ .pa-shot .pa-medium }
 
-Press **Send Request**, and watch.
+Press **Add to queue**, then **Done**, open the **Logs** tab (press ++4++), and watch.
 
-![The sweep running: the Task Queue and the log](../images/tutorial/sweep-running.png){ .pa-shot }
+![The sweep running: the log, and the file it has reached in the top bar](../images/tutorial/sweep-running.png){ .pa-shot }
 
-The **Data File** pane follows the sweep from file to file (here it has reached `00.03 8K ramp.data`), and the log tells the whole story of the nesting. Read it from the top:
+The file name in the top bar follows the sweep from file to file (here it has reached `00.03 8K ramp.data`), and the log tells the whole story of the nesting. Every line is labelled with the task that logged it. Scroll up to the start and read down:
 
-- `[TemperatureSweep] Starting task.` The sweep begins.
-- `[RecordAt] Starting subtask of [TemperatureSweep].` It starts its first `RecordAt`.
-- `[NewFile] Starting subtask of [RecordAt].`, then `[Scribe] New file: 'my_data\00.01 4K ramp.data'`. The first thing a `RecordAt` does is start a file.
-- `[SetTemperature] Starting subtask of [RecordAt].` The `RecordAt` starts a `SetTemperature`, so this task is two levels down.
-- `[SetTemperature] Ramping to 4.0 K`, and later `Arrived at 4.0 K`. The messages you logged in the last lesson.
+- `TemperatureSweep` `Starting task.` The sweep begins.
+- `RecordAt` `Starting subtask of [TemperatureSweep].` It starts its first `RecordAt`.
+- `NewFile` `Starting subtask of [RecordAt].`, then `Scribe` `New file: 'my_data\00.01 4K ramp.data'`. The first thing a `RecordAt` does is start a file.
+- `SetTemperature` `Starting subtask of [RecordAt].` The `RecordAt` starts a `SetTemperature`, so this task is two levels down.
+- `SetTemperature` `Ramping to 4.0 K`, and later `Arrived at 4.0 K`. The messages you logged in the last lesson.
 
-Every line is labelled with the name of the task that logged it, which makes a long procedure easy to follow.
+The labels make a long procedure easy to follow, and the search box finds any line.
 
-The whole sweep takes about two and a half minutes. Open **Plots → New Plot** while you wait, choose `T` as the x-axis, hide `time` and `T`, and double-click to fit. You are watching your sample go through its transition, one temperature at a time.
+The whole sweep takes about two and a half minutes. While you wait, set the plot to show `x` and `y` against `T`, as in [lesson 2](simulated_rig.md#plot-it). The plot shows the file being written and, more faintly, the one before it, so as the sweep moves from file to file it shows the latest stretch: here, the 12 K hold and the ramp to 16 K, right through the transition.
 
-![The live plot after the sweep: x and y against temperature](../images/tutorial/sweep-plot.png){ .pa-shot }
+![The live plot during the ramp to 16 K: x and y against temperature](../images/tutorial/sweep-plot.png){ .pa-shot }
 
 When it has finished, `my_data` holds a pair of files for each temperature:
 

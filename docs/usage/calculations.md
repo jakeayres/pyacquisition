@@ -87,4 +87,4 @@ If a measurement has failed and has no value yet, it is `None`. `Sum` and `Rolli
 
 ## Where the results appear
 
-Calculated columns are saved to the data file. The **Live Data** window and the plots show the measurements only.
+Calculated columns are saved to the data file, and shown in the interface like the measurements: each has a tile in the **Values** tab, and can be plotted.

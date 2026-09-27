@@ -227,22 +227,13 @@ async def test_an_experiment_with_no_port_to_have_stops_before_setting_up(tmp_pa
     assert set_up == []  # no instruments were opened
 
 
-def test_the_new_gui_follows_the_port():
-    from pyacquisition.new_gui import NewGui
-
-    gui = NewGui(port=8000)
-    gui.port = 8003
-
-    assert gui.server == "http://localhost:8003"
-
-
-def test_the_classic_gui_follows_the_port():
+def test_the_gui_follows_the_port():
     from pyacquisition.gui import Gui
 
     gui = Gui(port=8000)
     gui.port = 8003
 
-    assert gui.api_client.port == 8003
+    assert gui.server == "http://localhost:8003"
 
 
 def test_making_the_coroutine_does_not_claim_the_port():

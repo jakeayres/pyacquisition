@@ -28,7 +28,6 @@ def test_the_defaults_are_the_documented_ones():
     assert Experiment.measurement_period == 0.25
     assert Experiment.api_server_port == 8000
     assert Experiment.gui is True
-    assert Experiment.sparkline_points == 100
 
 
 def test_every_option_can_be_passed_to_the_constructor():
@@ -140,12 +139,7 @@ def test_subclasses_do_not_leak_into_one_another(root):
         ("api_server_port", 0, "port number"),
         ("api_server_port", 70000, "port number"),
         ("api_server_port", "8000", "port number"),
-        ("gui", "yes", "True, False, 'classic' or 'new'"),
-        ("sparkline_points", 1, "whole number from 2 to 10000"),
-        ("sparkline_points", 10001, "whole number from 2 to 10000"),
-        ("sparkline_points", 50.5, "whole number"),
-        ("sparkline_points", "100", "whole number"),
-        ("sparkline_points", True, "whole number"),
+        ("gui", "yes", "True, False or 'new'"),
         ("history_points", 99, "whole number from 100 to 100000000"),
         ("history_points", 1.5e6, "whole number"),
         ("console_log_level", "LOUD", "must be one of"),
@@ -291,7 +285,6 @@ period = 0.75
 
 [gui]
 run = false
-sparkline_points = 40
 
 [api_server]
 host = "localhost"
@@ -304,7 +297,6 @@ port = 8123
     assert experiment._log_file_name.name == "run.log"
     assert experiment._rack.period == 0.75
     assert experiment._run_gui is False
-    assert experiment._gui.sparkline_points == 40
 
 
 def test_an_empty_toml_gives_the_defaults(tmp_path, root):
@@ -346,24 +338,15 @@ def test_the_toml_keys_are_documented_once_each():
         assert len(keys) == len(set(keys))
 
 
-# -------------------------------------------------------------- sparkline points
-def test_the_number_of_sparkline_points_reaches_the_gui(root):
-    class MyExperiment(Experiment):
-        root_path = root
-        gui = False
-        sparkline_points = 250
-
-    assert MyExperiment()._gui.sparkline_points == 250
-    assert MyExperiment(sparkline_points=30)._gui.sparkline_points == 30
-
-
-def test_it_is_a_hundred_points_unless_told_otherwise(root):
-    assert Experiment(root_path=root, gui=False)._gui.sparkline_points == 100
-
-
-def test_it_is_set_in_the_gui_section_of_a_toml_file(tmp_path, root):
+# -------------------------------------------------------------- removed keys
+def test_a_removed_toml_key_is_ignored_with_a_warning(tmp_path, root, monkeypatch):
+    """`sparkline_points` went with the classic GUI. A file that still has it
+    works, as it did, rather than being refused as a mistake."""
+    warnings = []
+    monkeypatch.setattr(settings.logger, "warning", warnings.append)
     path = write_toml(tmp_path, "[gui]\nsparkline_points = 60\n")
 
     experiment = Experiment.from_config(path, root_path=root, gui=False)
 
-    assert experiment._gui.sparkline_points == 60
+    assert experiment._run_gui is False
+    assert any("'sparkline_points' in [gui] does nothing now" in w for w in warnings)

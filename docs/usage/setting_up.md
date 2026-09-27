@@ -46,9 +46,8 @@ This saves data to `C:/data/cooldown_1`, keeps the terminal quiet, and records e
 | `api_server_host` | `"localhost"` | Address of the local API server. |
 | `api_server_port` | `8000` | Port of the local API server. Use a different port for each experiment running at the same time. |
 | `api_server_fallback_ports` | `()` | Ports to try in turn if `api_server_port` is taken by another program, such as `[8001, 8002, 8003]`. The experiment moves to the first free one, logs which, and the interface follows it. |
-| `gui` | `True` | Set to `False` to run without the graphical interface. |
+| `gui` | `True` | Set to `False` to run without the interface's window. It can still be opened in a browser at the API server's address. |
 | `auto_tasks` | `True` | Register the tasks that come with an instrument, such as `RampTemperature` for a Lakeshore, when the instrument is in the experiment. Set to `False` to register the ones you want yourself. See [tasks that are already included](tasks.md#tasks-that-are-already-included). |
-| `sparkline_points` | `100` | How many of the latest points the small graph beside each value in **Live Data** shows, from 2 to 10000. At the default measurement period, 100 points is the last 25 seconds. |
 
 The log levels are `TRACE`, `DEBUG`, `INFO`, `SUCCESS`, `WARNING`, `ERROR` and `CRITICAL`.
 

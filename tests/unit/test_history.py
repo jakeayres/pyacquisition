@@ -1,4 +1,4 @@
-"""The history: rows kept in memory for the new GUI, and streamed with a number
+"""The history: rows kept in memory for the GUI, and streamed with a number
 for each event, so a client can merge a snapshot with the stream."""
 
 import asyncio

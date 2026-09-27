@@ -1,6 +1,5 @@
 import pytest
 import asyncio
-from enum import Enum
 from fastapi.testclient import TestClient
 from pyacquisition.core.api_server import APIServer, SHUTDOWN_TIMEOUT
 
@@ -67,29 +66,6 @@ async def test_shutdown_finishes_even_if_a_connection_is_never_released():
     await api_server.shutdown()
 
     await asyncio.wait_for(serving, timeout=SHUTDOWN_TIMEOUT + 5)
-
-
-class SampleEnum(Enum):
-    OPTION_ONE = 1
-    OPTION_TWO = 2
-    OPTION_THREE = 3
-
-
-def test_enum_to_selected_dict():
-    """
-    Test the _enum_to_selected_dict function to ensure it converts an enum instance
-    to the correct dictionary format.
-    """
-    enum_instance = SampleEnum.OPTION_TWO
-    # Call the private method
-    result = APIServer._enum_to_selected_dict(enum_instance)
-    # Expected result
-    expected_result = {
-        "OPTION_ONE": {"value": 1, "selected": False},
-        "OPTION_TWO": {"value": 2, "selected": True},
-        "OPTION_THREE": {"value": 3, "selected": False},
-    }
-    assert result == expected_result
 
 
 def test_making_an_endpoint_leaves_the_methods_annotations_alone(api_server):

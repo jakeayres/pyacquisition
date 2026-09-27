@@ -135,7 +135,7 @@ The `[data]` section describes the configuration of the data files.
 
 ## `[api_server]` Section
 
-The `[api_server]` section defines the properties of the FastAPI backend that exposes functionality to the GUI that runs in a seperate process. This may be changed to avoid (for example) port conflicts with other services that are running.
+The `[api_server]` section defines the properties of the FastAPI backend that serves the interface, and the API that it and your scripts use. This may be changed to avoid (for example) port conflicts with other services that are running.
 
 | Parameter Name         | Description                          | Default Value          |
 |------------------------|--------------------------------------|------------------------|
@@ -171,8 +171,7 @@ This section defines the various logging levels and location of log files produc
 
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
-| `run`          | Set to `false` to run without the graphical interface. | `true` |
-| `sparkline_points` | How many of the latest points the small graph beside each value in the **Live Data** window shows, from 2 to 10000. | `100` |
+| `run`          | Set to `false` to run without the interface's window. It can still be opened in a browser at the API server's address. | `true` |
 
 
 ## Mistakes in the file

@@ -42,7 +42,7 @@ Update `my_experiment.py`. The new lines are highlighted, with a note beside eac
 
 <div class="pa-annot__notes" markdown="0">
 <div class="pa-note" style="--from: 3; --to: 4" data-contains="SimulatedCryostat"><b>The stand-in rig</b><span>The instruments from <code>simulated.py</code>, and the enum that picks a sensor.</span></div>
-<div class="pa-note" style="--from: 15; --to: 16" data-contains="SimulatedCryostat"><b>Add an instrument</b><span>An id, then <code>add_instrument</code>. The id names it in the menus, the API and your tasks.</span></div>
+<div class="pa-note" style="--from: 15; --to: 16" data-contains="SimulatedCryostat"><b>Add an instrument</b><span>An id, then <code>add_instrument</code>. The id names it in the interface, the API and your tasks.</span></div>
 <div class="pa-note" style="--from: 18; --to: 19" data-contains="SimulatedLockin"><b>Tell it about the sample</b><span>This lock-in is told which cryostat holds its sample. A real one is simply wired to it.</span></div>
 <div class="pa-note" style="--from: 22; --to: 30" data-contains="input_channel"><b>Add measurements</b><span>Any query, read every cycle. Give a query its arguments as keywords, like <code>input_channel</code>, which picks the sensor.</span></div>
 </div>
@@ -57,62 +57,59 @@ Add instruments and measurements in `setup()`. Once the experiment is running, t
 uv run my_experiment.py
 ```
 
-**Live Data** now has a row for each measurement: `time`, `T`, `x` and `y`. The temperature sits at 20 K, where the sample has lost its signal, so `x` and `y` are tiny.
+The **Values** tab now has a tile for each measurement: `time`, `T`, `x` and `y`. The temperature sits at 20 K, where the sample has lost its signal, so `x` and `y` are tiny.
 
 ## Talk to an instrument
 
-Open the **Instruments** menu. There is a submenu for each instrument, and each lists everything it can do.
+Open the **Instruments** tab (or press ++3++). It lists every instrument down the left. Click **lockin**, and the next column lists everything it can do: its queries, its commands, and a few others.
 
-![The Instruments menu, with the lock-in's queries and commands](../images/tutorial/instruments-menu.png){ .pa-shot .pa-medium }
+![The Instruments tab, with the lock-in's queries and commands](../images/tutorial/instruments-tab.png){ .pa-shot }
 
-Choose **lockin → Get X**. Every menu item opens a small window that describes the function (this text is the function's docstring), has a box for each input it needs, and a **Send Request** button. Press it.
+Click **get_x**. Its form appears beside the list, with the function's description (this text is the function's docstring) and a box for each input it needs. `get_x` needs none, so press **Read**.
 
-![The Get X window, showing the lock-in's reply](../images/tutorial/get-x.png){ .pa-shot .pa-small }
+![The lock-in's reply to get_x, among the recent results](../images/tutorial/get-x.png){ .pa-shot }
 
-The reply appears in the window: a `status` of `200` (success) and the `data`. That is the value of `x` right now, a few microvolts of noise.
-
-Every window opens in the top left corner, over the panes. Drag its title bar to move it out of the way, and close it with the **x**.
+The reply appears in **Recent results**, at the right: the value of `x` right now, a few microvolts of noise, with the time and how long the call took. The copy button beside it copies it. Every call you make to an instrument is listed there, newest first.
 
 ## Drive the rig by hand
 
 The interface is as good at *doing* things as reading them. Warm sample, cold sample: let's cross the transition yourself.
 
-First tell the controller how fast to move. Choose **Instruments → lakeshore → Set Ramp**, set `state` to **On** and `rate` to `60` (kelvin per minute), and press **Send Request**.
+First tell the controller how fast to move. Click **lakeshore**, then **set_ramp**. Choose **Output 1** for `Output Channel` and **On** for `State`, type `60` into `Rate` (kelvin per minute), and press **Send**.
 
-![The Set Ramp window, with state On and rate 60](../images/tutorial/set-ramp.png){ .pa-shot .pa-small }
+![The set_ramp form, with Output 1, On and a rate of 60](../images/tutorial/set-ramp.png){ .pa-shot .pa-small }
 
-!!! warning "Fill in every input"
-    The boxes in these windows always start at zero (or empty), whatever default the code has. If you press **Send Request** with `rate` left at `0`, that is what is sent.
+!!! tip "The forms"
+    An input marked with a red star must be filled in, and the form will not send until it is. An input with a default in the code starts at its default. Choices, such as the channel, are a list to pick from.
 
-Now choose **lakeshore → Set Setpoint**, type `4` into `setpoint`, and press **Send Request**.
+Now click **set_setpoint**, choose **Output 1**, type `4` into `Setpoint`, and press **Send**.
 
-![The Set Setpoint window, with a setpoint of 4](../images/tutorial/set-setpoint.png){ .pa-shot .pa-small }
+![The set_setpoint form, with a setpoint of 4](../images/tutorial/set-setpoint.png){ .pa-shot .pa-small }
 
-Watch **Live Data**. `T` falls from 20 K towards 4 K at one kelvin per second, and as it passes 14 K, `x` climbs from almost nothing to about 2.4 millivolts. When it has arrived, set the setpoint back to `20` and watch it all happen in reverse.
+Watch the **Values** tab (press ++1++). `T` falls from 20 K towards 4 K at one kelvin per second, and as it passes 14 K, `x` climbs from almost nothing to about 2.4 millivolts. When it has arrived, set the setpoint back to `20` and watch it all happen in reverse.
 
 ## Plot it
 
-Numbers are hard to read, so choose **Plots → New Plot**. A plot window opens, and it draws *every* measurement against the first one, on a single scale. That is rarely what you want, so give it three instructions:
+Numbers are hard to read, and the plot at the top shows `T` against `time` to begin with. Make it show what the sample is doing:
 
-1. **Choose the horizontal axis.** Open the plot's **x-axis** menu and choose `T`.
-2. **Hide what you do not want.** Click a name in the plot's legend to hide or show that series. Hide `time` and `T`, so that only `x` and `y` remain.
-3. **Fit the axes.** Double-click inside the plot and it rescales to what is visible.
+1. **Choose the horizontal axis.** Choose `T` in the plot's **against** list.
+2. **Choose what is plotted.** Use **+ Add** to add `x`, then `y`, and click the **×** on the `T` chip to take it off.
 
 ![The live plot of x and y against temperature, across the transition](../images/tutorial/live-plot.png){ .pa-shot }
 
-There it is: `x` (green) collapses as the sample warms through 14 K, while `y` (red) shows a peak. Each dot is one measurement cycle. **Clear** empties the plot, and you can open as many plots as you like.
+There it is: `x` (orange) collapses as the sample warms through 14 K, while `y` (green) shows a peak. The plot keeps its axes fitted to the data as it arrives, and it holds the whole of the current file, so nothing scrolls away.
 
 !!! tip "Getting the plot you want"
-    Those three gestures (choose the axis, hide series, double-click to fit) are all there is to the plots. Do them again whenever you open a new plot, or when new data drifts outside the view.
+    Drag a box to zoom in, and double-click to see everything again. Hover over the plot to read the values at any point. **+ Add plot** puts another plot beside this one, with its own columns, for when you want `T` against `time` as well.
 
 !!! success "Checkpoint"
-    You can ask an instrument a question from the **Instruments** menu, change its state by sending a command, and see the effect in **Live Data** and on a plot. `x` is about 2.4 mV when `T` is 4 K, and about zero at 20 K.
+    You can ask an instrument a question from the **Instruments** tab, change its state by sending a command, and see the effect in the **Values** tab and on a plot. `x` is about 2.4 mV when `T` is 4 K, and about zero at 20 K.
 
 ## What you learned
 
-- **Instruments** have **queries** (read) and **commands** (do), and all of them appear in the **Instruments** menu.
+- **Instruments** have **queries** (read) and **commands** (do), and all of them appear in the **Instruments** tab.
 - A **measurement** takes a query, plus any arguments it needs as keywords, and records it on every cycle.
-- Every menu item opens a request window. Fill in every input, then press **Send Request**.
+- Pick a query or command, fill in its form, and press **Read** or **Send**. The answers are kept beside the form.
 - The simulated instruments have the same interface as the real ones, so nothing you write here is throwaway.
 
 To go deeper on instruments, see [Adding instruments](instruments.md) and [Writing your own instrument](custom_instruments.md).

@@ -160,25 +160,26 @@ def test_an_icon_is_passed_through(fake_pyinstaller, config, tmp_path):
     assert command[command.index("--icon") + 1] == "rig.ico"
 
 
-def test_pyvisa_and_dearpygui_are_always_collected(fake_pyinstaller, config, tmp_path):
+def test_pyvisas_backends_are_always_collected(fake_pyinstaller, config, tmp_path):
     freeze.build_app(toml_file=str(config), out_dir=tmp_path)
 
     (command,) = fake_pyinstaller
     collected = [
         command[i + 1] for i, arg in enumerate(command) if arg == "--collect-all"
     ]
-    assert set(collected) == {"pyvisa", "pyvisa_py", "dearpygui"}
+    assert set(collected) == {"pyvisa", "pyvisa_py"}
 
 
-def test_the_new_gui_page_is_always_collected(fake_pyinstaller, config, tmp_path):
-    # The API server serves it whichever GUI runs, and does not start without it.
+def test_the_gui_page_is_always_collected(fake_pyinstaller, config, tmp_path):
+    # The API server serves it with or without a window, and does not start
+    # without it.
     freeze.build_app(toml_file=str(config), out_dir=tmp_path)
 
     (command,) = fake_pyinstaller
     collected = [
         command[i + 1] for i, arg in enumerate(command) if arg == "--collect-data"
     ]
-    assert collected == ["pyacquisition.new_gui"]
+    assert collected == ["pyacquisition.gui"]
 
 
 def test_onefile_by_default(fake_pyinstaller, config, tmp_path):
@@ -237,8 +238,8 @@ def test_pyinstaller_available_reflects_the_path(monkeypatch):
 )
 def test_a_real_toml_build(tmp_path):
     """Freezes a genuine, tiny experiment and checks the result runs and serves
-    the new GUI's page. (It runs without a window: the window itself was checked
-    by hand, in milestone 19 of SPEC.md.)"""
+    the GUI's page. (It runs without a window: the window itself was checked by
+    hand, in milestone 19 of specs/archive/new-gui.md.)"""
     # A port away from 8000, which the docs server commonly occupies during dev.
     port = 8193
     base = f"http://localhost:{port}"
@@ -257,7 +258,7 @@ def test_a_real_toml_build(tmp_path):
     assert exe.exists()
     assert (app_dir / "config.toml").exists()
 
-    # What the new GUI's window needs, which is found at runtime rather than
+    # What the GUI's window needs, which is found at runtime rather than
     # imported: pywebview's WebView2 libraries, pythonnet's .NET runtime and its
     # loader, and the page itself.
     from PyInstaller.archive.readers import CArchiveReader
@@ -269,9 +270,9 @@ def test_a_real_toml_build(tmp_path):
         "webview/lib/runtimes/win-x64/native/WebView2Loader.dll",
         "pythonnet/runtime/Python.Runtime.dll",
         "clr_loader/ffi/dlls/amd64/ClrLoader.dll",
-        "pyacquisition/new_gui/static/index.html",
-        "pyacquisition/new_gui/static/js/main.js",
-        "pyacquisition/new_gui/static/vendor/preact/preact.module.js",
+        "pyacquisition/gui/static/index.html",
+        "pyacquisition/gui/static/js/main.js",
+        "pyacquisition/gui/static/vendor/preact/preact.module.js",
     ):
         assert name in bundled, f"{name} is missing from the build"
 

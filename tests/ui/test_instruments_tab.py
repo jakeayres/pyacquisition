@@ -2,6 +2,7 @@
 forms, with their recent results (milestone 14). On the tutorial's simulated
 cryostat and lock-in."""
 
+import json
 import re
 import sys
 from pathlib import Path
@@ -121,6 +122,43 @@ def test_a_command_is_sent_and_its_effect_can_be_read_back(context, rig):
 
     expect(results(page).first.locator(".result-value")).to_have_text("137.5")
     assert rig.get("/lockin/get_frequency").json()["data"] == 137.5
+
+
+def test_a_list_is_shown_as_rows_and_a_call_says_how_long_it_took(context, rig):
+    page = open_tab(context, rig)
+    instrument(page, "clock")
+    method(page, "start_timer")
+    page.page.locator(".form-field[data-field='name'] input").fill("cooldown")
+    page.page.get_by_role("button", name="Send").click()
+    expect(results(page)).to_have_count(1)
+
+    method(page, "list_timers")
+    page.page.get_by_role("button", name="Read", exact=True).click()
+    expect(results(page)).to_have_count(2)
+
+    first = results(page).first
+    expect(first.locator(".result-row dt")).to_contain_text(["[0]"])
+    expect(first.locator(".result-row dd")).to_contain_text(["cooldown"])
+    expect(first.locator(".result-time")).to_have_text(re.compile(r"^\d+ ms · "))
+
+
+def test_copy_takes_the_whole_result(context, rig):
+    context.grant_permissions(["clipboard-read", "clipboard-write"])
+    page = open_tab(context, rig)
+    instrument(page, "clock")
+    method(page, "start_timer")
+    page.page.locator(".form-field[data-field='name'] input").fill("warmup")
+    page.page.get_by_role("button", name="Send").click()
+    expect(results(page)).to_have_count(1)
+    method(page, "list_timers")
+    page.page.get_by_role("button", name="Read", exact=True).click()
+    expect(results(page)).to_have_count(2)
+
+    results(page).first.get_by_role("button", name="Copy the result").click()
+
+    expect(results(page).first.get_by_role("status")).to_have_text("Copied")
+    copied = page.page.evaluate("navigator.clipboard.readText()")
+    assert "warmup" in json.loads(copied)
 
 
 def test_a_bad_value_is_explained_and_not_sent(context, rig):

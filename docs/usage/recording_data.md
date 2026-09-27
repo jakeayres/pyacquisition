@@ -26,17 +26,15 @@ Recording each stage of an experiment (a sweep, a cooldown, one condition) into 
 
 ## Start a new file
 
-Run the experiment from the last lesson. Then choose **Scribe → Next File Endpoint**.
+Run the experiment from the last lesson. Then click the file name in the top bar, `00.00 start.data`. It shows the folder the files go in, and a form to start a new one.
 
-![The Scribe menu](../images/tutorial/scribe-menu.png){ .pa-shot .pa-small }
+Type `cold` as the **Title**, and leave **Start a new block** unticked. Under it, the form shows the name the file will get. Press **Start new file**.
 
-Type `cold` into `title`, leave `next_block` unticked, and press **Send Request**.
+![The Data file menu, with the title cold and the next file 00.01 cold.data](../images/tutorial/next-file.png){ .pa-shot .pa-small }
 
-![The Next File window, with the title cold](../images/tutorial/next-file.png){ .pa-shot .pa-small }
+The top bar now reads `00.01 cold.data`, and from the next cycle onward, every row goes there. The plot starts afresh with the new file, and shows the file before it more faintly.
 
-The **Data File** pane now reads `00.01 cold.data`, and from the next cycle onward, every row goes there.
-
-![The Data File pane, now showing 00.01 cold.data](../images/tutorial/new-file-header.png){ .pa-shot .pa-medium }
+![The top bar, now showing 00.01 cold.data](../images/tutorial/new-file.png){ .pa-shot }
 
 Look in `my_data`:
 
@@ -46,7 +44,7 @@ my_data/
 └── 00.01 cold.data
 ```
 
-Tick `next_block` instead, and the new file would start a new block: `01.00 cold.data`. The `step` is for stages within one run, and the `block` is for runs.
+Tick **Start a new block** instead, and the new file would start a new block: `01.00 cold.data`. The `step` is for stages within one run, and the `block` is for runs.
 
 You will not always want to click. In [lesson 5](building_a_sweep.md) a task starts a new file for you at the right moment.
 
@@ -80,10 +78,10 @@ time,T,x,y,R
 47.891117095947266,20.004272338647684,1.1351878629106635e-05,7.014072038616088e-07,1.1373527178302996e-05
 ```
 
-There is a new `R` column.
+There is a new `R` column. It is in the interface too: `R` has a tile in the **Values** tab, and can be plotted like any measurement.
 
-!!! note "Calculations are saved, not shown"
-    Calculated columns are written to the data file, but **Live Data** and the plots show the measurements only. Calculations that need to remember earlier rows (a rolling average, say) are covered in [Calculations](calculations.md).
+!!! note "More calculations"
+    Calculations that need to remember earlier rows (a rolling average, say) are covered in [Calculations](calculations.md).
 
 ## Read your data in Python
 
@@ -104,7 +102,7 @@ print(data[["T", "x", "R"]].describe())
 ## What you learned
 
 - Data goes to files named `<block>.<step> <title>.data`. A new **block** starts with each run, and a new **step** with each file.
-- **Scribe → Next File Endpoint** starts a new file, and tasks can do it too.
+- The file name in the top bar starts a new file, and tasks can do it too.
 - A **calculation** adds columns to the file without touching the raw data.
 - Files are plain CSV: read them with `pandas` or anything else.
 

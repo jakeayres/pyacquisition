@@ -3,7 +3,7 @@
 `pyacquisition` turns a short Python script into a complete data acquisition application. You describe your experiment in Python and `pyacquisition` provides:
 
 - **Continuous recording.** The values you choose are polled at a fixed period and written to comma separated files.
-- **A control panel.** A graphical interface is generated automatically. Every function of every instrument is available from a menu, with no GUI code to write.
+- **A control panel.** A graphical interface is generated automatically: live plots and values, every function of every instrument, a task queue and the log, with no GUI code to write. It opens in its own window, and in a browser too.
 - **Live feedback.** Live values, live plots and a scrolling log.
 - **Automation.** Experimental procedures written as *tasks* run from a queue, and can be paused or aborted at any time.
 

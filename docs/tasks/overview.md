@@ -21,7 +21,7 @@ The following tasks are registered to your experiment by default.
 
 ## With an instrument
 
-The following tasks are registered to your experiment **when the instrument they are for is in it**. They appear in the **Tasks** menu, and their instrument's id is filled in for you if there is only one. Set `auto_tasks = False` to turn this off, and register the ones you want yourself. See [tasks that are already included](../usage/tasks.md#tasks-that-are-already-included).
+The following tasks are registered to your experiment **when the instrument they are for is in it**. They are listed in **Add task**, and their instrument's id is filled in for you if there is only one. Set `auto_tasks = False` to turn this off, and register the ones you want yourself. See [tasks that are already included](../usage/tasks.md#tasks-that-are-already-included).
 
 #### Lakeshore 340 and 350
 

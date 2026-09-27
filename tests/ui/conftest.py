@@ -1,4 +1,4 @@
-"""The new GUI's page, loaded in a real browser against a running experiment.
+"""The GUI's page, loaded in a real browser against a running experiment.
 
 The browser is the installed Microsoft Edge, driven by Playwright, so no browser
 needs downloading. Without Edge, these tests are skipped. What the tests share

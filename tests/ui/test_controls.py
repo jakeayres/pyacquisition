@@ -1,6 +1,7 @@
 """The experiment's controls in the top bar: the data file, the measurements
 and stopping (milestone 8)."""
 
+import asyncio
 import itertools
 import re
 import time
@@ -200,6 +201,47 @@ def test_the_period_can_be_changed(context, rig):
         assert rig.get("/rack/state").json()["period"] == 0.5
     finally:
         rig.get("/rack/period/set/", period=0.25)
+
+
+def test_the_menu_shows_the_time_the_loops_take(context, rig):
+    page = open_page(context, rig)
+
+    rack_button(page).click()
+
+    expect(page.page.locator(".rack-measured")).to_have_text(
+        re.compile(r"^Measured: every 0\.2[5-9]\d* s$")
+    )
+    expect(page.page.locator(".rack-slow")).to_have_count(0)
+
+
+class SlowRig(SmokeExperiment):
+    """Measuring takes longer than the period. (Waiting without blocking, as a
+    blocking measurement this slow would leave the server no time to answer.)"""
+
+    def setup(self):
+        super().setup()
+        measure = self._rack.measure
+
+        async def slowly():
+            await asyncio.sleep(0.3)
+            await measure()
+
+        self._rack.measure = slowly
+
+
+def test_measuring_slower_than_the_period_is_pointed_out(context, tmp_path):
+    slow = Running(SlowRig, tmp_path, measurement_period=0.05)
+    try:
+        page = open_page(context, slow)
+
+        expect(page.page.locator(".rack-slow")).to_have_text("slow", timeout=10000)
+        expect(rack_button(page)).to_contain_text("Every 0.05 s")
+        rack_button(page).click()
+        expect(page.page.locator(".rack-measured")).to_contain_text(
+            "as measuring takes longer than the period"
+        )
+    finally:
+        slow.stop()
 
 
 @pytest.mark.parametrize("text", ["0", "-1", "fast", ""])

@@ -26,6 +26,8 @@ import os
 from dataclasses import dataclass
 from typing import Any, Callable
 
+from .logging import logger
+
 LOG_LEVELS = ("TRACE", "DEBUG", "INFO", "SUCCESS", "WARNING", "ERROR", "CRITICAL")
 
 
@@ -103,17 +105,27 @@ def _flag(name, value):
     return value
 
 
-GUIS = ("classic", "new")
-DEFAULT_GUI = "classic"  # the GUI that `gui = True` runs
+GUIS = ("new",)
+DEFAULT_GUI = "new"  # the GUI that `gui = True` runs
+
+# GUIs that have gone, and what to say to anyone who still asks for one.
+REMOVED_GUIS = {
+    "classic": (
+        "The classic GUI (Dear PyGui) has been removed. `gui = True` runs the "
+        "web GUI that replaced it, so use that (or leave the option out)."
+    ),
+}
 
 
 def _gui(name, value):
     """True (the default GUI), False (none), or the name of a GUI."""
+    if isinstance(value, str) and value.lower() in REMOVED_GUIS:
+        raise ValueError(f"`{name}`: {REMOVED_GUIS[value.lower()]}")
     if isinstance(value, str) and value.lower() in GUIS:
         return value.lower()
     if not isinstance(value, bool):
         raise ValueError(
-            f"`{name}` must be True, False, {' or '.join(map(repr, GUIS))}, "
+            f"`{name}` must be True, False or {' or '.join(map(repr, GUIS))}, "
             f"got {value!r}"
         )
     return value
@@ -166,8 +178,13 @@ SETTINGS = {
         Setting("measurement_period", 0.25, _seconds, "rack", "period"),
         Setting("gui", True, _gui, "gui", "run"),
         Setting("auto_tasks", True, _flag, "experiment", "auto_tasks"),
-        Setting("sparkline_points", 100, _count, "gui", "sparkline_points"),
     )
+}
+
+# TOML keys that did something once, and now do nothing. A file that still has
+# one works, with a warning, rather than being refused as a mistake.
+REMOVED_KEYS = {
+    ("gui", "sparkline_points"): "it set the classic GUI's small graphs, which have gone",
 }
 
 
@@ -207,6 +224,12 @@ def from_config(config: dict) -> dict:
             raise ValueError(f"[{section}] must be a table")
         keys = {s.key: s for s in SETTINGS.values() if s.section == section}
         for key, value in table.items():
+            if (section, key) in REMOVED_KEYS:
+                logger.warning(
+                    f"'{key}' in [{section}] does nothing now "
+                    f"({REMOVED_KEYS[section, key]}), so it can be removed."
+                )
+                continue
             if key not in keys:
                 raise ValueError(
                     f"Unknown key '{key}' in [{section}]"

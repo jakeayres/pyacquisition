@@ -6,43 +6,46 @@ Once tasks are [registered](tasks.md#registering-tasks), you run them by adding 
 
 ## Queueing a task
 
-1. Open the **Tasks** menu and choose your task.
-2. Fill in **every** input. The inputs start at zero or empty, and the defaults from your code are not filled in for you.
-3. Press **Send Request**.
+1. Open the **Queue** tab and press **Add task** (with several task managers, on the one it should run on).
+2. Pick your task. Search to narrow the list, and use the arrow keys and ++enter++ to go to its form.
+3. Fill in its inputs. Each starts at its default from your code, if it has one, and an input marked with a star must be given.
+4. Press **Add to queue**. The window stays open, so you can add several tasks in turn, and **Done** closes it.
+
+++ctrl+k++ does the same from anywhere: it searches every task on every task manager, and queues the one you pick.
 
 The task joins the queue, and starts as soon as the task manager is free. You can queue several tasks, including several copies of the same one with different inputs, and then leave them to run.
 
-## The Task Queue window
+## The Queue tab
 
-The **Task Queue** window shows:
+The **Queue** tab shows, for each task manager:
 
-- **The header**: the name of the task that is running now, and a badge for the state of the task manager: **RUNNING** (green), **PAUSED** (amber), **ABORTING** (red) or **IDLE** (grey).
-- **Queue**: the tasks waiting behind it, in order, with their `description` and `parameters` (if you [wrote them](tasks.md#your-first-task)). The running task is not repeated here. Each waiting task has a **Remove** button, which takes that task out of the queue straight away. It is the task you clicked that is removed, even if the queue has moved on since you last looked, for example because the task in front of it has just started. The two arrows beside it move that task one place **up**, so that it runs sooner, or **down**. The first task in the queue cannot move up, because the place in front of it belongs to the task that is running, and the last cannot move down, so those arrows are greyed out. Like **Remove**, an arrow moves the task you clicked, wherever it now is.
+- **The header**: its state (**Running**, **Paused**, **Aborting…** or **Idle**), **Add task**, and **Pause** (which becomes **Resume** while it is paused).
+- **The running task**, in a card: its `description` and `parameters` (if you [wrote them](tasks.md#your-first-task)), how long it has been running, how far along it is and how long is left, if it [says](tasks.md#showing-progress), the subtasks it is running, and **Abort**. The card is green while the task runs, amber while the task manager is paused, and red while the task is being aborted. Its copy button queues the same task again. The name of the running task is in the top bar too, whichever tab is open.
+- **The queue**: the tasks waiting behind it, in order, with their inputs. The running task is not repeated here. Each waiting task has buttons to move it one place **up** (so that it runs sooner) or **down**, to copy it, and to remove it (**×**). You can also drag it by the handle at its left to any place. It is always the task you clicked that is moved or removed, even if the queue has moved on since you last looked, for example because the task in front of it has just started. The first task cannot move up, because the place in front of it belongs to the task that is running, and the last cannot move down, so those arrows are greyed out.
+- **Save…**, **Load…** and **Clear queue**: [sequences](#saving-a-queue-as-a-sequence), and emptying the queue (after asking). Clearing does not stop the task that is running.
 
-Everything a task logs with `self.log(...)` appears in the **Logs** window, labelled with the task's name, so you can follow its progress there. So does a task that fails, with the reason.
+Everything a task logs with `self.log(...)` appears in the **Logs** tab, labelled with the task's name, so you can follow its progress there. So does a task that fails, with the reason, and an alert says so as well.
 
 ## Pause, resume and abort
 
-Use the **Task Manager** menu to control what is running. With [several task managers](#several-task-managers), the **Pause** and **Abort** buttons on each one's card do the same, and aborting asks you to confirm first.
+The buttons in the **Queue** tab control what is running:
 
-| Menu item | What it does |
+| Button | What it does |
 |---|---|
 | **Pause** | The running task stops at its next wait and holds there. If it has an [`on_pause()`](tasks.md#pausing-hardware-on_pause-and-on_resume), that is called at once, so a task that controls a magnet can put it on hold. Otherwise the instruments are left as they are. No new task is started. |
 | **Resume** | The task's `on_resume()` is called if it has one, and then the task carries on from where it stopped, and the queue continues. |
-| **Abort Current Task** | The running task stops at once, wherever it is waiting, and its `teardown()` runs, leaving the instruments in the safe state you defined. The task manager then **pauses**, so the next task does not start until you press **Resume**. |
-| **Remove Task** | Removes one task from the queue. Give its position `N`: `0` is the next task to run. The **Remove** buttons in the **Task Queue** window are safer, because the queue can move up between you looking at a position and the request arriving. |
-| **Clear All Tasks** | Empties the queue. It does not stop the task that is running. |
+| **Abort** | After asking you to confirm, the running task stops at once, wherever it is waiting, and its `teardown()` runs, leaving the instruments in the safe state you defined. The task manager then **pauses**, so the next task does not start until you press **Resume**. |
 
 A task pauses at its waits (`self.sleep()`, `self.wait_until()` and so on: see [How `run()` works](tasks.md#how-run-works)), so a pause takes effect when the task next reaches one. An abort does not wait for one.
 
 !!! note "Abort pauses the whole queue"
-    Aborting deliberately does not go straight on to the next task. Nothing else runs until you decide, by pressing **Resume**, or by clearing the queue first with **Clear All Tasks**.
+    Aborting deliberately does not go straight on to the next task. Nothing else runs until you decide, by pressing **Resume**, or by clearing the queue first with **Clear queue**.
 
 !!! note "An abort stops the task at once, and then its `teardown()` runs"
-    The task is stopped wherever it is waiting, and then its `teardown()` runs, which is never interrupted, even by a second press of **Abort**. A `teardown()` that takes a while, for example one that waits for an instrument to settle, therefore keeps the card red, reading **ABORTING**, until it has finished.
+    The task is stopped wherever it is waiting, and then its `teardown()` runs, which is never interrupted, even by a second press of **Abort**. A `teardown()` that takes a while, for example one that waits for an instrument to settle, therefore keeps the card red, and the task manager **Aborting…**, until it has finished.
 
 !!! note "A task that fails pauses the queue too"
-    If a task raises an error, the error is shown in the **Logs** window, its `teardown()` runs, and the task manager **pauses**, as it does after an abort. The tasks behind it may rely on it having worked, so they do not run on their own. Choose **Resume** to carry on with them, or **Clear All Tasks**. How the last task ended (`completed`, `failed` or `aborted`, and the error) is in `/managers/state`, under `last_result`.
+    If a task raises an error, an alert says so, the error is in the **Logs** tab, its `teardown()` runs, and the task manager **pauses**, as it does after an abort. The tasks behind it may rely on it having worked, so they do not run on their own. Press **Resume** to carry on with them, or **Clear queue**. How the last task ended (`completed`, `failed` or `aborted`, and the error) is in `/managers/state`, under `last_result`.
 
 ## Several task managers
 
@@ -79,17 +82,7 @@ Use one task manager for a set of tasks that must run *one after another*. To ru
 
 ### In the interface
 
-With more than one task manager, the interface adds them alongside the main one:
-
-- **The Task Queue window** has a section for each task manager. The header shows its name, the task that is running, and a badge for its state (**RUNNING**, **PAUSED**, **ABORTING** or **IDLE**) in a matching colour, so you can see at a glance that a control loop is still going. Below it, the task that is running is shown in full in a highlighted card, with its description and parameters, in the same way as in the queue. The card is **green** while the task runs, **amber** when it is paused, **red** while it is being aborted, and grey when nothing is running. Its two buttons, at the top right, are one click away from the **Task Manager** menu:
-    - **Pause** pauses that task manager, and becomes **Resume** when it is paused. It works when nothing is running too, so a paused queue can always be resumed from here.
-    - **Abort** stops the task that is running, after asking you to confirm. It is greyed out when nothing is running, and while an abort is already under way.
-
-    The queue is underneath. Click a header to collapse its section, and click it again to expand it (the arrow at its left shows which). The header stays, so its state is still visible.
-- **The Task Manager and Tasks menus** have a submenu for each task manager. The **Tasks** submenu of a task manager lists the tasks that can be queued on it, so choosing a task there queues it on that task manager. A task manager that no task can be queued on is left out.
-- **Windows are titled with the task manager**, for example **control: Pause**, so that the same action on two task managers can be told apart.
-
-With only the main task manager, the window and menus are exactly as described on the rest of this page.
+With more than one task manager, the **Queue** tab has a section for each, one under another, with its own header, state, running task, queue and buttons, so you can see at a glance that a control loop is still going. **Add task** on a section lists only the tasks that can be queued on that task manager. The top bar names the first task that is running, with a count of any others (**+1**), and ++ctrl+k++ offers each task once for every task manager it can be queued on.
 
 ## Running tasks from a script
 
@@ -136,13 +129,13 @@ def wait_until_idle():
         time.sleep(1)
 ```
 
-To remove one waiting task, `/task_manager/remove_task?N=` takes its position, and `/task_manager/remove_queued_task?task_id=` takes its id instead, which cannot pick the wrong task if the queue has moved on. Every task in the queue, and the running task, has an `id` in `/managers/state`. To move one, `/task_manager/move_queued_task?task_id=...&direction=up` (or `down`) moves it one place, and answers `{"moved": false}` if it cannot go that way. `/task_manager/place_queued_task?task_id=...&index=0` puts it at a place (0 is the front), and `/task_manager/duplicate_queued_task?task_id=...` queues a copy straight after it (or at the front, for the running task). (These are what the buttons in the queue use. They are not listed at [http://localhost:8000/docs](http://localhost:8000/docs), so that they do not appear as entries in the **Task Manager** menu.) Other task managers have them at `/managers/<name>/...`.
+To remove one waiting task, `/task_manager/remove_task?N=` takes its position, and `/task_manager/remove_queued_task?task_id=` takes its id instead, which cannot pick the wrong task if the queue has moved on. Every task in the queue, and the running task, has an `id` in `/managers/state`. To move one, `/task_manager/move_queued_task?task_id=...&direction=up` (or `down`) moves it one place, and answers `{"moved": false}` if it cannot go that way. `/task_manager/place_queued_task?task_id=...&index=0` puts it at a place (0 is the front), and `/task_manager/duplicate_queued_task?task_id=...` queues a copy straight after it (or at the front, for the running task). (These are what the buttons in the queue use. They are not listed at [http://localhost:8000/docs](http://localhost:8000/docs).) Other task managers have them at `/managers/<name>/...`.
 
 That makes it possible to run a whole series of experiments unattended, from a script that queues tasks, waits, analyses the data files, and decides what to queue next.
 
 ## Saving a queue as a sequence
 
-A queue you will want again, such as a cooldown or an overnight sweep, can be saved as a **sequence** and loaded later, in the same run or the next. The new interface (`gui = "new"`) has **Save…** and **Load…** beside each queue, and the API has them too:
+A queue you will want again, such as a cooldown or an overnight sweep, can be saved as a **sequence** and loaded later, in the same run or the next. The **Queue** tab has **Save…** and **Load…** beside each queue, and the API has them too:
 
 | Address | Does |
 |---|---|

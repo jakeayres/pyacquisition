@@ -2,13 +2,12 @@
 
 import asyncio
 import socket
-from enum import Enum
 
 import pytest
 import pytest_asyncio
 from aiohttp import ClientSession
 
-from pyacquisition.core.api_server import APIServer, enum_choices
+from pyacquisition.core.api_server import APIServer
 from pyacquisition.core.broadcaster import Broadcaster
 
 
@@ -99,25 +98,3 @@ async def test_a_client_that_joins_late_gets_what_is_sent_from_then_on(stream):
 
         received = await asyncio.wait_for(client.receive_json(), timeout=3)
         assert received == {"n": "after"}
-
-
-class Colour(Enum):
-    RED = 1
-    BLUE = 2
-
-
-def test_the_classic_encoding_lists_the_choices_of_an_enum():
-    message = {"colour": Colour.BLUE, "x": 1.0}
-
-    assert enum_choices(message) == {
-        "colour": {
-            "RED": {"value": 1, "selected": False},
-            "BLUE": {"value": 2, "selected": True},
-        },
-        "x": 1.0,
-    }
-    assert message["colour"] is Colour.BLUE  # the message itself is left alone
-
-
-def test_the_classic_encoding_passes_other_messages_through():
-    assert enum_choices("text") == "text"

@@ -62,13 +62,13 @@ if __name__ == "__main__":
 6. `self.log(...)` writes a message to the log, labelled with the name of the task.
 7. Wait with `await self.sleep(...)`. It waits without blocking anything else, and it is a place where the task can be paused and aborted. Never use `time.sleep()` in a task, which would freeze the entire experiment while it waits.
 8. `teardown()` always runs when the task ends, including when it was aborted or hit an error. Use it to leave your instruments in a safe state. Here, the generator goes back to its default distribution.
-9. Register the task, passing the class itself (not an instance: no brackets). It now appears in the **Tasks** menu. `label` sets the name shown there.
+9. Register the task, passing the class itself (not an instance: no brackets). It can now be queued from the interface. `label` sets the name it is listed by.
 
-Run the experiment and open **Tasks → Sample Gaussian**. Fill in **every** input, for example `mean` 5, `sigma` 2 and `seconds` 10 (the form starts at zero, and defaults are not filled in for you), then press **Send Request**. The task joins the queue and starts. Open **Plots → New Plot** and watch `random` settle around 5 for ten seconds, then return to a spread around 0 when the task ends. [Running tasks](running_tasks.md) covers what you can do with the queue.
+Run the experiment, open the **Queue** tab, press **Add task** and pick **Sample Gaussian**. Its form starts at the defaults: set `mean` 5, `sigma` 2 and `seconds` 10, and press **Add to queue**. The task joins the queue and starts. Watch `random` on the plot settle around 5 for ten seconds, then return to a spread around 0 when the task ends. [Running tasks](running_tasks.md) covers what you can do with the queue.
 
 ## What the queue shows
 
-The **Task Queue** window shows each task's `description` and `parameters`. By default, the description is the first line of the task's docstring, and the parameters are its inputs. To show something more useful, override them as properties:
+The **Queue** tab shows each task's `description` and `parameters`. By default, the description is the first line of the task's docstring, and the parameters are its inputs. To show something more useful, override them as properties:
 
 ```python
 @property
@@ -80,11 +80,11 @@ def parameters(self):
     return {"mean": self.mean, "sigma": self.sigma}
 ```
 
-The window is refreshed about once a second, and `parameters` is read each time, so it can return values that change while the task runs, such as the latest reading.
+The queue is refreshed about once a second, and `parameters` is read each time, so it can return values that change while the task runs, such as the latest reading.
 
 ### Showing progress
 
-A task can say how far along it is with `self.set_progress(...)`, as it goes. The new interface (`gui = "new"`) shows it on the running task as a bar, with how long the task has run and how long is left, and in its top bar.
+A task can say how far along it is with `self.set_progress(...)`, as it goes. The interface shows it on the running task as a bar, with how long the task has run and how long is left, and in its top bar.
 
 ```python
 async def run(self, experiment):
@@ -209,13 +209,13 @@ A task ends in one of three ways, and its `teardown()` runs in all of them:
 | `aborted` | You aborted it, or the experiment shut down. |
 | `failed` | `run()`, `setup()`, `teardown()`, `on_pause()` or `on_resume()` raised an error. |
 
-A failure does not crash the experiment. The error appears in the **Logs** window (`[SampleGaussian] Task failed: ValueError: ...`), with the traceback in the terminal and the log file. **The task manager then pauses**, as it does after an abort, so the tasks queued behind a task that failed, which may rely on it having worked, do not run on their own. Press **Resume** to carry on with them, or clear the queue.
+A failure does not crash the experiment. An alert says which task failed and why, and the error appears in the **Logs** tab (`[SampleGaussian] Task failed: ValueError: ...`), with the traceback in the terminal and the log file. **The task manager then pauses**, as it does after an abort, so the tasks queued behind a task that failed, which may rely on it having worked, do not run on their own. Press **Resume** to carry on with them, or clear the queue.
 
 Code can read the outcome from `task.outcome` (`None` until it has ended) and the error from `task.failure`. The result of the last task on each task manager is also in `/managers/state`, under `last_result`.
 
 ## Registering tasks
 
-Tasks must be registered in `setup()` to appear in the **Tasks** menu:
+Tasks must be registered in `setup()` to be queued from the interface:
 
 ```python
 self.register_task(SampleGaussian, label="Sample Gaussian")
@@ -224,7 +224,7 @@ self.register_task(SampleGaussian, label="Sample Gaussian")
 | Argument | Effect |
 |---|---|
 | The class | Required. Pass the class, not an instance. |
-| `label` | The name in the menu, and in the API address (`/tasks/sample_gaussian`). Without it the class name is used, run together: `Samplegaussian` and `/tasks/samplegaussian`. |
+| `label` | The name it is listed by, and its API address (`/tasks/sample_gaussian`). Without it the class name is used, and the address is the class name in lower case, run together: `SampleGaussian` and `/tasks/samplegaussian`. |
 | Other keywords | Fix an input to a value. The task then appears with that input hidden. |
 
 Fixing inputs lets you offer ready-made variants of a general task:
@@ -234,15 +234,15 @@ self.register_task(SampleGaussian, label="Standard Normal", mean=0.0, sigma=1.0)
 self.register_task(SampleGaussian, label="Wide Gaussian", mean=0.0, sigma=10.0)
 ```
 
-Both appear in the **Tasks** menu asking only for `seconds`.
+Both are listed in **Add task**, asking only for `seconds`.
 
 ### Tasks that are already included
 
 A few tasks come with `pyacquisition`. `NewFile`, `WaitFor` and `WaitUntil` are always registered for you.
 
-**Tasks for an instrument register themselves when it is there.** `RampTemperature` is for the Lakeshore 340 and 350, and `SweepMagneticField` is for the Mercury IPS. Add one of those instruments, in `setup()` or in a [TOML file](toml_config.md), and its task appears in the **Tasks** menu (as **Ramp Temperature** and **Sweep Magnetic Field**) with nothing else to write. They are registered once `setup()` has finished, so it does not matter in which order you add things.
+**Tasks for an instrument register themselves when it is there.** `RampTemperature` is for the Lakeshore 340 and 350, and `SweepMagneticField` is for the Mercury IPS. Add one of those instruments, in `setup()` or in a [TOML file](toml_config.md), and its task can be queued (as **Ramp Temperature** and **Sweep Magnetic Field**) with nothing else to write. They are registered once `setup()` has finished, so it does not matter in which order you add things.
 
-- **The instrument's id is filled in for you** when there is exactly one such instrument, so the form does not ask for it. With two, such as a Lakeshore 340 and a 350, the form asks which, in the box for the id.
+- **The instrument's id is filled in for you** when there is exactly one such instrument, so the form does not ask for it. With two, such as a Lakeshore 340 and a 350, the form asks which, from a list of them.
 - **A task that you registered yourself is left as you registered it.** Do that to choose the label, to fix some of its inputs, or to limit it to a task manager.
 - **A task whose instrument is absent is not registered.**
 

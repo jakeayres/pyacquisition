@@ -1,4 +1,4 @@
-"""The new GUI's layout (its plots, the dock and the theme chosen), kept by the
+"""The GUI's layout (its plots, the dock and the theme chosen), kept by the
 experiment so it comes back on the next run.
 
 It lives in a file on the server, not in the browser: the app's window starts
@@ -63,14 +63,14 @@ class Layout:
         @api_server.app.get("/experiment/layout", tags=["experiment"])
         async def get_layout():
             """
-            The new GUI's layout for this experiment, as it last saved it: an
+            The GUI's layout for this experiment, as it last saved it: an
             object of its own making ({} if there is none yet).
             """
             return {"status": 200, "data": self.get()}
 
         @api_server.app.put("/experiment/layout", tags=["experiment"])
         async def put_layout(layout: dict = Body(...)):
-            """Save the new GUI's layout for this experiment (a JSON object)."""
+            """Save the GUI's layout for this experiment (a JSON object)."""
             if len(json.dumps(layout)) > MAX_BYTES:
                 raise HTTPException(status_code=413, detail="That layout is too big.")
             try:

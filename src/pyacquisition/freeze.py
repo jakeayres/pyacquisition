@@ -13,9 +13,9 @@ third-party package your own instrument needs) and bundles that too. Building
 our own wrapper around it, the way the TOML path does, would hide those imports
 from PyInstaller and they would silently be missing from the built application.
 
-The PC a built application runs on needs no Python. For the new GUI (`gui =
-"new"`) it needs the Microsoft Edge WebView2 Runtime, which Windows 11 has, and
-Windows 10 has with a current Edge. Without it the window says what to install,
+The PC a built application runs on needs no Python. For the GUI's window it
+needs the Microsoft Edge WebView2 Runtime, which Windows 11 has, and Windows 10
+has with a current Edge. Without it the window says what to install,
 and the page can still be opened in a browser.
 """
 
@@ -26,13 +26,12 @@ from pathlib import Path
 from .core.config_parser import ConfigParser
 
 # The instrument backends that PyInstaller's static analysis cannot see, because
-# they are found at runtime rather than imported directly: pyvisa's VISA backends,
-# and dearpygui's bundled native module and default font.
-_COLLECT_ALL = ("pyvisa", "pyvisa_py", "dearpygui")
+# they are found at runtime rather than imported directly: pyvisa's VISA backends.
+_COLLECT_ALL = ("pyvisa", "pyvisa_py")
 
 # Files that are read rather than imported, so the analysis does not see them: the
-# new GUI's page, which the API server always serves.
-_COLLECT_DATA = ("pyacquisition.new_gui",)
+# GUI's page, which the API server always serves.
+_COLLECT_DATA = ("pyacquisition.gui",)
 
 # The entry point for a --toml build. It is the same every time: it looks for its
 # configuration beside the executable, under a fixed name, whatever the original

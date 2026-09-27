@@ -1,6 +1,6 @@
 # The Interface and the API
 
-[Lesson 1](first_experiment.md) introduces running an experiment and the window it opens. This page has the detail: every window and menu, running without the interface, and the local web API.
+[Lesson 1](first_experiment.md) introduces running an experiment and the window it opens. This page has the detail: every part of the interface, running without a window, and the local web API.
 
 ## Start it
 
@@ -33,31 +33,54 @@ Put `MyExperiment().run()` (and anything else that starts things running) under 
 
 ## The interface
 
-The interface has a menu down the left edge, and its tabs change what is shown in the left part of the window. The right 58% is a live plot of every numeric measurement against one of the measurements, as points, in the colour of its card in **Live Data**, on the same black as the rest of the interface. It stays as it is whichever tab is shown. Everything the plot offers on a right click is there, and so are **Clear** and the **x-axis** choice. The x axis is always a measurement, since the plot has no time of its own: if you want time, measure it, for example with the clock's `timestamp_ms`. It starts as the measurement called `time` if there is one, or else the first. The legend is a column of small coloured pills to the right of the plot, under the plot's choices: click one to hide its points, and click it again to show them, and tick **Normalise** to draw each measurement from 0 to 1 of its own range, which is what to do when the measurements are of very different sizes. **Autofit**, which starts ticked, keeps the axes fitted to the data as it arrives, with a margin of 5% of the range of the data at each side so that the extreme points are not on the edge. It unticks itself as soon as you drag or scroll the plot or its axes, so that it stays where you put it; tick it again to fit the axes again.
+The window is a page served by the experiment itself, so you can also open it in a browser at [http://localhost:8000](http://localhost:8000) (the API server's address), on this computer or another. It has three parts: a slim bar across the top, the plots filling the window, and a **dock** of tabs along the bottom.
 
-**Pages**
+![The interface of the first experiment](../images/tutorial/first-run.png){ .pa-shot }
+
+**The top bar**
+
+| Part | What it does |
+|---|---|
+| **Data file** | The file being written. Click it for its folder (with buttons to copy the path and to open it), and to start a new file: type a title, tick **Start a new block** if you want one, and it shows the name the file will get. |
+| **Measurements** | How often everything is measured, such as **Every 0.25 s**. Click it to change the period. It also says how long the loops really take, which is longer than the period if measuring takes longer, and then a **slow** marker appears on it. The button beside it pauses and resumes measuring. |
+| **Running task** | The task that is running, and how far along it is, if it says. Click it to open the **Queue** tab. |
+| **Bell** | Alerts: an error logged, a task that failed, data that stopped arriving, or the connection to the experiment lost. Each shows for a few seconds, and the bell keeps a list. |
+| **Connected** | Whether the experiment is answering. If it stops, the page reconnects by itself when it can. |
+| Keyboard, moon and power buttons | The keyboard shortcuts, the light or dark theme (it follows Windows until you choose), and stopping the experiment. |
+
+**The plots**
+
+Each plot shows one or more columns against another. The chips along its top are the columns plotted, each in its own colour (the same colour as its tile in the **Values** tab): click one to hide or show it, click its **×** to take it off, and use **+ Add** to add another. **against** chooses the horizontal axis. **Lines**, **Points** and **Both** choose how it is drawn. The axis button sets fixed limits or a log scale for either axis, the download button saves the plot as a picture or the data in view as a CSV file, and the last buttons copy or remove the plot.
+
+- **Zoom** by dragging a box. A thin box zooms one axis only. **Pan** by dragging with Shift or the middle button, or by scrolling. Ctrl and the scroll wheel zoom about the pointer.
+- While zoomed or panned, the plot holds that view as data arrives, and says **Autoscale off**. **Autoscale** there, or a double-click, sets it following the data again.
+- Hover over a plot to read the values of the nearest row.
+- **+ Add plot** adds another (up to six), and **Link x-axes** zooms and pans the x axes of plots against the same column together.
+- The plots show the whole of the current data file, and the file before it, drawn fainter (the key at the top right hides or shows it). Calculated columns can be plotted too.
+
+**The dock**
 
 | Tab | Shows |
 |---|---|
-| **Experiment** | The **Data File** and **Live Data** windows, one under the other. |
-| **Task Queue** | The task queue: for each task manager, whether it is running or paused, the task that is running now, and the tasks waiting behind it, with a **+** card to add one. |
-| **Instruments** | A card for every instrument, with how many endpoints it has. Click a card to list its queries and commands, and click one to open the window that asks for its inputs and sends the request. |
-| **Logs** | The **Log**, filling the page: messages from the experiment as they happen, one line each, with a level tag in colour by severity. Choose the lowest level to show with the buttons under the title. |
+| **Values** | A tile for each column: its latest value, its unit, where it comes from, and a small graph of its recent values. |
+| **Queue** | Each task manager's queue: the task running, with how far along it is and **Abort**, and the tasks waiting, which can be dragged into a new order, moved, copied or removed. **Add task** queues a task from a form, **Pause** and **Resume** hold the queue, and **Save…** and **Load…** keep a queue as a sequence to use again. |
+| **Instruments** | Every instrument, with its queries and commands. Pick one, fill in its form, and press **Read** or **Send**. The answers are kept beside the form, with how long each call took, and a button to copy it. |
+| **Logs** | What the experiment is doing, as it does it, one line per message. Choose which levels to show, and search. Click a message to see all of it. |
 
-**Windows on the Experiment and Task Queue pages**
+Drag the top edge of the dock to make it taller or shorter, and click the open tab (or the arrow at the right) to hide it. The plots, the dock and the theme are remembered for the next run of the same experiment.
 
-| Window | Shows |
+**The keyboard**
+
+| Key | Does |
 |---|---|
-| **Data File** | The data file that is being written and the name the next one would get, and its folder, with a box and button to start the next file. |
-| **Live Data** | The latest value of every measurement, updating as it arrives. Its header says whether data is arriving. |
+| ++space++ | Holds every plot where it is, or sets them all following the data again. |
+| ++1++ to ++4++ | Opens the **Values**, **Queue**, **Instruments** or **Logs** tab. |
+| ++grave++ | Hides or shows the dock. |
+| ++t++ | Switches between the light and dark themes. |
+| ++ctrl+k++ | Searches every task and every instrument's queries and commands, to queue one or call one from the same forms. |
+| ++question++ | Lists these shortcuts. |
 
-The **Live Data** and **Task Queue** windows have a plain header with a thin line under it. The **Live Data** header turns amber, with a **STALE** badge, if no measurement has arrived for a few seconds, and says **WAITING** before the first one.
-
-The pause icon at the right of the **Live Data** header pauses the measurements. While they are paused the header and its lines turn amber, and the cards are drawn in muted colours, so that it is clear that nothing is updating. Press it again to resume. In the **Task Queue** window the running task is a green card, and it turns amber while the task manager is paused, and red while the task is being aborted. The tasks waiting behind it are blue cards. The icon at the right of the header pauses and resumes the task manager, and the red X on a card aborts the running task or removes a waiting one.
-
-Clicking an endpoint on the **Instruments** page, or a task in the list from the **+** card, opens a small window that describes what it does, has a box for each input it needs, and a **Send Request** button. The reply appears in the window.
-
-Try it. Open the **Instruments** tab, click the **clock** card, choose **Time** and press **Send Request** to read the clock.
+None of them do anything while you are typing in a box.
 
 ## Your data
 
@@ -75,17 +98,17 @@ Every measurement you add becomes another column.
 Files are named `<block>.<step> <title>.data`, for example `00.00 start.data`.
 
 - Each time you run the experiment, a new **block** is started, so nothing from a previous run is overwritten. The first run in a folder writes `00.00 start.data`, the next run `01.00 start.data`, and so on.
-- Within a block, starting a new file increments the **step**: `00.01 gaussian.data`, `00.02 uniform.data`. You can start a new file from the **Scribe** menu, or from a task. [Measurements and data files](measurements.md) covers this in more detail.
+- Within a block, starting a new file increments the **step**: `00.01 gaussian.data`, `00.02 uniform.data`. You can start a new file from the **Data file** button in the top bar, or from a task. [Measurements and data files](measurements.md) covers this in more detail.
 
 The log is written to `debug.log` (see [`log_path` and `log_file_name`](setting_up.md#experiment-options)).
 
 ## Stopping
 
-Close the window. This shuts down the whole experiment cleanly, including `teardown()`.
+Close the window, or press the power button at the right of the top bar. Either asks first, and then shuts down the whole experiment cleanly, including `teardown()`. (Closing a browser tab that shows the page does not stop the experiment: only the window's own close button does.)
 
-## Running without the interface
+## Running without a window
 
-Set `gui = False` to run headless, for example on a computer with no display. Data is still recorded and tasks still run.
+Set `gui = False` to run without a window, for example on a computer with no display. Data is still recorded, tasks still run, and the interface can still be opened in a browser at the API server's address.
 
 ```python
 class MyExperiment(Experiment):
@@ -95,10 +118,22 @@ class MyExperiment(Experiment):
 
 ## The API
 
-While the experiment is running it serves a local HTTP API, and the interface is simply a client of it. Everything you can do from the menus you can also do with a plain web request, from a browser, a notebook or another script.
+While the experiment is running it serves a local HTTP API, and the interface is simply a client of it. Everything you can do from the interface you can also do with a plain web request, from a browser, a notebook or another script.
 
 Open [http://localhost:8000/docs](http://localhost:8000/docs) in your browser (adjust the port if you changed `api_server_port`) for an interactive page listing every endpoint, where you can try them out. For example, with the experiment above running, [http://localhost:8000/clock/time](http://localhost:8000/clock/time) returns the clock reading.
 
 ## An alternative way to start
 
 `pyacquisition --py my_experiment.py` finds the first `Experiment` class in the file, creates it and runs it, so the file needs no `if __name__ == "__main__":` block. It only works for experiments in a single, self-contained file: modules that sit next to your script are not importable this way. Otherwise use `python my_experiment.py`.
+
+## A standalone application
+
+`pyacquisition build` freezes an experiment into an application that runs on a PC with no Python installed, such as the lab PC. It needs PyInstaller, which is not installed with `pyacquisition`: add it with `uv add pyacquisition[build]`.
+
+```
+uv run pyacquisition build --py my_experiment.py
+```
+
+This makes `dist/my_experiment.exe`, a single file to copy to the other PC. `--toml rig.toml` builds from a TOML file instead, and puts `config.toml` beside the executable, where you can edit it without building again. `--onedir` builds a folder instead of one file, which starts faster, `--console` keeps a console window open to show errors, `--name` names it, and `--icon` gives it an `.ico` icon.
+
+The window needs the **Microsoft Edge WebView2 Runtime** on the PC it runs on. Windows 11 has it, and so does Windows 10 with a current Edge. On a PC without it, the window says so, with where to download it, and the experiment runs regardless: open its address in a browser meanwhile.

@@ -1,4 +1,4 @@
-"""What the new GUI's top bar needs from the scribe and the rack (milestone 8)."""
+"""What the GUI's top bar needs from the scribe and the rack (milestone 8)."""
 
 import pytest
 from fastapi.testclient import TestClient
@@ -111,3 +111,51 @@ def test_a_relative_data_folder_is_given_in_full(monkeypatch, tmp_path):
 
     assert scribe.current_directory() == str(tmp_path / "my_data")
     assert scribe.state()["directory"] == str(tmp_path / "my_data")
+
+
+# -------------------------------------------------------------- the loop time
+async def run_rack(rack, seconds):
+    import asyncio
+
+    task = asyncio.create_task(rack.run())
+    await asyncio.sleep(seconds)
+    task.cancel()
+
+
+@pytest.mark.asyncio
+async def test_the_loop_time_is_the_period_while_measuring_keeps_up():
+    # Periods well above Windows' timer resolution (15.6 ms), which a shorter
+    # sleep is rounded up to.
+    rack = Rack(period=0.1)
+    assert rack.loop_time is None  # nothing has run
+
+    await run_rack(rack, 0.65)
+
+    assert rack.loop_time == pytest.approx(0.1, abs=0.02)
+    assert serve(rack).get("/rack/state").json()["loop_time"] == rack.loop_time
+
+
+@pytest.mark.asyncio
+async def test_the_loop_time_is_longer_when_measuring_is_slower_than_the_period():
+    import time
+
+    from pyacquisition.core.measurement import Measurement
+
+    rack = Rack(period=0.05)
+    rack.measurements["slow"] = Measurement("slow", lambda: time.sleep(0.15) or 1.0)
+
+    await run_rack(rack, 1.0)
+
+    assert rack.loop_time == pytest.approx(0.15, abs=0.03)
+
+
+@pytest.mark.asyncio
+async def test_pausing_starts_the_loop_time_again():
+    rack = Rack(period=0.05)
+    await run_rack(rack, 0.2)
+    assert rack.loop_time is not None
+
+    rack.pause()
+
+    assert rack.loop_time is None
+    assert serve(rack).get("/rack/state").json()["loop_time"] is None

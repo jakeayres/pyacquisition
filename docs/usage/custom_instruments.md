@@ -86,7 +86,7 @@ if __name__ == "__main__":
     MyExperiment().run()
 ```
 
-Run it. **Instruments → rng** now includes **Use Gaussian**, **Use Uniform**, **Get Distribution** and **Random Number**, and the **Live Data** window shows `random` changing on every cycle. Choose **Use Uniform**, enter a `low` of `10` and a `high` of `20`, and press **Send Request**. From then on `random` stays between 10 and 20.
+Run it. In the **Instruments** tab, **rng** now lists **use_gaussian**, **use_uniform**, **get_distribution** and **random_number**, and the **Values** tab shows `random` changing on every cycle. Pick **use_uniform**, enter a `low` of `10` and a `high` of `20`, and press **Send**. From then on `random` stays between 10 and 20.
 
 ## A hardware instrument
 
