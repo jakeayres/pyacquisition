@@ -126,7 +126,11 @@ function TopBar({ setup, dirty, status, canSave, canRun, onSave, onRun, theme, o
         <button
           class="button button-small button-primary"
           disabled=${!canRun}
-          title=${canRun ? "Start the experiment from the file" : "Save the file, with no problems, to run it"}
+          title=${canRun
+            ? dirty
+              ? "Save the file, and start the experiment from it"
+              : "Start the experiment from the file"
+            : "It can run once it has no problems"}
           onClick=${onRun}
         >
           <${PlayIcon} /> Run
@@ -167,7 +171,8 @@ export function App() {
   const problems = checked?.problems ?? [];
   const clean = checked !== null && !stale && problems.length === 0;
   const canSave = !busy && dirty && clean;
-  const canRun = !busy && !dirty && setup?.exists && clean;
+  // Run saves first, if there is anything to save.
+  const canRun = !busy && clean && (dirty || setup?.exists);
 
   // The window's close button (see gui/window.py) asks first if there are
   // unsaved changes. So does closing a browser tab.
@@ -196,8 +201,8 @@ export function App() {
     else setClosed(true); // a browser tab, which only its user can close
   };
 
-  const save = async () => {
-    setBusy(true);
+  // Saves the config. Returns whether it was saved.
+  const write = async () => {
     setStatus("Saving…");
     try {
       const result = await api.save(config);
@@ -205,18 +210,24 @@ export function App() {
         setSaved(JSON.stringify(config));
         setSetup((s) => ({ ...s, exists: true }));
         setStatus("");
-      } else {
-        setStatus("Not saved: it has problems.");
+        return true;
       }
+      setStatus("Not saved: it has problems.");
     } catch (e) {
       setStatus(`Not saved: ${e.message}`);
-    } finally {
-      setBusy(false);
     }
+    return false;
+  };
+
+  const save = async () => {
+    setBusy(true);
+    await write();
+    setBusy(false);
   };
 
   const runExperiment = async () => {
     setBusy(true);
+    if (dirty && !(await write())) return setBusy(false);
     setStatus("Starting the experiment…");
     try {
       if (!(await followRun(await api.run()))) {

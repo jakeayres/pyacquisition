@@ -53,14 +53,9 @@ def _add_source_arguments(parser) -> None:
 
 def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="pyacquisition", description="Run or freeze an experiment."
+        prog="pyacquisition", description="Set up, run or freeze an experiment."
     )
-    # `new` is left out of the help until the setup page is finished (see
-    # specs/setup-page.md, in the repository): it has no `help`, so it isn't
-    # listed, and the metavar keeps it out of the usage line.
-    subparsers = parser.add_subparsers(
-        dest="command", required=True, metavar="{run,build}"
-    )
+    subparsers = parser.add_subparsers(dest="command", required=True)
 
     run_parser = subparsers.add_parser("run", help="Run an experiment.")
     _add_source_arguments(run_parser)
@@ -96,7 +91,13 @@ def _build_parser() -> argparse.ArgumentParser:
     )
 
     new_parser = subparsers.add_parser(
-        "new", description="Build or change an experiment's config in a window."
+        "new",
+        help="Build or change an experiment's config in a window.",
+        description=(
+            "Build or change an experiment's TOML config in a window, and run "
+            "it from there. A file that doesn't exist yet is made when it is "
+            "first saved."
+        ),
     )
     new_parser.add_argument("config", type=str, help="Path to the TOML config file.")
     new_parser.add_argument(
@@ -157,11 +158,13 @@ def _new(config: str, port: int | None) -> None:
 
 def main(*args) -> None:
     """
-    The `pyacquisition` command: `run` an experiment, or `build` a standalone
-    application from one.
+    The `pyacquisition` command: `run` an experiment, `build` a standalone
+    application from one, or set one up with `new`.
 
     Args:
         run --toml <path> | --py <path>: Run the experiment the file describes.
+        new <path> [--port]: Build or change a TOML config in a window, and run
+            it from there. See `pyacquisition.core.setup.open_setup`.
         build --toml <path> | --py <path> [--name] [--onedir] [--console] [--icon]:
             Freeze it into a standalone application with PyInstaller: a single
             executable by default. See `pyacquisition.freeze.build_app`.
@@ -170,7 +173,8 @@ def main(*args) -> None:
     subcommand) still works, as `pyacquisition run --toml <path>`.
     """
     argv = list(args) if args else sys.argv[1:]
-    if not argv or argv[0] not in ("run", "build", "new"):
+    # `--help` alone lists the subcommands; anything else unknown is `run`'s.
+    if not argv or argv[0] not in ("run", "build", "new", "-h", "--help"):
         argv = ["run", *argv]
 
     parsed = _build_parser().parse_args(argv)

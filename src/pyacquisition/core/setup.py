@@ -412,27 +412,31 @@ def _driver_route(function):
     return route
 
 
-def _run_experiment(path: Path, port: int, gui: Gui, window) -> str | None:
+def _run_experiment(path: Path, port: int, gui: Gui | None, window) -> str | None:
     """Builds the experiment from the file and runs it in the window, until it
-    stops.
+    stops. With no window (`gui` None), it runs with none of its own either.
 
     Returns:
         str | None: Why it stopped before it started, or None if it started.
     """
     from .experiment import Experiment
 
+    overrides = {"api_server_port": port}
+    if gui is None:
+        overrides["gui"] = False
     try:
-        experiment = Experiment.from_config(str(path), api_server_port=port)
+        experiment = Experiment.from_config(str(path), **overrides)
     except Exception as e:  # noqa: BLE001 - any failure is shown on the page
         return str(e)
-    experiment._adopt_gui(gui, window)
+    if gui is not None:
+        experiment._adopt_gui(gui, window)
     experiment.run()
     if experiment._started or isinstance(experiment._error, KeyboardInterrupt):
         return None
     return str(experiment._error or "The experiment stopped before it started.")
 
 
-def open_setup(path: str | Path, port: int | None = None) -> None:
+def open_setup(path: str | Path, port: int | None = None, window: bool = True) -> None:
     """Shows the setup page for a config file in a window, until it closes, and
     runs the experiment in the same window when the page's Run button is
     pressed. `pyacquisition new CONFIG` calls it.
@@ -441,34 +445,40 @@ def open_setup(path: str | Path, port: int | None = None) -> None:
         path: The config file.
         port (int | None): The port for the setup server, and for the
             experiment Run starts. By default, the one the file gives, or 8000.
+        window (bool): Whether to show it in a window. Without one (for the
+            browser tests), it runs until `/setup/shutdown`, or until the
+            experiment that Run starts stops, which has no window either.
     """
     logger.configure(console_level="INFO", file_level=None, gui_level="NONE")
     path = Path(path)
-    gui = Gui(page=SETUP_PAGE)
-    window = None
+    gui = Gui(page=SETUP_PAGE) if window else None
+    process = None
     error = None
     try:
         while True:
             server = SetupServer(path, port=port, gui=gui, error=error)
             port = server.bind()  # the same port each time round, once had
-            gui.host, gui.port = server.host, port
-            if window is None:
-                window = gui.run_in_new_process()
-                window.start()
-            else:
-                gui.end_handover()  # back from an experiment that didn't start
-            logger.info(f"[Setup] The setup page is at {gui.server}{SETUP_PAGE}")
-            if not server.run(window):
+            if gui is not None:
+                gui.host, gui.port = server.host, port
+                if process is None:
+                    process = gui.run_in_new_process()
+                    process.start()
+                else:
+                    gui.end_handover()  # back from an experiment that didn't start
+            logger.info(
+                f"[Setup] The setup page is at http://localhost:{port}{SETUP_PAGE}"
+            )
+            if not server.run(process):
                 return  # the window closed
-            error = _run_experiment(path, port, gui, window)
+            error = _run_experiment(path, port, gui, process)
             if error is None:
                 return  # it ran, and has stopped, and its window with it
             logger.error(f"[Setup] The experiment didn't start: {error}")
     except KeyboardInterrupt:
         logger.info("[Setup] Interrupted by user")
     finally:
-        if window is not None:
+        if process is not None:
             gui.close()
-            window.join(timeout=5)
-            if window.is_alive():
-                window.terminate()
+            process.join(timeout=5)
+            if process.is_alive():
+                process.terminate()

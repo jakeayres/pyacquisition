@@ -225,13 +225,20 @@ def test_new_needs_a_toml_file(no_setup, tmp_path):
     assert no_setup == []
 
 
-def test_new_is_not_in_the_help_until_it_is_finished(capsys):
-    from pyacquisition import _build_parser
-
-    assert "new" not in _build_parser().format_help()
+def test_the_help_lists_every_subcommand(capsys):
     with pytest.raises(SystemExit):
         main("--help")
-    assert "new" not in capsys.readouterr().out
+
+    out = capsys.readouterr().out
+    assert "run" in out and "build" in out and "new" in out
+
+
+def test_new_is_in_the_help():
+    from pyacquisition import _build_parser
+
+    assert "Build or change an experiment's config in a window." in (
+        _build_parser().format_help()
+    )
 
 
 # ------------------------------------------------------------ freeze_support
