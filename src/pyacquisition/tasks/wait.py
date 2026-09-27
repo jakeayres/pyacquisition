@@ -4,6 +4,19 @@ from dataclasses import dataclass
 
 # How often the time left is reported, in seconds.
 REPORT_EVERY = 300
+# How often the progress is updated for the interface, in seconds.
+TICK = 1.0
+
+
+async def _pass(task, seconds, tick):
+    """Sleeps for `seconds` of the task's running time, a `TICK` at a time,
+    calling `tick(step)` after each one, so the progress can follow."""
+    left = seconds
+    while left > 0:
+        step = min(TICK, left)
+        await task.sleep(step)
+        left -= step
+        tick(step)
 
 
 @dataclass
@@ -32,13 +45,21 @@ class WaitFor(Task):
         return f"Wait for {self.hours} hours, {self.minutes} minutes, and {self.seconds} seconds."
 
     async def run(self, experiment):
-        remaining = self.hours * 3600 + self.minutes * 60 + self.seconds
+        total = remaining = self.hours * 3600 + self.minutes * 60 + self.seconds
         self.log(f"Waiting for {remaining} seconds")
+        waited = 0.0
 
+        def tick(step):
+            nonlocal waited
+            waited += step
+            self.set_progress(waited / total, remaining=total - waited)
+
+        if total > 0:
+            self.set_progress(0, remaining=total)
         while remaining > 0:
             # wait until the next multiple of five minutes is left, and report it
             step = min(remaining, remaining % REPORT_EVERY or REPORT_EVERY)
-            await self.sleep(step)
+            await _pass(self, step, tick)
             remaining -= step
             if remaining > 0:
                 self.log(f"{datetime.timedelta(seconds=int(remaining))} remaining")
@@ -70,12 +91,19 @@ class WaitUntil(Task):
             target_time += datetime.timedelta(days=1)
 
         self.log(f"Waiting until {target_time.strftime('%H:%M')}")
+        total = (target_time - datetime.datetime.now()).total_seconds()
 
+        def tick(step=0):
+            # By the clock, which runs on while the task is paused.
+            left = max(0.0, (target_time - datetime.datetime.now()).total_seconds())
+            self.set_progress(1 - left / total, remaining=left)
+
+        tick()
         while True:
             remaining = (target_time - datetime.datetime.now()).total_seconds()
             if remaining <= 0:
                 break
-            await self.sleep(min(remaining, REPORT_EVERY))
+            await _pass(self, min(remaining, REPORT_EVERY), tick)
             remaining = (target_time - datetime.datetime.now()).total_seconds()
             if remaining > 0:
                 self.log(f"{datetime.timedelta(seconds=int(remaining))} remaining")

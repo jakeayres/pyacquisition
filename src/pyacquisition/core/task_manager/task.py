@@ -1,5 +1,6 @@
 import asyncio
 import inspect
+import time
 import traceback
 import uuid
 import weakref
@@ -117,6 +118,12 @@ class Task:
         self._failure: BaseException | None = None
         self._hook_failure: BaseException | None = None
         self._pause_hook_ran: bool = False
+        # How long it has been running, and how far along it is (see `progress`).
+        self._started_at: float | None = None  # wall clock, when it started
+        self._clock_start: float | None = None  # monotonic, when it started
+        self._paused_for: float = 0.0  # seconds spent paused so far
+        self._paused_since: float | None = None
+        self._progress: dict | None = None
         self._pause_event.set()  # Set to allow task to run immediately
         self._abort_event.clear()  # Clear to allow task to run immediately
 
@@ -265,6 +272,79 @@ class Task:
             await self.sleep(step)
             waited += step
 
+    def set_progress(
+        self,
+        done: float,
+        of: float | None = None,
+        *,
+        remaining: float | None = None,
+        note: str | None = None,
+    ) -> None:
+        """
+        Says how far along the task is, for the interface to show. Call it as the
+        task goes.
+
+        Args:
+            done (float): A fraction from 0 to 1, or with `of`, the steps done.
+            of (float | None): How many steps there are, so the interface shows
+                "3 of 10".
+            remaining (float | None): Seconds left, where the task knows (a wait
+                does). Otherwise the interface estimates it from the time so far.
+            note (str | None): What it is doing now, such as "Sweeping to 2 T".
+
+        Example:
+            for i, kelvin in enumerate(points):
+                self.set_progress(i, of=len(points), note=f"Going to {kelvin} K")
+                ...
+        """
+        fraction = done / of if of else done
+        self._progress = {
+            "fraction": min(1.0, max(0.0, float(fraction))),
+            "step": done if of else None,
+            "steps": of,
+            "remaining": remaining,
+            "note": note,
+            "at": self.elapsed,  # the running time when this was said
+        }
+
+    @property
+    def elapsed(self) -> float | None:
+        """Seconds the task has been running, not counting time spent paused, or
+        None if it hasn't started."""
+        if self._clock_start is None:
+            return None
+        now = time.monotonic()
+        paused = self._paused_for
+        if self._paused_since is not None:
+            paused += now - self._paused_since
+        return max(0.0, now - self._clock_start - paused)
+
+    @property
+    def progress(self) -> dict | None:
+        """How far along the task is, as the interface shows it: `fraction` (0 to
+        1), `step` and `steps` if it counts steps, `remaining` seconds if it said
+        (counted down since), and `note`. None if it hasn't said."""
+        if self._progress is None:
+            return None
+        shown = {k: v for k, v in self._progress.items() if k != "at"}
+        if shown["remaining"] is not None and self._progress["at"] is not None:
+            since = (self.elapsed or 0.0) - self._progress["at"]
+            shown["remaining"] = max(0.0, shown["remaining"] - since)
+        return shown
+
+    def timing(self) -> dict:
+        """When the task started, how long it has run, how far along it is, and
+        the same for the subtasks it is running now, for the interface."""
+        return {
+            "started_at": self._started_at,
+            "elapsed": self.elapsed,
+            "progress": self.progress,
+            "subtasks": [
+                {"name": subtask.name, "progress": subtask.progress}
+                for subtask in self._active_subtasks
+            ],
+        }
+
     def expect(self, actual, wanted, what: str = "Value", tolerance=None):
         """
         Checks a value, such as an instrument's status or the read-back of a
@@ -374,6 +454,12 @@ class Task:
         ended. An error in `setup()` or `run()`, or an abort, is raised after the
         teardown.
         """
+        # The clock starts, and any progress from an earlier run is forgotten.
+        self._started_at = time.time()
+        self._clock_start = time.monotonic()
+        self._paused_for = 0.0
+        self._paused_since = time.monotonic() if self.paused else None
+        self._progress = None
         try:
             self._phase = "setup"
             await self.setup(experiment=experiment)
@@ -711,6 +797,7 @@ class Task:
         self._pause_event.clear()
         self._paused_event.set()
         self._is_paused = True
+        self._paused_since = time.monotonic()
         for subtask in list(self._active_subtasks):
             subtask.pause()
         if self._phase == "run":
@@ -736,8 +823,15 @@ class Task:
         if self._abort_event.is_set():  # a subtask's hook failed, which aborted us
             return
         self._is_paused = False
+        self._stop_pause_clock()
         self._paused_event.clear()
         self._pause_event.set()
+
+    def _stop_pause_clock(self) -> None:
+        """Adds the time since it was paused to the time spent paused."""
+        if self._paused_since is not None:
+            self._paused_for += time.monotonic() - self._paused_since
+            self._paused_since = None
 
     def abort(self):
         """
@@ -752,6 +846,7 @@ class Task:
         self._pause_event.set()  # Ensure it doesn't stay paused
         self._paused_event.clear()
         self._is_paused = False
+        self._stop_pause_clock()
         for subtask in list(self._active_subtasks):
             subtask.abort()
         _cancel(self._runner)

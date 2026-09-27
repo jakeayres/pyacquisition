@@ -20,6 +20,38 @@ from ..instruments.oxford_instruments.mercury_ips import (
     SystemStatusM,
 )
 from .files import NewFile
+from .ramps import ramp_progress
+
+
+def _read(psu, getter: str):
+    """A reading for the progress, or None if it can't be had. The progress is
+    only shown, so a failed reading must not stop the sweep."""
+    try:
+        return getattr(psu, getter)()
+    except Exception:  # noqa: BLE001
+        return None
+
+
+class _Sweep:
+    """Follows a sweep from where it started to where it is going, for the
+    task's progress, at the rate the magnet was set to when it started."""
+
+    def __init__(self, task, psu, target):
+        self.task = task
+        self.psu = psu
+        self.target = target
+        self.start = _read(psu, "get_output_field")
+        rate = _read(psu, "get_field_sweep_rate")  # tesla a minute
+        self.per_second = rate / 60 if isinstance(rate, (int, float)) else 0.0
+
+    def show(self):
+        now = _read(self.psu, "get_output_field")
+        if not isinstance(now, (int, float)) or not isinstance(self.start, (int, float)):
+            return
+        fraction, remaining = ramp_progress(
+            self.start, now, self.target, per_second=self.per_second
+        )
+        self.task.set_progress(fraction, remaining=remaining, note=f"{now:g} T")
 
 
 @dataclass
@@ -45,7 +77,13 @@ class RampMagnet(Task):
         self.expect(psu.get_activity_status(), ActivityStatus.TO_SETPOINT, "Activity")
 
         self.log(f"Sweeping field to {self.setpoint} T")
-        await self.wait_until(lambda: psu.get_sweep_status() == ModeStatusN.REST)
+        sweep = _Sweep(self, psu, self.setpoint)
+
+        def arrived():
+            sweep.show()
+            return psu.get_sweep_status() == ModeStatusN.REST
+
+        await self.wait_until(arrived)
         self.log(f"Reached setpoint field of {self.setpoint} T")
 
     def on_pause(self, experiment):
@@ -79,7 +117,13 @@ class RampMagnetToZero(Task):
         self.expect(psu.get_activity_status(), ActivityStatus.TO_ZERO, "Activity")
 
         self.log("Sweeping field to 0 T")
-        await self.wait_until(lambda: psu.get_sweep_status() == ModeStatusN.REST)
+        sweep = _Sweep(self, psu, 0.0)
+
+        def arrived():
+            sweep.show()
+            return psu.get_sweep_status() == ModeStatusN.REST
+
+        await self.wait_until(arrived)
         self.log("Reached zero field")
 
     def on_pause(self, experiment):
@@ -92,6 +136,11 @@ class RampMagnetToZero(Task):
 
     async def teardown(self, experiment):
         experiment.instruments[self.magnet_psu].hold()
+
+
+# The stages of SweepMagneticField, for its progress: check the magnet, switch
+# the heater on, sweep up, sweep back down, and switch the heater off.
+STAGES = 5
 
 
 @dataclass
@@ -126,12 +175,14 @@ class SweepMagneticField(Task):
         psu = experiment.instruments[self.magnet_psu]
 
         # Set the magnet to 'HOLD' (in case it is clamped), and check it is fit to move
+        self.set_progress(0, of=STAGES, note="Checking the magnet")
         self.log('Setting magnet to "hold"')
         psu.hold()
         await self.sleep(1)
         self.expect(psu.get_system_status(), SystemStatusM.NORMAL, "System status")
         self.expect(psu.get_activity_status(), ActivityStatus.HOLD, "Activity")
 
+        self.set_progress(1, of=STAGES, note="Switching the switch heater on")
         self.log("Switching switch heater on")
         psu.heater_on()
         await self.sleep(15)
@@ -143,12 +194,15 @@ class SweepMagneticField(Task):
         await self.sleep(1)
         self.expect(psu.get_field_sweep_rate(), self.ramp_rate, "Ramp rate")
 
+        self.set_progress(2, of=STAGES, note=f"Sweeping to {self.setpoint:g} T")
         await self.run_subtask(NewFile(file_name=f"Field Sweep to {self.setpoint}T"))
         await self.run_subtask(RampMagnet(self.magnet_psu, self.setpoint))
 
+        self.set_progress(3, of=STAGES, note="Sweeping to 0 T")
         await self.run_subtask(NewFile(file_name="Field Sweep to 0T"))
         await self.run_subtask(RampMagnetToZero(self.magnet_psu))
 
+        self.set_progress(4, of=STAGES, note="Switching the switch heater off")
         self.log("Switching switch heater off")
         psu.heater_off()
         await self.sleep(15)
@@ -157,6 +211,7 @@ class SweepMagneticField(Task):
             SwitchHeaterStatus.OFF_AT_ZERO,
             "Switch heater",
         )
+        self.set_progress(STAGES, of=STAGES)
 
     async def teardown(self, experiment):
         psu = experiment.instruments[self.magnet_psu]

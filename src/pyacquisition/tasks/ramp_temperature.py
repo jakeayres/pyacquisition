@@ -5,6 +5,7 @@ from ..instruments.lakeshore.lakeshore_350 import OutputChannel as OC350
 from ..instruments.lakeshore.lakeshore_350 import State
 from ..core import Task
 from ..core.instrument import resolve_enum_kwargs
+from .ramps import ramp_progress
 from dataclasses import dataclass
 from enum import Enum
 
@@ -47,6 +48,8 @@ class RampTemperature(Task):
             {"output_channel": channel.name if isinstance(channel, Enum) else channel},
         )["output_channel"]
         tolerance = 0.003
+        # Where the setpoint ramps from, for the progress.
+        start = lakeshore.get_setpoint(channel)
 
         await self.sleep(1)
 
@@ -58,8 +61,15 @@ class RampTemperature(Task):
         self.log(f"Setpoint set: {self.setpoint}")
         await self.sleep(1)
 
-        await self.wait_until(
-            lambda: abs(lakeshore.get_setpoint(channel) - self.setpoint) <= tolerance,
-            what="the setpoint to finish ramping",
-        )
+        def arrived() -> bool:
+            # The controller ramps its setpoint, so how far that has gone is how
+            # far along the ramp is, and the rest at the ramp rate is the time left.
+            now = lakeshore.get_setpoint(channel)
+            fraction, remaining = ramp_progress(
+                start, now, self.setpoint, per_second=self.ramp_rate / 60
+            )
+            self.set_progress(fraction, remaining=remaining, note=f"Setpoint {now:g} K")
+            return abs(now - self.setpoint) <= tolerance
+
+        await self.wait_until(arrived, what="the setpoint to finish ramping")
         self.log("Temperature ramp finished")

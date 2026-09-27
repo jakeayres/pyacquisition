@@ -82,6 +82,26 @@ def parameters(self):
 
 The window is refreshed about once a second, and `parameters` is read each time, so it can return values that change while the task runs, such as the latest reading.
 
+### Showing progress
+
+A task can say how far along it is with `self.set_progress(...)`, as it goes. The new interface (`gui = "new"`) shows it on the running task as a bar, with how long the task has run and how long is left, and in its top bar.
+
+```python
+async def run(self, experiment):
+    for i, kelvin in enumerate(self.points):
+        self.set_progress(i, of=len(self.points), note=f"Going to {kelvin} K")
+        await self.run_subtask(SetTemperature(kelvin))
+    self.set_progress(len(self.points), of=len(self.points))
+```
+
+- `set_progress(0.4)` is a fraction from 0 to 1, and `set_progress(3, of=10)` counts steps, shown as "3 of 10".
+- `note=` says what it is doing now.
+- `remaining=` gives the seconds left, where the task knows them (a wait does). Otherwise the interface estimates them from the time taken so far.
+- The time a task spends paused does not count towards how long it has run.
+- A subtask's progress is shown under the task running it.
+
+The included waits, `RampTemperature` and the magnet sweeps already report their progress.
+
 ## How `run()` works
 
 `run()` is an `async def` method. You do not need to understand asynchronous programming to write one, but a few rules matter.
@@ -96,6 +116,7 @@ The window is refreshed about once a second, and `parameters` is read each time,
 | `await self.run_subtask(...)` | Runs another task. See [composing tasks](composing_tasks.md). |
 | `self.log("...")` | Writes a message to the log, labelled with the task's name. It is not a wait, so it needs no `await`. |
 | `self.expect(actual, wanted, "What")` | Checks a value, and raises an error if it is not the one you wanted. See [checking what you set](#checking-what-you-set). |
+| `self.set_progress(done, of=None)` | Says how far along the task is, for the interface to show. It is not a wait. See [showing progress](#showing-progress). |
 
 These work wherever you call them, however deep in your own helper methods, so you can split a long task into `async def` methods of its own and `await` them.
 
@@ -242,7 +263,7 @@ In a TOML file, it is `auto_tasks = false` under `[experiment]`. See the [list o
 
 ## Things to watch for
 
-- **Do not name an input after something a task already has.** Names such as `start`, `name`, `description`, `parameters`, `run`, `setup`, `teardown`, `pause`, `resume`, `abort`, `on_pause`, `on_resume`, `log`, `sleep`, `wait_until`, `checkpoint`, `expect`, `outcome`, `failure`, `paused` and `applies_to` are taken, and so is `label`, which `register_task` uses. An input called `start`, for example, fails with a confusing error about *"non-default argument follows default argument"*. Choose something more specific, such as `start_value`.
+- **Do not name an input after something a task already has.** Names such as `start`, `name`, `description`, `parameters`, `run`, `setup`, `teardown`, `pause`, `resume`, `abort`, `on_pause`, `on_resume`, `log`, `sleep`, `wait_until`, `checkpoint`, `expect`, `set_progress`, `progress`, `elapsed`, `timing`, `outcome`, `failure`, `paused` and `applies_to` are taken, and so is `label`, which `register_task` uses. An input called `start`, for example, fails with a confusing error about *"non-default argument follows default argument"*. Choose something more specific, such as `start_value`.
 - **Defaults apply in code, not in the form.** When you create a task yourself (for example [as part of another task](composing_tasks.md)), its defaults are used. The interface's form and the API currently ask for every input.
 - **Wait with `self.sleep()`, not `asyncio.sleep()`.** A task that waits with `asyncio.sleep()` can still be aborted, but it cannot be paused until its wait is over, and the time keeps passing while it is paused.
 - **Catch `Exception`, never everything.** Aborting a task raises `asyncio.CancelledError` inside it. `except Exception` does not catch that, as it should not, but a bare `except:` does, and it stops you being able to abort.

@@ -210,13 +210,36 @@ class TaskManager:
                 "parameters": None,
             }
 
+    def _timing(self, task: Task) -> dict:
+        """
+        When the running task started, how long it has run (not counting pauses),
+        and how far along it is (see `Task.set_progress`), with its running
+        subtasks' progress. A task that can't say is shown without it.
+        """
+        def safe(progress):
+            if progress is None:
+                return None
+            return {key: _json_safe(value) for key, value in progress.items()}
+
+        try:
+            timing = task.timing()
+            timing["progress"] = safe(timing["progress"])
+            for subtask in timing["subtasks"]:
+                subtask["name"] = _json_safe(subtask["name"])
+                subtask["progress"] = safe(subtask["progress"])
+            return timing
+        except Exception as e:  # noqa: BLE001 - the rest of the state still shows
+            logger.debug(f"{self._tag} Cannot show how far along {task.name} is: {e}")
+            return {"started_at": None, "elapsed": None, "progress": None, "subtasks": []}
+
     def state(self) -> dict:
         """
         A snapshot of this task manager for the interface: whether it is running or
         paused, the task that is running, and the tasks waiting in the queue. The
         running task and each queued task are given as a name, a description and the
         parameters to show, with the id that picks the task out (see
-        `remove_queued_task`).
+        `remove_queued_task`). The running task also has `started_at`, `elapsed`,
+        `progress` and `subtasks` (see `Task.timing`).
 
         `aborting` is true from the moment the running task is told to stop until it
         has finished, which is at its next step.
@@ -224,7 +247,7 @@ class TaskManager:
         task = self._current_task
         return {
             "status": "Running" if self._pause_event.is_set() else "Paused",
-            "current_task": self._display(task) if task else None,
+            "current_task": {**self._display(task), **self._timing(task)} if task else None,
             "aborting": bool(task and task._abort_event.is_set()),
             "last_result": self._last_result,
             "queue": [self._display(queued) for queued in self._task_queue._queue],

@@ -293,7 +293,13 @@ async def test_the_state_shows_the_running_task_and_the_queue_behind_it():
             "name": "Ticker",
             "description": "Takes a step every 50 ms, and records its lifecycle in a shared log.",
             "parameters": {"label": "first", "count": LONG, "log": ANY},
+            # How long it has run, and how far along it is (it doesn't say).
+            "started_at": ANY,
+            "elapsed": ANY,
+            "progress": None,
+            "subtasks": [],
         }
+        assert state["current_task"]["elapsed"] > 0
         assert [task["name"] for task in state["queue"]] == ["Ticker"], (
             "The running task is not in the queue."
         )
