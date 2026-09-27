@@ -7,6 +7,7 @@ import { LogStore } from "./logs.js";
 import { dataFeed, logFeed } from "./feed.js";
 import { ValuesTab } from "./dock/values.js";
 import { LogsTab } from "./dock/logs.js";
+import { InstrumentsTab } from "./dock/instruments.js";
 import { QueueTab, useManagers } from "./dock/queue.js";
 import { RunningSummary } from "./progress.js";
 import { useConnection } from "./connection.js";
@@ -30,9 +31,8 @@ const CONNECTION_LABELS = {
   disconnected: "Disconnected",
 };
 
-// The dock's tabs. Each milestone replaces one placeholder with the real thing.
-// A tab that `fill`s its panel scrolls itself, with no padding around it.
-const placeholder = (text) => html`<p class="placeholder">${text}</p>`;
+// The dock's tabs. A tab that `fill`s its panel scrolls itself, with no
+// padding around it.
 const dockTabs = ({ store, logs, columns, managers }) => [
   {
     id: "values",
@@ -47,7 +47,8 @@ const dockTabs = ({ store, logs, columns, managers }) => [
   {
     id: "instruments",
     label: "Instruments",
-    content: placeholder("Instrument queries and commands arrive in milestone 14."),
+    fill: true,
+    content: html`<${InstrumentsTab} />`,
   },
   {
     id: "logs",

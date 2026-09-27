@@ -1724,6 +1724,209 @@ body.dragging-task * {
   color: var(--text);
 }
 
+/* ---------------------------------------------------------- instruments tab */
+
+.instruments-tab {
+  display: grid;
+  /* Their least widths fit the window's smallest (900 px). */
+  grid-template-columns: 180px 220px minmax(220px, 1fr) minmax(220px, 1fr);
+  height: 100%;
+}
+
+.instruments-tab > * {
+  min-height: 0;
+  overflow: auto;
+}
+
+.instrument-list {
+  margin: 0;
+  padding: var(--space-2);
+  border-right: var(--border-width) solid var(--border);
+  list-style: none;
+}
+
+.instrument-item,
+.method-item {
+  display: flex;
+  width: 100%;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.instrument-item {
+  flex-direction: column;
+  padding: 6px var(--space-2);
+}
+
+.instrument-item:hover,
+.method-item:hover {
+  background: var(--surface-hover);
+}
+
+.instrument-item[aria-pressed="true"],
+.method-item[aria-pressed="true"] {
+  background: var(--accent-soft);
+  box-shadow: inset 2px 0 var(--accent);
+}
+
+.instrument-uid {
+  font-family: var(--font-mono);
+  font-weight: var(--weight-medium);
+}
+
+.instrument-kind {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.method-pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border-right: var(--border-width) solid var(--border);
+}
+
+.logs-search.method-search {
+  flex: none;
+}
+
+.method-list {
+  flex: 1;
+  overflow: auto;
+}
+
+.method-group + .method-group {
+  margin-top: var(--space-2);
+}
+
+.method-group ul {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.method-item {
+  padding: 3px var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.call-pane {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+}
+
+.call-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.call-title {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+}
+
+.call-kind {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-strong);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.call-kind[data-group="command"] {
+  color: var(--warn);
+}
+
+.call-pane .endpoint-form {
+  gap: var(--space-2);
+}
+
+.call-pane .form-buttons .button {
+  height: 28px;
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+/* The recent results, in the fourth column. */
+.results-pane {
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
+  border-left: var(--border-width) solid var(--border);
+}
+
+.instrument-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.instrument-results-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.result-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.result {
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  background: var(--bg);
+  font-size: var(--text-sm);
+}
+
+.result-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.result-call {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-family: var(--font-mono);
+}
+
+.result-args {
+  color: var(--text-muted);
+}
+
+.result-time {
+  flex: none;
+  margin-left: auto;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.result-value {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.result:first-child .result-value {
+  font-weight: var(--weight-strong);
+}
+
+.result.failed .result-value {
+  color: var(--bad);
+}
+
 /* ---------------------------------------------------------------- sequences */
 
 .dialog.sequence-dialog {

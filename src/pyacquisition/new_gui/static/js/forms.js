@@ -30,8 +30,14 @@ function resolve(schema, root) {
 
 // One field: {name, title, type, required, default, description, choices, labels}.
 // `type` is integer, number, boolean, text or choice.
+// A parameter's name as a title: "output_channel" as "Output Channel".
+const titled = (name) => name.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
 export function describeField(parameter, root) {
   let schema = resolve(parameter.schema, root);
+  // A shared schema (an instrument's enum) is titled after its class
+  // ("OutputChannel"), not the input, so the input's own name is used.
+  if (parameter.schema?.$ref) schema = { ...schema, title: titled(parameter.name) };
   if (schema.anyOf) {
     // An optional input is "this or null".
     const kind = schema.anyOf.map((s) => resolve(s, root)).find((s) => s.type !== "null");
