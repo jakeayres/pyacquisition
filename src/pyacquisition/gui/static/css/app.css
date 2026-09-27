@@ -740,36 +740,6 @@ button {
   font-weight: var(--weight-medium);
 }
 
-/* Lines / Points / Both: one control, three buttons. */
-.segmented {
-  display: inline-flex;
-  padding: 2px;
-  border: var(--border-width) solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-}
-
-.segmented button {
-  height: 22px;
-  padding: 0 var(--space-2);
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--text-muted);
-  font-size: var(--text-sm);
-  cursor: pointer;
-}
-
-.segmented button:hover {
-  color: var(--text);
-}
-
-.segmented button[aria-pressed="true"] {
-  background: var(--surface-active);
-  color: var(--text);
-  font-weight: var(--weight-medium);
-}
-
 .axes-control {
   position: relative;
 }
@@ -841,6 +811,33 @@ button {
 .export-item:hover,
 .export-item:focus-visible {
   background: var(--surface-hover);
+}
+
+/* A label over a menu's items. */
+.menu-heading {
+  padding: 4px var(--space-3) 2px;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+/* Lines, points or both: each with a picture of it, the chosen one marked. */
+.marks-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+}
+
+.marks-item[aria-checked="true"] {
+  background: var(--surface-active);
+  color: var(--text);
+  font-weight: var(--weight-medium);
+}
+
+.marks-glyph {
+  width: 28px;
+  height: 12px;
+  overflow: visible;
 }
 
 /* Where an export went, for a few seconds, under the button. */

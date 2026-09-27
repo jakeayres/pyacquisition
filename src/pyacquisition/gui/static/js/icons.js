@@ -70,6 +70,18 @@ export const AxesIcon = () =>
     { width: 1.75 },
   );
 
+// A line through dots: how the data is drawn (lines, points, or both).
+export const MarksIcon = () =>
+  stroke(
+    html`
+      <path d="M3 18l5-8 5 5 7-6" />
+      <circle cx="8" cy="10" r="2" fill="currentColor" />
+      <circle cx="13" cy="15" r="2" fill="currentColor" />
+      <circle cx="20" cy="9" r="2" fill="currentColor" />
+    `,
+    { width: 1.75 },
+  );
+
 export const CopyIcon = () =>
   stroke(html`
     <rect x="9" y="9" width="12" height="12" rx="2" />

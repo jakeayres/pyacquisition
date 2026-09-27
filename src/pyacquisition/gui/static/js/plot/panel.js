@@ -5,7 +5,7 @@
 import { useRef, useState } from "preact/hooks";
 import { html } from "../html.js";
 import { usePopover } from "../hooks.js";
-import { AxesIcon, CopyIcon, CloseIcon, DownloadIcon } from "../icons.js";
+import { AxesIcon, CopyIcon, CloseIcon, DownloadIcon, MarksIcon } from "../icons.js";
 import { plotScript } from "../api.js";
 import { exportName, plotImage, saveFile, scriptSettings, viewCsv } from "./export.js";
 import { ScriptDialog } from "./script-dialog.js";
@@ -120,22 +120,64 @@ export const MARKS = [
   ["both", "Both"],
 ];
 
-// How the data is drawn: lines, points, or both.
-function MarksPicker({ value, onChange }) {
+// A small picture of each way of drawing, beside its name in the menu.
+const MarksGlyph = ({ marks }) => html`
+  <svg class="marks-glyph" viewBox="0 0 28 12" aria-hidden="true">
+    ${marks !== "points" &&
+    html`<path d="M2 9l8-5 8 4 8-6" fill="none" stroke="currentColor" stroke-width="1.5" />`}
+    ${marks !== "lines" &&
+    html`
+      <circle cx="10" cy="4" r="1.8" fill="currentColor" />
+      <circle cx="18" cy="8" r="1.8" fill="currentColor" />
+      <circle cx="26" cy="2.5" r="1.8" fill="currentColor" />
+    `}
+  </svg>
+`;
+
+// How the data is drawn: lines, points, or both. Opens from an icon in the
+// toolbar; choosing one closes it.
+function MarksMenu({ value, onChange }) {
+  const [open, setOpen] = useState(false);
+  const menu = useRef(null);
+  usePopover(menu, open, () => setOpen(false));
+  const changed = value !== "lines"; // from the default
+  const label = MARKS.find(([marks]) => marks === value)?.[1] ?? value;
   return html`
-    <div class="segmented" role="group" aria-label="Draw as">
-      ${MARKS.map(
-        ([marks, label]) => html`
-          <button
-            key=${marks}
-            aria-pressed=${value === marks}
-            title=${`Draw as ${label.toLowerCase()}`}
-            onClick=${() => onChange(marks)}
-          >
-            ${label}
-          </button>
-        `,
-      )}
+    <div class="axes-control" ref=${menu}>
+      <button
+        class="icon-button axes-button"
+        aria-label="Line and point style"
+        aria-pressed=${changed}
+        aria-expanded=${open}
+        title=${`Line and point style: ${label.toLowerCase()}`}
+        onClick=${() => setOpen(!open)}
+      >
+        <${MarksIcon} />
+        ${changed && html`<span class="axes-badge" aria-hidden="true"></span>`}
+      </button>
+      ${open &&
+      html`
+        <div class="axes-menu export-menu" role="menu" aria-label="Line and point style">
+          <span class="menu-heading">Draw as</span>
+          ${MARKS.map(
+            ([marks, name]) => html`
+              <button
+                key=${marks}
+                class="export-item marks-item"
+                role="menuitemradio"
+                aria-checked=${value === marks}
+                onClick=${() => {
+                  onChange(marks);
+                  setOpen(false);
+                }}
+              >
+                <${MarksGlyph} marks=${marks} />
+                ${name}
+              </button>
+            `,
+          )}
+        </div>
+      `}
     </div>
   `;
 }
@@ -464,7 +506,7 @@ export function PlotPanel({
           onChange=${(value) => set({ x: value }, true)}
         />
         <div class="toolbar-end">
-          <${MarksPicker} value=${marks} onChange=${(value) => set({ marks: value })} />
+          <${MarksMenu} value=${marks} onChange=${(value) => set({ marks: value })} />
           <${AxesMenu}
             limits=${limits}
             logX=${logX}
