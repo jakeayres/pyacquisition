@@ -8,6 +8,7 @@ import inspect
 from datetime import datetime
 from enum import Enum
 
+import numpy as np
 from fastapi import HTTPException
 
 from .logging import logger
@@ -22,7 +23,7 @@ from .history import History
 from .log_history import LogHistory
 from .sequences import Sequences
 from .layout import Layout
-from .plot_script import PlotRequest, PlotScriptError, plot_script
+from .plot_script import PlotRequest, PlotScriptError, figure_scales, plot_script
 # The module's names, since `gui` is also an option here.
 from ..gui import Gui
 from ..gui import mount as serve_gui
@@ -1029,7 +1030,12 @@ class Experiment:
             `"both"`; `log_x` and `log_y`; `x_limits` and `y_limits`, each
             `[min, max]` to set that axis, or null to fit the data; and
             `previous`, to draw the previous data file too, fainter, behind the
-            current one.
+            current one; and `style`, `"screen"` (the default) to draw it as the
+            GUI does, or `"aps"` for a figure in the style of an APS journal
+            (PRB, PRL), as **Export → Publication figure (APS style)** saves it:
+            one column wide and square, serif fonts, inward ticks, and each
+            axis scaled by a power of 1000 for tidy numbers, with the SI prefix
+            in its unit (`µV`). The figure's script saves a PDF beside itself.
 
             The script reads the whole of the current data file (and the
             previous one) where it is, when it runs. A column is drawn from a
@@ -1052,6 +1058,21 @@ class Experiment:
                     detail="No data has been written yet, so there is nothing to plot.",
                 )
             previous = files[0]["file"] if len(files) > 1 else None
+            units = {c["name"]: c["unit"] for c in self._column_info()}
+            scales = None
+            if request.style == "aps":
+                # From the values of the file it draws: the current one, or
+                # the one before while the current has no rows. Copied, since
+                # the history keeps adding to its columns.
+                history = self._history
+                held = history.current if history.current.rows else history.previous
+                wanted = {request.x, *(s.name for s in request.series)}
+                values = {
+                    name: np.array(column, dtype=float)
+                    for name, column in (held.columns.items() if held else ())
+                    if name in wanted
+                }
+                scales = figure_scales(request, values, units)
             try:
                 script = plot_script(
                     request,
@@ -1059,12 +1080,13 @@ class Experiment:
                     current_file=current["file"] or self._scribe.current_file(),
                     previous_file=previous,
                     delimiter=self._scribe.delimiter,
-                    units={c["name"]: c["unit"] for c in self._column_info()},
+                    units=units,
                     # A file with no rows yet may have any of the columns.
                     columns={
                         s["file"]: set(s["columns"]) if s["rows"] else None for s in files
                     },
                     now=datetime.now(),
+                    scales=scales,
                 )
             except PlotScriptError as error:
                 raise HTTPException(status_code=422, detail=str(error)) from error

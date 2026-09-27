@@ -18,6 +18,9 @@ from pyacquisition import Experiment, Measurement  # noqa: E402
 from pyacquisition.core.plot_script import (  # noqa: E402
     PlotRequest,
     PlotScriptError,
+    Scale,
+    axis_scale,
+    figure_scales,
     plot_script,
 )
 
@@ -480,3 +483,294 @@ def test_the_endpoint_refuses_while_nothing_is_written(experiment):
 
     assert response.status_code == 409
     assert "nothing to plot" in response.json()["detail"]
+
+
+# ------------------------------------------------------------ the APS figure
+@pytest.mark.parametrize(
+    "largest, unit, scale",
+    [
+        (1.2e-5, "V", Scale(-6, "µV")),
+        (3.4e-8, "A", Scale(-9, "nA")),
+        (5e-12, "A", Scale(-12, "pA")),
+        (2.5e-3, "K", Scale(-3, "mK")),
+        (4.2, "K", Scale(0, "K")),
+        (999.9, "V", Scale(0, "V")),
+        (1.0, "V", Scale(0, "V")),
+        (1000.0, "V", Scale(3, "kV")),
+        (7.5e6, "Hz", Scale(6, "MHz")),
+        (2e9, "Hz", Scale(9, "GHz")),
+        (1e-15, "A", Scale(-12, "pA")),  # no prefix below p
+        (0.5, "Ω", Scale(-3, "mΩ")),
+        (0.5, "Ohm", Scale(-3, "mOhm")),
+        (0.5, "mV", Scale(-3, "10$^{-3}$ mV")),  # already prefixed
+        (0.5, "Ω cm", Scale(-3, "10$^{-3}$ Ω cm")),  # compound
+        (5e3, None, Scale(3, "10$^{3}$")),
+        (5.0, None, Scale(0, None)),
+    ],
+)
+def test_an_axis_is_scaled_by_a_power_of_1000_into_its_unit(largest, unit, scale):
+    assert axis_scale(largest, largest, unit) == scale
+
+
+def test_an_axis_of_zeros_or_offset_values_is_not_scaled():
+    assert axis_scale(0.0, 0.0, "V") == Scale(0, "V")
+    assert axis_scale(1.79e9, 3600.0, "s") == Scale(0, "s")  # Unix time
+    assert axis_scale(float("nan"), 0.0, "V") == Scale(0, "V")
+    assert axis_scale(2e-3, 1e-3, "V") == Scale(-3, "mV")
+
+
+def test_a_dollar_in_a_unit_is_escaped():
+    assert axis_scale(5.0, 1.0, "a$b") == Scale(0, "a\\$b")
+
+
+def test_the_scales_come_from_the_values_or_the_limits():
+    req = request(series=[{"name": "x", "colour": BLUE}], style="aps")
+    values = {"time": [0.0, 10.0, 20.0], "x": [1e-6, float("nan"), -1.2e-5]}
+
+    assert figure_scales(req, values, {"time": "s", "x": "V"}) == {
+        "x": Scale(0, "s"),
+        "y": Scale(-6, "µV"),
+    }
+    held = request(
+        series=[{"name": "x", "colour": BLUE}], x_limits=[1000.0, 5000.0], y_limits=[0.0, 0.2]
+    )
+    assert figure_scales(held, values, {"time": "s", "x": "V"}) == {
+        "x": Scale(3, "ks"),
+        "y": Scale(-3, "mV"),
+    }
+
+
+def test_the_y_axis_of_series_in_different_units_is_not_scaled():
+    values = {"time": [1.0, 2.0], "T": [1e-3, 2e-3], "R": [1e-3, 2e-3]}
+
+    assert "y" not in figure_scales(request(style="aps"), values, UNITS)
+
+
+APS_UNITS = {"time": "s", "x": "V", "y": "V"}
+
+
+@pytest.fixture
+def lockin(tmp_path):
+    folder = tmp_path / "data"
+    write_data(
+        folder,
+        CURRENT,
+        {"time": [1.0, 2.0, 3.0], "x": [1e-6, 5e-6, 1.2e-5], "y": [2e-6, 3e-6, 4e-6]},
+    )
+    write_data(folder, PREVIOUS, {"time": [0.0, 0.5], "x": [7e-6, 8e-6], "y": [1e-6, 1e-6]})
+    return folder
+
+
+def aps(folder, *, series=("x",), units=APS_UNITS, previous_file=PREVIOUS, **settings):
+    """An APS figure's script, scaled from the current file's values."""
+    colours = [BLUE, ORANGE, GREEN]
+    req = request(
+        series=[{"name": n, "colour": c} for n, c in zip(series, colours, strict=False)],
+        style="aps",
+        **settings,
+    )
+    values = pd.read_csv(folder / CURRENT).to_dict("list")
+    return plot_script(
+        req,
+        folder=str(folder),
+        current_file=CURRENT,
+        previous_file=previous_file,
+        delimiter=",",
+        units=units,
+        columns={},
+        now=NOW,
+        scales=figure_scales(req, values, units),
+    )
+
+
+def run_figure(script, where):
+    """Runs a figure's script from a file in `where`, with matplotlib's settings
+    put back after, and gives its figure, axes, the settings it made, and the
+    script's path."""
+    where.mkdir(parents=True, exist_ok=True)
+    path = where / "figure.py"
+    path.write_text(script, encoding="utf-8")
+    with matplotlib.rc_context():
+        runpy.run_path(str(path), run_name="__main__")
+        params = dict(plt.rcParams)
+    fig = plt.gcf()
+    (ax,) = fig.axes
+    return fig, ax, params, path
+
+
+def test_the_figure_is_one_aps_column_square_in_the_journal_style(lockin, tmp_path):
+    fig, ax, params, _ = run_figure(aps(lockin), tmp_path / "scripts")
+
+    assert list(fig.get_size_inches()) == [3.375, 3.375]
+    assert params["font.family"] == ["STIXGeneral"] and params["mathtext.fontset"] == "stix"
+    assert (params["font.size"], params["xtick.labelsize"], params["legend.fontsize"]) == (9, 8, 8)
+    assert (params["xtick.direction"], params["ytick.direction"]) == ("in", "in")
+    assert params["xtick.top"] and params["ytick.right"]
+    assert params["xtick.minor.visible"] and params["ytick.minor.visible"]
+    assert params["axes.formatter.use_mathtext"] and not params["legend.frameon"]
+    assert params["pdf.fonttype"] == 42
+    tick = ax.xaxis.get_major_ticks()[0]
+    assert tick.tick2line.get_visible()  # a tick on the top too
+
+
+def test_the_figure_is_scaled_for_tidy_numbers(lockin, tmp_path):
+    script = aps(lockin)
+
+    assert "Y_SCALE = 1e6  # V to µV" in script
+    assert "X_SCALE" not in script  # 1 to 3 s: as it is
+    _, ax, _, _ = run_figure(script, tmp_path / "scripts")
+    (line,) = ax.get_lines()
+    assert list(line.get_xdata()) == [1.0, 2.0, 3.0]
+    assert [round(v, 9) for v in line.get_ydata()] == [1.0, 5.0, 12.0]
+    assert (ax.get_xlabel(), ax.get_ylabel()) == ("time (s)", "x (µV)")
+
+
+def test_limits_on_a_scaled_axis_are_written_times_its_scale(lockin, tmp_path):
+    script = aps(lockin, x_limits=[1.5, 2.5], y_limits=[2e-6, 1e-5])
+
+    assert "ax.set_ylim(2e-06 * Y_SCALE, 1e-05 * Y_SCALE)" in script
+    assert "ax.set_xlim(1.5, 2.5)  # as the plot showed it" in script
+    _, ax, _, _ = run_figure(script, tmp_path / "scripts")
+    assert ax.get_ylim() == (2e-06 * 1e6, 1e-05 * 1e6)
+    assert ax.get_xlim() == (1.5, 2.5)
+
+
+def test_a_unit_that_cant_take_a_prefix_is_scaled_by_a_power_of_ten(lockin, tmp_path):
+    script = aps(lockin, units={"time": "s", "x": "mV"})
+
+    assert "Y_SCALE = 1e6  # in units of 10^-6" in script
+    _, ax, _, _ = run_figure(script, tmp_path / "scripts")
+    assert ax.get_ylabel() == "x (10$^{-6}$ mV)"
+
+
+def test_several_series_share_the_label_and_have_a_legend(lockin, tmp_path):
+    _, ax, _, _ = run_figure(aps(lockin, series=("x", "y")), tmp_path / "scripts")
+
+    assert ax.get_ylabel() == "x, y (µV)"
+    assert [t.get_text() for t in ax.get_legend().get_texts()] == ["x", "y"]
+
+
+def test_one_series_has_no_legend(lockin, tmp_path):
+    _, ax, _, _ = run_figure(aps(lockin), tmp_path / "scripts")
+
+    assert ax.get_legend() is None
+
+
+def test_series_in_different_units_keep_theirs(lockin, tmp_path):
+    units = {"time": "s", "x": "V", "y": "K"}
+
+    script = aps(lockin, series=("x", "y"), units=units)
+
+    assert "Y_SCALE" not in script
+    _, ax, _, _ = run_figure(script, tmp_path / "scripts")
+    assert ax.get_ylabel() == "x (V), y (K)"
+    assert [t.get_text() for t in ax.get_legend().get_texts()] == ["x (V)", "y (K)"]
+
+
+def test_the_previous_file_is_offered_but_not_drawn(lockin, tmp_path):
+    script = aps(lockin, previous=True)
+
+    assert 'PREVIOUS_FILE = None  # "00.00 start.data" to draw it too, fainter' in script
+    _, ax, _, _ = run_figure(script, tmp_path / "scripts")
+    assert len(ax.get_lines()) == 1
+    plt.close("all")
+
+    drawn_too = script.replace(
+        'PREVIOUS_FILE = None  # "00.00 start.data"', 'PREVIOUS_FILE = "00.00 start.data"  #'
+    )
+    _, ax, _, _ = run_figure(drawn_too, tmp_path / "again")
+    old, _ = ax.get_lines()
+    assert old.get_alpha() == 0.35 and [round(v, 9) for v in old.get_ydata()] == [7.0, 8.0]
+
+
+def test_the_previous_file_isnt_mentioned_unless_it_was_shown(lockin):
+    assert "PREVIOUS_FILE" not in aps(lockin)
+
+
+def test_marks_take_their_sizes_from_the_style(lockin, tmp_path):
+    script = aps(lockin, marks="both")
+
+    plots = [line for line in script.splitlines() if line.startswith("ax.plot(")]
+    assert plots and not any("markersize" in p or "linewidth" in p for p in plots)
+    _, ax, _, _ = run_figure(script, tmp_path / "scripts")
+    (line,) = ax.get_lines()
+    assert (line.get_linestyle(), line.get_marker()) == ("-", "o")
+    assert line.get_markersize() == 3 and line.get_linewidth() == 1.0
+
+
+def test_a_dollar_in_a_name_is_shown_as_it_is(tmp_path):
+    folder = tmp_path / "data"
+    write_data(folder, CURRENT, {"time": [1.0, 2.0], "cost $": [1.0, 2.0], "gain $x$": [3.0, 4.0]})
+
+    script = aps(folder, series=("cost $", "gain $x$"), units={}, previous_file=None)
+    fig, ax, _, _ = run_figure(script, tmp_path / "scripts")
+    fig.canvas.draw()  # would fail on bad maths
+
+    assert ax.get_ylabel() == r"cost \$, gain \$x\$"
+
+
+def test_a_linear_axis_has_about_five_numbered_ticks(lockin, tmp_path):
+    assert "ax.locator_params(nbins=5)" in aps(lockin)
+    assert 'ax.locator_params(axis="x", nbins=5)' in aps(lockin, log_y=True)
+    assert "locator_params" not in aps(lockin, log_x=True, log_y=True)
+
+    _, ax, _, _ = run_figure(aps(lockin, log_y=True), tmp_path / "scripts")
+    assert len(ax.get_xticks()) <= 7
+    assert ax.get_yscale() == "log"
+
+
+def test_the_figure_is_saved_as_a_pdf_beside_the_script(lockin, tmp_path):
+    _, _, _, path = run_figure(aps(lockin, log_y=True), tmp_path / "scripts")
+
+    assert path.with_suffix(".pdf").read_bytes().startswith(b"%PDF")
+
+
+def test_the_figure_says_what_it_is(lockin):
+    script = aps(lockin)
+
+    module = ast.parse(script)
+    assert ast.get_docstring(module).startswith(
+        "A figure exported from pyacquisition on 2026-09-27 at 14:03: x against time."
+    )
+    assert "APS journal" in ast.get_docstring(module)
+    assert [n.name for n in module.body if isinstance(n, ast.FunctionDef)] == ["read"]
+
+
+# ------------------------------------------------------------ the figure's endpoint
+def test_a_request_without_a_style_gets_the_screen_script(experiment):
+    start_file(experiment, ROWS)
+
+    plain = post(experiment).json()["data"]
+    screen = post(experiment, style="screen").json()["data"]
+
+    assert plain.split("\n", 1)[1] == screen.split("\n", 1)[1]  # past the time in the docstring
+    assert "rcParams" not in plain
+
+
+def test_the_endpoint_scales_a_figure_from_the_historys_values(experiment, tmp_path):
+    start_file(
+        experiment, [{"time": 1.0, "T": 4.0, "R": 7e-6}, {"time": 2.0, "T": 5.0, "R": 9e-6}]
+    )
+
+    script = post(experiment, series=[{"name": "R", "colour": BLUE}], style="aps").json()["data"]
+
+    assert "Y_SCALE = 1e6  # in units of 10^-6" in script  # R has no unit
+    _, ax, _, _ = run_figure(script, tmp_path / "scripts")
+    assert ax.get_ylabel() == "R (10$^{-6}$)" and ax.get_xlabel() == "time (s)"
+
+
+def test_the_endpoint_scales_a_held_axis_from_its_limits(experiment):
+    start_file(experiment, ROWS)
+
+    script = post(
+        experiment, series=[{"name": "T", "colour": BLUE}], x_limits=[1000.0, 4000.0], style="aps"
+    ).json()["data"]
+
+    assert "X_SCALE = 1e-3  # s to ks" in script
+    assert "ax.set_xlim(1000.0 * X_SCALE, 4000.0 * X_SCALE)" in script
+
+
+def test_the_endpoint_refuses_an_unknown_style(experiment):
+    start_file(experiment, ROWS)
+
+    assert post(experiment, style="nature").status_code == 422
