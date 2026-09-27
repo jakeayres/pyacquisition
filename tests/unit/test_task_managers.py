@@ -560,7 +560,7 @@ def test_the_endpoint_removes_from_the_main_manager_at_its_original_path(experim
     assert experiment._task_manager._task_queue.empty()
 
 
-def test_the_endpoint_only_touches_the_task_manager_it_was_sent_to(experiment):
+def test_removing_only_touches_the_task_manager_it_was_sent_to(experiment):
     control = experiment.add_task_manager("control")
     main_task, control_task = Hold(), Hold()
     experiment._task_manager.add_task(main_task)
@@ -779,7 +779,7 @@ def test_the_endpoint_moves_a_task_in_the_main_manager_at_its_original_path(expe
     assert order(experiment._task_manager) == [b._id, a._id]
 
 
-def test_the_endpoint_only_touches_the_task_manager_it_was_sent_to(experiment):
+def test_moving_only_touches_the_task_manager_it_was_sent_to(experiment):
     control = experiment.add_task_manager("control")
     m1, m2 = Hold(kelvin=1.0), Hold(kelvin=2.0)
     experiment._task_manager.add_task(m1)
