@@ -10,7 +10,6 @@ import pytest
 
 from pyacquisition import Task
 from pyacquisition.core.task_manager.task_manager import TaskManager
-from pyacquisition.instruments.oxford_instruments.mercury_ips import ModeStatusN
 from pyacquisition.tasks import RampTemperature, SweepMagneticField, WaitFor, WaitUntil
 from pyacquisition.tasks import wait as wait_module
 from pyacquisition.tasks.field_sweep import RampMagnet

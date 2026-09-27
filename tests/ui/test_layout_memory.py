@@ -61,9 +61,9 @@ def test_the_layout_comes_back_after_a_restart(browser, tmp_path):
         page.get_by_role("button", name=re.compile("Switch to the (dark|light) theme")).click()
         theme = page.evaluate("document.documentElement.dataset.theme")
         height = page.locator(".dock").evaluate("d => d.getBoundingClientRect().height")
-        wait_saved(first, lambda l: l.get("dock", {}).get("active") == "logs"
-                   and len(l.get("plots", {}).get("panels", [])) == 2
-                   and l.get("theme") == theme)
+        wait_saved(first, lambda layout: layout.get("dock", {}).get("active") == "logs"
+                   and len(layout.get("plots", {}).get("panels", [])) == 2
+                   and layout.get("theme") == theme)
     finally:
         context.close()
         first.stop()
