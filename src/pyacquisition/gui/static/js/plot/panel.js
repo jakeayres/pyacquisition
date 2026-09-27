@@ -8,6 +8,7 @@ import { usePopover } from "../hooks.js";
 import { AxesIcon, CopyIcon, CloseIcon, DownloadIcon } from "../icons.js";
 import { plotScript } from "../api.js";
 import { exportName, plotImage, saveFile, scriptSettings, viewCsv } from "./export.js";
+import { ScriptDialog } from "./script-dialog.js";
 import { colourVar, isTimeColumn } from "../colours.js";
 import { Plot } from "./plot.js";
 
@@ -306,11 +307,12 @@ function AxesMenu({ limits, logX, logY, scalesRef, onApply }) {
 
 // Exporting the plot: as an image of it, the data in view as CSV (export.js), or
 // a Python script that draws it with matplotlib (written by the server), as it
-// looks or as a figure for a paper. A message says where it went, for a few
-// seconds.
+// looks or as a figure for a paper, shown first in a dialog (script-dialog.js)
+// to copy or save. A message says where it went, for a few seconds.
 function ExportMenu({ store, plotRef, scalesRef, what }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState(null); // {text, failed}
+  const [shown, setShown] = useState(null); // a script in its dialog: {title, name, script}
   const menu = useRef(null);
   const timer = useRef(null);
   usePopover(menu, open, () => setOpen(false));
@@ -321,27 +323,46 @@ function ExportMenu({ store, plotRef, scalesRef, what }) {
     timer.current = setTimeout(() => setMessage(null), 5000);
   };
 
+  const save = async (name, content) => {
+    const where = await saveFile(name, content);
+    if (where) tell(`Saved ${where}`);
+  };
+
+  // The image and the data are saved straight away. A script is shown first,
+  // to copy or save.
   const run = async (kind) => {
     setOpen(false);
     try {
       const u = plotRef.current;
       if (!u) throw new Error("there is no plot yet");
+      if (kind === "png" || kind === "csv") {
+        const content =
+          kind === "png"
+            ? await plotImage(u, what)
+            : viewCsv(store, { ...what, range: scalesRef.current().x });
+        await save(exportName(store, what, kind), content);
+        return;
+      }
       const held = manualAxes(what.view, what.limits).length > 0;
-      const content =
-        kind === "png"
-          ? await plotImage(u, what)
-          : kind === "csv"
-            ? viewCsv(store, { ...what, range: scalesRef.current().x })
-            : await plotScript(
-                scriptSettings(what, scalesRef.current(), held, kind === "aps" ? "aps" : "screen"),
-              );
+      const style = kind === "aps" ? "aps" : "screen";
+      const script = await plotScript(scriptSettings(what, scalesRef.current(), held, style));
       // The figure's script is named apart from the plain one of the same plot.
       const name =
         kind === "aps"
           ? exportName(store, what, "py").replace(/\.py$/, " - figure.py")
-          : exportName(store, what, kind);
-      const where = await saveFile(name, content);
-      if (where) tell(`Saved ${where}`);
+          : exportName(store, what, "py");
+      const title = kind === "aps" ? "Publication figure (APS style)" : "Python script (matplotlib)";
+      setShown({ title, name, script });
+    } catch (error) {
+      tell(`Couldn't export: ${error.message ?? error}`, true);
+    }
+  };
+
+  const saveShown = async () => {
+    const { name, script } = shown;
+    setShown(null);
+    try {
+      await save(name, script);
     } catch (error) {
       tell(`Couldn't export: ${error.message ?? error}`, true);
     }
@@ -377,6 +398,8 @@ function ExportMenu({ store, plotRef, scalesRef, what }) {
       `}
       ${message &&
       html`<span class="export-message ${message.failed ? "failed" : ""}" role="status">${message.text}</span>`}
+      ${shown &&
+      html`<${ScriptDialog} ...${shown} onSave=${saveShown} onClose=${() => setShown(null)} />`}
     </div>
   `;
 }

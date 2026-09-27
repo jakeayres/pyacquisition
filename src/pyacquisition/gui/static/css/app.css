@@ -2886,6 +2886,70 @@ kbd {
   margin-top: var(--space-5);
 }
 
+/* A plot's script, shown before it is copied or saved (plot/script-dialog.js). */
+
+.dialog.script-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(820px, 100%);
+  /* Within the window, so the buttons stay in view and the script scrolls. */
+  max-height: min(760px, calc(100vh - 2 * var(--space-4)));
+}
+
+.script-code {
+  flex: 1;
+  min-height: 0;
+  margin: var(--space-2) 0 0;
+  overflow: auto;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+  white-space: pre;
+  tab-size: 4;
+  user-select: text;
+}
+
+.script-dialog .dialog-buttons {
+  align-items: center;
+}
+
+.script-copied {
+  margin-right: auto;
+  color: var(--good);
+  font-size: var(--text-sm);
+}
+
+.script-copied.failed {
+  color: var(--bad);
+}
+
+.code-comment {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.code-keyword {
+  color: var(--series-7);
+  font-weight: var(--weight-medium);
+}
+
+.code-string {
+  color: var(--good);
+}
+
+.code-number {
+  color: var(--series-2);
+}
+
+:root[data-theme="dark"] .code-keyword {
+  color: var(--series-5);
+}
+
 .button {
   height: 32px;
   padding: 0 var(--space-4);

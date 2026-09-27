@@ -202,6 +202,24 @@ def script_of(download):
     return downloaded_bytes(download).decode("utf-8")
 
 
+def shown_script(page, item):
+    """Chooses a script from the Export menu, and gives the dialog that shows it."""
+    page.page.get_by_role("button", name="Export").click()
+    page.page.get_by_role("menuitem", name=item).click()
+    dialog = page.page.get_by_role("dialog", name=item)
+    expect(dialog.get_by_label("Script")).to_contain_text("import matplotlib.pyplot as plt")
+    return dialog
+
+
+def saved_script(page, item):
+    """Chooses a script, and saves it from its dialog: the download."""
+    dialog = shown_script(page, item)
+    with page.page.expect_download() as download:
+        dialog.get_by_role("button", name="Save…").click()
+    expect(dialog).to_be_hidden()
+    return download.value
+
+
 def colour_of(page, slot):
     return page.page.evaluate(
         f"getComputedStyle(document.documentElement).getPropertyValue('--series-{slot}').trim()"
@@ -231,7 +249,7 @@ def test_the_script_draws_what_the_panel_shows(context, rig, monkeypatch, tmp_pa
     page = open_page(context, rig)
     hold_still(rig, page)
 
-    download = export(page, "Python script (matplotlib)")
+    download = saved_script(page, "Python script (matplotlib)")
 
     assert download.suggested_filename.endswith(" - wave vs time.py")
     script = script_of(download)
@@ -264,7 +282,7 @@ def test_with_x_fixed_the_script_sets_both_axes_as_the_plot_shows_them(context, 
     fix_x(page, low, high)
     page.page.wait_for_function(f"window.pyacquisition.plot.scales.x.min === {low}")
 
-    script = script_of(export(page, "Python script (matplotlib)"))
+    script = script_of(saved_script(page, "Python script (matplotlib)"))
 
     y = page.page.evaluate("(({min, max}) => [min, max])(window.pyacquisition.plot.scales.y)")
     assert f"ax.set_xlim({float(low)!r}, {float(high)!r})" in script
@@ -277,7 +295,7 @@ def test_with_the_previous_file_shown_the_script_reads_it(context, rig):
     page.page.wait_for_function("window.pyacquisition.store.current.rows > 10")
     hold_still(rig, page)
 
-    script = script_of(export(page, "Python script (matplotlib)"))
+    script = script_of(saved_script(page, "Python script (matplotlib)"))
 
     assert 'FILE = "00.01 second.data"' in script
     assert 'PREVIOUS_FILE = "00.00 start.data"' in script
@@ -290,7 +308,7 @@ def test_a_hidden_series_is_not_in_the_script(context, rig):
     page.page.locator(".series-chip").filter(has_text="wave").locator(".series-toggle").click()
     hold_still(rig, page)
 
-    script = script_of(export(page, "Python script (matplotlib)"))
+    script = script_of(saved_script(page, "Python script (matplotlib)"))
 
     assert 'data["double"]' in script
     assert '"wave"' not in script
@@ -315,7 +333,7 @@ def test_the_figure_is_named_apart_and_drawn_in_the_journal_style(context, rig):
     page = open_page(context, rig)
     hold_still(rig, page)
 
-    download = export(page, "Publication figure (APS style)")
+    download = saved_script(page, "Publication figure (APS style)")
 
     assert download.suggested_filename.endswith(" - wave vs time - figure.py")
     script = script_of(download)
@@ -337,7 +355,71 @@ def test_with_x_fixed_the_figure_sets_both_axes(context, rig):
     fix_x(page, low, high)
     page.page.wait_for_function(f"window.pyacquisition.plot.scales.x.min === {low}")
 
-    script = script_of(export(page, "Publication figure (APS style)"))
+    script = script_of(saved_script(page, "Publication figure (APS style)"))
 
     assert f"ax.set_xlim({float(low)!r}, {float(high)!r})" in script
     assert "ax.set_ylim(" in script
+
+
+# -------------------------------------------------------------- the script's dialog
+@pytest.mark.parametrize(
+    "item, ending",
+    [
+        ("Python script (matplotlib)", " - wave vs time.py"),
+        ("Publication figure (APS style)", " - wave vs time - figure.py"),
+    ],
+)
+def test_a_script_is_shown_coloured_before_it_is_saved(context, rig, item, ending):
+    page = open_page(context, rig)
+    hold_still(rig, page)
+
+    dialog = shown_script(page, item)
+
+    code = dialog.get_by_label("Script")
+    shown = code.text_content()
+    assert dialog.locator("strong").text_content().endswith(ending)  # the name it saves as
+    expect(code.locator(".code-comment").first).to_have_text(
+        "# The data files. If they aren't in FOLDER, they are looked for beside this script."
+    )
+    expect(code.locator(".code-keyword").first).to_have_text("from")
+    expect(code.locator(".code-string").first).to_contain_text("A ")  # the docstring
+    assert code.locator(".code-number").count() > 0
+    # What is saved is what was shown, to the character.
+    with page.page.expect_download() as download:
+        dialog.get_by_role("button", name="Save…").click()
+    assert script_of(download.value) == shown
+    assert download.value.suggested_filename.endswith(ending)
+    assert page.errors == []
+
+
+def test_copy_puts_the_script_on_the_clipboard(context, rig):
+    context.grant_permissions(["clipboard-read", "clipboard-write"])
+    page = open_page(context, rig)
+    hold_still(rig, page)
+    dialog = shown_script(page, "Python script (matplotlib)")
+
+    dialog.get_by_role("button", name="Copy").click()
+
+    expect(dialog.get_by_role("status")).to_have_text("Copied to the clipboard")
+    # Windows's clipboard gives text back with its own line endings.
+    copied = page.page.evaluate("navigator.clipboard.readText()").replace("\r\n", "\n")
+    assert copied == dialog.get_by_label("Script").text_content()
+    assert copied.startswith('"""A plot exported from pyacquisition')
+
+
+def test_the_dialog_closes_with_escape_or_close_and_saves_nothing(context, rig):
+    page = open_page(context, rig)
+    hold_still(rig, page)
+    downloads = []
+    page.page.on("download", lambda download: downloads.append(download))
+
+    dialog = shown_script(page, "Publication figure (APS style)")
+    page.page.keyboard.press("Escape")
+    expect(dialog).to_be_hidden()
+
+    dialog = shown_script(page, "Publication figure (APS style)")
+    dialog.get_by_role("button", name="Close").click()
+    expect(dialog).to_be_hidden()
+
+    assert downloads == []
+    expect(page.page.locator(".export-message")).to_have_count(0)
