@@ -63,6 +63,37 @@ class Running:
         self.thread.join(timeout=15)
 
 
+class SetupRunning:
+    """A setup server (`pyacquisition new`) for a config file, running in a
+    background thread, with no window."""
+
+    def __init__(self, path, port=None):
+        from pyacquisition.core.setup import SetupServer
+
+        self.server = SetupServer(path, port=port or free_port())
+        self.port = self.server.bind()
+        self.address = f"http://localhost:{self.port}"
+        self.thread = threading.Thread(
+            target=lambda: asyncio.run(self.server.serve()), daemon=True
+        )
+        self.thread.start()
+        for _ in range(100):
+            try:
+                requests.get(f"{self.address}/ping", timeout=1)
+                return
+            except requests.exceptions.RequestException:
+                time.sleep(0.1)
+        pytest.fail("the setup server never answered")
+
+    def stop(self):
+        if self.thread.is_alive():
+            try:
+                requests.get(f"{self.address}/setup/shutdown", timeout=5)
+            except requests.exceptions.RequestException:
+                pass
+        self.thread.join(timeout=15)
+
+
 class Page:
     """A page, with the errors it logged to its console."""
 

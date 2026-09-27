@@ -1,0 +1,193 @@
+/* The setup page (js/setup/): the sections down the left, the one picked in the
+   middle, and the file it makes on the right. Every value comes from tokens.css. */
+
+.setup-app {
+  display: grid;
+  grid-template-rows: var(--topbar-height) auto minmax(0, 1fr);
+  height: 100%;
+}
+
+.setup-path {
+  overflow: hidden;
+  min-width: 0;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.setup-status {
+  flex: none;
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+.setup-app .topbar-actions {
+  gap: var(--space-2);
+}
+
+.setup-banner {
+  margin: 0;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: var(--border-width) solid var(--border);
+  background: color-mix(in srgb, var(--bad) 10%, var(--surface));
+  color: var(--bad);
+  font-size: var(--text-sm);
+}
+
+.setup-body {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr) minmax(320px, 38%);
+  min-height: 0;
+}
+
+/* ------------------------------------------------------------ the sections */
+
+.setup-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-3) var(--space-2);
+  border-right: var(--border-width) solid var(--border);
+  background: var(--surface);
+}
+
+.setup-nav-item {
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--text-muted);
+  text-align: left;
+  cursor: pointer;
+}
+
+.setup-nav-item:hover {
+  background: var(--surface-hover);
+  color: var(--text);
+}
+
+.setup-nav-item[aria-current="page"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: var(--weight-medium);
+}
+
+.setup-main {
+  overflow: auto;
+  padding: var(--space-5) var(--space-6);
+}
+
+.setup-section > h2 {
+  margin: 0 0 var(--space-1);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-strong);
+}
+
+.setup-intro {
+  margin: 0 0 var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.setup-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-5);
+  padding: 0;
+  border: 0;
+}
+
+.setup-group legend {
+  margin-bottom: var(--space-3);
+  padding: 0;
+  font-weight: var(--weight-medium);
+}
+
+.setup-group legend code {
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+}
+
+/* ------------------------------------------------------------ the file */
+
+.setup-preview {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: var(--border-width) solid var(--border);
+  background: var(--surface);
+}
+
+.setup-problems {
+  flex: none;
+  max-height: 40%;
+  overflow: auto;
+  padding: var(--space-3) var(--space-4);
+  border-bottom: var(--border-width) solid var(--border);
+  font-size: var(--text-sm);
+}
+
+.setup-problems-title {
+  margin: 0 0 var(--space-2);
+  color: var(--bad);
+  font-size: var(--text-md);
+  font-weight: var(--weight-strong);
+}
+
+.setup-problems ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.setup-problems strong {
+  margin-right: var(--space-1);
+  font-family: var(--font-mono);
+  font-weight: var(--weight-medium);
+}
+
+.setup-problems code {
+  padding: 0 3px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-hover);
+  font-family: var(--font-mono);
+}
+
+.setup-ok,
+.setup-note {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.setup-ok {
+  color: var(--good);
+}
+
+.setup-toml {
+  flex: 1;
+  margin: 0;
+  overflow: auto;
+  padding: var(--space-3) var(--space-4);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  white-space: pre;
+  tab-size: 4;
+}
+
+.setup-loading,
+.setup-failure {
+  padding: var(--space-5);
+}
+
+.setup-failure {
+  margin: 0;
+  color: var(--bad);
+}

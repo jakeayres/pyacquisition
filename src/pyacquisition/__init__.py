@@ -144,8 +144,11 @@ def _build(args: argparse.Namespace) -> None:
 
 def _new(config: str, port: int | None) -> None:
     path = Path(config)
-    if not path.is_file():
-        raise SystemExit(f"pyacquisition new: {config} doesn't exist.")
+    # A file that doesn't exist yet is made when it is first saved.
+    if path.suffix.lower() != ".toml":
+        raise SystemExit(f"pyacquisition new: {config} must be a .toml file.")
+    if not path.parent.resolve().is_dir():
+        raise SystemExit(f"pyacquisition new: the folder {path.parent} doesn't exist.")
     # Imported here, so that running an experiment doesn't load it.
     from .core.setup import open_setup
 

@@ -125,7 +125,9 @@ export function checkValues(fields, values) {
   return Object.keys(errors).length ? { errors } : { params };
 }
 
-function Field({ field, value, error, onChange, id }) {
+// One field. The setup page's options use it too: a `placeholder` there is the
+// default that an empty field leaves in place.
+export function Field({ field, value, error, onChange, id }) {
   const help = field.description ? `${id}-help` : undefined;
   const problem = error ? `${id}-error` : undefined;
   const describedBy = [help, problem].filter(Boolean).join(" ") || undefined;
@@ -144,7 +146,7 @@ function Field({ field, value, error, onChange, id }) {
           ${field.title}
         </label>
         ${field.description && html`<p class="form-help" id=${help}>${withCode(field.description)}</p>`}
-        ${error && html`<p class="form-error" id=${problem}>${error}</p>`}
+        ${error && html`<p class="form-error" id=${problem}>${withCode(error)}</p>`}
       </div>
     `;
   }
@@ -161,7 +163,9 @@ function Field({ field, value, error, onChange, id }) {
             onChange=${(e) => onChange(e.currentTarget.value)}
           >
             ${value === "" &&
-            html`<option value="">${field.required ? "Choose…" : "Default"}</option>`}
+            html`<option value="">
+              ${field.required ? "Choose…" : field.placeholder ? `Default (${field.placeholder})` : "Default"}
+            </option>`}
             ${field.choices.map(
               (choice, i) => html`<option value=${String(choice)}>${field.labels[i]}</option>`,
             )}
@@ -172,6 +176,7 @@ function Field({ field, value, error, onChange, id }) {
             class="text-input ${field.type === "text" ? "" : "number-input"}"
             id=${id}
             value=${value}
+            placeholder=${field.placeholder}
             inputmode=${field.type === "integer" ? "numeric" : field.type === "number" ? "decimal" : undefined}
             aria-invalid=${!!error}
             aria-describedby=${describedBy}
@@ -185,7 +190,7 @@ function Field({ field, value, error, onChange, id }) {
       </label>
       ${input}
       ${field.description && html`<p class="form-help" id=${help}>${withCode(field.description)}</p>`}
-      ${error && html`<p class="form-error" id=${problem}>${error}</p>`}
+      ${error && html`<p class="form-error" id=${problem}>${withCode(error)}</p>`}
     </div>
   `;
 }

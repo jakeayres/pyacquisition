@@ -207,9 +207,21 @@ def test_new_needs_a_path(capsys):
     assert "required" in capsys.readouterr().err.lower()
 
 
-def test_new_needs_the_file_to_exist_for_now(no_setup, tmp_path):
+def test_new_can_start_a_file_that_does_not_exist_yet(no_setup, tmp_path):
+    main("new", str(tmp_path / "fresh.toml"))
+
+    assert no_setup == [(tmp_path / "fresh.toml", None)]
+
+
+def test_new_needs_its_folder_to_exist(no_setup, tmp_path):
     with pytest.raises(SystemExit, match="doesn't exist"):
-        main("new", str(tmp_path / "missing.toml"))
+        main("new", str(tmp_path / "missing" / "rig.toml"))
+    assert no_setup == []
+
+
+def test_new_needs_a_toml_file(no_setup, tmp_path):
+    with pytest.raises(SystemExit, match="must be a .toml file"):
+        main("new", str(tmp_path / "rig.txt"))
     assert no_setup == []
 
 

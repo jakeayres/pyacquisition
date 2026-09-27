@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PyAcquisition setup</title>
+    <title>Setup · PyAcquisition</title>
     <link rel="icon" href="../favicon.svg" type="image/svg+xml" />
     <script>
       // The theme, set before the first paint, as on the experiment's page.
@@ -15,16 +15,19 @@
     </script>
     <link rel="stylesheet" href="../css/tokens.css" />
     <link rel="stylesheet" href="../css/app.css" />
+    <link rel="stylesheet" href="../css/setup.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "preact": "../vendor/preact/preact.module.js",
+          "preact/hooks": "../vendor/preact/hooks.module.js",
+          "htm": "../vendor/htm/htm.module.js"
+        }
+      }
+    </script>
     <script type="module" src="../js/setup/main.js"></script>
   </head>
   <body>
-    <!-- A placeholder until the real page (milestone 4 of specs/setup-page.md). -->
-    <main class="empty-state">
-      <h2>Set up an experiment</h2>
-      <p id="setup-path"></p>
-      <p id="setup-error" class="popover-error" role="alert" hidden></p>
-      <button id="setup-run" class="button button-primary" disabled>Run</button>
-      <p id="setup-status" role="status"></p>
-    </main>
+    <div id="app"></div>
   </body>
 </html>
