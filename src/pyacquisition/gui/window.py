@@ -8,9 +8,15 @@ The window and the experiment live and die together:
   so that it is never left open with nothing behind it.
 - If this process ends any other way, the experiment notices and shuts down (see
   `Experiment._watch_gui`).
+
+The window can also be handed from one server to another without closing: the
+setup page (`pyacquisition new`) hands it to the experiment its Run button
+starts. While a handover is under way the window waits, as long as the process
+that started it is alive, and then follows the new address (see `gui.Gui`).
 """
 
 import json
+import multiprocessing
 import os
 import signal
 import subprocess
@@ -134,7 +140,12 @@ class Lifeline:
         self._allowed_misses = missed
         self._startup_timeout = startup_timeout
         self._clock = clock
-        self._started = clock()
+        self.restart()
+
+    def restart(self) -> None:
+        """Waits again, as at the start, for a server to answer: one that is
+        taking over from the last (see `_Window.watch`)."""
+        self._started = self._clock()
         self._misses = 0
         self.connected = False
 
@@ -248,12 +259,32 @@ def open_folder(path: str | None) -> bool:
         return False
 
 
+def parent_alive() -> bool:
+    """Whether the process that started this one is still running."""
+    parent = multiprocessing.parent_process()
+    return parent is None or parent.is_alive()
+
+
 class _Window:
-    def __init__(self, server: str):
-        self.server = server
+    def __init__(self, server: str, address=None):
+        """
+        Args:
+            server (str): The address of the server the window shows.
+            address: A shared address (see `gui.Gui`) that replaces `server`, so
+                that the window can be moved to another server.
+        """
+        self._server = server
+        self._address = address
         self.window = None
         self._closing = threading.Event()  # set once the window may really close
         self._lock = threading.Lock()
+
+    @property
+    def server(self) -> str:
+        """The address of the server the window shows now."""
+        if self._address is None:
+            return self._server
+        return self._address.value.decode()
 
     def close(self) -> None:
         """Closes the window, once, whichever thread asks first."""
@@ -287,7 +318,7 @@ class _Window:
             shutdown(self.server)
             self.close()
 
-    def watch(self, told_to_close=None) -> None:
+    def watch(self, told_to_close=None, handing_over=None) -> None:
         """Closes the window when the experiment says it is shutting down, or,
         if it goes without saying (a crash), once it stops answering.
 
@@ -295,6 +326,14 @@ class _Window:
         experiment answers can take a couple of seconds to fail once it has gone.
         `told_to_close` is a shared flag with a `value`, checked every so often
         rather than waited on (see Gui.run_in_new_process).
+
+        While `handing_over` (a shared flag too) is set, the server is going
+        away on purpose and another will take over, so nothing is checked, and
+        the window closes only if the process that started it ends. When the
+        address changes, the window waits for the new one to answer, as at the
+        start, and then shows its page. (When the port stays the same, the
+        address doesn't change, and the setup page moves to the experiment's page
+        itself.)
         """
         if told_to_close is not None:
 
@@ -307,14 +346,36 @@ class _Window:
 
             threading.Thread(target=close_when_told, daemon=True).start()
         lifeline = Lifeline()
+        watched = self.server
+        moved = False  # to show the new address's page once it answers
         while not self._closing.is_set():
-            if lifeline.record(ping(self.server)):
-                self.close()
-                return
+            if handing_over is not None and handing_over.value:
+                if not parent_alive():
+                    self.close()
+                    return
+                lifeline.restart()
+            else:
+                if self.server != watched:
+                    watched = self.server
+                    lifeline.restart()
+                    moved = True
+                answered = ping(watched)
+                if lifeline.record(answered):
+                    self.close()
+                    return
+                if answered and moved:
+                    moved = False
+                    self.window.load_url(f"{watched}/")  # sent on to its own page
             self._closing.wait(PING_PERIOD)
 
 
-def main(server: str, told_to_close=None) -> None:
+def main(
+    server: str,
+    told_to_close=None,
+    address=None,
+    handing_over=None,
+    page: str = "/ui/",
+) -> None:
     """Shows the page served at `server` until the window closes.
 
     Args:
@@ -322,6 +383,11 @@ def main(server: str, told_to_close=None) -> None:
             `http://localhost:8000`.
         told_to_close (multiprocessing.RawValue | None): A shared flag that the
             experiment sets when it shuts down, so the window closes at once.
+        address (multiprocessing.RawArray | None): The shared address the window
+            follows, which starts as `server`.
+        handing_over (multiprocessing.RawValue | None): A shared flag set while
+            the window is being handed to another server.
+        page (str): The path of the page to open.
     """
     import webview  # imported here, so that importing pyacquisition does not load it
 
@@ -329,14 +395,14 @@ def main(server: str, told_to_close=None) -> None:
     # which shuts down, and then this window closes because the experiment has gone.
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-    app = _Window(server)
+    app = _Window(server, address)
     theme = system_theme()
     # Without the WebView2 Runtime the page can't run here: the window says so
     # instead of staying blank.
     shown = (
         {"html": webview2_notice(server, theme)}
         if needs_webview2()
-        else {"url": f"{server}/ui/"}
+        else {"url": f"{server}{page}"}
     )
     app.window = webview.create_window(
         TITLE,
@@ -349,5 +415,7 @@ def main(server: str, told_to_close=None) -> None:
     )
     app.window.events.closing += app.on_closing
     webview.start(
-        app.watch, (told_to_close,), debug=bool(os.environ.get(DEBUG_VARIABLE))
+        app.watch,
+        (told_to_close, handing_over),
+        debug=bool(os.environ.get(DEBUG_VARIABLE)),
     )

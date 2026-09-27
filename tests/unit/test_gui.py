@@ -297,6 +297,225 @@ def test_the_window_closes_when_the_experiment_stops_answering(monkeypatch):
     assert app.window.destroyed
 
 
+# -------------------------------------------------------------- handing the window over
+def test_a_restarted_lifeline_waits_again_as_at_the_start():
+    clock = Clock()
+    lifeline = Lifeline(missed=3, startup_timeout=60, clock=clock)
+    lifeline.record(True)
+
+    clock.now = 100
+    lifeline.restart()
+
+    clock.now = 159
+    assert not any(lifeline.record(False) for _ in range(10))
+    clock.now = 161
+    assert lifeline.record(False)
+
+
+def test_the_window_can_be_handed_over():
+    gui = Gui(port=8123, page="/ui/setup/")
+    process = gui.run_in_new_process()
+    _, _, address, handing_over = process._args
+
+    assert address.value == b"http://localhost:8123"
+    assert process._kwargs == {"page": "/ui/setup/"}
+    assert not handing_over.value
+
+    gui.start_handover()
+    assert handing_over.value
+
+    gui.host, gui.port = "0.0.0.0", 8124
+    gui.end_handover()
+    assert address.value == b"http://localhost:8124"
+    assert not handing_over.value
+
+
+def test_handing_over_a_window_that_never_started_does_nothing():
+    gui = Gui()
+
+    gui.start_handover()
+    gui.end_handover()
+
+
+class SharedAddress:
+    """As the shared address: bytes in `value`."""
+
+    def __init__(self, address):
+        self.value = address.encode()
+
+
+class LoadingWindow(FakeWebviewWindow):
+    def __init__(self):
+        super().__init__()
+        self.loaded = []
+
+    def load_url(self, url):
+        self.loaded.append(url)
+
+
+def watch_in_thread(app, *flags):
+    import threading
+
+    thread = threading.Thread(target=app.watch, args=flags, daemon=True)
+    thread.start()
+    return thread
+
+
+def wait_until(check, timeout=5.0):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        if check():
+            return True
+        time.sleep(0.01)
+    return False
+
+
+def test_failed_pings_are_ignored_while_handing_over(monkeypatch):
+    from types import SimpleNamespace
+
+    from pyacquisition.gui import window
+
+    pings = []
+    monkeypatch.setattr(window, "ping", lambda server: pings.append(server) or False)
+    monkeypatch.setattr(window, "PING_PERIOD", 0.01)
+    app = window._Window("http://localhost:1")
+    app.window = FakeWebviewWindow()
+
+    thread = watch_in_thread(app, None, SimpleNamespace(value=True))
+    time.sleep(0.2)  # many more periods than MISSED_PINGS
+
+    assert not app.window.destroyed
+    assert pings == []  # nothing to check while its server goes away on purpose
+    app.close()
+    thread.join(timeout=2)
+
+
+def test_the_window_closes_if_its_parent_goes_while_handing_over(monkeypatch):
+    from types import SimpleNamespace
+
+    from pyacquisition.gui import window
+
+    monkeypatch.setattr(window, "PING_PERIOD", 0.01)
+    monkeypatch.setattr(window, "parent_alive", lambda: False)
+    app = window._Window("http://localhost:1")
+    app.window = FakeWebviewWindow()
+
+    app.watch(None, SimpleNamespace(value=True))
+
+    assert app.window.destroyed
+
+
+def test_the_window_follows_the_shared_address(monkeypatch):
+    from types import SimpleNamespace
+
+    from pyacquisition.gui import window
+
+    up = {"http://localhost:8123"}
+    pinged = []
+
+    def ping(server):
+        pinged.append(server)
+        return server in up
+
+    monkeypatch.setattr(window, "ping", ping)
+    monkeypatch.setattr(window, "PING_PERIOD", 0.01)
+    address = SharedAddress("http://localhost:8123")
+    handing_over = SimpleNamespace(value=False)
+    app = window._Window("http://localhost:8123", address)
+    app.window = LoadingWindow()
+    thread = watch_in_thread(app, None, handing_over)
+    assert wait_until(lambda: pinged)
+
+    # Handed over to a server on another port, which takes a while to answer.
+    handing_over.value = True
+    up.clear()
+    address.value = b"http://localhost:8124"
+    handing_over.value = False
+    assert wait_until(lambda: pinged[-1] == "http://localhost:8124")
+    time.sleep(0.1)  # more than MISSED_PINGS: it waits, as for a new server
+    assert not app.window.destroyed
+    assert app.window.loaded == []
+
+    up.add("http://localhost:8124")
+    assert wait_until(lambda: app.window.loaded)
+    assert app.window.loaded == ["http://localhost:8124/"]  # its own page
+    assert app.server == "http://localhost:8124"  # for the data folder, and closing
+    app.close()
+    thread.join(timeout=2)
+
+
+def test_a_window_on_the_same_address_is_left_to_its_page(monkeypatch):
+    from types import SimpleNamespace
+
+    from pyacquisition.gui import window
+
+    answers = iter([True, False, False, True, True, True])
+    monkeypatch.setattr(window, "ping", lambda server: next(answers, True))
+    monkeypatch.setattr(window, "PING_PERIOD", 0.01)
+    handing_over = SimpleNamespace(value=False)
+    app = window._Window("http://localhost:8123", SharedAddress("http://localhost:8123"))
+    app.window = LoadingWindow()
+    thread = watch_in_thread(app, None, handing_over)
+
+    time.sleep(0.2)
+
+    assert app.window.loaded == []
+    assert not app.window.destroyed
+    app.close()
+    thread.join(timeout=2)
+
+
+class HandoverGui:
+    """A stand-in for a `Gui` whose window is already open, being handed over."""
+
+    def __init__(self):
+        self.host = self.port = None
+        self.handed_to = None
+
+    def run_in_new_process(self):
+        raise AssertionError("an adopted window is not started again")
+
+    def end_handover(self):
+        self.handed_to = (self.host, self.port)
+
+    def close(self):
+        pass  # its process ends by itself
+
+
+def test_an_adopted_window_is_watched_and_not_started_again(tmp_path):
+    port = free_port()
+    experiment = Experiment(root_path=str(tmp_path), gui=False, api_server_port=port)
+    gui = HandoverGui()
+    window = Process(target=time.sleep, args=(0.5,))
+    window.start()
+
+    experiment._adopt_gui(gui, window)
+    asyncio.run(asyncio.wait_for(experiment._run(), timeout=20))
+
+    assert gui.handed_to == ("localhost", port)
+    assert experiment._ui_process is window
+    assert experiment._shutdown_event.is_set()  # it stopped when the window went
+    assert experiment._started
+
+
+def test_an_adopted_window_is_left_open_if_the_experiment_fails_to_start(tmp_path):
+    class Broken(Experiment):
+        def setup(self):
+            raise RuntimeError("the magnet is not answering")
+
+    experiment = Broken(root_path=str(tmp_path), gui=False, api_server_port=free_port())
+    gui = HandoverGui()
+    gui.close = lambda: pytest.fail("the window was told to close")
+    window = FakeProcess(alive=True)
+
+    experiment._adopt_gui(gui, window)
+    asyncio.run(asyncio.wait_for(experiment._run(), timeout=20))
+
+    assert gui.handed_to is None  # still being handed over, for the setup page
+    assert not experiment._started
+    assert "the magnet is not answering" in str(experiment._error)
+
+
 # -------------------------------------------------------------- the experiment following the GUI
 class FakeProcess:
     def __init__(self, alive):

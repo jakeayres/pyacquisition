@@ -214,6 +214,10 @@ class Experiment:
 
         self._shutdown_event = asyncio.Event()
         self._started = False
+        # The error or interruption that stopped it, if one did (see `_adopt_gui`).
+        self._error = None
+        # A window already open, which the experiment takes over (see `_adopt_gui`).
+        self._adopted_ui_process = None
         # What the interface calls the experiment. `from_config` names a plain
         # Experiment after its TOML file instead.
         self._name = type(self).__name__
@@ -684,6 +688,7 @@ class Experiment:
         # port the server ends up on. (`run` logs the PortsUnavailable error,
         # which says which ports were tried.)
         port = self._api_server.bind()
+        self._gui.host = self._api_server.host
         self._gui.port = port
         logger.info(f"[Experiment] API server on port {port}")
 
@@ -693,7 +698,10 @@ class Experiment:
             self._register_instrument_tasks()
             self._started = True
             try:
-                if self._run_gui:
+                if self._adopted_ui_process is not None:
+                    self._ui_process = self._adopted_ui_process
+                    self._gui.end_handover()  # the window follows this server now
+                elif self._run_gui:
                     self._ui_process = self._gui.run_in_new_process()
                     self._ui_process.start()
             except Exception as e:
@@ -738,6 +746,7 @@ class Experiment:
                     await task_manager.shutdown()
 
         except Exception as e:
+            self._error = e
             logger.error(f"Task group terminated due to an error: {e}")
             if isinstance(e, ExceptionGroup):
                 for subexception in e.exceptions:
@@ -753,6 +762,24 @@ class Experiment:
                 self.teardown()
             finally:
                 self._close_instruments()
+
+    def _adopt_gui(self, gui: Gui, process) -> None:
+        """
+        Takes over a window that is already open, instead of opening one: the
+        setup page's (see `core/setup.py`), whose Run button starts this
+        experiment. The window is being handed over (`gui.start_handover()` has
+        been called), and is moved to this experiment's server once `setup()`
+        has run, where a new window would be started. If the experiment stops
+        before that, the window is left as it is, for the setup page to take
+        back, and `_error` says why it stopped.
+
+        Args:
+            gui (Gui): The window's `Gui`, whose process is running.
+            process: The window's process.
+        """
+        self._gui = gui
+        self._adopted_ui_process = process
+        self._run_gui = True
 
     async def _watch_gui(self, process, period: float = 0.25) -> None:
         """
@@ -819,9 +846,11 @@ class Experiment:
 
         try:
             asyncio.run(self._run())
-        except KeyboardInterrupt:
+        except KeyboardInterrupt as e:
+            self._error = e
             logger.info("Experiment interrupted by user")
         except Exception as e:
+            self._error = e
             logger.error(f"An error occurred while running the experiment: {e}")
 
         logger.info("Experiment ended")
