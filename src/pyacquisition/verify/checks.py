@@ -20,6 +20,7 @@ from .spec import (
     check_type,
     hints_of,
     marked_methods,
+    missing_words,
     params_of,
     roundtrip_shape,
     same,
@@ -77,7 +78,7 @@ class IdentityCheck(Check):
         session.identity = reply.strip()
         if session.dry_run:
             raise Skip("dry run: the reply is not compared")
-        missing = [word for word in self.expected if word.upper() not in reply.upper()]
+        missing = missing_words(self.expected, reply)
         if missing:
             raise CheckFailed(
                 f"the instrument answered {reply.strip()!r}, which lacks {missing}: "

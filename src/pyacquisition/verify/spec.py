@@ -268,6 +268,12 @@ def parse_spec(data, source="<spec>"):
     )
 
 
+def missing_words(words, reply: str) -> list[str]:
+    """The words of an instrument's `[identity]` that a reply to `*IDN?`
+    lacks, ignoring case. None missing means the reply is that instrument's."""
+    return [word for word in words if word.upper() not in reply.upper()]
+
+
 def spec_path(cls):
     """Where the spec for an instrument class lives: beside its source file."""
     return Path(inspect.getsourcefile(cls)).with_suffix(".toml")
