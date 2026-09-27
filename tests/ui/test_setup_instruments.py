@@ -54,7 +54,7 @@ def open_setup(context, running):
 
 
 def card(page, name):
-    return page.page.get_by_role("article", name=f"Instrument {name}")
+    return page.page.get_by_role("article", name=f"Instrument {name}", exact=True)
 
 
 def toml(page):

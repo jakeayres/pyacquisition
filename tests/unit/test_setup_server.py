@@ -426,6 +426,18 @@ def test_a_query_route_checks_its_args(tmp_path):
     )
 
 
+def test_a_query_route_refuses_an_enum_by_its_argument(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    response = client.get(
+        "/setup/drivers/Lakeshore_350/get_temperature", params={"input_channel": "INPUT_Z"}
+    )
+
+    (problem,) = response.json()["detail"]
+    assert problem["loc"] == ["query", "input_channel"]
+    assert "INPUT_A, INPUT_B" in problem["msg"]
+
+
 def test_a_query_route_leaves_out_what_is_not_given(tmp_path):
     client, _ = client_for(tmp_path)
 
@@ -439,6 +451,9 @@ def test_a_query_routes_schema_is_the_form_the_page_builds(tmp_path):
     (parameter,) = paths["/setup/drivers/Lakeshore_350/get_temperature"]["get"]["parameters"]
 
     assert parameter["name"] == "input_channel" and parameter["required"] is True
+    # Names, as the file holds them, with the labels to show.
+    assert parameter["schema"]["enum"] == ["INPUT_A", "INPUT_B", "INPUT_C", "INPUT_D"]
+    assert parameter["schema"]["x-labels"] == ["Input A", "Input B", "Input C", "Input D"]
     assert "/setup/drivers/Mercury_IPS/to_zero" not in paths  # a command
 
 

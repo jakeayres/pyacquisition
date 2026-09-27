@@ -306,3 +306,12 @@
 .setup-add .form-error {
   flex-basis: 100%;
 }
+
+/* ------------------------------------------------------------ measurements */
+
+.setup-card-actions {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-1);
+}

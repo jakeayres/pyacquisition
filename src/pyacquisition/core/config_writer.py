@@ -302,14 +302,15 @@ def _update(container, wanted: dict, depth: int, section=None, outer=None) -> No
 
 def _chunks(container: Container):
     """The container's entries in pieces: what comes before its first key, each
-    key with the comments above it and the blank lines after it, and the
-    comments at its end."""
+    key with the comments above it and the blank lines after it (up to the next
+    key's comments), and what comes after its last key, which stays at the end:
+    the blank line before the next section, and any comments of its own."""
     entries = _entries(container)
     keyed = [i for i, (k, _) in enumerate(entries) if k is not None]
     if not keyed:
         return entries, {}, []
     starts = [i - len(_leading_run(entries, i)) for i in keyed]
-    end = len(entries) - len(_leading_run(entries, len(entries)))
+    end = keyed[-1] + 1
     chunks = {}
     for n, index in enumerate(keyed):
         stop = starts[n + 1] if n + 1 < len(keyed) else end

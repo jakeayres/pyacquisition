@@ -24,7 +24,7 @@ import typing
 from enum import Enum
 from pathlib import Path
 
-from fastapi import BackgroundTasks, Body, Request
+from fastapi import BackgroundTasks, Body, Query, Request
 from fastapi.responses import JSONResponse
 
 from ..gui import UI_PATH, Gui
@@ -33,7 +33,8 @@ from ..instruments import instrument_map
 from . import calculations, config_check, config_writer, settings
 from .adapters import ADAPTERS, open_resource
 from .api_server import APIServer
-from .instrument import SoftwareInstrument
+from .instrument import SoftwareInstrument, _allows_text, enum_classes, resolve_enum_kwargs
+from .task_manager.inputs import _enum_choices
 from .logging import logger
 
 # The setup page's path. `/` is sent here.
@@ -355,29 +356,50 @@ def describe() -> dict:
 
 def _driver_route(function):
     """A route with a query's arguments (without `self`) as its parameters,
-    which answers with them as a config holds them: those given, with an enum
-    member by its name. FastAPI checks them against their types, as it does for
-    a running instrument's endpoint, so the page builds its form the same way."""
+    which answers with them as a config holds them: those given, checked, with
+    an enum member by its name.
+
+    As a task's inputs are (`task_manager/inputs.py`), an enum is asked for as
+    text, with its members' names as the choices (`enum` in the schema) and
+    their labels (`x-labels`), so the page's form holds names, as the file does.
+    Other spellings are accepted too (`resolve_enum_kwargs`). A value that names
+    no member is refused (422), by the argument, as FastAPI refuses the others.
+    """
     signature = inspect.signature(function)
     try:
         hints = typing.get_type_hints(function)
     except Exception:  # noqa: BLE001 - left as they are, unresolved
         hints = {}
-    parameters = [
-        parameter.replace(
-            annotation=hints.get(parameter.name, parameter.annotation),
-            kind=inspect.Parameter.KEYWORD_ONLY,
+    parameters = []
+    for parameter in list(signature.parameters.values())[1:]:
+        hint = hints.get(parameter.name, parameter.annotation)
+        enums = enum_classes(hint)
+        default = parameter.default
+        if enums and not _allows_text(hint):
+            names, labels = _enum_choices(enums)
+            hint = typing.Annotated[
+                str, Query(json_schema_extra={"enum": names, "x-labels": labels})
+            ]
+            if isinstance(default, Enum):
+                default = default.name
+        parameters.append(
+            parameter.replace(
+                annotation=hint, default=default, kind=inspect.Parameter.KEYWORD_ONLY
+            )
         )
-        for parameter in list(signature.parameters.values())[1:]
-    ]
 
     async def route(request: Request, **kwargs):
-        given = {
-            name: value.name if isinstance(value, Enum) else value
-            for name, value in kwargs.items()
-            if name in request.query_params
-        }
-        return {"status": 200, "data": given}
+        given = {name: kwargs[name] for name in kwargs if name in request.query_params}
+        refused = []
+        for name, value in given.items():
+            try:
+                given[name] = resolve_enum_kwargs(function, {name: value})[name]
+            except ValueError as e:
+                refused.append({"loc": ["query", name], "msg": str(e), "type": "value_error"})
+        if refused:
+            return JSONResponse(status_code=422, content={"detail": refused})
+        answer = {name: v.name if isinstance(v, Enum) else v for name, v in given.items()}
+        return {"status": 200, "data": answer}
 
     route.__name__ = function.__name__
     route.__doc__ = function.__doc__

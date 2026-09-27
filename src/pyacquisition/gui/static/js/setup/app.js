@@ -8,6 +8,7 @@ import { ConfirmDialog } from "../confirm.js";
 import { LogoMark, MoonIcon, PlayIcon, SunIcon } from "../icons.js";
 import * as api from "./api.js";
 import { InstrumentsSection } from "./instruments.js";
+import { MeasurementsSection } from "./measurements.js";
 import { OptionsSection } from "./options.js";
 import { Preview } from "./preview.js";
 
@@ -17,6 +18,7 @@ const POLL_PERIOD = 500; // ms between checks meanwhile
 
 const SECTIONS = [
   { id: "instruments", label: "Instruments" },
+  { id: "measurements", label: "Measurements" },
   { id: "options", label: "Options" },
 ];
 
@@ -267,6 +269,13 @@ export function App() {
         <main class="setup-main">
           ${section === "instruments" &&
           html`<${InstrumentsSection}
+            described=${described}
+            config=${config}
+            problems=${problems}
+            onChange=${setConfig}
+          />`}
+          ${section === "measurements" &&
+          html`<${MeasurementsSection}
             described=${described}
             config=${config}
             problems=${problems}

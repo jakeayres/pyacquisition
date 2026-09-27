@@ -122,6 +122,18 @@ def test_a_new_key_in_an_inline_table_is_spaced_as_the_others():
     assert 't = {instrument = "clock", method = "timestamp_ms", args = {n = 1}, unit = "ms"}' in result
 
 
+def test_a_new_entry_goes_before_the_blank_line_that_ends_its_section():
+    new = config()
+    new["measurements"]["y"] = {"instrument": "lockin", "method": "get_y"}
+
+    result = render(new, RIG)
+
+    assert result == RIG.replace(
+        'unit = "V"}\n',
+        'unit = "V"}\ny = {instrument = "lockin", method = "get_y"}\n',
+    )
+
+
 def test_a_new_measurement_among_inline_ones_is_inline():
     new = config()
     new["measurements"]["y"] = {"instrument": "lockin", "method": "get_y"}
