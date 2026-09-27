@@ -30,7 +30,13 @@ function argumentFields(schema, driver, method) {
   return describeEndpoint(path, endpoint, schema).fields.map((field) => ({
     ...field,
     title: field.name,
-    placeholder: field.default === undefined || field.default === null ? undefined : String(field.default),
+    // A choice shows its default as "Default (…)"; a box, as faint text.
+    placeholder:
+      field.default === undefined || field.default === null
+        ? undefined
+        : field.type === "choice"
+          ? String(field.default)
+          : `default: ${field.default}`,
   }));
 }
 

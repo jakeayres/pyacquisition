@@ -47,7 +47,8 @@
 .setup-body {
   display: grid;
   flex: 1;
-  grid-template-columns: 180px minmax(0, 1fr) minmax(320px, 38%);
+  /* The section and the file side by side, as wide as each other. */
+  grid-template-columns: 180px minmax(0, 1fr) minmax(0, 1fr);
   min-height: 0;
 }
 
@@ -300,7 +301,7 @@
 .setup-add {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
+  align-items: flex-start;
   gap: var(--space-3);
   max-width: 720px;
   padding: var(--space-3) var(--space-4);
@@ -312,7 +313,8 @@
   width: 220px;
 }
 
-.setup-add .form-error {
+.setup-add .form-error,
+.setup-add .form-buttons {
   flex-basis: 100%;
 }
 
@@ -344,4 +346,92 @@
   flex-wrap: wrap;
   gap: var(--space-1) var(--space-3);
   font-family: var(--font-mono);
+}
+
+/* ------------------------------------------------------------ defaults */
+
+/* A default shown in an empty box: faint and slanted, so it can't be taken for
+   a value that is in the file. */
+.setup-app .text-input::placeholder {
+  color: var(--text-faint);
+  font-style: italic;
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------ the driver list */
+
+.setup-add .setup-picker {
+  width: 300px;
+}
+
+.setup-picker-list {
+  max-height: calc(8 * 30px); /* eight drivers in view */
+  margin: 0;
+  padding: var(--space-1) 0;
+  overflow-y: auto;
+  border: var(--border-width) solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+  list-style: none;
+}
+
+.setup-picker-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  height: 30px;
+  padding: 0 var(--space-2);
+  line-height: 30px;
+  cursor: pointer;
+}
+
+.setup-picker-list li:hover,
+.setup-picker-list li.setup-picker-active {
+  background: var(--surface-hover);
+}
+
+.setup-picker-list li[aria-selected="true"] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.setup-picker-name {
+  font-family: var(--font-mono);
+}
+
+.setup-picker-kind,
+.setup-picker-list .setup-picker-none {
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+  cursor: default;
+}
+
+/* ------------------------------------------------------------ TOML colours */
+
+.toml-comment {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+.toml-header {
+  color: var(--accent);
+  font-weight: var(--weight-strong);
+}
+
+.toml-key {
+  color: var(--series-7);
+}
+
+.toml-string {
+  color: var(--good);
+}
+
+.toml-number,
+.toml-bool {
+  color: var(--series-2);
+}
+
+:root[data-theme="dark"] .toml-key {
+  color: var(--series-5);
 }

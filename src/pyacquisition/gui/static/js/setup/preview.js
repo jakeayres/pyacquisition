@@ -2,6 +2,7 @@
 // problem is shown by its field too, where it has one on the page.
 import { html } from "../html.js";
 import { withCode } from "../forms.js";
+import { highlighted } from "./toml.js";
 
 // Where a problem is, as it reads in TOML: [rack] period.
 function place(where) {
@@ -30,7 +31,7 @@ export function Preview({ checked, stale }) {
                 </ul>
               `}
       </div>
-      <pre class="setup-toml" aria-label="TOML">${checked?.toml ?? ""}</pre>
+      <pre class="setup-toml" aria-label="TOML">${highlighted(checked?.toml ?? "")}</pre>
     </aside>
   `;
 }

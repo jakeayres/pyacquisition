@@ -76,7 +76,7 @@ def test_a_set_option_shows_its_value_and_an_unset_one_its_default(context, setu
 
     expect(field(page, "rack", "period")).to_have_value("0.5")
     expect(field(page, "api_server", "port")).to_have_value("")
-    expect(field(page, "api_server", "port")).to_have_attribute("placeholder", "8000")
+    expect(field(page, "api_server", "port")).to_have_attribute("placeholder", "default: 8000")
     expect(field(page, "logging", "console_level").locator("option").first).to_have_text(
         "Default (DEBUG)"
     )

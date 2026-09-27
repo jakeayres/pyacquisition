@@ -16,7 +16,7 @@ function field(option) {
     name: option.name,
     title: option.key,
     description: option.help,
-    placeholder: text(option, option.default) || undefined,
+    placeholder: text(option, option.default) ? `default: ${text(option, option.default)}` : undefined,
   };
   switch (option.kind) {
     case "port":
@@ -25,7 +25,13 @@ function field(option) {
     case "seconds":
       return { ...base, type: "number" };
     case "level":
-      return { ...base, type: "choice", choices: option.choices, labels: option.choices };
+      return {
+        ...base,
+        type: "choice",
+        choices: option.choices,
+        labels: option.choices,
+        placeholder: text(option, option.default), // shown as "Default (…)"
+      };
     case "flag":
     case "gui":
       return {

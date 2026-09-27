@@ -149,7 +149,7 @@ function InstrumentCard({ name, entry, driver, adapters, names, problems, onChan
           />
           <${Field}
             id=${id("timeout")}
-            field=${{ name: "timeout", title: "timeout", type: "integer", placeholder: "5000",
+            field=${{ name: "timeout", title: "timeout", type: "integer", placeholder: "default: 5000",
               description: "How long to wait for it to answer, in milliseconds." }}
             value=${args.timeout === undefined ? "" : String(args.timeout)}
             error=${errorAt("args", "timeout")}
@@ -189,6 +189,71 @@ function InstrumentCard({ name, entry, driver, adapters, names, problems, onChan
   `;
 }
 
+// The drivers, filtered as their name is typed, in a list tall enough to see
+// several at once (the browser's own list for an input showed three).
+function DriverPicker({ drivers, value, onChange }) {
+  const [active, setActive] = useState(0);
+  const typed = value.trim().toLowerCase();
+  const shown = drivers.filter((d) => d.name.toLowerCase().includes(typed));
+  const pick = (name) => {
+    onChange(name);
+    setActive(0);
+  };
+  const onKeyDown = (event) => {
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      setActive((i) => Math.min(i + 1, shown.length - 1));
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      setActive((i) => Math.max(i - 1, 0));
+    } else if (event.key === "Enter" && shown[active] && shown[active].name !== value) {
+      event.preventDefault(); // picks it, rather than adding
+      pick(shown[active].name);
+    }
+  };
+  return html`
+    <div class="form-field setup-picker">
+      <label for="add-instrument-driver">Driver</label>
+      <input
+        class="text-input"
+        id="add-instrument-driver"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="add-instrument-drivers"
+        aria-autocomplete="list"
+        value=${value}
+        autofocus
+        placeholder="Type to search"
+        onInput=${(e) => {
+          onChange(e.currentTarget.value);
+          setActive(0);
+        }}
+        onKeyDown=${onKeyDown}
+      />
+      <ul class="setup-picker-list" id="add-instrument-drivers" role="listbox" aria-label="Choices">
+        ${shown.length === 0 && html`<li class="setup-picker-none">No driver matches.</li>`}
+        ${shown.map(
+          (d, i) => html`
+            <li
+              key=${d.name}
+              role="option"
+              aria-selected=${d.name === value}
+              class=${i === active ? "setup-picker-active" : ""}
+              onPointerDown=${(e) => {
+                e.preventDefault(); // keeps the focus in the box
+                pick(d.name);
+              }}
+            >
+              <span class="setup-picker-name">${d.name}</span>
+              <span class="setup-picker-kind">${d.hardware ? "hardware" : "software"}</span>
+            </li>
+          `,
+        )}
+      </ul>
+    </div>
+  `;
+}
+
 function AddInstrument({ drivers, names, onAdd }) {
   const [open, setOpen] = useState(false);
   const [driver, setDriver] = useState("");
@@ -218,24 +283,14 @@ function AddInstrument({ drivers, names, onAdd }) {
   }
   return html`
     <form class="setup-add" onSubmit=${add} aria-label="Add instrument" noValidate>
-      <div class="form-field">
-        <label for="add-instrument-driver">Driver</label>
-        <input
-          class="text-input"
-          id="add-instrument-driver"
-          list="setup-drivers"
-          value=${driver}
-          autofocus
-          placeholder="Type to search"
-          onInput=${(e) => {
-            setDriver(e.currentTarget.value);
-            setProblem("");
-          }}
-        />
-        <datalist id="setup-drivers">
-          ${drivers.map((d) => html`<option value=${d.name}>${d.hardware ? "hardware" : "software"}</option>`)}
-        </datalist>
-      </div>
+      <${DriverPicker}
+        drivers=${drivers}
+        value=${driver}
+        onChange=${(value) => {
+          setDriver(value);
+          setProblem("");
+        }}
+      />
       <div class="form-field">
         <label for="add-instrument-name">Name</label>
         <input
