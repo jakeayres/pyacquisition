@@ -36,14 +36,29 @@ def browser():
     playwright.stop()
 
 
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "real_layout: let the page keep its layout on the server, as it does for real",
+    )
+
+
 @pytest.fixture
-def context(browser):
+def context(browser, request):
     """A fresh browser context, so no session state carries between tests.
 
     Reduced motion turns the page's transitions off (see app.css), so sizes can be
     measured straight after they change.
+
+    The layout the page keeps on the server (/experiment/layout) is turned off,
+    so what one test does to the layout doesn't come back in the next, whose rig
+    may be the same one. Tests of it are marked `real_layout`. (A flag the page
+    reads, set before it loads: routing the request instead makes the browser
+    hold every request to check it, which slowed the suite by minutes.)
     """
     context = browser.new_context(viewport=VIEWPORT, reduced_motion="reduce")
+    if request.node.get_closest_marker("real_layout") is None:
+        context.add_init_script("window.pyacquisitionLayoutOff = true")
     yield context
     context.close()
 

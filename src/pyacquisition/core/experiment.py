@@ -16,6 +16,7 @@ from .scribe import Scribe
 from .history import History
 from .log_history import LogHistory
 from .sequences import Sequences
+from .layout import Layout
 from ..gui import Gui
 from .. import new_gui
 from ..instruments import instrument_map
@@ -238,6 +239,8 @@ class Experiment:
         # What the interface calls the experiment. `from_config` names a plain
         # Experiment after its TOML file instead.
         self._name = type(self).__name__
+        # The new GUI's layout, kept by name (from_config renames it afterwards).
+        self._layout = Layout(self._root_path, lambda: self._name)
 
         logger.info("[Experiment] Fully initialized")
 
@@ -950,6 +953,7 @@ class Experiment:
         Register the endpoints for the experiment.
         """
         self._sequences._register_endpoints(api_server)
+        self._layout._register_endpoints(api_server)
 
         @api_server.app.get("/experiment/info", tags=["experiment"])
         async def experiment_info():

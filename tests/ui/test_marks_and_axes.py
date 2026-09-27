@@ -108,7 +108,7 @@ def test_the_choice_of_marks_is_per_plot_and_kept(plot_page):
     assert page.evaluate("window.pyacquisition.plots[0]._marks") == "lines"
     page.reload()
     page.wait_for_function(
-        "window.pyacquisition.plots?.[1]?._marks === 'points'", timeout=15000
+        "window.pyacquisition?.plots?.[1]?._marks === 'points'", timeout=15000
     )
 
 
@@ -342,7 +342,7 @@ def test_fixed_limits_are_kept_for_the_session(plot_page):
     page.reload()
 
     page.wait_for_function(
-        "window.pyacquisition.plot?.scales.y.min === 3.5", timeout=15000
+        "window.pyacquisition?.plot?.scales.y.min === 3.5", timeout=15000
     )
 
 

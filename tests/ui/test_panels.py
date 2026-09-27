@@ -285,7 +285,7 @@ def test_the_plots_are_remembered_for_the_session(plots_page):
     page.reload()
     # The units come from the experiment a moment after the plots are first made.
     page.wait_for_function(
-        "(window.pyacquisition.plots || []).filter(Boolean).length === 3"
+        "(window.pyacquisition?.plots || []).filter(Boolean).length === 3"
         " && window.pyacquisition.plots[2].axes[0].label === 'T (K)'"
         " && window.pyacquisition.plots[0].axes[1].label === 'T (K)'",
         timeout=15000,

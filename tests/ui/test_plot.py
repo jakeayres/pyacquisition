@@ -93,9 +93,10 @@ def test_the_choice_lasts_for_the_session(plot_page):
     choose(plot_page.page, "Plot", "x")
 
     plot_page.page.reload()
-    plot_page.page.wait_for_function("window.pyacquisition?.plot")
-
-    assert plot(plot_page.page, "u.axes[1].label") == "x (V)"
+    # The units come from the experiment a moment after the plot is first made.
+    plot_page.page.wait_for_function(
+        "window.pyacquisition?.plot?.axes[1].label === 'x (V)'", timeout=15000
+    )
 
 
 def test_the_plot_follows_the_newest_point(plot_page):
