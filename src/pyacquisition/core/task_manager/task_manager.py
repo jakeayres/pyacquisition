@@ -52,6 +52,9 @@ class TaskManager:
         self._pause_event.set()
 
         self._task_registry = {}
+        # How each task that can be queued here is made, by its endpoint's name
+        # ("waitfor"), from the inputs it is given (see Task.register_endpoints).
+        self._queueable = {}
         self._shutdown_event = asyncio.Event()
         self._display_errors = set()
 
@@ -409,13 +412,79 @@ class TaskManager:
                 logger.info(f"{self._tag} Task {task_id} is no longer in the queue")
                 return None
             original, index = tasks[found], found + 1
-        # A new task made from the same inputs, with an id and state of its own.
+        # A new task made from the same inputs, with an id and state of its own,
+        # queued the same way.
         copy = dataclasses.replace(original)
+        copy._queued_with = getattr(original, "_queued_with", None)
         tasks.insert(index, copy)
         queue.clear()
         queue.extend(tasks)
         logger.info(f"{self._tag} Duplicated {original.name} in the queue")
         return copy._id
+
+    def saveable(self, include_running: bool = True) -> tuple[list, list]:
+        """
+        The tasks as they can be saved in a sequence: how each was queued (its
+        endpoint's task and the inputs it was given), in order, starting with the
+        running one if asked.
+
+        Returns:
+            tuple: The entries, and the names of the tasks that can't be saved
+                because they weren't queued from the API (such as those queued in
+                `setup()`).
+        """
+        tasks = list(self._task_queue._queue)
+        if include_running and self._current_task is not None:
+            tasks.insert(0, self._current_task)
+        entries, skipped = [], []
+        for task in tasks:
+            record = getattr(task, "_queued_with", None)
+            if record is None:
+                skipped.append(task.name)
+            else:
+                entries.append(
+                    {
+                        "task": record["task"],
+                        "name": record["name"],
+                        "parameters": dict(record["parameters"]),
+                    }
+                )
+        return entries, skipped
+
+    def queue_saved(self, entries: list) -> int:
+        """
+        Queues the tasks of a saved sequence, after the tasks already queued. Each
+        is made as its endpoint makes it, so an input it has since gained takes its
+        default.
+
+        Nothing is queued unless every task can be made.
+
+        Args:
+            entries (list): As `saveable` gives them.
+
+        Returns:
+            int: How many were queued.
+
+        Raises:
+            ValueError: If any can't be made here, listing each problem.
+        """
+        tasks, problems = [], []
+        for number, entry in enumerate(entries, start=1):
+            key = entry.get("task")
+            shown = entry.get("name") or key
+            make = self._queueable.get(key)
+            if make is None:
+                problems.append(f"{number}. {shown}: can't be queued here")
+                continue
+            try:
+                tasks.append(make(dict(entry.get("parameters") or {})))
+            except (TypeError, ValueError) as error:
+                problems.append(f"{number}. {shown}: {error}")
+        if problems:
+            raise ValueError("\n".join(problems))
+        for task in tasks:
+            self.add_task(task)
+        return len(tasks)
 
     async def clear_tasks(self):
         """

@@ -365,8 +365,9 @@ class MoveStage(Task):
 
 def make_experiment():
     app = FastAPI()
+    # A task manager keeps how each task it can queue is made (for sequences).
     experiment = SimpleNamespace(
-        _api_server=SimpleNamespace(app=app), _task_manager=Mock()
+        _api_server=SimpleNamespace(app=app), _task_manager=Mock(_queueable={})
     )
     return experiment, app
 

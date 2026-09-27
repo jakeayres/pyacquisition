@@ -15,6 +15,7 @@ from .task_manager.task import Task
 from .scribe import Scribe
 from .history import History
 from .log_history import LogHistory
+from .sequences import Sequences
 from ..gui import Gui
 from .. import new_gui
 from ..instruments import instrument_map
@@ -171,6 +172,8 @@ class Experiment:
         # with `add_task_manager()`, and they all run at the same time.
         self._task_manager = TaskManager()
         self._task_managers = {self._task_manager.name: self._task_manager}
+        # Queues saved to use again, in `sequences` under the root path.
+        self._sequences = Sequences(self._root_path / "sequences", self._task_managers)
         # Tasks registered on every task manager, kept so that a task manager added
         # later gets them too.
         self._shared_tasks = []
@@ -946,6 +949,7 @@ class Experiment:
         """
         Register the endpoints for the experiment.
         """
+        self._sequences._register_endpoints(api_server)
 
         @api_server.app.get("/experiment/info", tags=["experiment"])
         async def experiment_info():

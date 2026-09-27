@@ -124,6 +124,9 @@ class Task:
         self._paused_for: float = 0.0  # seconds spent paused so far
         self._paused_since: float | None = None
         self._progress: dict | None = None
+        # How it was queued from the API, so it can be saved in a sequence: the
+        # endpoint's task and the inputs it was given (see register_endpoints).
+        self._queued_with: dict | None = None
         self._pause_event.set()  # Set to allow task to run immediately
         self._abort_event.clear()  # Clear to allow task to run immediately
 
@@ -895,6 +898,26 @@ class Task:
         # for as text (`"OUTPUT_1"`), which is resolved to the member.
         params, fields_dict = input_parameters(cls, experiment, fixed_kwargs)
 
+        name = label if label is not None else cls.__name__
+        slug = name.lower().replace(" ", "_")
+        queue = task_manager if task_manager is not None else experiment._task_manager
+
+        def make(kwargs: dict) -> "Task":
+            """The task, from the inputs its endpoint was given, as the endpoint
+            makes it. It records how it was made (`queued_with`), so that it can
+            be saved in a sequence and made again. Raises `ValueError` or
+            `TypeError` if the inputs won't do."""
+            given = {
+                key: value.name if isinstance(value, Enum) else value
+                for key, value in kwargs.items()
+            }
+            task = cls(**fixed_kwargs, **resolve_enum_kwargs(cls, given))
+            task._queued_with = {"task": slug, "name": name, "parameters": given}
+            return task
+
+        # How the task manager makes this task again, from a saved sequence.
+        queue._queueable[slug] = make
+
         async def task_endpoint(**kwargs):
             """
             Endpoint to run the task.
@@ -903,27 +926,17 @@ class Task:
                 dict: The result of the task.
             """
             try:
-                kwargs = resolve_enum_kwargs(cls, kwargs)
-            except ValueError as error:
-                raise HTTPException(status_code=422, detail=str(error)) from error
-            try:
-                task = cls(**fixed_kwargs, **kwargs)
+                task = make(kwargs)
             except (TypeError, ValueError) as error:
-                # A task that checks its inputs as it is made (in __post_init__)
-                # says what is wrong with them, which is worth showing as it is.
+                # A name that no member of an enum has, or a task that checks
+                # its inputs as it is made (in __post_init__), says what is wrong,
+                # which is worth showing as it is.
                 raise HTTPException(status_code=422, detail=str(error)) from error
-            queue = (
-                task_manager if task_manager is not None else experiment._task_manager
-            )
             queue.add_task(task)
             return {"status": 200, "message": f"{cls.__name__} added"}
 
-        if label is not None:
-            task_endpoint.__name__ = f"{label}"
-            endpoint_path = f"{tasks_path}/{label.lower().replace(' ', '_')}"
-        else:
-            task_endpoint.__name__ = f"{cls.__name__}"
-            endpoint_path = f"{tasks_path}/{cls.__name__.lower().replace(' ', '_')}"
+        task_endpoint.__name__ = name
+        endpoint_path = f"{tasks_path}/{slug}"
         task_endpoint.__annotations__ = fields_dict
         task_endpoint.__annotations__["return"] = dict
         task_endpoint.__signature__ = Signature(

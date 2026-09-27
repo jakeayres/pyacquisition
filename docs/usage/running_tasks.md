@@ -93,7 +93,7 @@ With only the main task manager, the window and menus are exactly as described o
 
 ## Running tasks from a script
 
-The interface is only one client of the [API](running.md#the-api). You can queue and manage tasks from any Python script or notebook with `requests`. Every input is passed as a query parameter, and every input must be given:
+The interface is only one client of the [API](running.md#the-api). You can queue and manage tasks from any Python script or notebook with `requests`. Every input is passed as a query parameter. An input with a default can be left out:
 
 ```python
 import requests
@@ -136,6 +136,23 @@ def wait_until_idle():
         time.sleep(1)
 ```
 
-To remove one waiting task, `/task_manager/remove_task?N=` takes its position, and `/task_manager/remove_queued_task?task_id=` takes its id instead, which cannot pick the wrong task if the queue has moved on. Every task in the queue, and the running task, has an `id` in `/managers/state`. To move one, `/task_manager/move_queued_task?task_id=...&direction=up` (or `down`) moves it one place, and answers `{"moved": false}` if it cannot go that way. (`remove_queued_task` and `move_queued_task` are what the buttons in the queue use. They are not listed at [http://localhost:8000/docs](http://localhost:8000/docs), so that they do not appear as entries in the **Task Manager** menu.) Other task managers have them at `/managers/<name>/...`.
+To remove one waiting task, `/task_manager/remove_task?N=` takes its position, and `/task_manager/remove_queued_task?task_id=` takes its id instead, which cannot pick the wrong task if the queue has moved on. Every task in the queue, and the running task, has an `id` in `/managers/state`. To move one, `/task_manager/move_queued_task?task_id=...&direction=up` (or `down`) moves it one place, and answers `{"moved": false}` if it cannot go that way. `/task_manager/place_queued_task?task_id=...&index=0` puts it at a place (0 is the front), and `/task_manager/duplicate_queued_task?task_id=...` queues a copy straight after it (or at the front, for the running task). (These are what the buttons in the queue use. They are not listed at [http://localhost:8000/docs](http://localhost:8000/docs), so that they do not appear as entries in the **Task Manager** menu.) Other task managers have them at `/managers/<name>/...`.
 
 That makes it possible to run a whole series of experiments unattended, from a script that queues tasks, waits, analyses the data files, and decides what to queue next.
+
+## Saving a queue as a sequence
+
+A queue you will want again, such as a cooldown or an overnight sweep, can be saved as a **sequence** and loaded later, in the same run or the next. The new interface (`gui = "new"`) has **Save…** and **Load…** beside each queue, and the API has them too:
+
+| Address | Does |
+|---|---|
+| `/sequences` | The sequences saved, each with its name, when it was saved and its tasks' names. |
+| `/sequences/save?name=cooldown` | Saves the main queue, starting with the running task (`include_running=false` leaves it out). `manager=` saves another task manager's. A name that is taken is refused unless `overwrite=true`. |
+| `/sequences/load?name=cooldown` | Queues the sequence's tasks after those already queued. `manager=` loads onto another task manager. |
+| `/sequences/delete?name=cooldown` | Deletes it. |
+
+Sequences are JSON files in a `sequences` folder under the experiment's `root_path`, one for each, which can be copied between experiments or edited by hand. Each task is saved as it was queued, by its address and the inputs it was given, so:
+
+- **Only tasks queued from the interface or the API are saved.** Tasks queued in code, such as in `setup()`, are left out, and saving says which.
+- **Loading is all or nothing.** If a task can't be queued (it isn't registered in this experiment, or an input no longer fits), nothing is queued, and the reason is given for each such task.
+- **An input a task has gained since the sequence was saved takes its default.**
