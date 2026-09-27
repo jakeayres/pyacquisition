@@ -35,9 +35,11 @@ class Rig(Experiment):
         )
 
 
-@pytest.fixture
-def rig(tmp_path):
-    running = Running(Rig, tmp_path, measurement_period=0.05)
+# One rig for the whole module: the tests only look at its data, and starting
+# one for each test, and waiting for its rows, cost a few seconds a test.
+@pytest.fixture(scope="module")
+def rig(tmp_path_factory):
+    running = Running(Rig, tmp_path_factory.mktemp("interaction"), measurement_period=0.05)
     yield running
     running.stop()
 

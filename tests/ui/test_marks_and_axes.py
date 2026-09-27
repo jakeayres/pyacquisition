@@ -24,9 +24,11 @@ class Rig(Experiment):
         self.add_measurement(Measurement("x", lambda: math.cos(clock.time()), unit="V"))
 
 
-@pytest.fixture
-def rig(tmp_path):
-    running = Running(Rig, tmp_path, measurement_period=0.05)
+# One rig for the whole module: the tests only look at its data, and starting
+# one for each test, and waiting for its rows, cost a few seconds a test.
+@pytest.fixture(scope="module")
+def rig(tmp_path_factory):
+    running = Running(Rig, tmp_path_factory.mktemp("marks_and_axes"), measurement_period=0.05)
     yield running
     running.stop()
 
@@ -74,11 +76,22 @@ def fix(page, axis, low, high):
     expect(menu).to_have_count(0)
 
 
+def open_marks(scope):
+    scope.get_by_role("button", name="Line and point style").click()
+    menu = scope.get_by_role("menu", name="Line and point style")
+    expect(menu).to_be_visible()
+    return menu
+
+
 # -------------------------------------------------------------- lines or points
 def test_lines_are_drawn_to_start_with(plot_page):
     page = plot_page.page
-    expect(page.get_by_role("button", name="Lines")).to_have_attribute(
-        "aria-pressed", "true"
+    expect(page.get_by_role("button", name="Line and point style")).to_have_attribute(
+        "aria-pressed", "false"
+    )
+    menu = open_marks(page)
+    expect(menu.get_by_role("menuitemradio", name="Lines")).to_have_attribute(
+        "aria-checked", "true"
     )
     assert plot(page, "u._marks") == "lines"
 
@@ -86,12 +99,17 @@ def test_lines_are_drawn_to_start_with(plot_page):
 @pytest.mark.parametrize("marks, label", [("points", "Points"), ("both", "Both")])
 def test_the_data_can_be_drawn_as_points_or_both(plot_page, marks, label):
     page = plot_page.page
-    page.get_by_role("button", name=label).click()
+    open_marks(page).get_by_role("menuitemradio", name=label).click()
 
     page.wait_for_function(f"window.pyacquisition.plot._marks === '{marks}'")
-    expect(page.get_by_role("button", name=label)).to_have_attribute(
+    # Choosing closes the menu, and the button shows something is set.
+    expect(page.get_by_role("menu", name="Line and point style")).to_have_count(0)
+    expect(page.get_by_role("button", name="Line and point style")).to_have_attribute(
         "aria-pressed", "true"
     )
+    expect(
+        open_marks(page).get_by_role("menuitemradio", name=label)
+    ).to_have_attribute("aria-checked", "true")
     # The dots are filled in the column's colour.
     assert plot(page, "u.series[2].fill()") == plot(page, "u.series[2].stroke()")
 
@@ -102,7 +120,8 @@ def test_the_choice_of_marks_is_per_plot_and_kept(plot_page):
     page.wait_for_function(
         "(window.pyacquisition.plots || []).filter(Boolean).length === 2"
     )
-    page.locator(".plot-panel").nth(1).get_by_role("button", name="Points").click()
+    second = page.locator(".plot-panel").nth(1)
+    open_marks(second).get_by_role("menuitemradio", name="Points").click()
     page.wait_for_function("window.pyacquisition.plots[1]._marks === 'points'")
 
     assert page.evaluate("window.pyacquisition.plots[0]._marks") == "lines"

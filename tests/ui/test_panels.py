@@ -25,21 +25,37 @@ class Rig(Experiment):
         self.add_measurement(Measurement("y", lambda: 100 * math.sin(clock.time())))
 
 
-@pytest.fixture
-def rig(tmp_path):
-    running = Running(Rig, tmp_path, measurement_period=0.05)
+# One rig for the whole module: the tests only look at its data, and starting
+# one for each test, and waiting for its rows, cost a few seconds a test.
+@pytest.fixture(scope="module")
+def rig(tmp_path_factory):
+    running = Running(Rig, tmp_path_factory.mktemp("panels"), measurement_period=0.05)
     yield running
     running.stop()
 
 
 @pytest.fixture
-def plots_page(context, rig):
+def own_rig(tmp_path):
+    """A rig of its own, for a test that starts a new file, which the tests
+    sharing `rig` mustn't see."""
+    running = Running(Rig, tmp_path, measurement_period=0.05)
+    yield running
+    running.stop()
+
+
+def open_plots(context, rig):
     page = Page(context.new_page())
     page.page.goto(f"{rig.address}/")
     page.page.wait_for_function(
         "window.pyacquisition?.plot && window.pyacquisition.store.current.rows > 40",
         timeout=15000,
     )
+    return page
+
+
+@pytest.fixture
+def plots_page(context, rig):
+    page = open_plots(context, rig)
     yield page
     assert page.errors == [], f"the page logged errors: {page.errors}"
 
@@ -261,10 +277,11 @@ def test_unlinked_plots_zoom_alone(plots_page):
 
 
 # -------------------------------------------------------------- shared, and kept
-def test_the_previous_file_is_shown_or_hidden_in_every_plot(plots_page, rig):
+def test_the_previous_file_is_shown_or_hidden_in_every_plot(context, own_rig):
+    plots_page = open_plots(context, own_rig)
     page = plots_page.page
     add(page)
-    rig.get("/scribe/next_file", title="sweep")
+    own_rig.get("/scribe/next_file", title="sweep")
     key = page.locator(".file-key-previous")
     key.wait_for()
     page.wait_for_function(
@@ -276,6 +293,7 @@ def test_the_previous_file_is_shown_or_hidden_in_every_plot(plots_page, rig):
     page.wait_for_function(
         "window.pyacquisition.plots.every(u => !u || u.data[1][0].length === 0)"
     )
+    assert plots_page.errors == [], f"the page logged errors: {plots_page.errors}"
 
 
 def test_the_plots_are_remembered_for_the_session(plots_page):

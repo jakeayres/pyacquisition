@@ -233,6 +233,7 @@ def test_pyinstaller_available_reflects_the_path(monkeypatch):
 
 
 # --------------------------------------------------------- a real build, end to end
+@pytest.mark.slow  # about a minute: run with --slow
 @pytest.mark.skipif(
     shutil.which("pyinstaller") is None, reason="pyinstaller is not installed"
 )
