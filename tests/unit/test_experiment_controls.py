@@ -105,6 +105,22 @@ def test_pausing_and_resuming_show_in_the_state():
     assert client.get("/rack/state").json()["paused"] is False
 
 
+@pytest.mark.asyncio
+async def test_a_paused_rack_stops_when_shut_down():
+    # It waited for the pause to end, for ever, so the experiment never ended.
+    import asyncio
+
+    rack = Rack(period=0.05)
+    task = asyncio.create_task(rack.run())
+    await asyncio.sleep(0.1)
+    rack.pause()
+    await asyncio.sleep(0.1)
+
+    await rack.shutdown()
+
+    await asyncio.wait_for(task, timeout=2)
+
+
 def test_a_relative_data_folder_is_given_in_full(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     scribe = Scribe(root_path="my_data")

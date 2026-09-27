@@ -77,6 +77,9 @@ class Rack(Broadcaster):
         Shuts down the rack and all its instruments.
         """
         self._shutdown_event.set()
+        # A paused rack waits for the pause to end, so it is woken to see the
+        # shutdown. Otherwise an experiment stopped while paused never ended.
+        self._pause_event.set()
 
     def pause(self):
         """
