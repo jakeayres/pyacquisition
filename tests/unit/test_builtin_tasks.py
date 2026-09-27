@@ -363,6 +363,9 @@ def test_the_sweep_describes_itself():
 async def test_wait_for_reports_every_five_minutes(fast, monkeypatch):
     logger = Mock()
     monkeypatch.setattr(task_module, "logger", logger)
+    # Its progress ticks each second, and even `fast`, a sleep takes the timer's
+    # resolution on Windows (about 15 ms), so 700 ticks took 11 s.
+    monkeypatch.setattr(wait_module, "TICK", 50.0)
 
     await WaitFor(seconds=700).start()
 

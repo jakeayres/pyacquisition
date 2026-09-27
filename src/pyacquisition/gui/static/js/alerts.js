@@ -9,11 +9,16 @@ import { Watched } from "./store.js";
 import { useStore, usePopover } from "./hooks.js";
 import { BellIcon, CloseIcon } from "./icons.js";
 
+// The browser tests shorten the times below, so as not to wait them out, with a
+// scale set before the page loads. It is 1 otherwise.
+const SCALE = globalThis.pyacquisitionAlertTimeScale ?? 1;
+
 const KEEP = 30; // alerts listed under the bell
-const TOAST_FOR = 10000; // milliseconds a toast stays
-const TOGETHER = 5000; // milliseconds within which alerts of a group are one
+const TOAST_FOR = 10000 * SCALE; // milliseconds a toast stays
+const TOGETHER = 5000 * SCALE; // milliseconds within which alerts of a group are one
 const STALL_PERIODS = 5; // measurement periods without a row before it's a stall
-const STALL_AT_LEAST = 5000; // but never sooner than this, in milliseconds
+const STALL_AT_LEAST = 5000 * SCALE; // but never sooner than this, in milliseconds
+const STALL_CHECK = 1000 * SCALE; // milliseconds between checks for a stall
 
 // Text as a sentence: with a full stop, unless it ends in one already.
 const sentence = (text) => (/[.!?]$/.test(text.trim()) ? text.trim() : `${text.trim()}.`);
@@ -167,7 +172,7 @@ export function useAlertWatch({ alerts, connection, store, logs, managers, rack 
         message: `Measuring every ${Number(period.toPrecision(3))} s, but no row has arrived for ${seconds} s.`,
         group: "stall",
       });
-    }, 1000);
+    }, STALL_CHECK);
     return () => clearInterval(timer);
   }, [measuring, period, store, alerts]);
 

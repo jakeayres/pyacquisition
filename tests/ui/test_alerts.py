@@ -42,7 +42,15 @@ def rig(tmp_path):
     running.stop()
 
 
+# The page's alert times are scaled by this (see alerts.js), so the tests wait
+# less: a toast stays 4 s, alerts within 2 s are merged, and a stall is 2 s
+# without a row. Not much shorter, so a failing task's error and failure, which
+# arrive by different routes, still come within the merging time.
+SCALE = 0.4
+
+
 def open_page(context, rig):
+    context.add_init_script(f"window.pyacquisitionAlertTimeScale = {SCALE}")
     page = Page(context.new_page())
     page.page.goto(f"{rig.address}/")
     page.page.wait_for_function("window.pyacquisition?.logs?.status === 'live'")
@@ -122,7 +130,7 @@ def test_each_failure_is_an_alert_of_its_own(context, rig):
     queue(rig, task="explode", message="first")
     expect(toasts(page).first).to_contain_text("Explode failed", timeout=8000)
 
-    page.page.wait_for_timeout(5500)  # past the time alerts are merged in
+    page.page.wait_for_timeout(6500 * SCALE)  # well past the time alerts are merged in
     rig.get("/task_manager/resume")
     queue(rig, task="explode", message="second")
 
@@ -135,7 +143,7 @@ def test_data_stopping_raises_one_alert_for_each_stall(context, rig):
 
     rig.get("/test/stall")
     expect(toasts(page).first).to_contain_text("No data is arriving", timeout=10000)
-    page.page.wait_for_timeout(3000)  # longer still: still the one alert
+    page.page.wait_for_timeout(3000 * SCALE)  # longer still: still the one alert
     expect(bell(page)).to_have_attribute("aria-label", "Alerts, 1 new")
 
     rig.get("/test/unstall")
@@ -151,7 +159,7 @@ def test_paused_measurements_are_not_a_stall(context, rig):
     page.page.wait_for_function("window.pyacquisition.store.current.rows > 5")
 
     rig.get("/rack/pause/")
-    page.page.wait_for_timeout(7500)
+    page.page.wait_for_timeout(7500 * SCALE)  # well past the time a stall takes
 
     expect(bell(page)).to_have_attribute("aria-label", "Alerts")
 
@@ -208,5 +216,5 @@ def test_a_toast_goes_by_itself(context, rig):
     rig.get("/test/log", message="brief")
     expect(toasts(page)).to_have_count(1)
 
-    expect(toasts(page)).to_have_count(0, timeout=13000)
+    expect(toasts(page)).to_have_count(0, timeout=13000 * SCALE)
     expect(bell(page)).to_have_attribute("aria-label", "Alerts, 1 new")  # still to see
