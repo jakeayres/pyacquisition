@@ -54,7 +54,14 @@ def test_the_leaf_tasks_are_left_out_and_the_standard_tasks_stay_as_they_were():
     assert instrument_tasks == [RampTemperature, SweepMagneticField]
     assert RampMagnet not in instrument_tasks
     assert RampMagnetToZero not in instrument_tasks
-    assert len(standard_tasks) == 3
+    assert [task.__name__ for task in standard_tasks] == [
+        "NewFile",
+        "WaitFor",
+        "WaitUntil",
+        "PauseMeasurements",
+        "ResumeMeasurements",
+        "SetMeasurementPeriod",
+    ]
 
 
 @pytest.mark.parametrize("task", instrument_tasks)

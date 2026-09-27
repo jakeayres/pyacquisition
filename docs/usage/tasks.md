@@ -238,7 +238,7 @@ Both are listed in **Add task**, asking only for `seconds`.
 
 ### Tasks that are already included
 
-A few tasks come with `pyacquisition`. `NewFile`, `WaitFor` and `WaitUntil` are always registered for you.
+A few tasks come with `pyacquisition`. `NewFile`, `WaitFor` and `WaitUntil` are always registered for you, and so are `PauseMeasurements`, `ResumeMeasurements` and `SetMeasurementPeriod`, to pause the measurements or change how often they are taken at a point in a queue ([Measurements](../tasks/measurements.md)).
 
 **Tasks for an instrument register themselves when it is there.** `RampTemperature` is for the Lakeshore 340 and 350, and `SweepMagneticField` is for the Mercury IPS. Add one of those instruments, in `setup()` or in a [TOML file](toml_config.md), and its task can be queued (as **Ramp Temperature** and **Sweep Magnetic Field**) with nothing else to write. They are registered once `setup()` has finished, so it does not matter in which order you add things.
 

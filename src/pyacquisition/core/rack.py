@@ -97,6 +97,11 @@ class Rack(Broadcaster):
         logger.info("Measurements resumed.")
 
     @property
+    def paused(self) -> bool:
+        """Whether the measurements are paused."""
+        return not self._pause_event.is_set()
+
+    @property
     def loop_time(self) -> float | None:
         """
         The time the latest loops actually took, start to start, on average: the

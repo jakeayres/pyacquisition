@@ -14,7 +14,7 @@ A few tasks are already included. Open the **Queue** tab (press ++2++) and press
 
 ![The Add a task window, with the standard tasks](../images/tutorial/add-task.png){ .pa-shot .pa-medium }
 
-`NewFile` starts a new data file, `WaitFor` waits for a time, and `WaitUntil` waits until a clock time. Your own tasks will join them in a moment. Press **Done** to close it.
+`NewFile` starts a new data file, `WaitFor` waits for a time, and `WaitUntil` waits until a clock time. `PauseMeasurements`, `ResumeMeasurements` and `SetMeasurementPeriod` pause the measurements, start them again, or change how often they are taken. Your own tasks will join them in a moment. Press **Done** to close it.
 
 ## Write the task
 

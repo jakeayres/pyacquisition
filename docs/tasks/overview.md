@@ -18,6 +18,14 @@ The following tasks are registered to your experiment by default.
 
 `STANDARD` [`Task` **WaitUntil**](wait_until.md) - Wait until a specified time (24 hr clock).
 
+#### Measurements
+
+`STANDARD` [`Task` **PauseMeasurements**](measurements.md) - Pause the measurements.
+
+`STANDARD` [`Task` **ResumeMeasurements**](measurements.md) - Resume the measurements.
+
+`STANDARD` [`Task` **SetMeasurementPeriod**](measurements.md) - Set the time between measurements.
+
 
 ## With an instrument
 

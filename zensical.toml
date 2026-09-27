@@ -70,6 +70,7 @@ nav = [
     { "NewFile" = "tasks/new_file.md" },
     { "WaitFor" = "tasks/wait_for.md" },
     { "WaitUntil" = "tasks/wait_until.md" },
+    { "Measurements" = "tasks/measurements.md" },
     { "RampTemperature" = "tasks/ramp_temperature.md" },
     { "PID" = "tasks/pid.md" },
     { "Magnet sweeps" = "tasks/field_sweep.md" },
