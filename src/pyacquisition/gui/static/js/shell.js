@@ -26,6 +26,7 @@ import { CloseDialog } from "./close-dialog.js";
 import { KeyboardIcon, LogoMark, MoonIcon, SunIcon } from "./icons.js";
 import { ShortcutHelp, useShortcuts } from "./shortcuts.js";
 import { Palette } from "./palette.js";
+import { ConfirmDialog } from "./confirm.js";
 import { PlotArea } from "./plot/area.js";
 
 const CONNECTION_LABELS = {
@@ -162,6 +163,14 @@ export function App() {
   useAlertWatch({ alerts, connection, store, logs, managers, rack });
   const [palette, setPalette] = useState(false);
   const [help, setHelp] = useState(false);
+  // A question an action asks before it runs (abort, clear the queue): its
+  // answer resolves the promise the palette waits on.
+  const [asking, setAsking] = useState(null);
+  const confirm = (question) => new Promise((resolve) => setAsking({ ...question, resolve }));
+  const answer = (yes) => {
+    asking.resolve(yes);
+    setAsking(null);
+  };
   useShortcuts({
     onToggleTheme: toggle,
     onPalette: () => setPalette((open) => !open),
@@ -189,7 +198,29 @@ export function App() {
       managers=${managers.states}
       onQueued=${managers.refresh}
       onClose=${() => setPalette(false)}
+      context=${{
+        managers: managers.states,
+        refreshManagers: managers.refresh,
+        rack: rack.state,
+        refreshRack: rack.refresh,
+        columns: store.columns,
+        theme,
+        toggleTheme: toggle,
+        logs,
+        showHelp: () => setHelp(true),
+        confirm,
+      }}
     />`}
+    ${asking &&
+    html`<${ConfirmDialog}
+      title=${asking.title}
+      confirmLabel=${asking.confirmLabel}
+      danger=${asking.danger}
+      onCancel=${() => answer(false)}
+      onConfirm=${() => answer(true)}
+    >
+      <p>${asking.message}</p>
+    <//>`}
     ${help && html`<${ShortcutHelp} onClose=${() => setHelp(false)} />`}
     <${CloseDialog} />
   `;

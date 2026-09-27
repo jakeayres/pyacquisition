@@ -7,7 +7,7 @@ import { useStore } from "../hooks.js";
 import { load, save } from "../session.js";
 import { ChartIcon, EyeIcon, EyeOffIcon } from "../icons.js";
 import { colourSlots, isTimeColumn } from "../colours.js";
-import { PlotPanel, defaultX, defaultY, resolve } from "./panel.js";
+import { MAX_SERIES, PlotPanel, defaultX, defaultY, resolve } from "./panel.js";
 
 export const MAX_PANELS = 6;
 
@@ -83,6 +83,46 @@ export function PlotArea({ store, columns, theme }) {
   };
   const viewsNow = useRef(views);
   viewsNow.current = views;
+  const stateNow = useRef(state);
+  stateNow.current = state;
+
+  // The palette's "Add a plot" and "Add a column to a plot": each answers
+  // through `detail.done(problem)`, null when it was done.
+  useEffect(() => {
+    const addPlot = (event) => {
+      const names = store.columns;
+      const panels = stateNow.current.panels.map((p) => resolve(p, names));
+      if (panels.length >= MAX_PANELS) {
+        return event.detail?.done?.(`There are ${MAX_PANELS} plots already, the most there can be.`);
+      }
+      const id = Math.max(0, ...panels.map((p) => p.id)) + 1;
+      setState((s) => ({ ...s, panels: [...panels, newPanel(panels, names, id)] }));
+      event.detail?.done?.(null);
+    };
+    const addSeries = (event) => {
+      const { column, plot = 1, done } = event.detail ?? {};
+      const names = store.columns;
+      const panels = stateNow.current.panels.map((p) => resolve(p, names));
+      const panel = panels[plot - 1];
+      if (!panel) {
+        return done?.(`There is no plot ${plot}: there ${panels.length === 1 ? "is 1" : `are ${panels.length}`}.`);
+      }
+      if (!names.includes(column)) return done?.(`There is no column called ${column}.`);
+      if (panel.series.some((s) => s.name === column)) return done?.(`Plot ${plot} has ${column} already.`);
+      if (panel.series.length >= MAX_SERIES) {
+        return done?.(`Plot ${plot} has ${MAX_SERIES} columns already, the most it can have.`);
+      }
+      const series = [...panel.series.map(({ name, hidden }) => ({ name, hidden })), { name: column }];
+      setState((s) => ({ ...s, panels: panels.map((p, i) => (i === plot - 1 ? { ...p, series } : p)) }));
+      done?.(null);
+    };
+    window.addEventListener("pyacquisition:add-plot", addPlot);
+    window.addEventListener("pyacquisition:add-series", addSeries);
+    return () => {
+      window.removeEventListener("pyacquisition:add-plot", addPlot);
+      window.removeEventListener("pyacquisition:add-series", addSeries);
+    };
+  }, [store]);
 
   // The Space shortcut: every plot holds where it is, or, if any is held (by a
   // zoom, a pan or Space), they all follow the data again. Fixed limits stay.

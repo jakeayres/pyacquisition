@@ -35,7 +35,7 @@ def page(context, rig):
 
 
 def palette(page):
-    return page.page.get_by_role("dialog", name="Queue a task or call an instrument")
+    return page.page.get_by_role("dialog", name="Command palette")
 
 
 def open_palette(page):
@@ -276,3 +276,239 @@ def test_a_queue_holding_a_call_is_saved_and_loaded_again(page, rig):
 
     assert queued(rig) == [("clock.start_timer", {"name": "lap"})]
     rig.get("/sequences/delete", name="with a call")
+
+
+# -------------------------------------------------------------- actions
+def rack_state(rig):
+    return rig.get("/rack/state").json()
+
+
+def run_line(page, text, key="Enter"):
+    dialog, search = type_line(page, text)
+    expect(dialog.locator(".task-form-title")).to_be_visible()
+    search.press(key)
+    return dialog
+
+
+def until(page, condition):
+    """Waits for `condition`, JavaScript given the state of the experiment's
+    task managers (`m`), its rack (`r`) and its scribe (`s`)."""
+    page.page.wait_for_function(
+        f"""Promise.all(['/managers/state', '/rack/state', '/scribe/state'].map(
+            (p) => fetch(p).then((r) => r.json()))).then(([m, r, s]) => {condition})"""
+    )
+
+
+def test_new_data_file_runs_at_once_and_its_task_is_found_too(page, rig):
+    dialog, search = type_line(page, "new file")
+    rows = dialog.locator(".palette-option")
+    expect(rows.filter(has_text="New data file").locator(".palette-tag")).to_have_text("Experiment")
+    expect(rows.filter(has_text="NewFile").first.locator(".palette-tag")).to_have_text("Task · Main")
+    search.fill("")
+
+    search.press_sequentially("new data file cold")
+    expect(dialog.locator(".palette-arg-ready")).to_have_text("✓ Enter to run · Shift+Enter to queue")
+    search.press("Enter")
+
+    expect(palette(page)).to_have_count(0)
+    until(page, "s.data.file.endsWith('cold.data')")
+    assert queued(rig) == []
+
+
+def test_shift_enter_on_new_data_file_queues_newfile(page, rig):
+    run_line(page, "new data file later", "Shift+Enter")
+
+    expect(palette(page)).to_have_count(0)
+    assert queued(rig) == [("NewFile", {"file_name": "later", "increment_block": False})]
+
+
+def test_pausing_and_resuming_the_measurements_runs_at_once(page, rig):
+    try:
+        run_line(page, "pause measurements")
+        until(page, "r.paused")
+        expect(page.page.get_by_role("button", name="Measurements", exact=True)).to_contain_text("Paused")
+
+        dialog, search = type_line(page, "measurements")
+        names = dialog.locator(".task-option-name")
+        expect(names.filter(has_text=re.compile("^Resume measurements$"))).to_have_count(1)
+        expect(names.filter(has_text=re.compile("^Pause measurements$"))).to_have_count(0)
+        search.fill("resume measurements")
+        search.press("Enter")
+        until(page, "!r.paused")
+    finally:
+        rig.get("/rack/resume/")
+
+
+def test_shift_enter_queues_the_pause_and_the_measurements_carry_on(page, rig):
+    run_line(page, "pause measurements", "Shift+Enter")
+
+    expect(palette(page)).to_have_count(0)
+    assert queued(rig) == [("PauseMeasurements", None)]
+    assert rack_state(rig)["paused"] is False
+
+
+def test_setting_the_period_now_or_in_its_turn(page, rig):
+    try:
+        run_line(page, "set measurement period 0.5")
+        until(page, "r.period === 0.5")
+        expect(page.page.get_by_role("button", name="Measurements", exact=True)).to_contain_text("Every 0.5 s")
+
+        run_line(page, "set measurement period 2", "Shift+Enter")
+        expect(palette(page)).to_have_count(0)
+        assert queued(rig) == [("SetMeasurementPeriod", {"period": 2.0})]
+        assert rack_state(rig)["period"] == 0.5
+    finally:
+        rig.get("/rack/period/set/", period=0.05)
+
+
+def test_a_period_of_zero_is_refused_and_says_why(page, rig):
+    dialog, search = type_line(page, "set measurement period 0")
+    search.press("Enter")
+
+    expect(dialog.locator(".form-error").first).to_be_visible()
+    assert rack_state(rig)["period"] == 0.05
+    page.errors = [e for e in page.errors if "422" not in e]
+
+
+def test_the_theme_switches_and_its_label_follows(page):
+    before = page.page.evaluate("document.documentElement.dataset.theme")
+    after = "dark" if before == "light" else "light"
+
+    run_line(page, f"switch to the {after} theme")
+
+    expect(page.page.locator("html")).to_have_attribute("data-theme", after)
+    dialog, search = type_line(page, "theme")
+    expect(dialog.locator(".task-option-name").first).to_have_text(f"Switch to the {before} theme")
+    search.press("Enter")  # and back
+    expect(page.page.locator("html")).to_have_attribute("data-theme", before)
+
+
+def test_a_tab_opens_and_the_dock_hides(page):
+    logs = page.page.get_by_role("tab", name="Logs")
+
+    run_line(page, "open the logs tab")
+    expect(logs).to_have_attribute("aria-selected", "true")
+
+    run_line(page, "hide or show the dock")
+    expect(page.page.get_by_role("tabpanel")).to_have_count(0)
+    run_line(page, "hide or show the dock")
+    expect(page.page.get_by_role("tabpanel")).to_have_count(1)
+
+
+def test_a_queue_is_resumed_and_paused_by_its_name(page, rig):
+    try:
+        dialog, search = type_line(page, "queue control")
+        expect(dialog.locator(".task-option-name").first).to_have_text("Resume queue (Control)")
+        search.press("Enter")
+        until(page, "m.data.control.status !== 'Paused'")
+
+        run_line(page, "pause queue control")
+        until(page, "m.data.control.status === 'Paused'")
+    finally:
+        rig.get("/managers/control/pause")
+
+
+def test_clearing_a_queue_asks_first_and_cancelling_does_nothing(page, rig):
+    rig.get("/tasks/waitfor", hours=0, minutes=0, seconds=5)
+
+    run_line(page, "clear queue main")
+
+    question = page.page.get_by_role("alertdialog", name="Clear the Main queue?")
+    expect(question).to_be_visible()
+    expect(palette(page)).to_have_count(0)
+    question.get_by_role("button", name="Cancel").click()
+    expect(question).to_have_count(0)
+    assert len(queued(rig)) == 1
+
+    run_line(page, "clear queue main")
+    page.page.get_by_role("alertdialog").get_by_role("button", name="Clear queue").click()
+    until(page, "m.data.main.queue.length === 0")
+
+
+def test_aborting_asks_first(page, rig):
+    rig.get("/tasks/waitfor", hours=0, minutes=0, seconds=30)
+    rig.get("/task_manager/resume")
+    try:
+        until(page, "!!m.data.main.current_task")
+        dialog, search = type_line(page, "abort running task main")
+        expect(dialog.locator(".task-form-title")).to_have_text("Abort running task (Main)")
+        search.press("Enter")
+
+        question = page.page.get_by_role("alertdialog", name="Abort WaitFor?")
+        expect(question).to_be_visible()
+        question.get_by_role("button", name="Cancel").click()
+        expect(question).to_have_count(0)
+        assert rig.get("/managers/state").json()["data"]["main"]["current_task"]["name"] == "WaitFor"
+    finally:
+        rig.get("/task_manager/abort")
+        rig.get("/task_manager/pause")
+
+
+def test_shutting_down_asks_first(page, rig):
+    run_line(page, "shut down")
+
+    close = page.page.get_by_role("alertdialog")
+    expect(close).to_contain_text("This stops the experiment")
+    page.page.keyboard.press("Escape")
+    expect(close).to_have_count(0)
+    assert rig.get("/ping").status_code == 200
+
+
+def test_a_saved_sequence_is_loaded(page, rig):
+    rig.get("/tasks/waitfor", hours=0, minutes=1, seconds=0)
+    rig.get("/sequences/save", name="one wait", manager="main")
+    rig.get("/task_manager/clear_tasks")
+    try:
+        run_line(page, "load saved sequence 'one wait'")
+
+        expect(palette(page)).to_have_count(0)
+        assert queued(rig) == [("WaitFor", {"hours": 0, "minutes": 1, "seconds": 0})]
+    finally:
+        rig.get("/sequences/delete", name="one wait")
+
+
+def test_the_data_folder_is_only_offered_in_the_apps_window(page):
+    dialog, _ = type_line(page, "open the data folder")
+
+    expect(dialog.locator(".task-option-name", has_text="Open the data folder")).to_have_count(0)
+
+
+def test_going_to_the_last_error_is_offered_once_there_is_one(page, rig):
+    dialog, _ = type_line(page, "go to the last error")
+    expect(dialog.locator(".task-option-name", has_text="Go to the last error")).to_have_count(0)
+    page.page.keyboard.press("Escape")
+
+    rig.get("/managers/control/tasks/explode", message="kaboom")
+    rig.get("/managers/control/resume")
+    try:
+        page.page.wait_for_function(
+            "window.pyacquisition.logs.entries.some("
+            "(e) => (e.level === 'error' || e.level === 'exception') && e.message.includes('kaboom'))",
+            timeout=10000,
+        )
+        run_line(page, "go to the last error")
+
+        expect(page.page.get_by_role("tab", name="Logs")).to_have_attribute("aria-selected", "true")
+        # The newest error: the task manager's, just after the task's own.
+        expect(page.page.get_by_role("region", name="Log message")).to_contain_text("Explode failed")
+        expect(page.page.locator(".log-row.selected")).to_be_in_viewport()
+    finally:
+        rig.get("/managers/control/pause")
+        page.errors = [e for e in page.errors if "kaboom" not in e]
+
+
+def test_an_action_registered_by_a_later_feature_is_found_and_runs(page):
+    page.page.evaluate(
+        """import('/ui/js/actions.js').then((a) => a.registerAction({
+            name: "say-hello",
+            label: "Say hello",
+            tag: "Test",
+            description: "Proves an action can be added.",
+            run: () => { window.hello = "hello"; },
+        }))"""
+    )
+
+    run_line(page, "say hello")
+
+    expect(palette(page)).to_have_count(0)
+    assert page.page.evaluate("window.hello") == "hello"

@@ -64,7 +64,7 @@ def queue_of(rig, manager="main"):
 
 
 def palette(page):
-    return page.page.get_by_role("dialog", name="Queue a task or call an instrument")
+    return page.page.get_by_role("dialog", name="Command palette")
 
 
 def open_palette(page):
@@ -144,6 +144,9 @@ def test_question_mark_lists_the_shortcuts(page):
     expect(help).to_be_visible()
     expect(help.locator(".shortcut")).to_have_count(6)
     expect(help).to_contain_text("Hide or show the dock")
+    expect(help.locator(".shortcut").filter(has_text="Ctrl")).to_contain_text(
+        "Search tasks, instruments and actions, to queue, call or run one"
+    )
     page.page.keyboard.press("Escape")
     expect(help).to_have_count(0)
 
@@ -214,7 +217,7 @@ def test_ctrl_k_opens_the_palette_ready_to_search_even_from_a_field(page):
 
     dialog = open_palette(page)
 
-    expect(dialog.get_by_role("searchbox", name="Search tasks and instruments")).to_be_focused()
+    expect(dialog.get_by_role("searchbox", name="Search tasks, instruments and actions")).to_be_focused()
     names = dialog.locator(".task-option-name").all_inner_texts()
     for name in ("WaitFor", "Explode", "clock.time", "clock.start_timer"):
         assert name in names

@@ -274,7 +274,7 @@ def test_the_docs_example_queues_a_setpoint_from_the_palette(context, rig):
     try:
         page = open_tab(context, rig)
         page.page.keyboard.press("Control+k")
-        search = page.page.get_by_role("searchbox", name="Search tasks and instruments")
+        search = page.page.get_by_role("searchbox", name="Search tasks, instruments and actions")
         search.press_sequentially("lakeshore set_setpoint output_1 300")
         expect(page.page.locator(".palette-arg-ready")).to_be_visible()
 

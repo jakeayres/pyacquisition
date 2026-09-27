@@ -2527,6 +2527,11 @@ kbd {
   font-size: var(--text-xs);
 }
 
+/* An action runs at once, where a task is queued: told apart by its tag. */
+.palette-tag[data-kind="action"] {
+  color: var(--accent);
+}
+
 .palette-form {
   padding-top: var(--space-1);
 }

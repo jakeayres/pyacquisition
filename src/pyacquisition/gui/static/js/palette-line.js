@@ -21,12 +21,15 @@ const labelWords = (label) =>
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
 
-// How well an item's label matches the search: every word a word of it (3),
-// the start of one (2), in it anywhere (1), or only in the rest of its text (0).
+// How well an item's label matches the search: its words and no others (4),
+// every word a word of it (3), the start of one (2), in it anywhere (1), or only
+// in the rest of its text (0).
 function rank(item, query) {
   const wanted = words(query);
   const own = labelWords(item.label);
-  if (wanted.every((w) => own.includes(w))) return 3;
+  if (wanted.every((w) => own.includes(w))) {
+    return own.length === wanted.length ? 4 : 3;
+  }
   if (wanted.every((w) => own.some((o) => o.startsWith(w)))) return 2;
   return hasAll(item.label, query) ? 1 : 0;
 }
@@ -181,15 +184,17 @@ const listed = (names) =>
 // - `values`: the form's values, as `startingValues` gives them, with the
 //   arguments in;
 // - `given`: [[name, text]] for each input an argument filled, in the order
-//   typed;
+//   typed, then each filled as the only choice it has;
 // - `errors`: a problem by input's name, the parser's own and `checkValues`';
 // - `problems`: those that belong to no input (an unknown name);
 // - `ok`: whether it can be sent as it is.
 //
 // A choice with exactly one choice is filled first, then each name=value, then
 // each positional token goes to the next input not yet filled that can take it.
-// A word that no input left can take joins the text input just before it, so
-// `cold run` fills one text input with both words.
+// A token that is the only choice of an input filled with it is taken as given
+// (typing the one saved sequence's name is no problem). A word that no input left
+// can take joins the text input just before it, so `cold run` fills one text
+// input with both words.
 export function matchArguments(fields, argumentTokens) {
   const values = startingValues(fields);
   const filled = new Set();
@@ -202,10 +207,12 @@ export function matchArguments(fields, argumentTokens) {
     given.push([field.name, text]);
   };
 
+  const only = new Set(); // inputs filled with their only choice, not typed
   for (const field of fields) {
     if (field.type === "choice" && field.choices.length === 1) {
       values[field.name] = String(field.choices[0]);
       filled.add(field.name);
+      only.add(field.name);
     }
   }
 
@@ -224,6 +231,7 @@ export function matchArguments(fields, argumentTokens) {
       errors[field.name] = `${code(field.name)} is given twice.`;
       continue;
     }
+    only.delete(field.name); // typed after all
     const typed = typedValue(field, token.value);
     if (typed.refused) {
       errors[field.name] = `${code(token.value)} isn't ${typed.refused}.`;
@@ -239,9 +247,14 @@ export function matchArguments(fields, argumentTokens) {
   for (const token of argumentTokens.filter((t) => t.name === null)) {
     const open = fields.filter((f) => !filled.has(f.name));
     const field = open.find((f) => !typedValue(f, token.text).refused);
+    const own = fields.find((f) => only.has(f.name) && !typedValue(f, token.text).refused);
     if (field) {
       put(field, typedValue(field, token.text).value, token.text);
       last = field;
+    } else if (own) {
+      only.delete(own.name);
+      given.push([own.name, token.text]);
+      last = own;
     } else if (last?.type === "text") {
       values[last.name] = `${values[last.name]} ${token.text}`;
       const entry = given.find(([name]) => name === last.name);
@@ -256,6 +269,10 @@ export function matchArguments(fields, argumentTokens) {
     }
   }
 
+  for (const name of only) {
+    const field = fields.find((f) => f.name === name);
+    given.push([name, String(field.labels?.[0] ?? field.choices[0])]);
+  }
   const checked = checkValues(fields, values);
   for (const [name, message] of Object.entries(checked.errors ?? {})) errors[name] ??= message;
   return {

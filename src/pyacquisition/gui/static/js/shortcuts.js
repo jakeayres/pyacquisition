@@ -13,7 +13,7 @@ export const SHORTCUTS = [
   ["1 – 4", "Open the Values, Queue, Instruments or Logs tab"],
   ["`", "Hide or show the dock"],
   ["T", "Switch between the light and dark themes"],
-  ["Ctrl + K", "Queue a task, or call an instrument"],
+  ["Ctrl + K", "Search tasks, instruments and actions, to queue, call or run one"],
   ["?", "Show these shortcuts"],
 ];
 

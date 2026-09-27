@@ -30,6 +30,16 @@ const UP_KEYS = new Set(["ArrowUp", "PageUp", "Home"]);
 
 const pad = (n, width = 2) => String(n).padStart(width, "0");
 
+// A message to show, asked for from elsewhere (the palette's "Go to the last
+// error"): the Logs tab shows it whole, in view, once it is open, which may be
+// after it is asked for.
+let wanted = null;
+
+export function showLog(seq) {
+  wanted = seq;
+  window.dispatchEvent(new CustomEvent("pyacquisition:show-log", { detail: { seq } }));
+}
+
 // A message's time of day, to the millisecond, in the local time zone.
 export function logTime(seconds) {
   const d = new Date(seconds * 1000);
@@ -163,6 +173,36 @@ export function LogsTab({ store }) {
   const pressed = useRef(false);
 
   useLayoutEffect(() => save("logs", { hidden, query }), [hidden, query]);
+
+  // A message asked for (showLog): the filters that would hide it are cleared,
+  // and it is shown whole and scrolled into the middle of the list, held there.
+  const scrollTo = useRef(null); // the index of a row to bring into view
+  const showRef = useRef(null);
+  showRef.current = (seq) => {
+    const index = firstFrom(store.entries, seq);
+    if (store.entries[index]?.seq !== seq) return; // trimmed
+    wanted = null;
+    setHidden([]);
+    setQuery("");
+    setSelected(seq);
+    anchor.current = { seq, index };
+    scrollTo.current = index;
+    setFollowing(false);
+  };
+  useEffect(() => {
+    if (wanted !== null) showRef.current(wanted);
+    const onShow = (event) => showRef.current(event.detail.seq);
+    window.addEventListener("pyacquisition:show-log", onShow);
+    return () => window.removeEventListener("pyacquisition:show-log", onShow);
+  }, []);
+  // Scrolled there once the list has drawn with every message in it.
+  useLayoutEffect(() => {
+    const element = list.current;
+    if (scrollTo.current === null || !element || element.clientHeight === 0) return;
+    element.scrollTop = Math.max(0, scrollTo.current * row - element.clientHeight / 2);
+    scrollTo.current = null;
+    setView({ top: element.scrollTop, height: element.clientHeight });
+  });
 
   useEffect(() => {
     const element = list.current;

@@ -292,3 +292,21 @@ def test_a_choice_ignores_spaces_underscores_and_case_as_the_server_does(line):
     assert line("typedValue", field, "output_1") == {"value": "Output 1"}
     assert line("typedValue", field, "OUTPUT 2") == {"value": "Output 2"}
     assert line("typedValue", field, "output3") == {"refused": "one of Output 1, Output 2"}
+
+
+def test_typing_the_only_choice_of_an_input_is_no_problem(line):
+    # One saved sequence: its name is filled in, and typing it too is fine.
+    fields = [
+        {"name": "name", "title": "Sequence", "type": "choice", "required": True,
+         "choices": ["one wait"], "labels": ["one wait"]},
+        {"name": "manager", "title": "Queue", "type": "choice", "required": False,
+         "default": "main", "choices": ["main", "control"], "labels": ["Main", "Control"]},
+    ]
+
+    typed = match(line, fields, "'one wait'")
+    alone = match(line, fields, "")
+    with_queue = match(line, fields, "'one wait' control")
+
+    assert typed["ok"] and typed["given"] == [["name", "one wait"]]
+    assert alone["ok"] and alone["given"] == [["name", "one wait"]]  # shown, as filled
+    assert with_queue["values"] == {"name": "one wait", "manager": "control"}

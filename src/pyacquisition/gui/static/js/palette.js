@@ -1,7 +1,8 @@
 // The palette (Ctrl+K): one search over every task that can be queued, on each
-// task manager, and every instrument's queries and commands, with the form for
-// the one picked (forms.js). A task is queued and the palette closes; an
-// instrument's answer is shown here, and in the Instruments tab's results.
+// task manager, every instrument's queries and commands, and the interface's
+// actions (actions.js), with the form for the one picked (forms.js). A task is
+// queued and the palette closes; an instrument's answer is shown here, and in
+// the Instruments tab's results; an action runs at once.
 //
 // The inputs can be typed on the search line after the search (palette-line.js):
 // `wait 0 5` fills WaitFor's form with hours 0 and minutes 5 as it is typed, and
@@ -10,8 +11,9 @@
 // with Shift+Enter or its form's Add to queue, rather than called at once.
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { html } from "./html.js";
-import { get } from "./api.js";
+import { get, sequences } from "./api.js";
 import { EndpointForm, loadSchema, taskEndpoints, withCode } from "./forms.js";
+import { actionItems } from "./actions.js";
 import { matchArguments, searchItems, splitLine } from "./palette-line.js";
 import {
   CopyResult,
@@ -73,7 +75,12 @@ export function paletteItems(root, managerNames, instruments) {
 }
 
 // What Enter does, in the hint, by the form's button.
-const ENTER = { "Add to queue": "Enter to queue", Send: "Enter to send", Read: "Enter to read" };
+const ENTER = {
+  "Add to queue": "Enter to queue",
+  Send: "Enter to send",
+  Read: "Enter to read",
+  Run: "Enter to run",
+};
 
 // Under the search box, while arguments are typed: each input given, with its
 // value, those left to their defaults, and each problem.
@@ -98,9 +105,12 @@ function ArgumentHint({ item, match }) {
 }
 
 // `managers` is the task managers' states (polled), and `onQueued` is told
-// when a task has been queued.
-export function Palette({ managers, onQueued, onClose }) {
+// when a task has been queued. `context` is what the actions need (see
+// actions.js), with `confirm(question)`, which resolves to whether to go ahead.
+export function Palette({ managers, onQueued, onClose, context = {} }) {
   const [items, setItems] = useState(null);
+  const [tasks, setTasks] = useState({}); // the main manager's, by name, for the actions
+  const [saved, setSaved] = useState([]); // the saved sequences
   const [failed, setFailed] = useState("");
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState(null); // the id of the item picked
@@ -113,10 +123,23 @@ export function Palette({ managers, onQueued, onClose }) {
 
   useEffect(() => {
     Promise.all([loadSchema(), loadInstruments().catch(() => [])]).then(
-      ([root, instruments]) => setItems(paletteItems(root, names, instruments)),
+      ([root, instruments]) => {
+        setTasks(
+          Object.fromEntries(taskEndpoints(root, "main").map((e) => [e.path.split("/").at(-1), e])),
+        );
+        setItems(paletteItems(root, names, instruments));
+      },
       (e) => setFailed(e.message),
     );
   }, [names.join()]);
+  // What the actions depend on, fresh: the task managers' and the rack's states
+  // are polled, and a poll due in a moment would leave "Abort running task" out
+  // of a palette opened just after a task started.
+  useEffect(() => {
+    sequences().then(setSaved, () => {});
+    context.refreshManagers?.();
+    context.refreshRack?.();
+  }, []);
 
   // The search has the focus from the start; it goes back where it was after.
   useLayoutEffect(() => {
@@ -135,7 +158,12 @@ export function Palette({ managers, onQueued, onClose }) {
     };
   }, []);
 
-  const all = items ?? [];
+  // An action that can also queue its task comes before that task, which it
+  // covers (Enter now, Shift+Enter in its turn); the other actions come last.
+  const acts = items ? actionItems({ ...context, sequences: saved }, tasks) : [];
+  const all = items
+    ? [...acts.filter((a) => a.queue), ...items, ...acts.filter((a) => !a.queue)]
+    : [];
   const lockedItem = all.find((item) => item.id === locked) ?? null;
   const line = splitLine(query, all, lockedItem);
   const shown = searchItems(all, line.search);
@@ -192,6 +220,12 @@ export function Palette({ managers, onQueued, onClose }) {
   const submit = async (params) => {
     const item = current;
     setAnswer(null);
+    // An action that asks first closes the palette, and asks in its place.
+    if (item.confirm) {
+      onClose();
+      if (await context.confirm?.(item.confirm)) await item.run(params);
+      return;
+    }
     const result = await item.run(params);
     if (item.kind === "task") onQueued();
     if (item.closes) onClose();
@@ -217,7 +251,7 @@ export function Palette({ managers, onQueued, onClose }) {
   } else {
     body = html`
       <div class="palette-body">
-        <ul class="task-list palette-list" role="listbox" aria-label="Tasks and instruments" ref=${list}>
+        <ul class="task-list palette-list" role="listbox" aria-label="Tasks, instruments and actions" ref=${list}>
           ${shown.map(
             (item) => html`
               <li
@@ -275,7 +309,7 @@ export function Palette({ managers, onQueued, onClose }) {
         class="dialog palette"
         role="dialog"
         aria-modal="true"
-        aria-label="Queue a task or call an instrument"
+        aria-label="Command palette"
         ref=${dialog}
       >
         <label class="logs-search palette-search">
@@ -283,8 +317,8 @@ export function Palette({ managers, onQueued, onClose }) {
           <input
             ref=${searchBox}
             type="search"
-            placeholder="Queue a task or call an instrument…"
-            aria-label="Search tasks and instruments"
+            placeholder="Search tasks, instruments and actions…"
+            aria-label="Search tasks, instruments and actions"
             value=${query}
             onInput=${(e) => {
               const value = e.currentTarget.value;

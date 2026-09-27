@@ -81,14 +81,14 @@ Drag the top edge of the dock to make it taller or shorter, and click the open t
 | ++1++ to ++4++ | Opens the **Values**, **Queue**, **Instruments** or **Logs** tab. |
 | ++grave++ | Hides or shows the dock. |
 | ++t++ | Switches between the light and dark themes. |
-| ++ctrl+k++ | Searches every task and every instrument's queries and commands, to queue one or call one, with its inputs typed on the same line or in its form (see **The command palette**, below). |
+| ++ctrl+k++ | Searches every task, every instrument's queries and commands, and the interface's actions, to queue, call or run one, with its inputs typed on the same line or in its form (see **The command palette**, below). |
 | ++question++ | Lists these shortcuts. |
 
 None of them do anything while you are typing in a box.
 
 **The command palette**
 
-++ctrl+k++ opens a search over every task, on every task manager, and every instrument's queries and commands. Type a few letters of what you want: the best match is picked, with its form beside the list, and the arrow keys pick another.
+++ctrl+k++ opens a search over every task, on every task manager, every instrument's queries and commands, and the interface's actions. Type a few letters of what you want: the best match is picked, with its form beside the list, and the arrow keys pick another.
 
 Its inputs can be typed on the same line, after the search, and the form fills in as you type:
 
@@ -104,6 +104,7 @@ Its inputs can be typed on the same line, after the search, and the form fills i
 - ++tab++ fixes the item picked, so everything typed after its name is its inputs, even words that other items have.
 - A line under the search shows each input and its value, and anything wrong, which is marked on the form too.
 - ++enter++ queues the task, sends the command or reads the query when its inputs are all there and right, or when it takes none. Otherwise it goes to the form: to the first input that is wrong, or, with nothing typed after the search, to the first input, to fill it in there.
+- **Actions** are found the same way: what the interface's buttons and keys do, which run at once. For example **New data file**, **Pause measurements**, **Set measurement period**, **Pause queue**, **Clear queue**, **Load saved sequence**, **Open the Logs tab**, **Add a column to a plot**, **Switch to the dark theme**, **Go to the last error** and **Shut down the experiment**. Their tag says what they act on (Experiment, Queue, Plot or View). Those that can't be undone, such as aborting a task, ask first. The four that a task can also do, **New data file**, **Pause measurements**, **Resume measurements** and **Set measurement period**, run at once on ++enter++, and ++shift+enter++ queues their task instead (`NewFile`, `PauseMeasurements`, and so on). `set measurement period 10` and ++shift+enter++ slows the measurements once the tasks before it are done.
 - An instrument's query or command can also be **queued**, to run in its turn like a task, with the inputs it has now: ++shift+enter++ queues it, and so does its form's **Add to queue**. `lakeshore set_setpoint output_1 300` and ++shift+enter++ sets the setpoint once the tasks before it are done. With more than one task manager, the list beside **Add to queue** picks which queue.
 
 ## Your data
