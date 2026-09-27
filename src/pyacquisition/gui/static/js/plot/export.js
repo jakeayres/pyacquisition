@@ -1,6 +1,8 @@
 // Exporting a plot: as an image of what it shows (the plot and its axes, as
 // drawn, with a legend above), or as the data in view (the rows whose x is on
-// the x axis now, of the columns it plots) in a CSV file.
+// the x axis now, of the columns it plots) in a CSV file. The third export, a
+// Python script, is written by the server (/experiment/plot_script) from
+// `scriptSettings`.
 //
 // In the app's window the file is saved where a Save dialog says (the window
 // doesn't download); in a browser it downloads.
@@ -12,7 +14,7 @@ const GAP = 16; // between one entry and the next
 const cssValue = (name) =>
   getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
-const colourOf = (slot) => cssValue(slot ? `--series-${slot}` : "--series-other");
+export const colourOf = (slot) => cssValue(slot ? `--series-${slot}` : "--series-other");
 const withUnit = (name, units) => (units[name] ? `${name} (${units[name]})` : name);
 
 // Where a legend's entries go: rows of [{text, x}], as wide as `width`.
@@ -107,6 +109,35 @@ export function viewCsv(store, { x, series, units, showPrevious, range }) {
   return `${lines.join("\r\n")}\r\n`;
 }
 
+// A colour as #rrggbb, however the theme writes it: a canvas gives an opaque
+// colour back in that form.
+function hexColour(colour) {
+  const ctx = document.createElement("canvas").getContext("2d");
+  ctx.fillStyle = "#000000";
+  ctx.fillStyle = colour;
+  return ctx.fillStyle;
+}
+
+// The plot's settings, as /experiment/plot_script takes them: the series shown,
+// each in its colour on screen, and both axes' ranges as they show now
+// (`scales`) if either axis is `held` (by a zoom, a pan or fixed limits), or
+// neither, to fit the data.
+export function scriptSettings({ x, series, marks, logX, logY, showPrevious }, scales, held) {
+  const range = (axis) => (held ? [scales[axis].min, scales[axis].max] : null);
+  return {
+    x,
+    series: series
+      .filter((s) => !s.hidden)
+      .map((s) => ({ name: s.name, colour: hexColour(colourOf(s.slot)) })),
+    marks: marks ?? "lines",
+    log_x: !!logX,
+    log_y: !!logY,
+    x_limits: range("x"),
+    y_limits: range("y"),
+    previous: !!showPrevious,
+  };
+}
+
 // A file name from what the plot shows, without characters a file can't have.
 export function exportName(store, { x, series }, extension) {
   const file = (store.current.file ?? "plot").replace(/\.[^.]+$/, "");
@@ -124,6 +155,9 @@ function base64Of(blob) {
   });
 }
 
+// The media type of a downloaded text file, by its extension.
+const MEDIA_TYPES = { csv: "text/csv", py: "text/x-python" };
+
 // Saves text or a blob as a file called `name`. In the app's window, a Save
 // dialog asks where; it resolves to where it went, or null if cancelled. In a
 // browser, it downloads, and resolves to the name.
@@ -134,8 +168,9 @@ export async function saveFile(name, content) {
       ? api.save_file(name, content, null)
       : api.save_file(name, null, await base64Of(content));
   }
+  const type = MEDIA_TYPES[name.split(".").pop().toLowerCase()] ?? "text/plain";
   const blob =
-    typeof content === "string" ? new Blob([content], { type: "text/csv;charset=utf-8" }) : content;
+    typeof content === "string" ? new Blob([content], { type: `${type};charset=utf-8` }) : content;
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = name;

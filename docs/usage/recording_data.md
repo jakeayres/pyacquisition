@@ -96,6 +96,8 @@ print(data[["T", "x", "R"]].describe())
 
 `describe()` prints the count, mean, spread and range of each column. Notice the file name has a space in it, so keep the quotes.
 
+To draw a plot from a file, the quickest start is a plot's download button: **Python script (matplotlib)** saves a script that reads the data files and draws that plot, to change as you like (see [the plots](running.md#the-interface)).
+
 !!! success "Checkpoint"
     `my_data` holds a `00.00 start.data` and a `00.01 cold.data`, and the second has the columns `time`, `T`, `x`, `y` and `R`.
 

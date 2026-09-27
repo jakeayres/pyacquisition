@@ -185,7 +185,11 @@ class _Api:
         import base64 as b64
 
         suffix = os.path.splitext(name)[1].lower()
-        kinds = {".png": "PNG image (*.png)", ".csv": "CSV file (*.csv)"}
+        kinds = {
+            ".png": "PNG image (*.png)",
+            ".csv": "CSV file (*.csv)",
+            ".py": "Python script (*.py)",
+        }
         chosen = ask_where_to_save(
             self._owner.window,
             directory=data_folder(self._owner.server) or "",

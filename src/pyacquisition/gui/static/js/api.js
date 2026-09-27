@@ -39,6 +39,26 @@ async function failure(path, response) {
   return new Error(`${path} failed with status ${status}`);
 }
 
+// Posts `body` as JSON, and gives the JSON answer.
+export async function post(path, body, { timeout = 5000 } = {}) {
+  const response = await fetch(path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(timeout),
+  });
+  if (!response.ok) throw await failure(path, response);
+  return response.json();
+}
+
+// A Python script that draws a plot with matplotlib, from its settings (see
+// /experiment/plot_script): {x, series: [{name, colour}], marks, log_x, log_y,
+// x_limits, y_limits, previous}.
+export async function plotScript(body) {
+  const { data } = await post("/experiment/plot_script", body);
+  return data;
+}
+
 export async function getBinary(path, { params, timeout = 5000 } = {}) {
   const query = params ? `?${new URLSearchParams(params)}` : "";
   const response = await fetch(`${path}${query}`, {

@@ -6,7 +6,8 @@ import { useRef, useState } from "preact/hooks";
 import { html } from "../html.js";
 import { usePopover } from "../hooks.js";
 import { AxesIcon, CopyIcon, CloseIcon, DownloadIcon } from "../icons.js";
-import { exportName, plotImage, saveFile, viewCsv } from "./export.js";
+import { plotScript } from "../api.js";
+import { exportName, plotImage, saveFile, scriptSettings, viewCsv } from "./export.js";
 import { colourVar, isTimeColumn } from "../colours.js";
 import { Plot } from "./plot.js";
 
@@ -303,8 +304,9 @@ function AxesMenu({ limits, logX, logY, scalesRef, onApply }) {
   `;
 }
 
-// Exporting the plot: as an image of it, or the data in view as CSV (export.js).
-// A message says where it went, for a few seconds.
+// Exporting the plot: as an image of it, the data in view as CSV (export.js), or
+// a Python script that draws it with matplotlib (written by the server). A
+// message says where it went, for a few seconds.
 function ExportMenu({ store, plotRef, scalesRef, what }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState(null); // {text, failed}
@@ -326,7 +328,11 @@ function ExportMenu({ store, plotRef, scalesRef, what }) {
       const content =
         kind === "png"
           ? await plotImage(u, what)
-          : viewCsv(store, { ...what, range: scalesRef.current().x });
+          : kind === "py"
+            ? await plotScript(
+                scriptSettings(what, scalesRef.current(), manualAxes(what.view, what.limits).length > 0),
+              )
+            : viewCsv(store, { ...what, range: scalesRef.current().x });
       const where = await saveFile(exportName(store, what, kind), content);
       if (where) tell(`Saved ${where}`);
     } catch (error) {
@@ -353,6 +359,9 @@ function ExportMenu({ store, plotRef, scalesRef, what }) {
           </button>
           <button class="export-item" role="menuitem" onClick=${() => run("csv")}>
             Data in view (CSV)
+          </button>
+          <button class="export-item" role="menuitem" onClick=${() => run("py")}>
+            Python script (matplotlib)
           </button>
         </div>
       `}
@@ -434,7 +443,7 @@ export function PlotPanel({
             store=${store}
             plotRef=${plotRef}
             scalesRef=${scalesRef}
-            what=${{ x, series, units, showPrevious }}
+            what=${{ x, series, units, showPrevious, view, limits, marks, logX, logY }}
           />
           ${onDuplicate &&
           html`

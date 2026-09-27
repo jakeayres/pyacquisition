@@ -1,9 +1,11 @@
-"""Exporting a plot as an image, or the data in view as CSV (milestone 16)."""
+"""Exporting a plot as an image, the data in view as CSV (milestone 16), or a
+Python script that draws it with matplotlib (plot-script, milestone 2)."""
 
 import base64
 import csv
 import io
 import math
+import runpy
 
 import pytest
 
@@ -193,3 +195,111 @@ def test_a_failed_export_says_so(context, rig):
     page.page.get_by_role("menuitem", name="Image of the plot (PNG)").click()
 
     expect(page.page.locator(".export-message")).to_contain_text("Couldn't export")
+
+
+# -------------------------------------------------------------- the script
+def script_of(download):
+    return downloaded_bytes(download).decode("utf-8")
+
+
+def colour_of(page, slot):
+    return page.page.evaluate(
+        f"getComputedStyle(document.documentElement).getPropertyValue('--series-{slot}').trim()"
+    )
+
+
+def test_the_menu_offers_the_image_the_data_and_a_script(context, rig):
+    page = open_page(context, rig)
+
+    page.page.get_by_role("button", name="Export").click()
+
+    expect(page.page.get_by_role("menu", name="Export").get_by_role("menuitem")).to_have_text(
+        ["Image of the plot (PNG)", "Data in view (CSV)", "Python script (matplotlib)"]
+    )
+
+
+def test_the_script_draws_what_the_panel_shows(context, rig, monkeypatch, tmp_path):
+    matplotlib = pytest.importorskip("matplotlib")
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    page = open_page(context, rig)
+    hold_still(rig, page)
+
+    download = export(page, "Python script (matplotlib)")
+
+    assert download.suggested_filename.endswith(" - wave vs time.py")
+    script = script_of(download)
+    current = rig.get("/scribe/current_file").json()["data"]
+    assert f'FILE = "{current}"' in script
+    colour = colour_of(page, 1).lower()
+    assert f'data["wave"], "-", color="{colour}"' in script
+    assert "set_xlim" not in script and "set_ylim" not in script  # scaling to the data
+
+    # And it runs, drawing the rig's data.
+    monkeypatch.setattr(plt, "show", lambda *args, **kwargs: None)
+    path = tmp_path / "scripts" / "plot.py"
+    path.parent.mkdir()
+    path.write_text(script, encoding="utf-8")
+    runpy.run_path(str(path))
+    (ax,) = plt.gcf().axes
+    (line,) = ax.get_lines()
+    assert line.get_label() == "wave" and ax.get_xlabel() == "time (s)"
+    assert len(line.get_xdata()) > 40
+    plt.close("all")
+    assert page.errors == []
+
+
+def test_with_x_fixed_the_script_sets_both_axes_as_the_plot_shows_them(context, rig):
+    page = open_page(context, rig, rows=60)
+    hold_still(rig, page)
+    (segment,) = history(rig)
+    times = segment["columns"]["time"]
+    low, high = times[10], times[30]
+    fix_x(page, low, high)
+    page.page.wait_for_function(f"window.pyacquisition.plot.scales.x.min === {low}")
+
+    script = script_of(export(page, "Python script (matplotlib)"))
+
+    y = page.page.evaluate("(({min, max}) => [min, max])(window.pyacquisition.plot.scales.y)")
+    assert f"ax.set_xlim({float(low)!r}, {float(high)!r})" in script
+    assert f"ax.set_ylim({float(y[0])!r}, {float(y[1])!r})" in script
+
+
+def test_with_the_previous_file_shown_the_script_reads_it(context, rig):
+    page = open_page(context, rig, rows=20)
+    rig.get("/scribe/next_file", title="second")
+    page.page.wait_for_function("window.pyacquisition.store.current.rows > 10")
+    hold_still(rig, page)
+
+    script = script_of(export(page, "Python script (matplotlib)"))
+
+    assert 'FILE = "00.01 second.data"' in script
+    assert 'PREVIOUS_FILE = "00.00 start.data"' in script
+
+
+def test_a_hidden_series_is_not_in_the_script(context, rig):
+    page = open_page(context, rig)
+    page.page.locator(".series-add").select_option("double")
+    expect(page.page.locator(".series-chip")).to_have_count(2)
+    page.page.locator(".series-chip").filter(has_text="wave").locator(".series-toggle").click()
+    hold_still(rig, page)
+
+    script = script_of(export(page, "Python script (matplotlib)"))
+
+    assert 'data["double"]' in script
+    assert '"wave"' not in script
+
+
+def test_a_script_the_server_refuses_says_why(context, rig):
+    page = open_page(context, rig)
+    reason = "No data has been written yet, so there is nothing to plot."
+    page.page.route(
+        "**/experiment/plot_script",
+        lambda route: route.fulfill(status=409, json={"detail": reason}),
+    )
+
+    page.page.get_by_role("button", name="Export").click()
+    page.page.get_by_role("menuitem", name="Python script (matplotlib)").click()
+
+    expect(page.page.locator(".export-message")).to_have_text(f"Couldn't export: {reason}")

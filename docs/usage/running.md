@@ -50,13 +50,14 @@ The window is a page served by the experiment itself, so you can also open it in
 
 **The plots**
 
-Each plot shows one or more columns against another. The chips along its top are the columns plotted, each in its own colour (the same colour as its tile in the **Values** tab): click one to hide or show it, click its **×** to take it off, and use **+ Add** to add another. **against** chooses the horizontal axis. **Lines**, **Points** and **Both** choose how it is drawn. The axis button sets fixed limits or a log scale for either axis, the download button saves the plot as a picture or the data in view as a CSV file, and the last buttons copy or remove the plot.
+Each plot shows one or more columns against another. The chips along its top are the columns plotted, each in its own colour (the same colour as its tile in the **Values** tab): click one to hide or show it, click its **×** to take it off, and use **+ Add** to add another. **against** chooses the horizontal axis. **Lines**, **Points** and **Both** choose how it is drawn. The axis button sets fixed limits or a log scale for either axis, the download button saves the plot as a picture, the data in view as a CSV file, or a Python script that draws it, and the last buttons copy or remove the plot.
 
 - **Zoom** by dragging a box. A thin box zooms one axis only. **Pan** by dragging with Shift or the middle button, or by scrolling. Ctrl and the scroll wheel zoom about the pointer.
 - While zoomed or panned, the plot holds that view as data arrives, and says **Autoscale off**. **Autoscale** there, or a double-click, sets it following the data again.
 - Hover over a plot to read the values of the nearest row.
 - **+ Add plot** adds another (up to six), and **Link x-axes** zooms and pans the x axes of plots against the same column together.
 - The plots show the whole of the current data file, and the file before it, drawn fainter (the key at the top right hides or shows it). Calculated columns can be plotted too.
+- **Export**, then **Python script (matplotlib)**, saves a script that draws the plot again with matplotlib, for a paper or a slide: the same columns, labels, log axes, marks and colours, and the same limits if the plot was zoomed or had fixed limits. It reads the data files where they are (or beside itself, if they have moved), and draws the whole of each file as it stands when you run it, not only what the plot held. It needs pandas and matplotlib (`pip install pandas matplotlib`). It is plain code, meant to be changed: fonts, sizes, labels, anything.
 
 **The dock**
 

@@ -680,6 +680,18 @@ def test_an_image_is_saved_from_its_base64(monkeypatch, tmp_path):
     assert target.read_bytes() == png
 
 
+def test_a_script_is_offered_as_one_and_saved_as_given(monkeypatch, tmp_path):
+    target = tmp_path / "plot.py"
+    api, dialog = api_with(monkeypatch, tmp_path, [str(target)])
+    script = '"""A plot."""\n\nprint("Température")\n'
+
+    api.save_file("00.00 start - T vs time.py", text=script)
+
+    assert target.read_bytes() == script.encode("utf-8")
+    assert dialog.asked["types"] == ("Python script (*.py)",)
+    assert dialog.asked["directory"] == str(tmp_path)
+
+
 def test_a_cancelled_dialog_saves_nothing(monkeypatch, tmp_path):
     api, _ = api_with(monkeypatch, tmp_path, None)
 
