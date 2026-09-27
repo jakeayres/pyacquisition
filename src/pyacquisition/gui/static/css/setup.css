@@ -1,10 +1,18 @@
 /* The setup page (js/setup/): the sections down the left, the one picked in the
    middle, and the file it makes on the right. Every value comes from tokens.css. */
 
+/* A column: the top bar, the banner when there is one, and the body filling
+   the rest. (A grid's rows put the body in the banner's row when there was none,
+   and it stopped short of the window's bottom.) */
 .setup-app {
-  display: grid;
-  grid-template-rows: var(--topbar-height) auto minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   height: 100%;
+}
+
+.setup-app > .topbar {
+  flex: none;
+  height: var(--topbar-height);
 }
 
 .setup-path {
@@ -38,6 +46,7 @@
 
 .setup-body {
   display: grid;
+  flex: 1;
   grid-template-columns: 180px minmax(0, 1fr) minmax(320px, 38%);
   min-height: 0;
 }
@@ -314,4 +323,25 @@
   flex: none;
   align-items: center;
   gap: var(--space-1);
+}
+
+/* ------------------------------------------------------------ calculations */
+
+.setup-columns {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.setup-columns legend {
+  margin-bottom: var(--space-1);
+  padding: 0;
+  font-weight: var(--weight-medium);
+}
+
+.setup-columns-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  font-family: var(--font-mono);
 }
