@@ -17,6 +17,7 @@ nav = [
   { "Basic Usage" = [
     { "Introduction" = "usage/introduction.md" },
     { "Installation" = "usage/installation.md" },
+    { "Setting Up in the Interface" = "usage/setup_page.md" },
     { "1. Your First Experiment" = "usage/first_experiment.md" },
     { "2. A Simulated Rig" = "usage/simulated_rig.md" },
     { "3. Recording Data" = "usage/recording_data.md" },

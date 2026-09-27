@@ -124,6 +124,8 @@ Open [http://localhost:8000/docs](http://localhost:8000/docs) in your browser (a
 
 ## An alternative way to start
 
+`pyacquisition new rig.toml` opens a window in which you build or change a TOML config from forms, and run it from there. See [Setting Up in the Interface](setup_page.md).
+
 `pyacquisition --py my_experiment.py` finds the first `Experiment` class in the file, creates it and runs it, so the file needs no `if __name__ == "__main__":` block. It only works for experiments in a single, self-contained file: modules that sit next to your script are not importable this way. Otherwise use `python my_experiment.py`.
 
 ## A standalone application

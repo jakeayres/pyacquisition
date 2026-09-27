@@ -95,3 +95,6 @@ Run it again and look in `my_data`. This time there is also a `01.00 start.data`
 - The interface, the recording and the files all come from `Experiment`. You only describe *what* to measure.
 
 Next: [make it a rig with real things to measure](simulated_rig.md).
+
+!!! tip "Rather not write code?"
+    An experiment can also be described in a TOML file, and `uv run pyacquisition new rig.toml` builds one for you from forms, in a window. See [Setting Up in the Interface](setup_page.md). The lessons here use Python, which is where your own tasks and calculations go.
