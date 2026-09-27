@@ -56,13 +56,13 @@ class Experiment:
 
     Attributes:
         root_path (str): The base folder for the data and log folders. Defaults to ".".
-        data_path (str): The folder for data files, inside `root_path`. Defaults to ".".
+        data_path (str): The folder for data files, inside `root_path`. Defaults to "data".
         data_file_extension (str): The extension of data files. Defaults to "data".
         data_delimiter (str): The column separator in data files. Defaults to ",".
         history_points (int): The most rows kept in memory for the GUI (the
             current data file and the one before it), from 100 to 100,000,000. Each
             numeric column takes 8 bytes a row. Defaults to 500,000.
-        log_path (str): The folder for the log file, inside `root_path`. Defaults to ".".
+        log_path (str): The folder for the log file, inside `root_path`. Defaults to "logs".
         log_file_name (str): The name of the log file. Defaults to "debug.log".
         console_log_level (str): The logging level for console output. Defaults to "DEBUG".
         file_log_level (str): The logging level for file output. Defaults to "DEBUG".

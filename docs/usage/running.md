@@ -84,7 +84,7 @@ None of them do anything while you are typing in a box.
 
 ## Your data
 
-Data is written to a comma separated file in the folder you chose with `data_path`. Each file has a header row of measurement names, then one row per measurement cycle:
+Data is written to a comma separated file in a `data` folder, or the folder you chose with `data_path`. Each file has a header row of measurement names, then one row per measurement cycle:
 
 ```
 time
@@ -100,7 +100,7 @@ Files are named `<block>.<step> <title>.data`, for example `00.00 start.data`.
 - Each time you run the experiment, a new **block** is started, so nothing from a previous run is overwritten. The first run in a folder writes `00.00 start.data`, the next run `01.00 start.data`, and so on.
 - Within a block, starting a new file increments the **step**: `00.01 gaussian.data`, `00.02 uniform.data`. You can start a new file from the **Data file** button in the top bar, or from a task. [Measurements and data files](measurements.md) covers this in more detail.
 
-The log is written to `debug.log` (see [`log_path` and `log_file_name`](setting_up.md#experiment-options)).
+The log is written to `logs/debug.log` (see [`log_path` and `log_file_name`](setting_up.md#experiment-options)).
 
 ## Stopping
 

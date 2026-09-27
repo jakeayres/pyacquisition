@@ -176,7 +176,7 @@ SETTINGS = {
             kind="path",
         ),
         Setting(
-            "data_path", ".", _path, "data", "path",
+            "data_path", "data", _path, "data", "path",
             help="The folder for the data files, inside `root_path`.",
             kind="path",
         ),
@@ -199,7 +199,7 @@ SETTINGS = {
             kind="count",
         ),
         Setting(
-            "log_path", ".", _path, "logging", "path",
+            "log_path", "logs", _path, "logging", "path",
             help="The folder for the log file, inside `root_path`.",
             kind="path",
         ),

@@ -158,7 +158,7 @@ The `[data]` section describes the configuration of the data files.
 
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
-| `path` | The folder for the data files, inside `root_path`. | `.`           |
+| `path` | The folder for the data files, inside `root_path`. | `data`        |
 | `file_extension` | The extension of the data files, without the dot. | `data` |
 | `delimiter` | The character between the columns of the data files. | `,` |
 | `history_points` | The most rows kept in memory for the interface's plots, from 100 to 100,000,000, where each numeric column takes 8 bytes a row. | `500000` |
@@ -191,7 +191,7 @@ This section defines the various logging levels and location of log files produc
 
 | Parameter Name  | Description                          | Default Value |
 |-----------------|--------------------------------------|---------------|
-| `path` | The folder for the log file, inside `root_path`. | `.` |
+| `path` | The folder for the log file, inside `root_path`. | `logs` |
 | `console_level` | The least serious messages shown in the console. | `DEBUG`       |
 | `gui_level` | The least serious messages shown in the interface's log. | `DEBUG`       |
 | `file_level` | The least serious messages written to the log file. | `DEBUG`       |

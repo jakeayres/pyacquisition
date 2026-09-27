@@ -34,11 +34,11 @@ This saves data to `C:/data/cooldown_1`, keeps the terminal quiet, and records e
 | Option | Default | Meaning |
 |---|---|---|
 | `root_path` | `"."` | The base folder for the data and log folders below. |
-| `data_path` | `"."` | Folder for data files, inside `root_path`. |
+| `data_path` | `"data"` | Folder for data files, inside `root_path`. |
 | `data_file_extension` | `"data"` | File extension for data files. |
 | `data_delimiter` | `","` | Column separator in data files. |
 | `measurement_period` | `0.25` | Target time between measurement cycles, in seconds. |
-| `log_path` | `"."` | Folder for the log file, inside `root_path`. |
+| `log_path` | `"logs"` | Folder for the log file, inside `root_path`. |
 | `log_file_name` | `"debug.log"` | Name of the log file. |
 | `console_log_level` | `"DEBUG"` | How much is printed in the terminal. `"DEBUG"` is very verbose. `"INFO"` is quieter. |
 | `file_log_level` | `"DEBUG"` | How much is written to the log file. |

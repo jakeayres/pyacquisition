@@ -27,7 +27,8 @@ def test_every_option_is_a_class_attribute_with_its_default():
 
 
 def test_the_defaults_are_the_documented_ones():
-    assert Experiment.data_path == "."
+    assert Experiment.data_path == "data"
+    assert Experiment.log_path == "logs"
     assert Experiment.measurement_period == 0.25
     assert Experiment.api_server_port == 8000
     assert Experiment.gui is True
@@ -65,7 +66,8 @@ def test_options_left_out_keep_their_defaults(root):
     experiment = MyExperiment()
 
     assert experiment._rack.period == 0.25
-    assert experiment._data_path == experiment._root_path
+    assert experiment._data_path == experiment._root_path / "data"
+    assert experiment._log_path == experiment._root_path / "logs"
 
 
 def test_an_argument_beats_a_class_attribute(root):
@@ -126,8 +128,8 @@ def test_subclasses_do_not_leak_into_one_another(root):
         root_path = root
         gui = False
 
-    assert Second()._data_path == Second()._root_path
-    assert Experiment.data_path == "."
+    assert Second()._data_path == Second()._root_path / "data"  # the default
+    assert Experiment.data_path == "data"
     assert First.data_path == "first"
 
 
