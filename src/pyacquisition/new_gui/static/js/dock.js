@@ -59,6 +59,13 @@ export function Dock({ tabs }) {
     return () => window.removeEventListener("pyacquisition:open-tab", open);
   }, [tabs.map((tab) => tab.id).join()]);
 
+  // The ` shortcut hides or shows it.
+  useEffect(() => {
+    const toggle = () => setCollapsed((current) => !current);
+    window.addEventListener("pyacquisition:toggle-dock", toggle);
+    return () => window.removeEventListener("pyacquisition:toggle-dock", toggle);
+  }, []);
+
   // A smaller window can leave the dock too tall for it.
   useEffect(() => {
     const onResize = () => setHeight((current) => clamp(current));

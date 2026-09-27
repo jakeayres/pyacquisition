@@ -379,13 +379,15 @@ export function PlotPanel({
   theme,
   view,
   onView,
+  scalesRef: givenScales = null,
 }) {
   const { x, logX, logY } = panel;
   const marks = panel.marks ?? "lines";
   const limits = panel.limits ?? null;
   const series = panel.series.map((s) => ({ ...s, slot: slots.get(s.name) ?? null }));
   const saved = (list) => list.map(({ name, hidden }) => ({ name, hidden }));
-  const scalesRef = useRef(null); // what the plot's axes show now
+  const ownScales = useRef(null);
+  const scalesRef = givenScales ?? ownScales; // what the plot's axes show now
   const plotRef = useRef(null); // the uPlot, to export
   const set = (change, reframe = false) => {
     onChange(change);

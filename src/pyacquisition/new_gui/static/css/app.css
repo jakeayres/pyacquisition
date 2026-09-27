@@ -2342,6 +2342,137 @@ body.dragging-task * {
   font-size: var(--text-sm);
 }
 
+/* ------------------------------------------------- the palette, shortcuts */
+
+kbd {
+  display: inline-block;
+  min-width: 20px;
+  padding: 1px 5px;
+  border: var(--border-width) solid var(--border-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  line-height: 16px;
+  text-align: center;
+}
+
+/* Near the top, as palettes are, so the list grows down. */
+.overlay.palette-overlay {
+  place-items: start center;
+  padding-top: 12vh;
+}
+
+.dialog.palette {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: min(820px, 100%);
+  height: min(520px, 100%);
+  padding: var(--space-3);
+}
+
+.logs-search.palette-search {
+  flex: none;
+  height: 38px;
+}
+
+.palette-search svg {
+  width: 16px;
+  height: 16px;
+}
+
+.logs-search.palette-search input {
+  font-size: var(--text-lg);
+}
+
+.palette-hint {
+  color: var(--text-muted);
+}
+
+.palette-body {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: var(--space-4);
+  min-height: 0;
+}
+
+.palette-option-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.palette-option-head .task-option-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.palette-tag {
+  flex: none;
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.palette-form {
+  padding-top: var(--space-1);
+}
+
+.palette-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius);
+  background: var(--surface-hover);
+}
+
+.palette-answer .result-value {
+  font-weight: var(--weight-strong);
+}
+
+.dialog.shortcut-help {
+  width: min(520px, 100%);
+}
+
+.shortcut-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+.shortcut {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.shortcut dt {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shortcut dd {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.shortcut-join {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
 /* ----------------------------------------------------------------- logs tab */
 
 .logs {

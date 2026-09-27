@@ -1,7 +1,7 @@
 // The plot area: one or more plot panels in an automatic grid, a way to add
 // more, an option to link their x axes, and a key to the current and previous
 // data files (for every panel).
-import { useLayoutEffect, useState } from "preact/hooks";
+import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { html } from "../html.js";
 import { useStore } from "../hooks.js";
 import { load, save } from "../session.js";
@@ -76,6 +76,32 @@ export function PlotArea({ store, columns, theme }) {
   const [state, setState] = useState(savedPlots);
   const [views, setViews] = useState({}); // zooms, by panel id; none: autoscaling
   useLayoutEffect(() => save("plots", state), [state]);
+  const scales = useRef(new Map()); // each panel's scalesRef, by panel id
+  const scalesOf = (id) => {
+    if (!scales.current.has(id)) scales.current.set(id, { current: null });
+    return scales.current.get(id);
+  };
+  const viewsNow = useRef(views);
+  viewsNow.current = views;
+
+  // The Space shortcut: every plot holds where it is, or, if any is held (by a
+  // zoom, a pan or Space), they all follow the data again. Fixed limits stay.
+  useEffect(() => {
+    const toggle = () => {
+      if (Object.values(viewsNow.current).some(Boolean)) {
+        setViews({});
+        return;
+      }
+      const held = {};
+      for (const [id, ref] of scales.current) {
+        const now = ref.current?.();
+        if (now) held[id] = { x: now.x, y: now.y };
+      }
+      setViews(held);
+    };
+    window.addEventListener("pyacquisition:toggle-hold", toggle);
+    return () => window.removeEventListener("pyacquisition:toggle-hold", toggle);
+  }, []);
 
   if (names.length === 0) {
     return html`
@@ -101,7 +127,10 @@ export function PlotArea({ store, columns, theme }) {
     update({ panels: [...panels.slice(0, at + 1), copy, ...panels.slice(at + 1)] });
     setViews((v) => ({ ...v, [copy.id]: v[id] ?? null }));
   };
-  const remove = (id) => update({ panels: panels.filter((p) => p.id !== id) });
+  const remove = (id) => {
+    scales.current.delete(id);
+    update({ panels: panels.filter((p) => p.id !== id) });
+  };
   const change = (id, delta) =>
     update({ panels: panels.map((p) => (p.id === id ? { ...p, ...delta } : p)) });
 
@@ -179,6 +208,7 @@ export function PlotArea({ store, columns, theme }) {
                 theme=${theme}
                 view=${views[panel.id] ?? null}
                 onView=${(next) => setView(panel.id, next)}
+                scalesRef=${scalesOf(panel.id)}
               />
             </div>
           `,

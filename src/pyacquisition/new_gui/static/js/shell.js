@@ -23,7 +23,9 @@ import {
 import { useTheme } from "./theme.js";
 import { Dock } from "./dock.js";
 import { CloseDialog } from "./close-dialog.js";
-import { LogoMark, MoonIcon, SunIcon } from "./icons.js";
+import { KeyboardIcon, LogoMark, MoonIcon, SunIcon } from "./icons.js";
+import { ShortcutHelp, useShortcuts } from "./shortcuts.js";
+import { Palette } from "./palette.js";
 import { PlotArea } from "./plot/area.js";
 
 const CONNECTION_LABELS = {
@@ -103,7 +105,7 @@ function useExperimentName(connection) {
   return name;
 }
 
-function TopBar({ name, connection, theme, onToggleTheme, store, managers, rack, alerts }) {
+function TopBar({ name, connection, theme, onToggleTheme, onHelp, store, managers, rack, alerts }) {
   useStore(store); // for the data file, which the data stream announces
   const file = store.current.file;
   const scribe = useScribe(connection, file);
@@ -125,6 +127,14 @@ function TopBar({ name, connection, theme, onToggleTheme, store, managers, rack,
           <span class="connection-dot"></span>
           ${CONNECTION_LABELS[connection]}
         </span>
+        <button
+          class="icon-button"
+          aria-label="Keyboard shortcuts"
+          title="Keyboard shortcuts (?)"
+          onClick=${onHelp}
+        >
+          <${KeyboardIcon} />
+        </button>
         <button
           class="icon-button"
           aria-label="Switch to the ${next} theme"
@@ -150,6 +160,13 @@ export function App() {
   const columns = useColumns(connection);
   const [alerts] = useState(() => new AlertStore());
   useAlertWatch({ alerts, connection, store, logs, managers, rack });
+  const [palette, setPalette] = useState(false);
+  const [help, setHelp] = useState(false);
+  useShortcuts({
+    onToggleTheme: toggle,
+    onPalette: () => setPalette((open) => !open),
+    onHelp: () => setHelp(true),
+  });
   return html`
     <div class="app">
       <${TopBar}
@@ -157,6 +174,7 @@ export function App() {
         connection=${connection}
         theme=${theme}
         onToggleTheme=${toggle}
+        onHelp=${() => setHelp(true)}
         store=${store}
         managers=${managers}
         rack=${rack}
@@ -166,6 +184,13 @@ export function App() {
       <${Dock} tabs=${dockTabs({ store, logs, columns, managers })} />
     </div>
     <${AlertToasts} alerts=${alerts} />
+    ${palette &&
+    html`<${Palette}
+      managers=${managers.states}
+      onQueued=${managers.refresh}
+      onClose=${() => setPalette(false)}
+    />`}
+    ${help && html`<${ShortcutHelp} onClose=${() => setHelp(false)} />`}
     <${CloseDialog} />
   `;
 }

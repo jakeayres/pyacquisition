@@ -124,6 +124,12 @@ export const BellIcon = () =>
     <path d="M10 20.5a2 2 0 0 0 4 0" />
   `);
 
+export const KeyboardIcon = () =>
+  stroke(html`
+    <rect x="2.5" y="6" width="19" height="12" rx="2" />
+    <path d="M6.5 10h.01M10 10h.01M14 10h.01M17.5 10h.01M8 14h8" />
+  `);
+
 export const PlusIcon = () => stroke(html`<path d="M12 5v14M5 12h14" />`);
 
 // Aborting a task.

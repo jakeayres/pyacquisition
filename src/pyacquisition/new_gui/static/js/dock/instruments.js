@@ -6,13 +6,37 @@ import { html } from "../html.js";
 import { get } from "../api.js";
 import { EndpointForm, describeEndpoint, loadSchema, withCode } from "../forms.js";
 import { load, save } from "../session.js";
+import { Watched } from "../store.js";
+import { useStore } from "../hooks.js";
 import { SearchIcon } from "../icons.js";
 
 const KEEP = 50; // results kept for each instrument
 
 // The results of the calls made, by instrument, newest first. Kept outside the
-// tab, so they outlast it being closed and opened again.
-const results = new Map();
+// tab, so they outlast it being closed and opened again, and so calls made from
+// the Ctrl+K palette are listed too.
+class Results extends Watched {
+  constructor() {
+    super();
+    this.byInstrument = new Map();
+  }
+
+  of(uid) {
+    return this.byInstrument.get(uid) ?? [];
+  }
+
+  add(uid, entry) {
+    this.byInstrument.set(uid, [entry, ...this.of(uid)].slice(0, KEEP));
+    this.changed();
+  }
+
+  clear(uid) {
+    this.byInstrument.delete(uid);
+    this.changed();
+  }
+}
+
+export const results = new Results();
 
 // A result as it is shown: numbers in full, nothing as "Done", and anything
 // else as text or JSON.
@@ -29,7 +53,7 @@ export function formatResult(value) {
 const names = (answer) => (Array.isArray(answer) ? answer : answer?.data ?? []);
 
 // Each instrument, with its endpoints sorted into queries, commands and others.
-async function loadInstruments() {
+export async function loadInstruments() {
   const [root, rack] = await Promise.all([loadSchema(), get("/rack/list_instruments")]);
   const instruments = await Promise.all(
     Object.entries(rack.instruments ?? {}).map(async ([uid, kind]) => {
@@ -58,9 +82,35 @@ const GROUPS = [
   ["other", "Other"],
 ];
 
+// Calls an instrument's endpoint (as described by loadInstruments) with the
+// form's params, and records what came back in its results. Returns the
+// result's entry, or throws what the call threw (after recording it).
+export async function callInstrument(uid, endpoint, params) {
+  const args = Object.entries(params)
+    .map(([k, v]) => `${k}=${v}`)
+    .join(", ");
+  const entry = {
+    id: `${Date.now()}-${Math.random()}`,
+    time: new Date().toLocaleTimeString(),
+    name: endpoint.method,
+    args,
+  };
+  try {
+    const answer = await get(endpoint.path, { params });
+    entry.value = formatResult(answer && typeof answer === "object" && "data" in answer ? answer.data : answer);
+    return entry;
+  } catch (e) {
+    entry.value = e.message;
+    entry.failed = true;
+    throw e;
+  } finally {
+    results.add(uid, entry);
+  }
+}
+
 // The instrument's recent results, in a column of their own: each call on one
 // line, with its time, and what came back under it.
-function Results({ uid, entries, onClear }) {
+function ResultList({ uid, entries, onClear }) {
   return html`
     <div class="instrument-results">
       <div class="instrument-results-head">
@@ -98,7 +148,7 @@ export function InstrumentsTab() {
   const [failed, setFailed] = useState("");
   const [picked, setPicked] = useState(() => load("instruments", {}));
   const [query, setQuery] = useState("");
-  const [, setVersion] = useState(0); // results changed
+  useStore(results);
 
   useEffect(() => {
     loadInstruments().then(setInstruments, (e) => setFailed(e.message));
@@ -117,31 +167,10 @@ export function InstrumentsTab() {
   const endpoint =
     instrument.endpoints.find((e) => e.path === picked.path) ??
     null;
-  const entries = results.get(instrument.uid) ?? [];
+  const entries = results.of(instrument.uid);
 
-  const call = async (params) => {
-    const args = Object.entries(params)
-      .map(([k, v]) => `${k}=${v}`)
-      .join(", ");
-    const entry = {
-      id: `${Date.now()}-${Math.random()}`,
-      time: new Date().toLocaleTimeString(),
-      name: endpoint.method,
-      args,
-    };
-    const list = results.get(instrument.uid) ?? [];
-    try {
-      const answer = await get(endpoint.path, { params });
-      entry.value = formatResult(answer && typeof answer === "object" && "data" in answer ? answer.data : answer);
-    } catch (e) {
-      entry.value = e.message;
-      entry.failed = true;
-      throw e; // the form shows it by the field it names, too
-    } finally {
-      results.set(instrument.uid, [entry, ...list].slice(0, KEEP));
-      setVersion((v) => v + 1);
-    }
-  };
+  // A failure is thrown on, for the form to show by the field it names.
+  const call = (params) => callInstrument(instrument.uid, endpoint, params);
 
   return html`
     <div class="instruments-tab">
@@ -222,13 +251,10 @@ export function InstrumentsTab() {
           : html`<p class="placeholder">Pick a query or a command.</p>`}
       </div>
       <div class="results-pane">
-        <${Results}
+        <${ResultList}
           uid=${instrument.uid}
           entries=${entries}
-          onClear=${() => {
-            results.delete(instrument.uid);
-            setVersion((v) => v + 1);
-          }}
+          onClear=${() => results.clear(instrument.uid)}
         />
       </div>
     </div>
