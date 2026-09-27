@@ -18,15 +18,22 @@ setup server starts again, on the same port and file, and the page shows why.
 """
 
 import asyncio
+import inspect
 import tomllib
+import typing
+from enum import Enum
 from pathlib import Path
 
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, Body, Request
+from fastapi.responses import JSONResponse
 
 from ..gui import UI_PATH, Gui
 from ..gui import mount as serve_gui
-from . import settings
+from ..instruments import instrument_map
+from . import calculations, config_check, config_writer, settings
+from .adapters import ADAPTERS
 from .api_server import APIServer
+from .instrument import SoftwareInstrument
 from .logging import logger
 
 # The setup page's path. `/` is sent here.
@@ -62,11 +69,17 @@ class SetupServer:
     """Serves the setup page for one config file, with no experiment.
 
     Endpoints:
+        GET /setup/describe: what a config can hold: the options, the drivers
+            and their queries, the calculations, and the adapters.
         GET /setup/config: the file's path, whether it exists, its config, and
             why the last Run stopped before the experiment started (or null).
+        POST /setup/check: a config's problems, and the file it would write.
+        POST /setup/save: writes a config with no problems to the file.
         POST /setup/run: starts handing over to the experiment, and stops the
             server. Answers with the port the experiment will listen on.
         GET /setup/shutdown: stops the server, when the window closes.
+        GET /setup/drivers/<driver>/<query>: a query's arguments, checked and
+            as a config holds them. Its schema gives the page its form.
     """
 
     def __init__(
@@ -157,8 +170,69 @@ class SetupServer:
             "error": self.error,
         }
 
+    def _text(self) -> str | None:
+        """The file's text, if it exists."""
+        return config_writer.read_text(self.path) if self.path.exists() else None
+
+    def check(self, config) -> dict:
+        """A config's `problems` (as JSON), and the `toml` that saving it would
+        write, or None if it can't be written."""
+        found = config_check.problems(config)
+        toml = None
+        if isinstance(config, dict):
+            try:
+                toml = config_writer.render(config, self._text())
+            except (config_writer.ConfigWriteError, TypeError, ValueError) as e:
+                found.append(config_check.Problem((), f"The file can't be written: {e}"))
+        return {"problems": [p.to_json() for p in found], "toml": toml}
+
     def _register_endpoints(self) -> None:
         app = self.app
+
+        @app.get("/setup/describe", tags=["setup"])
+        async def setup_describe():
+            """
+            Endpoint for what a config can hold: the `options` (each with its
+            section, key, default, help and kind), the `drivers` (each with
+            whether it is `hardware` and its `queries`, which are what can be
+            measured, with the first line of each one's docstring), the
+            `calculations` (each with the keys it takes and their kinds), and
+            the `adapters`.
+            """
+            return {"status": 200, "data": describe()}
+
+        @app.post("/setup/check", tags=["setup"])
+        async def setup_check(config: dict = Body(...)):
+            """
+            Endpoint that checks a config, given as JSON in the shape a TOML
+            file reads as, without opening an instrument. Answers with its
+            `problems` (each with `where`, the keys that lead to it, and a
+            `message`), and the `toml` that saving it would write, keeping the
+            file's comments.
+            """
+            return {"status": 200, "data": self.check(config)}
+
+        @app.post("/setup/save", tags=["setup"])
+        async def setup_save(config: dict = Body(...)):
+            """
+            Endpoint that writes a config, given as JSON, to the file, keeping
+            its comments. A config with problems is refused (422), with them.
+            """
+            checked = self.check(config)
+            if checked["problems"]:
+                return JSONResponse(status_code=422, content={"status": 422, "data": checked})
+            config_writer.write(self.path, config)
+            logger.info(f"[Setup] Saved {self.path}")
+            return {"status": 200, "data": checked}
+
+        for driver, cls in instrument_map.items():
+            for name, query in config_check.queries(cls).items():
+                app.add_api_route(
+                    f"/setup/drivers/{driver}/{name}",
+                    _driver_route(query),
+                    methods=["GET"],
+                    tags=["setup drivers"],
+                )
 
         @app.get("/setup/config", tags=["setup"])
         async def setup_config():
@@ -191,6 +265,70 @@ class SetupServer:
             """
             background.add_task(self.stop)
             return {"status": 200, "data": None}
+
+
+def describe() -> dict:
+    """What a config can hold (see `/setup/describe`)."""
+
+    def first_line(function) -> str:
+        return (inspect.getdoc(function) or "").split("\n")[0]
+
+    return {
+        "options": settings.describe(),
+        "drivers": [
+            {
+                "name": name,
+                "hardware": not issubclass(cls, SoftwareInstrument),
+                "queries": [
+                    {"name": query, "doc": first_line(function)}
+                    for query, function in sorted(config_check.queries(cls).items())
+                ],
+            }
+            for name, cls in instrument_map.items()
+        ],
+        "calculations": [
+            {"name": name, "keys": dict(cls.config_keys)}
+            for name, cls in calculations.calculation_map.items()
+        ],
+        "adapters": list(ADAPTERS),
+    }
+
+
+def _driver_route(function):
+    """A route with a query's arguments (without `self`) as its parameters,
+    which answers with them as a config holds them: those given, with an enum
+    member by its name. FastAPI checks them against their types, as it does for
+    a running instrument's endpoint, so the page builds its form the same way."""
+    signature = inspect.signature(function)
+    try:
+        hints = typing.get_type_hints(function)
+    except Exception:  # noqa: BLE001 - left as they are, unresolved
+        hints = {}
+    parameters = [
+        parameter.replace(
+            annotation=hints.get(parameter.name, parameter.annotation),
+            kind=inspect.Parameter.KEYWORD_ONLY,
+        )
+        for parameter in list(signature.parameters.values())[1:]
+    ]
+
+    async def route(request: Request, **kwargs):
+        given = {
+            name: value.name if isinstance(value, Enum) else value
+            for name, value in kwargs.items()
+            if name in request.query_params
+        }
+        return {"status": 200, "data": given}
+
+    route.__name__ = function.__name__
+    route.__doc__ = function.__doc__
+    request = inspect.Parameter(
+        "request", inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=Request
+    )
+    route.__signature__ = signature.replace(
+        parameters=[request, *parameters], return_annotation=dict
+    )
+    return route
 
 
 def _run_experiment(path: Path, port: int, gui: Gui, window) -> str | None:

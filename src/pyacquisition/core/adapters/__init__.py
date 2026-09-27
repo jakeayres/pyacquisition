@@ -10,6 +10,8 @@ _adapters = {
     "record": record_adapter,
 }
 
+# The names an instrument's `adapter` can be, in a config or in Python.
+ADAPTERS = tuple(_adapters)
 DEFAULT_ADAPTER = "pyvisa"
 DEFAULT_TIMEOUT = 5000
 

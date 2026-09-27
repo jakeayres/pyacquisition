@@ -17,6 +17,7 @@ dependencies = [
     "pyvisa-py>=0.8.0",
     "pywebview>=6.2.1",
     "requests>=2.34.2",
+    "tomlkit>=0.15.1",
     "uvicorn>=0.53.0",
     "websockets>=17.1",
 ]

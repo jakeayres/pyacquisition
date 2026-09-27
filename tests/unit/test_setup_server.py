@@ -320,3 +320,123 @@ def test_the_setup_window_is_the_one_gui_makes(tmp_path):
     process = gui.run_in_new_process()
 
     assert process._kwargs == {"page": SETUP_PAGE}
+
+
+# ------------------------------------------------------------ describing, checking, saving
+def client_for(tmp_path, text="# mine\n[rack]\nperiod = 0.5  # fast\n"):
+    config = tmp_path / "rig.toml"
+    if text is not None:
+        config.write_bytes(text.encode("utf-8"))  # its line endings as they are
+    return TestClient(SetupServer(config).app), config
+
+
+def test_what_a_config_can_hold_is_described(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    data = client.get("/setup/describe").json()["data"]
+
+    assert {o["name"] for o in data["options"]} >= {"measurement_period", "root_path"}
+    drivers = {d["name"]: d for d in data["drivers"]}
+    assert drivers["Clock"]["hardware"] is False
+    assert drivers["SR_830"]["hardware"] is True
+    assert {"name": "timestamp_ms", "doc": drivers["Clock"]["queries"][-1]["doc"]} in drivers[
+        "Clock"
+    ]["queries"]
+    ips = {q["name"] for q in drivers["Mercury_IPS"]["queries"]}
+    assert "get_output_field" in ips and "to_zero" not in ips  # a command
+    assert data["calculations"] == [
+        {"name": "Sum", "keys": {"inputs": "columns"}},
+        {"name": "RollingMean", "keys": {"column": "column", "window": "count"}},
+    ]
+    assert data["adapters"] == ["pyvisa", "mock", "prologix", "record"]
+
+
+def test_a_config_is_checked_with_what_it_would_write(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    data = client.post("/setup/check", json={"rack": {"period": 0.25}}).json()["data"]
+
+    assert data == {"problems": [], "toml": "# mine\n[rack]\nperiod = 0.25  # fast\n"}
+
+
+def test_a_config_with_problems_says_where_they_are(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    data = client.post("/setup/check", json={"rack": {"period": -1}}).json()["data"]
+
+    assert data["problems"] == [
+        {"where": ["rack", "period"], "message": "`period` must be a positive number, got -1"}
+    ]
+    assert "period = -1" in data["toml"]  # the preview still follows
+
+
+def test_a_new_file_is_previewed_with_its_header(tmp_path):
+    client, _ = client_for(tmp_path, text=None)
+
+    data = client.post("/setup/check", json={"rack": {"period": 0.5}}).json()["data"]
+
+    assert data["toml"].startswith("# An experiment's config")
+
+
+def test_saving_writes_the_file_keeping_its_comments(tmp_path):
+    client, config = client_for(tmp_path)
+
+    response = client.post("/setup/save", json={"rack": {"period": 1.5}})
+
+    assert response.status_code == 200
+    assert config.read_text(encoding="utf-8") == "# mine\n[rack]\nperiod = 1.5  # fast\n"
+
+
+def test_a_config_with_problems_is_not_saved(tmp_path):
+    client, config = client_for(tmp_path)
+
+    response = client.post("/setup/save", json={"rack": {"period": -1}})
+
+    assert response.status_code == 422
+    assert response.json()["data"]["problems"][0]["where"] == ["rack", "period"]
+    assert "period = 0.5" in config.read_text(encoding="utf-8")
+
+
+def test_saving_makes_a_file_that_does_not_exist(tmp_path):
+    client, config = client_for(tmp_path, text=None)
+
+    assert client.post("/setup/save", json={"rack": {"period": 0.5}}).status_code == 200
+    assert "period = 0.5" in config.read_text(encoding="utf-8")
+
+
+# ------------------------------------------------------------ a driver's query
+def test_a_query_route_answers_with_its_args_as_a_config_holds_them(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    response = client.get(
+        "/setup/drivers/Lakeshore_350/get_temperature", params={"input_channel": "Input A"}
+    )
+
+    assert response.json()["data"] == {"input_channel": "INPUT_A"}  # by name
+
+
+def test_a_query_route_checks_its_args(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    assert (
+        client.get(
+            "/setup/drivers/Lakeshore_350/get_temperature", params={"input_channel": "nope"}
+        ).status_code
+        == 422
+    )
+
+
+def test_a_query_route_leaves_out_what_is_not_given(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    assert client.get("/setup/drivers/Clock/timestamp_ms").json()["data"] == {}
+
+
+def test_a_query_routes_schema_is_the_form_the_page_builds(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    paths = client.get("/openapi.json").json()["paths"]
+    (parameter,) = paths["/setup/drivers/Lakeshore_350/get_temperature"]["get"]["parameters"]
+
+    assert parameter["name"] == "input_channel" and parameter["required"] is True
+    assert "/setup/drivers/Mercury_IPS/to_zero" not in paths  # a command
