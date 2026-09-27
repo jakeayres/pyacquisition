@@ -13,6 +13,7 @@ import { managerAction, managerStates } from "../api.js";
 import { ConfirmDialog } from "../confirm.js";
 import { AddTaskDialog } from "./add-task.js";
 import { dropIndex, reorder, useQueueDrag } from "./queue-drag.js";
+import { TaskProgress } from "../progress.js";
 import {
   ChevronDownIcon,
   ChevronUpIcon,
@@ -147,6 +148,7 @@ function RunningTask({ manager, state, onAbort, onDuplicate }) {
       </div>
       ${task.description && html`<p class="task-description">${task.description}</p>`}
       <${Parameters} parameters=${task.parameters} />
+      <${TaskProgress} task=${task} />
     </div>
   `;
 }

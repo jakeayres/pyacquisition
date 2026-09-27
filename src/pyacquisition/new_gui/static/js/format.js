@@ -12,6 +12,17 @@ export function formatValue(value) {
   return value.toPrecision(6);
 }
 
+// A length of time: "45 s" under a minute, then "12:05", then "1:12:05".
+export function formatDuration(seconds) {
+  if (seconds === null || seconds === undefined || !Number.isFinite(seconds)) return "—";
+  const whole = Math.max(0, Math.round(seconds));
+  if (whole < 60) return `${whole} s`;
+  const h = Math.floor(whole / 3600);
+  const m = Math.floor((whole % 3600) / 60);
+  const s = String(whole % 60).padStart(2, "0");
+  return h ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+}
+
 // The full value, for a tooltip.
 export function exactValue(value) {
   return typeof value === "number" ? String(value) : formatValue(value);

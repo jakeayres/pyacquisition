@@ -8,6 +8,7 @@ import { dataFeed, logFeed } from "./feed.js";
 import { ValuesTab } from "./dock/values.js";
 import { LogsTab } from "./dock/logs.js";
 import { QueueTab, useManagers } from "./dock/queue.js";
+import { RunningSummary } from "./progress.js";
 import { useConnection } from "./connection.js";
 import { useStore } from "./hooks.js";
 import {
@@ -100,7 +101,7 @@ function useExperimentName(connection) {
   return name;
 }
 
-function TopBar({ name, connection, theme, onToggleTheme, store }) {
+function TopBar({ name, connection, theme, onToggleTheme, store, managers }) {
   useStore(store); // for the data file, which the data stream announces
   const file = store.current.file;
   const scribe = useScribe(connection, file);
@@ -115,6 +116,7 @@ function TopBar({ name, connection, theme, onToggleTheme, store }) {
       <div class="topbar-middle">
         <${FileControl} scribe=${scribe} file=${file} />
         <${RackControl} rack=${rack.state} onChanged=${rack.refresh} />
+        <${RunningSummary} states=${managers.states} />
       </div>
       <div class="topbar-actions">
         <span class="connection" data-state=${connection} role="status">
@@ -151,6 +153,7 @@ export function App() {
         theme=${theme}
         onToggleTheme=${toggle}
         store=${store}
+        managers=${managers}
       />
       <${PlotArea} store=${store} columns=${columns} theme=${theme} />
       <${Dock} tabs=${dockTabs({ store, logs, columns, managers })} />

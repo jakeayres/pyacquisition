@@ -47,6 +47,18 @@ export function Dock({ tabs }) {
     [active, collapsed, height],
   );
 
+  // Something elsewhere (the top bar's running task) asks for a tab to open.
+  useEffect(() => {
+    const open = (event) => {
+      if (tabs.some((tab) => tab.id === event.detail)) {
+        setActive(event.detail);
+        setCollapsed(false);
+      }
+    };
+    window.addEventListener("pyacquisition:open-tab", open);
+    return () => window.removeEventListener("pyacquisition:open-tab", open);
+  }, [tabs.map((tab) => tab.id).join()]);
+
   // A smaller window can leave the dock too tall for it.
   useEffect(() => {
     const onResize = () => setHeight((current) => clamp(current));
