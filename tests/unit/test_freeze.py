@@ -4,6 +4,7 @@ runs a real build, end to end."""
 
 import pathlib
 import shutil
+import socket
 import subprocess
 
 import pytest
@@ -241,8 +242,11 @@ def test_a_real_toml_build(tmp_path):
     """Freezes a genuine, tiny experiment and checks the result runs and serves
     the GUI's page. (It runs without a window: the window itself was checked by
     hand, in milestone 19 of specs/archive/new-gui.md.)"""
-    # A port away from 8000, which the docs server commonly occupies during dev.
-    port = 8193
+    # A free port: 8000 is often the docs server's, and other tests may be
+    # running at the same time.
+    with socket.socket() as s:
+        s.bind(("localhost", 0))
+        port = s.getsockname()[1]
     base = f"http://localhost:{port}"
     config = tmp_path / "rig.toml"
     config.write_text(

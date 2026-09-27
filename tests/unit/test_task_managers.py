@@ -1,6 +1,7 @@
 """An experiment with several task managers, each running its own queue."""
 
 import asyncio
+import socket
 from dataclasses import dataclass, field
 from unittest.mock import ANY
 
@@ -10,6 +11,13 @@ from fastapi.testclient import TestClient
 from pyacquisition import Experiment, Measurement, Task
 from pyacquisition.core.task_manager.task_manager import TaskManager
 from pyacquisition.instruments.software import Clock
+
+
+def free_port() -> int:
+    """A port nothing is using, so tests running side by side don't collide."""
+    with socket.socket() as s:
+        s.bind(("localhost", 0))
+        return s.getsockname()[1]
 
 LONG = 10_000  # far more steps than any test lets a task reach
 
@@ -919,7 +927,7 @@ async def test_task_managers_run_their_queues_at_the_same_time(tmp_path):
 
     experiment = TwoQueues(
         root_path=str(tmp_path),
-        api_server_port=8126,
+        api_server_port=free_port(),
         measurement_period=0.05,
         gui=False,
     )

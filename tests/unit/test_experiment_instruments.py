@@ -1,7 +1,16 @@
 import asyncio
+import socket
+
 import pytest
 from pyacquisition import Experiment, Measurement
 from pyacquisition.instruments.software import Clock
+
+
+def free_port() -> int:
+    """A port nothing is using, so tests running side by side don't collide."""
+    with socket.socket() as s:
+        s.bind(("localhost", 0))
+        return s.getsockname()[1]
 
 
 @pytest.fixture
@@ -67,7 +76,7 @@ async def test_cannot_change_once_running(tmp_path):
             self.add_instrument(clock)
             self.add_measurement(Measurement("time", clock.timestamp_ms))
 
-    experiment = MyExperiment(root_path=str(tmp_path), api_server_port=8123, gui=False)
+    experiment = MyExperiment(root_path=str(tmp_path), api_server_port=free_port(), gui=False)
     errors = {}
 
     async def change_while_running():

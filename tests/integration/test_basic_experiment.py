@@ -30,7 +30,7 @@ def basic_experiment():
 @pytest.fixture(scope="module")
 def running_experiment(basic_experiment):
     def run_server():
-        asyncio.run(basic_experiment.run())
+        basic_experiment.run()  # returns once it has shut down
 
     server_thread = threading.Thread(target=run_server, daemon=True)
     server_thread.start()

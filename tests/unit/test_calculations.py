@@ -150,7 +150,7 @@ async def test_calculated_columns_reach_the_data_file(tmp_path):
     experiment = MyExperiment(
         root_path=str(tmp_path),
         data_path="data",
-        api_server_port=8124,
+        api_server_port=free_port(),
         measurement_period=0.05,
         gui=False,
     )
