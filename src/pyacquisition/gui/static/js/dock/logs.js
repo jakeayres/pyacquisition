@@ -217,7 +217,7 @@ export function LogsTab({ store }) {
   // so a new message can't pull the list back down first. Unless there is
   // nowhere up to go.
   const stopFollowing = () => {
-    if (!following || list.current.scrollTop < 1) return;
+    if (!following || !list.current || list.current.scrollTop < 1) return;
     hold(top);
     setView((current) => ({ ...current, top }));
     setFollowing(false);
@@ -225,6 +225,8 @@ export function LogsTab({ store }) {
 
   const onScroll = () => {
     const element = list.current;
+    // A scroll can arrive after the tab has closed, and the list with it.
+    if (!element) return;
     const scrolled = element.scrollTop;
     const atBottom = element.scrollHeight - scrolled - element.clientHeight < row / 2;
     setFollowing(atBottom);
