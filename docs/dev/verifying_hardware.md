@@ -72,7 +72,7 @@ Every restore is verified as well: a round trip reports `RESTORE FAILED` if the 
 
 ### The decorator is not trusted
 
-`Mercury_IPS` registers its `set_target_field`, `to_setpoint`, `switch_heater_on` and other *actions* as queries, and its protocol has no `?` to tell reads from writes. So the engine never decides what to run from `@mark_query`. It reads only methods **named** `get_...`, and each spec declares the reads of its own protocol for the guard:
+A driver's decorators are not trusted to say what a method does: `Mercury_IPS` once registered its `set_target_field`, `to_setpoint`, `switch_heater_on` and other *actions* as queries, and its protocol has no `?` to tell reads from writes. So the engine never decides what to run from `@mark_query`. It reads only methods **named** `get_...`, and each spec declares the reads of its own protocol for the guard:
 
 ```toml
 [guard]

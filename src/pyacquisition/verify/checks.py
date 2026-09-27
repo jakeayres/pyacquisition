@@ -226,8 +226,9 @@ def _read_cases(cls, name, rule):
 def plan(cls, spec):
     """Lists the checks for an instrument class, in the order they should run.
 
-    Only methods named `get_...` are read. What a method is registered as says
-    nothing about what it does: `Mercury_IPS` registers its setters as queries.
+    Only methods named `get_...` are read. What a method is registered as is
+    not trusted to say what it does: `Mercury_IPS` once registered its setters
+    and actions as queries.
     """
     checks = [IdentityCheck(spec.identity if spec else None)]
     if spec is not None and spec.steps is not None:

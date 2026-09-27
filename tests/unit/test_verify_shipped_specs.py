@@ -215,10 +215,23 @@ def test_the_mercury_setters_and_actions_are_never_in_the_plan_but_are_flagged()
         assert not any(method in i for i in ids), method
 
     cover = coverage(Mercury_IPS, checks)
-    assert {"set_target_field", "set_target_current"} <= set(
-        cover["set_registered_as_query"]
-    )
+    assert cover["set_registered_as_query"] == []  # they are commands now
     assert {"hold", "to_setpoint", "switch_heater_on"} <= set(cover["untested"])
+
+
+def test_the_mercury_actions_are_commands_and_its_queries_only_read():
+    """Its actions were once registered as queries, so the interface listed them
+    with the reads, and they could be chosen as a measurement, run every period."""
+    queries = {q.__name__ for q in Mercury_IPS._queries}
+    commands = {c.__name__ for c in Mercury_IPS._commands}
+
+    assert all(name.startswith("get_") or name == "identify" for name in queries)
+    assert {
+        "hold", "to_setpoint", "to_zero", "clamp", "switch_heater_on",
+        "switch_heater_off", "force_heater_on", "set_target_current",
+        "set_target_field", "set_current_sweep_rate", "set_field_sweep_rate",
+        "remote_and_locked", "local_and_unlocked", "remote_and_unlocked",
+    } == commands
 
 
 @pytest.mark.parametrize("limit", list(Hazard), ids=lambda h: h.value)

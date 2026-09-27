@@ -2,11 +2,12 @@
 #
 # READ THIS BEFORE EDITING. This is a magnet power supply.
 #
-# Mercury_IPS registers every one of its methods as a query, including the ones
-# that act: hold, to_setpoint, to_zero, clamp, switch_heater_on/off,
+# Mercury_IPS's actions (hold, to_setpoint, to_zero, clamp, switch_heater_on/off,
 # force_heater_on, set_target_current, set_target_field and the sweep-rate
-# setters. The verification engine therefore never trusts the decorator. It runs
-# only methods named get_..., and the guard below is the second line of defence:
+# setters) are commands, but they send with query(), as the supply answers every
+# message, and its protocol has no `?` to tell reads from writes. They were once
+# registered as queries. The verification engine never trusts the decorator. It
+# runs only methods named get_..., and the guard below is the second line of defence:
 # only the read commands of this instrument's protocol (R<n> and X) may be sent,
 # and anything else, such as A1 (to setpoint) or J<field> (set the field), is
 # refused and reported.

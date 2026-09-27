@@ -1,4 +1,4 @@
-from ...core.instrument import BaseEnum, Instrument, mark_query
+from ...core.instrument import BaseEnum, Instrument, mark_command, mark_query
 
 
 class SystemStatusM(BaseEnum):
@@ -54,7 +54,12 @@ class ModeStatusN(BaseEnum):
 
 
 class Mercury_IPS(Instrument):
-    """Class for controlling the Oxford Instruments Mercury IPS device."""
+    """Class for controlling the Oxford Instruments Mercury IPS device.
+
+    Its actions (the control mode, ramping, the switch heater, and setting the
+    target and sweep rate) are commands. The supply answers every message, even
+    those, so they send with `query` and return its answer.
+    """
 
     # The enums that the queries and commands take, so that they can be reached
     # from the instrument, as `Mercury_IPS.ActivityStatus`, without importing them.
@@ -100,7 +105,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("*IDN?")
 
-    @mark_query
+    @mark_command
     def remote_and_locked(self) -> str:
         """Sets the device to remote and locked mode.
 
@@ -109,7 +114,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("C1")
 
-    @mark_query
+    @mark_command
     def local_and_unlocked(self) -> str:
         """Sets the device to local and unlocked mode.
 
@@ -118,7 +123,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("C2")
 
-    @mark_query
+    @mark_command
     def remote_and_unlocked(self) -> str:
         """Sets the device to remote and unlocked mode.
 
@@ -332,7 +337,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R24")[1:])
 
-    @mark_query
+    @mark_command
     def hold(self) -> int:
         """Sets the device to hold mode.
 
@@ -341,7 +346,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("A0")
 
-    @mark_query
+    @mark_command
     def to_setpoint(self) -> int:
         """Moves the device to the setpoint.
 
@@ -350,7 +355,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("A1")
 
-    @mark_query
+    @mark_command
     def to_zero(self) -> int:
         """Moves the device to zero.
 
@@ -359,7 +364,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("A2")
 
-    @mark_query
+    @mark_command
     def clamp(self) -> int:
         """Sets the device to clamp mode.
 
@@ -368,7 +373,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("A4")
 
-    @mark_query
+    @mark_command
     def switch_heater_off(self) -> str:
         """Turns off the heater.
 
@@ -377,7 +382,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("H0")
 
-    @mark_query
+    @mark_command
     def switch_heater_on(self) -> str:
         """Turns on the heater.
 
@@ -386,7 +391,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("H1")
 
-    @mark_query
+    @mark_command
     def force_heater_on(self) -> int:
         """Forces the heater to turn on.
 
@@ -395,7 +400,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("H2")
 
-    @mark_query
+    @mark_command
     def set_target_current(self, current: float) -> int:
         """Sets the target current.
 
@@ -407,7 +412,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query(f"I{current:.3f}")
 
-    @mark_query
+    @mark_command
     def set_target_field(self, field: float) -> int:
         """Sets the target magnetic field.
 
@@ -419,7 +424,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query(f"J{field:.3f}")
 
-    @mark_query
+    @mark_command
     def set_current_sweep_rate(self, rate: float) -> int:
         """Sets the current sweep rate.
 
@@ -431,7 +436,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query(f"S{rate:.3f}")
 
-    @mark_query
+    @mark_command
     def set_field_sweep_rate(self, rate: float) -> int:
         """Sets the field sweep rate.
 
