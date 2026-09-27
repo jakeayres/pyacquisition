@@ -9,6 +9,13 @@ import pyacquisition
 from pyacquisition import Experiment, main
 
 
+@pytest.fixture(autouse=True)
+def in_a_folder_of_its_own(monkeypatch, tmp_path):
+    """The experiments these make have no `root_path`, so they write their log
+    (and data) where they are run from: here, not the repository."""
+    monkeypatch.chdir(tmp_path)
+
+
 @pytest.fixture
 def no_run(monkeypatch):
     """Stops an experiment from actually starting, and hands back what would run."""
