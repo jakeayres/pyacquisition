@@ -5,7 +5,11 @@ from pathlib import Path
 from types import MappingProxyType
 from functools import partial
 import inspect
+from datetime import datetime
 from enum import Enum
+
+from fastapi import HTTPException
+
 from .logging import logger
 from .api_server import APIServer
 from .rack import Rack
@@ -18,6 +22,7 @@ from .history import History
 from .log_history import LogHistory
 from .sequences import Sequences
 from .layout import Layout
+from .plot_script import PlotRequest, PlotScriptError, plot_script
 # The module's names, since `gui` is also an option here.
 from ..gui import Gui
 from ..gui import mount as serve_gui
@@ -1010,6 +1015,60 @@ class Experiment:
             function is only listed if it was given a unit.
             """
             return {"status": 200, "data": self._column_info()}
+
+        @api_server.app.post("/experiment/plot_script", tags=["experiment"])
+        async def experiment_plot_script(request: PlotRequest):
+            """
+            Endpoint for a Python script that draws a plot again with matplotlib,
+            from the data files, as the GUI's **Export → Python script
+            (matplotlib)** saves it. Its `data` is the script's text.
+
+            The body is the plot's settings: `x`, the x column; `series`, the
+            shown y columns in order, each `{name, colour}` with its colour as
+            `#rrggbb` (1 to 8 of them); `marks`, `"lines"`, `"points"` or
+            `"both"`; `log_x` and `log_y`; `x_limits` and `y_limits`, each
+            `[min, max]` to set that axis, or null to fit the data; and
+            `previous`, to draw the previous data file too, fainter, behind the
+            current one.
+
+            The script reads the whole of the current data file (and the
+            previous one) where it is, when it runs. A column is drawn from a
+            file only if the file has it.
+
+            It answers 422 with the reason for a request it can't draw: a
+            column that isn't in the files, a colour that isn't `#rrggbb`, no
+            series or more than 8, or limits that aren't two finite numbers,
+            smaller first (and above 0 on a log axis). It answers 409 while no
+            file it would read has any rows.
+            """
+            segments = self._history.info()["segments"]
+            current = segments[-1]
+            files = [current]
+            if request.previous and len(segments) > 1:
+                files.insert(0, segments[0])
+            if not any(segment["rows"] for segment in files):
+                raise HTTPException(
+                    status_code=409,
+                    detail="No data has been written yet, so there is nothing to plot.",
+                )
+            previous = files[0]["file"] if len(files) > 1 else None
+            try:
+                script = plot_script(
+                    request,
+                    folder=self._scribe.current_directory(),
+                    current_file=current["file"] or self._scribe.current_file(),
+                    previous_file=previous,
+                    delimiter=self._scribe.delimiter,
+                    units={c["name"]: c["unit"] for c in self._column_info()},
+                    # A file with no rows yet may have any of the columns.
+                    columns={
+                        s["file"]: set(s["columns"]) if s["rows"] else None for s in files
+                    },
+                    now=datetime.now(),
+                )
+            except PlotScriptError as error:
+                raise HTTPException(status_code=422, detail=str(error)) from error
+            return {"status": 200, "data": script}
 
         @api_server.app.get("/managers", tags=["experiment"])
         async def list_task_managers():
