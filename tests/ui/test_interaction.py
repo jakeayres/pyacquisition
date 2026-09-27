@@ -74,10 +74,16 @@ def y_range(page):
 
 def over(page):
     # Waited for: changing what is plotted draws the plot afresh, and for a
-    # moment there is none.
+    # moment there is none. It can be drawn afresh between the wait and the
+    # measuring too, when the machine is busy, so that is tried again.
     surface = page.locator(".u-over")
-    surface.wait_for(state="visible")
-    return surface.bounding_box()
+    for _ in range(50):
+        surface.wait_for(state="visible")
+        box = surface.bounding_box()
+        if box is not None:
+            return box
+        page.wait_for_timeout(100)
+    raise AssertionError("the plot never settled to be measured")
 
 
 def drag(page, start, end, button="left", shift=False):
