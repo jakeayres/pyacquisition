@@ -111,6 +111,13 @@ export const GripIcon = () => html`
   </svg>
 `;
 
+// Saving something out of the page.
+export const DownloadIcon = () =>
+  stroke(html`
+    <path d="M12 4v11M7 10l5 5 5-5" />
+    <path d="M5 19h14" />
+  `);
+
 export const PlusIcon = () => stroke(html`<path d="M12 5v14M5 12h14" />`);
 
 // Aborting a task.

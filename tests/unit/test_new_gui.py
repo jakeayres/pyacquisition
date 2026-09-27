@@ -411,3 +411,111 @@ def test_every_file_the_page_is_made_of_is_utf8():
     for path in static.rglob("*"):
         if path.suffix in {".js", ".css", ".html", ".svg"}:
             path.read_bytes().decode("utf-8")  # raises, naming nothing, if not
+
+
+# -------------------------------------------------------------- saving an export
+class FakeDialogWindow:
+    """A window whose Save dialog answers as told, and notes how it was asked."""
+
+    def __init__(self, answer):
+        self.answer = answer
+        self.asked = None
+
+    def create_file_dialog(self, kind, directory="", save_filename="", file_types=()):
+        self.asked = {"directory": directory, "name": save_filename, "types": file_types}
+        return self.answer
+
+
+def api_with(monkeypatch, tmp_path, answer):
+    from types import SimpleNamespace
+
+    from pyacquisition.new_gui import window
+
+    monkeypatch.setattr(window, "data_folder", lambda server: str(tmp_path))
+    owner = SimpleNamespace(server="http://localhost:1", window=FakeDialogWindow(answer))
+    return window._Api(owner), owner.window
+
+
+def test_an_export_is_saved_where_the_dialog_says(monkeypatch, tmp_path):
+    target = tmp_path / "chosen.csv"
+    api, dialog = api_with(monkeypatch, tmp_path, [str(target)])
+
+    where = api.save_file("plot.csv", text="time,T\r\n1,4.2\r\n")
+
+    assert where == str(target)
+    assert target.read_bytes() == b"time,T\r\n1,4.2\r\n"  # as it is: no line endings changed
+    assert dialog.asked == {
+        "directory": str(tmp_path),  # the data folder
+        "name": "plot.csv",
+        "types": ("CSV file (*.csv)",),
+    }
+
+
+def test_an_image_is_saved_from_its_base64(monkeypatch, tmp_path):
+    import base64
+
+    target = tmp_path / "plot.png"
+    api, _ = api_with(monkeypatch, tmp_path, str(target))  # some versions give a string
+    png = b"\x89PNG\r\n\x1a\n...image..."
+
+    api.save_file("plot.png", base64=base64.b64encode(png).decode())
+
+    assert target.read_bytes() == png
+
+
+def test_a_cancelled_dialog_saves_nothing(monkeypatch, tmp_path):
+    api, _ = api_with(monkeypatch, tmp_path, None)
+
+    assert api.save_file("plot.csv", text="x") is None
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_the_save_dialog_is_shown_on_the_windows_own_thread(monkeypatch):
+    """pywebview on Windows shows the dialog on the calling thread, and the
+    page's calls come on a thread of their own, which can't show it."""
+    import sys
+    import threading
+    from types import ModuleType, SimpleNamespace
+
+    from pyacquisition.new_gui import window
+
+    shown_on = []
+
+    class View:
+        InvokeRequired = True
+
+        def Invoke(self, func):  # as Windows Forms does: on the window's thread
+            done = threading.Thread(target=func, name="window thread")
+            done.start()
+            done.join()
+
+    class Func:
+        def __class_getitem__(cls, _):
+            return lambda fn: fn
+
+    fake = ModuleType("webview.platforms.winforms")
+    fake.BrowserView = SimpleNamespace(instances={"master": View()})
+    fake.Func = Func
+    fake.Type = object
+    monkeypatch.setitem(sys.modules, "webview.platforms.winforms", fake)
+
+    class Window:
+        uid = "master"
+
+        def create_file_dialog(self, kind, **options):
+            shown_on.append(threading.current_thread().name)
+            return ("C:/chosen.csv",)
+
+    assert window.ask_where_to_save(Window(), save_filename="a.csv") == ("C:/chosen.csv",)
+    assert shown_on == ["window thread"]
+
+
+def test_without_windows_forms_the_dialog_is_shown_directly(monkeypatch):
+    import sys
+
+    from pyacquisition.new_gui import window
+
+    monkeypatch.delitem(sys.modules, "webview.platforms.winforms", raising=False)
+    dialog = FakeDialogWindow("/tmp/chosen.csv")
+
+    assert window.ask_where_to_save(dialog, save_filename="a.csv") == "/tmp/chosen.csv"

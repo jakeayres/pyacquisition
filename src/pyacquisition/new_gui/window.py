@@ -122,6 +122,61 @@ class _Api:
         it could."""
         return open_folder(data_folder(self._owner.server))
 
+    def save_file(self, name: str, text: str | None = None, base64: str | None = None):
+        """Asks where to save a file (starting in the data folder, as `name`),
+        and saves it: `text`, or the bytes that `base64` holds (an image). The
+        page calls it to export a plot, since the window doesn't download.
+        Returns where it was saved, or None if the dialog was cancelled."""
+        import base64 as b64
+
+        suffix = os.path.splitext(name)[1].lower()
+        kinds = {".png": "PNG image (*.png)", ".csv": "CSV file (*.csv)"}
+        chosen = ask_where_to_save(
+            self._owner.window,
+            directory=data_folder(self._owner.server) or "",
+            save_filename=name,
+            file_types=(kinds[suffix],) if suffix in kinds else (),
+        )
+        if not chosen:
+            return None
+        path = chosen if isinstance(chosen, str) else chosen[0]
+        return save_to(path, text=text, data=None if base64 is None else b64.b64decode(base64))
+
+
+def ask_where_to_save(window, **options):
+    """Shows the Save dialog, on the window's own thread, and gives what it
+    answers (a path, a tuple of one, or None if cancelled).
+
+    The page's calls come on a thread of pywebview's own, and on Windows
+    pywebview shows the dialog on the calling thread. That thread can't show
+    Windows Forms dialogs, so the dialog never appeared and the call never
+    returned. It is shown on the window's thread instead, when the window is
+    one of pywebview's Windows Forms ones (its module is loaded then).
+    """
+    import webview
+
+    def show():
+        return window.create_file_dialog(webview.FileDialog.SAVE, **options)
+
+    winforms = sys.modules.get("webview.platforms.winforms")
+    view = winforms and winforms.BrowserView.instances.get(getattr(window, "uid", None))
+    if view is None or not view.InvokeRequired:
+        return show()
+    answer = []
+    view.Invoke(winforms.Func[winforms.Type](lambda: answer.append(show())))
+    return answer[0] if answer else None
+
+
+def save_to(path: str, text: str | None = None, data: bytes | None = None) -> str:
+    """Writes text (UTF-8, as it is) or bytes to a file. Returns its path."""
+    if data is not None:
+        with open(path, "wb") as file:
+            file.write(data)
+    else:
+        with open(path, "w", encoding="utf-8", newline="") as file:
+            file.write(text or "")
+    return path
+
 
 def data_folder(server: str) -> str | None:
     """The experiment's data folder, as it says, so the page can't ask for any

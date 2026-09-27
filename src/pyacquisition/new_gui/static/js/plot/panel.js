@@ -5,7 +5,8 @@
 import { useRef, useState } from "preact/hooks";
 import { html } from "../html.js";
 import { usePopover } from "../hooks.js";
-import { AxesIcon, CopyIcon, CloseIcon } from "../icons.js";
+import { AxesIcon, CopyIcon, CloseIcon, DownloadIcon } from "../icons.js";
+import { exportName, plotImage, saveFile, viewCsv } from "./export.js";
 import { colourVar, isTimeColumn } from "../colours.js";
 import { Plot } from "./plot.js";
 
@@ -302,6 +303,65 @@ function AxesMenu({ limits, logX, logY, scalesRef, onApply }) {
   `;
 }
 
+// Exporting the plot: as an image of it, or the data in view as CSV (export.js).
+// A message says where it went, for a few seconds.
+function ExportMenu({ store, plotRef, scalesRef, what }) {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState(null); // {text, failed}
+  const menu = useRef(null);
+  const timer = useRef(null);
+  usePopover(menu, open, () => setOpen(false));
+
+  const tell = (text, failed = false) => {
+    clearTimeout(timer.current);
+    setMessage({ text, failed });
+    timer.current = setTimeout(() => setMessage(null), 5000);
+  };
+
+  const run = async (kind) => {
+    setOpen(false);
+    try {
+      const u = plotRef.current;
+      if (!u) throw new Error("there is no plot yet");
+      const content =
+        kind === "png"
+          ? await plotImage(u, what)
+          : viewCsv(store, { ...what, range: scalesRef.current().x });
+      const where = await saveFile(exportName(store, what, kind), content);
+      if (where) tell(`Saved ${where}`);
+    } catch (error) {
+      tell(`Couldn't export: ${error.message ?? error}`, true);
+    }
+  };
+
+  return html`
+    <div class="axes-control export-control" ref=${menu}>
+      <button
+        class="icon-button"
+        aria-label="Export"
+        aria-expanded=${open}
+        title="Export this plot"
+        onClick=${() => setOpen(!open)}
+      >
+        <${DownloadIcon} />
+      </button>
+      ${open &&
+      html`
+        <div class="axes-menu export-menu" role="menu" aria-label="Export">
+          <button class="export-item" role="menuitem" onClick=${() => run("png")}>
+            Image of the plot (PNG)
+          </button>
+          <button class="export-item" role="menuitem" onClick=${() => run("csv")}>
+            Data in view (CSV)
+          </button>
+        </div>
+      `}
+      ${message &&
+      html`<span class="export-message ${message.failed ? "failed" : ""}" role="status">${message.text}</span>`}
+    </div>
+  `;
+}
+
 // `panel` is what it plots (resolved). `onChange` gets changes to it, and
 // `reframe` says whether they change what the axes mean (so any zoom is let go).
 // `slots` gives each quantity's colour (colours.js).
@@ -326,6 +386,7 @@ export function PlotPanel({
   const series = panel.series.map((s) => ({ ...s, slot: slots.get(s.name) ?? null }));
   const saved = (list) => list.map(({ name, hidden }) => ({ name, hidden }));
   const scalesRef = useRef(null); // what the plot's axes show now
+  const plotRef = useRef(null); // the uPlot, to export
   const set = (change, reframe = false) => {
     onChange(change);
     if (reframe) onView(null);
@@ -367,6 +428,12 @@ export function PlotPanel({
             scalesRef=${scalesRef}
             onApply=${(next) => set(next, true)}
           />
+          <${ExportMenu}
+            store=${store}
+            plotRef=${plotRef}
+            scalesRef=${scalesRef}
+            what=${{ x, series, units, showPrevious }}
+          />
           ${onDuplicate &&
           html`
             <button
@@ -407,6 +474,7 @@ export function PlotPanel({
           marks=${marks}
           limits=${limits}
           scalesRef=${scalesRef}
+          plotRef=${plotRef}
           onAutoscale=${autoscale}
         />
         ${manual.length > 0 &&

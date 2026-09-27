@@ -386,6 +386,7 @@ export function Plot({
   marks = "lines", // "lines", "points" or "both"
   limits = null, // fixed axis limits: {x, y}, each {min, max} or null for auto
   scalesRef = null, // given a function that returns what the axes show now
+  plotRef = null, // given the uPlot, to export it
   onAutoscale = null, // turns autoscaling back on (a double-click)
 }) {
   const box = useRef(null);
@@ -614,6 +615,7 @@ export function Plot({
     // The right button pans, so the browser's menu stays away from the plot.
     u.over.addEventListener("contextmenu", (event) => event.preventDefault());
     if (scalesRef) scalesRef.current = scalesNow;
+    if (plotRef) plotRef.current = u;
 
     redraw();
     const unsubscribe = store.subscribe(redraw);
@@ -630,6 +632,7 @@ export function Plot({
       readout.tip.remove();
       u.destroy();
       plot.current = null;
+      if (plotRef?.current === u) plotRef.current = null;
       const plots = window.pyacquisition?.plots ?? [];
       if (plots.includes(u)) plots[plots.indexOf(u)] = null;
     };

@@ -797,6 +797,50 @@ button {
   box-shadow: var(--shadow-overlay);
 }
 
+.export-menu {
+  gap: 2px;
+  padding: var(--space-1);
+}
+
+.export-item {
+  padding: 6px var(--space-3);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  font-size: var(--text-sm);
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.export-item:hover,
+.export-item:focus-visible {
+  background: var(--surface-hover);
+}
+
+/* Where an export went, for a few seconds, under the button. */
+.export-message {
+  position: absolute;
+  z-index: 3;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  /* As wide as its text, not the button it hangs from. */
+  width: max-content;
+  max-width: 420px;
+  padding: var(--space-1) var(--space-2);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-overlay);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.export-message.failed {
+  color: var(--bad);
+}
+
 .axes-row {
   display: flex;
   align-items: center;
