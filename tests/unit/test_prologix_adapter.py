@@ -420,7 +420,9 @@ def test_query_delay_is_honoured(bus, manager):
     r = manager.open_resource("COM9::5", query_delay=0.15)
     started = time.monotonic()
     r.query("*IDN?")
-    assert time.monotonic() - started >= 0.15
+    # Less the resolution of Windows' clock (about 16 ms), which made this fail
+    # now and then, reading a little under the delay slept.
+    assert time.monotonic() - started >= 0.15 - 0.02
 
 
 # -------------------------------------------------------------- sharing the bus
