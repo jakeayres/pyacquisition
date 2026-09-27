@@ -148,6 +148,10 @@ class Setting:
         check: Returns the value if it is valid, and raises `ValueError` if not.
         section: The TOML section it is read from.
         key: The key within that section.
+        help: What it is for, in one sentence: the same as its row in
+            `docs/usage/toml_config.md`, and shown on the setup page.
+        kind: The kind of value it takes, for the setup page's field: one of
+            `KINDS`.
     """
 
     name: str
@@ -155,31 +159,135 @@ class Setting:
     check: Callable[[str, Any], Any]
     section: str
     key: str
+    help: str
+    kind: str
+
+
+# The kinds of value a setting takes (see Setting.kind).
+KINDS = ("path", "text", "port", "ports", "seconds", "count", "level", "flag", "gui")
 
 
 SETTINGS = {
     setting.name: setting
     for setting in (
-        Setting("root_path", ".", _path, "experiment", "root_path"),
-        Setting("data_path", ".", _path, "data", "path"),
-        Setting("data_file_extension", "data", _text, "data", "file_extension"),
-        Setting("data_delimiter", ",", _text, "data", "delimiter"),
-        Setting("history_points", 500_000, _history_points, "data", "history_points"),
-        Setting("log_path", ".", _path, "logging", "path"),
-        Setting("log_file_name", "debug.log", _text, "logging", "file_name"),
-        Setting("console_log_level", "DEBUG", _level, "logging", "console_level"),
-        Setting("file_log_level", "DEBUG", _level, "logging", "file_level"),
-        Setting("gui_log_level", "DEBUG", _level, "logging", "gui_level"),
-        Setting("api_server_host", "localhost", _text, "api_server", "host"),
-        Setting("api_server_port", 8000, _port, "api_server", "port"),
         Setting(
-            "api_server_fallback_ports", (), _ports, "api_server", "fallback_ports"
+            "root_path", ".", _path, "experiment", "root_path",
+            help="The folder that the other paths are relative to.",
+            kind="path",
         ),
-        Setting("measurement_period", 0.25, _seconds, "rack", "period"),
-        Setting("gui", True, _gui, "gui", "run"),
-        Setting("auto_tasks", True, _flag, "experiment", "auto_tasks"),
+        Setting(
+            "data_path", ".", _path, "data", "path",
+            help="The folder for the data files, inside `root_path`.",
+            kind="path",
+        ),
+        Setting(
+            "data_file_extension", "data", _text, "data", "file_extension",
+            help="The extension of the data files, without the dot.",
+            kind="text",
+        ),
+        Setting(
+            "data_delimiter", ",", _text, "data", "delimiter",
+            help="The character between the columns of the data files.",
+            kind="text",
+        ),
+        Setting(
+            "history_points", 500_000, _history_points, "data", "history_points",
+            help=(
+                "The most rows kept in memory for the interface's plots, from 100 "
+                "to 100,000,000, where each numeric column takes 8 bytes a row."
+            ),
+            kind="count",
+        ),
+        Setting(
+            "log_path", ".", _path, "logging", "path",
+            help="The folder for the log file, inside `root_path`.",
+            kind="path",
+        ),
+        Setting(
+            "log_file_name", "debug.log", _text, "logging", "file_name",
+            help="The name of the log file.",
+            kind="text",
+        ),
+        Setting(
+            "console_log_level", "DEBUG", _level, "logging", "console_level",
+            help="The least serious messages shown in the console.",
+            kind="level",
+        ),
+        Setting(
+            "file_log_level", "DEBUG", _level, "logging", "file_level",
+            help="The least serious messages written to the log file.",
+            kind="level",
+        ),
+        Setting(
+            "gui_log_level", "DEBUG", _level, "logging", "gui_level",
+            help="The least serious messages shown in the interface's log.",
+            kind="level",
+        ),
+        Setting(
+            "api_server_host", "localhost", _text, "api_server", "host",
+            help="The address the API server listens on.",
+            kind="text",
+        ),
+        Setting(
+            "api_server_port", 8000, _port, "api_server", "port",
+            help="The port the API server listens on.",
+            kind="port",
+        ),
+        Setting(
+            "api_server_fallback_ports", (), _ports, "api_server", "fallback_ports",
+            help="Ports to try in turn if `port` is taken by another program.",
+            kind="ports",
+        ),
+        Setting(
+            "measurement_period", 0.25, _seconds, "rack", "period",
+            help="The time between measurements, in seconds.",
+            kind="seconds",
+        ),
+        Setting(
+            "gui", True, _gui, "gui", "run",
+            help=(
+                "Whether the interface has a window of its own, as well as being "
+                "at the API server's address in a browser."
+            ),
+            kind="gui",
+        ),
+        Setting(
+            "auto_tasks", True, _flag, "experiment", "auto_tasks",
+            help=(
+                "Whether the tasks that come with an instrument, such as "
+                "`RampTemperature` for a Lakeshore, can be queued when the "
+                "instrument is in the experiment."
+            ),
+            kind="flag",
+        ),
     )
 }
+
+
+def describe() -> list[dict]:
+    """Every option, as the setup page shows it: its `name`, where it sits in
+    TOML (`section` and `key`), its `default`, `help` and `kind`, and, for a
+    level, its `choices`, or for a count, its `minimum` and `maximum`."""
+    described = []
+    for setting in SETTINGS.values():
+        entry = {
+            "name": setting.name,
+            "section": setting.section,
+            "key": setting.key,
+            "default": (
+                list(setting.default)
+                if isinstance(setting.default, tuple)
+                else setting.default
+            ),
+            "help": setting.help,
+            "kind": setting.kind,
+        }
+        if setting.kind == "level":
+            entry["choices"] = list(LOG_LEVELS)
+        if setting.check is _history_points:
+            entry["minimum"], entry["maximum"] = 100, 100_000_000
+        described.append(entry)
+    return described
 
 # TOML keys that did something once, and now do nothing. A file that still has
 # one works, with a warning, rather than being refused as a mistake.

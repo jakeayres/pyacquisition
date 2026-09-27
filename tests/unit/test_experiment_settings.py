@@ -1,5 +1,8 @@
 """Experiment options are class attributes, arguments or TOML keys, in that order of strength."""
 
+import re
+from pathlib import Path
+
 import pytest
 
 from pyacquisition import Experiment
@@ -350,3 +353,57 @@ def test_a_removed_toml_key_is_ignored_with_a_warning(tmp_path, root, monkeypatc
 
     assert experiment._run_gui is False
     assert any("'sparkline_points' in [gui] does nothing now" in w for w in warnings)
+
+
+# -------------------------------------------------------------- described
+TOML_DOCS = Path(__file__).resolve().parents[2] / "docs" / "usage" / "toml_config.md"
+
+
+def documented_rows() -> dict:
+    """Each key's description in toml_config.md, by (section, key)."""
+    rows, section = {}, None
+    for line in TOML_DOCS.read_text(encoding="utf-8").splitlines():
+        heading = re.match(r"## `\[(\w+)\]` Section", line)
+        if heading:
+            section = heading[1]
+        elif line.startswith("## "):
+            section = None
+        row = re.match(r"\|\s*`(\w+)`\s*\|(.*?)\|", line)
+        if section and row:
+            rows[section, row[1]] = row[2].strip()
+    return rows
+
+
+@pytest.mark.parametrize("setting", settings.SETTINGS.values(), ids=lambda s: s.name)
+def test_every_option_has_a_kind_and_a_help_of_one_sentence(setting):
+    assert setting.kind in settings.KINDS
+    assert setting.help.endswith(".") and setting.help.count(". ") == 0
+
+
+@pytest.mark.parametrize("setting", settings.SETTINGS.values(), ids=lambda s: s.name)
+def test_each_help_is_what_the_toml_docs_say(setting):
+    assert documented_rows()[setting.section, setting.key] == setting.help
+
+
+def test_the_options_are_described_for_the_page():
+    import json
+
+    described = settings.describe()
+
+    json.dumps(described)  # all of it can be sent
+    assert [d["name"] for d in described] == list(settings.SETTINGS)
+    period = next(d for d in described if d["name"] == "measurement_period")
+    assert period == {
+        "name": "measurement_period",
+        "section": "rack",
+        "key": "period",
+        "default": 0.25,
+        "help": "The time between measurements, in seconds.",
+        "kind": "seconds",
+    }
+    level = next(d for d in described if d["name"] == "console_log_level")
+    assert level["choices"] == list(settings.LOG_LEVELS)
+    points = next(d for d in described if d["name"] == "history_points")
+    assert (points["minimum"], points["maximum"]) == (100, 100_000_000)
+    ports = next(d for d in described if d["name"] == "api_server_fallback_ports")
+    assert ports["default"] == []

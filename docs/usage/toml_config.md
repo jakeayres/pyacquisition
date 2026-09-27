@@ -9,8 +9,8 @@ General parameters for the experiment.
 
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
-| `root_path`    | Root directory for the experiment. All other paths are relative to this directory.   | `.`           |
-| `auto_tasks`   | Register the tasks that come with an instrument (`RampTemperature` for a Lakeshore, `SweepMagneticField` for a Mercury IPS) when the instrument is in the `[instruments]` section, so that they can be queued from the interface. Set to `false` to turn this off. | `true`        |
+| `root_path` | The folder that the other paths are relative to. | `.`           |
+| `auto_tasks` | Whether the tasks that come with an instrument, such as `RampTemperature` for a Lakeshore, can be queued when the instrument is in the experiment. | `true`        |
 
 
 ## `[rack]` Section
@@ -19,7 +19,7 @@ Configuration of the `rack` object which manages the polling of instruments.
 
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
-| `period`       | Time period for rack operations. How frequently measurement functions are polled in seconds.    | `0.25`        |
+| `period` | The time between measurements, in seconds. | `0.25`        |
 
 
 ## `[instruments]` Section
@@ -156,9 +156,10 @@ The `[data]` section describes the configuration of the data files.
 
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
-| `path`         | Directory for storing data (relative to the experiment `root_path`).          | `.`           |
-| `file_extension` | The file extension to use for data files | `data` |
-| `delimiter`    | Delimiter to use for data files | `,` |
+| `path` | The folder for the data files, inside `root_path`. | `.`           |
+| `file_extension` | The extension of the data files, without the dot. | `data` |
+| `delimiter` | The character between the columns of the data files. | `,` |
+| `history_points` | The most rows kept in memory for the interface's plots, from 100 to 100,000,000, where each numeric column takes 8 bytes a row. | `500000` |
 
 
 ## `[api_server]` Section
@@ -167,9 +168,9 @@ The `[api_server]` section defines the properties of the FastAPI backend that se
 
 | Parameter Name         | Description                          | Default Value          |
 |------------------------|--------------------------------------|------------------------|
-| `host`                 | Hostname for the API server.         | `localhost`            |
-| `port`                 | Port for the API server.             | `8000`                 |
-| `fallback_ports`       | Ports to try in turn if `port` is taken by another program. | `[]` (none) |
+| `host` | The address the API server listens on. | `localhost`            |
+| `port` | The port the API server listens on. | `8000`                 |
+| `fallback_ports` | Ports to try in turn if `port` is taken by another program. | `[]` (none) |
 
 With fallback ports, an experiment that finds its port taken, for example by another experiment already running, moves to the first free one instead of failing to start. The port it ends up on is logged, and the GUI connects to it by itself:
 
@@ -188,18 +189,18 @@ This section defines the various logging levels and location of log files produc
 
 | Parameter Name  | Description                          | Default Value |
 |-----------------|--------------------------------------|---------------|
-| `path`          | Directory for the log file (relative to the experiment `root_path`). | `.` |
-| `console_level` | Logging level for console output.    | `DEBUG`       |
-| `gui_level`     | Logging level for output in the GUI.    | `DEBUG`       |
-| `file_level`    | Logging level for file output.       | `DEBUG`       |
-| `file_name`     | Name of the log file.                | `debug.log`   |
+| `path` | The folder for the log file, inside `root_path`. | `.` |
+| `console_level` | The least serious messages shown in the console. | `DEBUG`       |
+| `gui_level` | The least serious messages shown in the interface's log. | `DEBUG`       |
+| `file_level` | The least serious messages written to the log file. | `DEBUG`       |
+| `file_name` | The name of the log file. | `debug.log`   |
 
 
 ## `[gui]` Section
 
 | Parameter Name | Description                          | Default Value |
 |----------------|--------------------------------------|---------------|
-| `run`          | Set to `false` to run without the interface's window. It can still be opened in a browser at the API server's address. | `true` |
+| `run` | Whether the interface has a window of its own, as well as being at the API server's address in a browser. | `true` |
 
 
 ## Mistakes in the file
