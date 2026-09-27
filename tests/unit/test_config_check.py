@@ -113,6 +113,25 @@ def test_an_unknown_adapter_or_key_is_a_problem():
     assert where(config) == [("instruments", "ls", "colour"), ("instruments", "ls", "adapter")]
 
 
+@pytest.mark.parametrize("timeout", ["5s", 0, -1, 2.5, True])
+def test_a_timeout_must_be_whole_milliseconds(timeout):
+    config = {"instruments": {"ls": {**LAKESHORE["ls"], "args": {"timeout": timeout}}}}
+
+    assert where(config) == [("instruments", "ls", "args", "timeout")]
+
+
+def test_a_termination_must_be_text():
+    config = {"instruments": {"ls": {**LAKESHORE["ls"], "args": {"read_termination": 10}}}}
+
+    assert where(config) == [("instruments", "ls", "args", "read_termination")]
+
+
+def test_other_args_are_let_be():
+    config = {"instruments": {"ls": {**LAKESHORE["ls"], "args": {"baud_rate": 9600}}}}
+
+    assert problems(config) == []
+
+
 def test_an_unknown_driver_is_a_problem():
     assert where({"instruments": {"x": {"instrument": "Mongolia"}}}) == [
         ("instruments", "x", "instrument")

@@ -174,10 +174,32 @@ def _connection_problems(name: str, entry: dict, cls) -> list[Problem]:
                 '"GPIB0::7::INSTR".',
             )
         )
-    if "args" in entry and not isinstance(entry["args"], dict):
+    args = entry.get("args", {})
+    if not isinstance(args, dict):
         found.append(
             Problem((*where, "args"), f"Instrument '{name}': `args` must be a table.")
         )
+        return found
+    timeout = args.get("timeout")
+    if timeout is not None and (
+        isinstance(timeout, bool) or not isinstance(timeout, int) or timeout <= 0
+    ):
+        found.append(
+            Problem(
+                (*where, "args", "timeout"),
+                f"Instrument '{name}': `timeout` must be a whole number of "
+                f"milliseconds, above 0, got {timeout!r}.",
+            )
+        )
+    for key in ("read_termination", "write_termination"):
+        if key in args and not isinstance(args[key], str):
+            found.append(
+                Problem(
+                    (*where, "args", key),
+                    f'Instrument \'{name}\': `{key}` must be text, such as "\\n", '
+                    f"got {args[key]!r}.",
+                )
+            )
     return found
 
 

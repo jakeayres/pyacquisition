@@ -31,7 +31,7 @@ from ..gui import UI_PATH, Gui
 from ..gui import mount as serve_gui
 from ..instruments import instrument_map
 from . import calculations, config_check, config_writer, settings
-from .adapters import ADAPTERS
+from .adapters import ADAPTERS, open_resource
 from .api_server import APIServer
 from .instrument import SoftwareInstrument
 from .logging import logger
@@ -75,6 +75,8 @@ class SetupServer:
             why the last Run stopped before the experiment started (or null).
         POST /setup/check: a config's problems, and the file it would write.
         POST /setup/save: writes a config with no problems to the file.
+        POST /setup/test: asks an instrument at an address for `*IDN?`, and
+            whether its reply is its driver's.
         POST /setup/run: starts handing over to the experiment, and stops the
             server. Answers with the port the experiment will listen on.
         GET /setup/shutdown: stops the server, when the window closes.
@@ -225,6 +227,27 @@ class SetupServer:
             logger.info(f"[Setup] Saved {self.path}")
             return {"status": 200, "data": checked}
 
+        @app.post("/setup/test", tags=["setup"])
+        def setup_test(instrument: dict = Body(...)):
+            """
+            Endpoint that opens an instrument's address, asks `*IDN?`, and
+            closes it, without making the driver (which would send its setup
+            commands). Given `instrument` (the driver's name), `adapter`,
+            `resource` and `args`, as a config holds them. Answers with the
+            `reply` (or null), whether it `matches` the driver's identity (null
+            when it has none), the `expected` words, the words `missing` from the
+            reply, and the `error` if it couldn't be asked.
+            """
+            return {
+                "status": 200,
+                "data": test_instrument(
+                    instrument.get("instrument"),
+                    instrument.get("adapter"),
+                    instrument.get("resource"),
+                    instrument.get("args") or {},
+                ),
+            }
+
         for driver, cls in instrument_map.items():
             for name, query in config_check.queries(cls).items():
                 app.add_api_route(
@@ -265,6 +288,42 @@ class SetupServer:
             """
             background.add_task(self.stop)
             return {"status": 200, "data": None}
+
+
+def test_instrument(driver, adapter, resource, args: dict) -> dict:
+    """Asks the instrument at an address for `*IDN?` (see `/setup/test`)."""
+    from .discovery import identities
+    from ..verify.spec import missing_words
+
+    expected = identities().get(driver)
+    answer = {
+        "reply": None,
+        "matches": None,
+        "expected": list(expected) if expected else None,
+        "missing": [],
+        "error": None,
+    }
+    if not isinstance(resource, str) or not resource or not isinstance(adapter, str):
+        answer["error"] = "It needs an adapter and an address to test."
+        return answer
+    try:
+        opened = open_resource(resource, adapter, **args)
+    except Exception as e:  # noqa: BLE001 - whatever it was, it is shown
+        answer["error"] = str(e)
+        return answer
+    try:
+        answer["reply"] = str(opened.query("*IDN?")).strip()
+    except Exception as e:  # noqa: BLE001
+        answer["error"] = f"It didn't answer *IDN?: {e}"
+    finally:
+        try:
+            opened.close()
+        except Exception:  # noqa: BLE001 - closing is best effort
+            pass
+    if expected and answer["reply"] is not None:
+        answer["missing"] = missing_words(expected, answer["reply"])
+        answer["matches"] = not answer["missing"]
+    return answer
 
 
 def describe() -> dict:

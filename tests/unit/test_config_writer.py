@@ -112,6 +112,16 @@ def test_a_new_instrument_goes_at_the_end_of_its_section_as_its_neighbours_are()
     )
 
 
+def test_a_new_key_in_an_inline_table_is_spaced_as_the_others():
+    new = config()
+    new["measurements"]["t"]["args"] = {"n": 1}
+    new["measurements"]["t"]["unit"] = "ms"
+
+    result = render(new, RIG)
+
+    assert 't = {instrument = "clock", method = "timestamp_ms", args = {n = 1}, unit = "ms"}' in result
+
+
 def test_a_new_measurement_among_inline_ones_is_inline():
     new = config()
     new["measurements"]["y"] = {"instrument": "lockin", "method": "get_y"}

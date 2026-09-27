@@ -191,3 +191,118 @@
   margin: 0;
   color: var(--bad);
 }
+
+/* ------------------------------------------------------------ instruments */
+
+.setup-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.setup-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 720px;
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.setup-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.setup-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.setup-card-name {
+  width: 200px;
+  font-family: var(--font-mono);
+  font-weight: var(--weight-medium);
+}
+
+.setup-card-name[aria-invalid="true"] {
+  border-color: var(--bad);
+}
+
+.setup-card-kind {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.setup-card-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--space-3) var(--space-4);
+}
+
+.setup-card-fields .form-field {
+  max-width: none;
+}
+
+.setup-others ul {
+  margin: var(--space-1) 0 0;
+  padding-left: var(--space-4);
+  font-size: var(--text-sm);
+}
+
+.setup-others code,
+.setup-test code,
+.setup-section code {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+}
+
+.setup-card-test {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.setup-test {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.setup-test-good {
+  color: var(--good);
+}
+
+.setup-test-warn {
+  color: var(--warn);
+}
+
+.setup-test-bad {
+  color: var(--bad);
+}
+
+.setup-add {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  max-width: 720px;
+  padding: var(--space-3) var(--space-4);
+  border: var(--border-width) dashed var(--border-strong);
+  border-radius: var(--radius-lg);
+}
+
+.setup-add .form-field {
+  width: 220px;
+}
+
+.setup-add .form-error {
+  flex-basis: 100%;
+}

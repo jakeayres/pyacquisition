@@ -23,6 +23,9 @@ async function post(path, body, { timeout = 10000 } = {}) {
 export const check = async (config) => (await post("/setup/check", config)).data;
 // {ok, data: {problems, toml}}
 export const save = (config) => post("/setup/save", config);
+// {reply, matches, expected, missing, error} for an instrument asked *IDN?.
+export const test = async (instrument) =>
+  (await post("/setup/test", instrument, { timeout: 30000 })).data;
 // The port the experiment will listen on.
 export const run = async () => (await post("/setup/run")).data.port;
 export const shutdown = () => fetch("/setup/shutdown").catch(() => {});

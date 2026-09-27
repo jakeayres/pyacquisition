@@ -7,6 +7,7 @@ import { useTheme } from "../theme.js";
 import { ConfirmDialog } from "../confirm.js";
 import { LogoMark, MoonIcon, PlayIcon, SunIcon } from "../icons.js";
 import * as api from "./api.js";
+import { InstrumentsSection } from "./instruments.js";
 import { OptionsSection } from "./options.js";
 import { Preview } from "./preview.js";
 
@@ -14,7 +15,10 @@ const CHECK_AFTER = 250; // ms after the last change before it is checked
 const RUN_TIMEOUT = 120_000; // ms to wait for the experiment to answer, after Run
 const POLL_PERIOD = 500; // ms between checks meanwhile
 
-const SECTIONS = [{ id: "options", label: "Options" }];
+const SECTIONS = [
+  { id: "instruments", label: "Instruments" },
+  { id: "options", label: "Options" },
+];
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -140,7 +144,7 @@ export function App() {
   const [busy, setBusy] = useState(false);
   const [asking, setAsking] = useState(false); // whether to close without saving
   const [closed, setClosed] = useState(false);
-  const [section, setSection] = useState("options");
+  const [section, setSection] = useState(SECTIONS[0].id);
   const { checked, stale } = useChecked(config);
 
   useEffect(() => {
@@ -261,6 +265,13 @@ export function App() {
           )}
         </nav>
         <main class="setup-main">
+          ${section === "instruments" &&
+          html`<${InstrumentsSection}
+            described=${described}
+            config=${config}
+            problems=${problems}
+            onChange=${setConfig}
+          />`}
           ${section === "options" &&
           html`<${OptionsSection}
             options=${described.options}

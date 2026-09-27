@@ -297,7 +297,7 @@ def _update(container, wanted: dict, depth: int, section=None, outer=None) -> No
     if outer is not None and _is_super(item):
         _rearrange_super(container, wanted, depth, section, outer)
     else:
-        _rearrange(container, wanted, depth, section)
+        _rearrange(container, wanted, depth, section, inline=isinstance(item, InlineTable))
 
 
 def _chunks(container: Container):
@@ -321,14 +321,20 @@ def _item_of(chunk: list):
     return next(item for key, item in chunk if key is not None)
 
 
-def _rearrange(container: Container, wanted: dict, depth: int, section) -> None:
+def _rearrange(container: Container, wanted: dict, depth: int, section, inline=False) -> None:
     head, chunks, tail = _chunks(container)
     style = _style(depth, section, [_item_of(c) for c in chunks.values()])
     last_blank = _last_ends_blank([_item_of(c) for c in chunks.values()])
 
     ordered, seen_table = [], False
     for key, value in wanted.items():
-        chunk = chunks.get(key) or [(tomlkit.key(key), _new_item(value, style, depth))]
+        if key in chunks:
+            chunk = chunks[key]
+        else:
+            new = _new_item(value, style, depth)
+            if inline:
+                new.trivia.indent = " "  # after the comma, as `{a = 1, b = 2}`
+            chunk = [(tomlkit.key(key), new)]
         item = _item_of(chunk)
         if _is_table(item):
             seen_table = True

@@ -42,6 +42,7 @@ def setup(rig_file):
 def open_setup(context, running):
     page = Page(context.new_page())
     page.page.goto(f"{running.address}/")
+    page.page.get_by_role("navigation", name="Sections").get_by_role("button", name="Options").click()
     page.page.get_by_role("heading", name="Options").wait_for()
     expect(page.page.get_by_label("TOML")).not_to_be_empty()  # checked once
     return page

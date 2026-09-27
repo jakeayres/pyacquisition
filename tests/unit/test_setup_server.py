@@ -440,3 +440,77 @@ def test_a_query_routes_schema_is_the_form_the_page_builds(tmp_path):
 
     assert parameter["name"] == "input_channel" and parameter["required"] is True
     assert "/setup/drivers/Mercury_IPS/to_zero" not in paths  # a command
+
+
+# ------------------------------------------------------------ testing an instrument
+def asked(client, instrument="SR_830", adapter="mock", resource="GPIB0::7::INSTR", args=None):
+    return client.post(
+        "/setup/test",
+        json={"instrument": instrument, "adapter": adapter, "resource": resource, "args": args or {}},
+    ).json()["data"]
+
+
+def test_an_instrument_that_answers_as_its_driver_matches(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    data = asked(client, args={"responses": {"*IDN?": "Stanford_Research_Systems,SR830,1,1"}})
+
+    assert data == {
+        "reply": "Stanford_Research_Systems,SR830,1,1",
+        "matches": True,
+        "expected": ["STANFORD", "SR830"],
+        "missing": [],
+        "error": None,
+    }
+
+
+def test_an_instrument_that_answers_as_another_does_not_match(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    data = asked(client, args={"responses": {"*IDN?": "LSCI,MODEL350"}})
+
+    assert data["matches"] is False
+    assert data["missing"] == ["STANFORD", "SR830"]
+
+
+def test_a_driver_with_no_identity_can_not_be_matched(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    data = asked(client, instrument="Mercury_IPS")
+
+    assert data["reply"]  # it answered, as the mock does
+    assert data["matches"] is None and data["expected"] is None
+
+
+def test_an_address_that_can_not_be_opened_says_why(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    data = asked(client, adapter="prologix", resource="NOT_A_PORT::7")
+
+    assert data["reply"] is None and data["matches"] is None
+    assert "Could not open 'NOT_A_PORT::7'" in data["error"]
+
+
+def test_nothing_is_asked_without_an_address(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    assert asked(client, resource="")["error"] == "It needs an adapter and an address to test."
+
+
+def test_the_resource_is_closed_after_asking(tmp_path, monkeypatch):
+    from pyacquisition.core import setup as setup_module
+
+    closed = []
+
+    class Resource:
+        def query(self, text):
+            return "Stanford_Research_Systems,SR830,1,1"
+
+        def close(self):
+            closed.append(True)
+
+    monkeypatch.setattr(setup_module, "open_resource", lambda *a, **k: Resource())
+    client, _ = client_for(tmp_path)
+
+    assert asked(client)["matches"] is True
+    assert closed == [True]
