@@ -201,7 +201,20 @@ export function Field({ field, value, error, onChange, id }) {
 // `initialValues` start it with other values than the defaults (the palette's
 // typed arguments), and `lineErrors` are shown by their fields until each is
 // changed: give it a key that changes with them.
-export function EndpointForm({ endpoint, onSubmit, submitLabel, initialValues, lineErrors }) {
+//
+// `secondary` adds a second button, {label, onSubmit(params, choice), choices},
+// checked as the first is; Shift+Enter in a field presses it. With more than one
+// of `choices` (the task managers, for queueing an instrument's call), a list
+// beside it picks one, the first to start with.
+export function EndpointForm({
+  endpoint,
+  onSubmit,
+  submitLabel,
+  initialValues,
+  lineErrors,
+  secondary,
+}) {
+  const [choice, setChoice] = useState(() => secondary?.choices?.[0]);
   const [values, setValues] = useState(() => ({
     ...startingValues(endpoint.fields),
     ...(initialValues ?? {}),
@@ -213,13 +226,15 @@ export function EndpointForm({ endpoint, onSubmit, submitLabel, initialValues, l
 
   const submit = async (event) => {
     event.preventDefault();
+    const second = !!secondary && event.submitter?.dataset.secondary === "true";
     setProblem("");
     const checked = checkValues(endpoint.fields, values);
     if (checked.errors) return setErrors(checked.errors);
     setErrors({});
     setBusy(true);
     try {
-      await onSubmit(checked.params);
+      if (second) await secondary.onSubmit(checked.params, choice);
+      else await onSubmit(checked.params);
     } catch (e) {
       const byField = {};
       const general = [];
@@ -236,7 +251,17 @@ export function EndpointForm({ endpoint, onSubmit, submitLabel, initialValues, l
 
   const id = (name) => `field-${endpoint.path.replaceAll("/", "-")}-${name}`;
   return html`
-    <form class="endpoint-form" onSubmit=${submit} noValidate>
+    <form
+      class="endpoint-form"
+      onSubmit=${submit}
+      onKeyDown=${(event) => {
+        if (secondary && event.key === "Enter" && event.shiftKey && event.target.tagName === "INPUT") {
+          event.preventDefault();
+          event.currentTarget.requestSubmit(event.currentTarget.querySelector("[data-secondary]"));
+        }
+      }}
+      noValidate
+    >
       ${endpoint.fields.length === 0 &&
       html`<p class="form-help">This takes no inputs.</p>`}
       ${endpoint.fields.map(
@@ -260,6 +285,25 @@ export function EndpointForm({ endpoint, onSubmit, submitLabel, initialValues, l
         <button type="submit" class="button button-primary" disabled=${busy}>
           ${busy ? "Sending…" : submitLabel}
         </button>
+        ${secondary &&
+        html`
+          <button type="submit" class="button" data-secondary="true" disabled=${busy}>
+            ${secondary.label}
+          </button>
+          ${secondary.choices?.length > 1 &&
+          html`
+            <select
+              class="text-input form-choice"
+              aria-label=${secondary.choiceLabel ?? "Queue on"}
+              value=${choice}
+              onChange=${(e) => setChoice(e.currentTarget.value)}
+            >
+              ${secondary.choices.map(
+                (c) => html`<option value=${c}>${c.charAt(0).toUpperCase() + c.slice(1)}</option>`,
+              )}
+            </select>
+          `}
+        `}
       </div>
     </form>
   `;

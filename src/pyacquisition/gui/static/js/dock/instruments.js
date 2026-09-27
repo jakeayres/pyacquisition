@@ -3,7 +3,7 @@
 // recent results stay, per instrument, for as long as the page is open.
 import { useEffect, useLayoutEffect, useState } from "preact/hooks";
 import { html } from "../html.js";
-import { get } from "../api.js";
+import { get, managerPath } from "../api.js";
 import { EndpointForm, describeEndpoint, loadSchema, withCode } from "../forms.js";
 import { load, save } from "../session.js";
 import { Watched } from "../store.js";
@@ -102,6 +102,13 @@ const GROUPS = [
   ["command", "Commands"],
   ["other", "Other"],
 ];
+
+// Queues an instrument's query or command (as described by loadInstruments) on
+// a task manager, to run in its turn with the form's params (see the server's
+// task_manager/instrument_call.py).
+export function queueCall(uid, endpoint, params, manager = "main") {
+  return get(managerPath(manager, `call/${uid}/${endpoint.method}`), { params });
+}
 
 // Calls an instrument's endpoint (as described by loadInstruments) with the
 // form's params, and records what came back in its results. Returns the
@@ -207,7 +214,8 @@ function ResultList({ uid, entries, onClear }) {
   `;
 }
 
-export function InstrumentsTab() {
+// `managers` is the task managers' states (polled), for queueing a call on one.
+export function InstrumentsTab({ managers }) {
   const [instruments, setInstruments] = useState(null);
   const [failed, setFailed] = useState("");
   const [picked, setPicked] = useState(() => load("instruments", {}));
@@ -235,6 +243,15 @@ export function InstrumentsTab() {
 
   // A failure is thrown on, for the form to show by the field it names.
   const call = (params) => callInstrument(instrument.uid, endpoint, params);
+  const names = Object.keys(managers?.states ?? { main: null });
+  const queue = {
+    label: "Add to queue",
+    choices: names,
+    onSubmit: async (params, manager) => {
+      await queueCall(instrument.uid, endpoint, params, manager);
+      managers?.refresh?.();
+    },
+  };
 
   return html`
     <div class="instruments-tab">
@@ -310,6 +327,7 @@ export function InstrumentsTab() {
                 endpoint=${endpoint}
                 submitLabel=${endpoint.group === "command" ? "Send" : "Read"}
                 onSubmit=${call}
+                secondary=${endpoint.group === "other" ? undefined : queue}
               />
             `
           : html`<p class="placeholder">Pick a query or a command.</p>`}

@@ -1577,6 +1577,11 @@ body.resizing-dock {
   color: var(--text);
 }
 
+.queue-last-value {
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
 .queue-last[data-outcome="failed"] .queue-error-inline {
   color: var(--bad);
   font-family: var(--font-mono);
@@ -2395,7 +2400,19 @@ body.dragging-task * {
 
 .form-buttons {
   display: flex;
+  align-items: center;
   gap: var(--space-2);
+}
+
+/* Which task manager a second button (Add to queue) queues on. */
+.form-buttons .form-choice {
+  width: auto;
+  height: 32px;
+}
+
+.call-pane .form-buttons .form-choice {
+  height: 28px;
+  font-size: var(--text-sm);
 }
 
 .dialog .form-added {

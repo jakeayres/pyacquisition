@@ -1,3 +1,4 @@
+from ..history import json_value
 from ..logging import logger
 from .task import Task
 import asyncio
@@ -123,6 +124,8 @@ class TaskManager:
             # When it ended, which also tells two results alike apart (the
             # interface raises an alert for each failure).
             "finished_at": time.time(),
+            # What it read, if it is an instrument's queued query (InstrumentCall).
+            "value": json_value(getattr(task, "_result", None)),
         }
         if outcome == "failed" and not self._shutdown_event.is_set():
             logger.error(

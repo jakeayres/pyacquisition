@@ -18,6 +18,7 @@ from . import calculations
 from .calculations import Calculations
 from .task_manager.task_manager import TaskManager
 from .task_manager.task import Task
+from .task_manager.instrument_call import register_call_endpoints
 from .scribe import Scribe
 from .history import History
 from .log_history import LogHistory
@@ -732,6 +733,7 @@ class Experiment:
             self._register_endpoints(self._api_server)
             self.setup()
             self._register_instrument_tasks()
+            self._register_instrument_calls()
             self._started = True
             try:
                 if self._adopted_ui_process is not None:
@@ -890,6 +892,17 @@ class Experiment:
             logger.error(f"An error occurred while running the experiment: {e}")
 
         logger.info("Experiment ended")
+
+    def _register_instrument_calls(self) -> None:
+        """
+        Lets every query and command of every instrument be queued on every task
+        manager, as `<manager path>/call/<uid>/<method>` (see
+        `task_manager/instrument_call.py`). It runs when `setup()` has added the
+        instruments and task managers.
+        """
+        for task_manager in self._task_managers.values():
+            for uid, instrument in self.instruments.items():
+                register_call_endpoints(self._api_server, task_manager, uid, instrument)
 
     def _register_instrument_tasks(self) -> None:
         """

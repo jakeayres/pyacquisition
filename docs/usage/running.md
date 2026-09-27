@@ -104,6 +104,7 @@ Its inputs can be typed on the same line, after the search, and the form fills i
 - ++tab++ fixes the item picked, so everything typed after its name is its inputs, even words that other items have.
 - A line under the search shows each input and its value, and anything wrong, which is marked on the form too.
 - ++enter++ queues the task, sends the command or reads the query when its inputs are all there and right, or when it takes none. Otherwise it goes to the form: to the first input that is wrong, or, with nothing typed after the search, to the first input, to fill it in there.
+- An instrument's query or command can also be **queued**, to run in its turn like a task, with the inputs it has now: ++shift+enter++ queues it, and so does its form's **Add to queue**. `lakeshore set_setpoint output_1 300` and ++shift+enter++ sets the setpoint once the tasks before it are done. With more than one task manager, the list beside **Add to queue** picks which queue.
 
 ## Your data
 

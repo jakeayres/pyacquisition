@@ -6,13 +6,20 @@
 // The inputs can be typed on the search line after the search (palette-line.js):
 // `wait 0 5` fills WaitFor's form with hours 0 and minutes 5 as it is typed, and
 // Enter then queues it. Tab locks in the item picked, so everything typed after
-// its label is an argument.
+// its label is an argument. An instrument's query or command can be queued too,
+// with Shift+Enter or its form's Add to queue, rather than called at once.
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { html } from "./html.js";
 import { get } from "./api.js";
 import { EndpointForm, loadSchema, taskEndpoints, withCode } from "./forms.js";
 import { matchArguments, searchItems, splitLine } from "./palette-line.js";
-import { CopyResult, ResultValue, callInstrument, loadInstruments } from "./dock/instruments.js";
+import {
+  CopyResult,
+  ResultValue,
+  callInstrument,
+  loadInstruments,
+  queueCall,
+} from "./dock/instruments.js";
 import { SearchIcon } from "./icons.js";
 
 export { searchItems } from "./palette-line.js";
@@ -23,7 +30,8 @@ const KINDS = { query: "Query", command: "Command", other: "Instrument" };
 // Everything the palette offers. Each item is {id, kind, label, tag, text,
 // description, fields, submitLabel, run, closes}, with the `endpoint` its form
 // is for. `text` is what the search looks in, and `run(params)` does what the
-// form's button does, giving an answer to show (or nothing).
+// form's button does, giving an answer to show (or nothing). An instrument's
+// call also has `queue(params, manager)`, which queues it instead.
 export function paletteItems(root, managerNames, instruments) {
   const single = managerNames.length === 1;
   const tasks = managerNames.flatMap((manager) =>
@@ -57,6 +65,7 @@ export function paletteItems(root, managerNames, instruments) {
       fields: endpoint.fields,
       submitLabel: endpoint.group === "command" ? "Send" : "Read",
       run: (params) => callInstrument(uid, endpoint, params),
+      queue: endpoint.group === "other" ? null : (params, manager) => queueCall(uid, endpoint, params, manager),
       closes: false,
     })),
   );
@@ -81,7 +90,9 @@ function ArgumentHint({ item, match }) {
         .concat(match.problems)
         .map((problem) => html`<span class="palette-arg palette-arg-problem">${withCode(problem)}</span>`)}
       ${match.ok &&
-      html`<span class="palette-arg palette-arg-ready">✓ ${ENTER[item.submitLabel] ?? "Enter to run"}</span>`}
+      html`<span class="palette-arg palette-arg-ready">
+        ✓ ${ENTER[item.submitLabel] ?? "Enter to run"}${item.queue ? " · Shift+Enter to queue" : ""}
+      </span>`}
     </p>
   `;
 }
@@ -165,8 +176,11 @@ export function Palette({ managers, onQueued, onClose }) {
       setAnswer(null);
     } else if (event.key === "Enter" && current) {
       event.preventDefault();
+      // Shift+Enter queues an instrument's call, by the form's second button.
+      const queueing = event.shiftKey && current.queue;
       if (current.fields.length === 0 || match?.ok) {
-        form()?.requestSubmit();
+        const button = queueing ? form()?.querySelector("[data-secondary]") : undefined;
+        form()?.requestSubmit(button ?? undefined);
       } else if (match) {
         form()?.querySelector("[aria-invalid='true']")?.focus();
       } else {
@@ -182,6 +196,17 @@ export function Palette({ managers, onQueued, onClose }) {
     if (item.kind === "task") onQueued();
     if (item.closes) onClose();
     else if (result) setAnswer(result);
+  };
+
+  // An instrument's call, queued on the task manager picked, as a task is.
+  const queue = current?.queue && {
+    label: "Add to queue",
+    choices: names,
+    onSubmit: async (params, manager) => {
+      await current.queue(params, manager);
+      onQueued();
+      onClose();
+    },
   };
 
   let body;
@@ -226,6 +251,7 @@ export function Palette({ managers, onQueued, onClose }) {
               initialValues=${match?.values}
               lineErrors=${match?.errors}
               onSubmit=${submit}
+              secondary=${queue || undefined}
             />
             ${answer &&
             html`

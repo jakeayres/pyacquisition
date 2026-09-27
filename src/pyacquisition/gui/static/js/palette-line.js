@@ -157,8 +157,11 @@ export function typedValue(field, text) {
     case "boolean":
       return lower in BOOLEANS ? { value: BOOLEANS[lower] } : refused;
     case "choice": {
-      let i = field.choices.findIndex((c) => String(c).toLowerCase() === lower);
-      if (i === -1) i = (field.labels ?? []).findIndex((l) => String(l).toLowerCase() === lower);
+      // As the server does: spaces, underscores and case don't matter, so
+      // `output_1` is the choice labelled "Output 1".
+      const loose = (x) => String(x).toLowerCase().replace(/[\s_]+/g, "");
+      let i = field.choices.findIndex((c) => loose(c) === loose(t));
+      if (i === -1) i = (field.labels ?? []).findIndex((l) => loose(l) === loose(t));
       return i === -1 ? refused : { value: String(field.choices[i]) };
     }
     case "integer":

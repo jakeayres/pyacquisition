@@ -282,3 +282,13 @@ def test_typed_values(line, field, text, value):
 
 def test_a_value_an_input_cant_take_says_what_it_takes(line):
     assert line("typedValue", {"name": "x", "type": "integer"}, "1.5") == {"refused": "a whole number"}
+
+
+def test_a_choice_ignores_spaces_underscores_and_case_as_the_server_does(line):
+    # An instrument's choices are its labels ("Output 1"), not names.
+    field = {"name": "output_channel", "type": "choice", "choices": ["Output 1", "Output 2"],
+             "labels": ["Output 1", "Output 2"]}
+
+    assert line("typedValue", field, "output_1") == {"value": "Output 1"}
+    assert line("typedValue", field, "OUTPUT 2") == {"value": "Output 2"}
+    assert line("typedValue", field, "output3") == {"refused": "one of Output 1, Output 2"}

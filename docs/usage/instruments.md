@@ -133,4 +133,6 @@ To remove an instrument again, call `self.remove_instrument("lockin")`. Like add
 
 Open the **Instruments** tab. Pick an instrument to list all of its queries and commands, pick one, fill in any inputs, and press **Read** (or **Send**, for a command). The reply is shown beside the form, with the replies before it. ++ctrl+k++ finds any of them from anywhere, and takes their inputs on the same line: `clock read_timer lap` and ++enter++ reads the clock's timer `lap`.
 
+**Add to queue**, beside **Read** or **Send**, queues the call instead, with the inputs in the form, to run in its turn after the tasks already queued. A query's reply is then logged, and shown in the **Queue** tab as the last result: `Last: lakeshore.get_temperature completed → 4.21`. A queue holding calls can be saved as a sequence, like any other.
+
 Reading values continuously and saving them to file is done with a [measurement](measurements.md).

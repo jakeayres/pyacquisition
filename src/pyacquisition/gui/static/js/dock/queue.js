@@ -84,6 +84,12 @@ function Parameters({ parameters }) {
   `;
 }
 
+// What a queued query read, short enough for the last result's line.
+function resultValue(value) {
+  const text = typeof value === "object" ? JSON.stringify(value) : formatParameter(value);
+  return text.length > 80 ? `${text.slice(0, 79)}…` : text;
+}
+
 // What the last task to finish did, when it is worth saying: a failure or an
 // abort that left the queue paused is a notice to act on; otherwise a quiet line.
 function LastResult({ manager }) {
@@ -109,7 +115,10 @@ function LastResult({ manager }) {
   }
   return html`
     <p class="queue-last" data-outcome=${last.outcome}>
-      Last: <span class="queue-last-name">${last.name}</span> ${last.outcome}${last.error
+      Last: <span class="queue-last-name">${last.name}</span> ${last.outcome}${last.value !== null &&
+      last.value !== undefined
+        ? html` → <span class="queue-last-value">${resultValue(last.value)}</span>`
+        : ""}${last.error
         ? html`: <span class="queue-error-inline">${last.error}</span>`
         : ""}
     </p>

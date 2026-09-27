@@ -13,7 +13,7 @@ Once tasks are [registered](tasks.md#registering-tasks), you run them by adding 
 
 ++ctrl+k++ does the same from anywhere: it searches every task on every task manager, and queues the one you pick. Its inputs can be typed after its name, as in `wait 0 5`, to queue it with ++enter++ without the form.
 
-The task joins the queue, and starts as soon as the task manager is free. You can queue several tasks, including several copies of the same one with different inputs, and then leave them to run.
+The task joins the queue, and starts as soon as the task manager is free. An instrument's query or command can be queued the same way, from the **Instruments** tab or ++ctrl+k++ ([Using an instrument from the interface](instruments.md#using-an-instrument-from-the-interface)): it shows in the queue as the call, such as `lakeshore.set_setpoint(output_channel=OUTPUT_1, setpoint=300)`. You can queue several tasks, including several copies of the same one with different inputs, and then leave them to run.
 
 ## The Queue tab
 

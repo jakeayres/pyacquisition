@@ -227,3 +227,64 @@ def test_an_enum_input_is_titled_after_the_input(context, rig):
     expect(page.page.locator(".form-field[data-field='output_channel'] label")).to_have_text(
         re.compile(r"^Output Channel")
     )
+
+
+# -------------------------------------------------------------- queueing a call
+def test_a_call_is_queued_from_its_form_and_its_value_shown_in_the_queue(context, rig):
+    rig.get("/task_manager/pause")
+    try:
+        page = open_tab(context, rig)
+        instrument(page, "lakeshore")
+        method(page, "get_temperature")
+        page.page.locator(".call-pane select").first.select_option(label="Input A")
+
+        page.page.get_by_role("button", name="Add to queue").click()
+
+        page.page.wait_for_function(
+            "fetch('/managers/state').then(r => r.json()).then(s => s.data.main.queue.length === 1)"
+        )
+        (task,) = rig.get("/managers/state").json()["data"]["main"]["queue"]
+        assert task["name"] == "lakeshore.get_temperature"
+        assert task["parameters"] == {"input_channel": "INPUT_A"}
+
+        # Run, it reads the temperature, and the Queue tab says what it read.
+        rig.get("/task_manager/resume")
+        page.page.get_by_role("tab", name="Queue").click()
+        expect(page.page.locator(".queue-last").first).to_contain_text(
+            re.compile(r"lakeshore\.get_temperature completed → \d+\.\d+")
+        )
+        assert page.errors == []
+    finally:
+        rig.get("/task_manager/clear_tasks")
+        rig.get("/task_manager/resume")
+
+
+def test_a_call_that_isnt_a_query_or_command_has_no_add_to_queue(context, rig):
+    page = open_tab(context, rig)
+    instrument(page, "lakeshore")
+    method(page, "get_temperature")
+
+    expect(page.page.get_by_role("button", name="Add to queue")).to_be_visible()
+    # One task manager: no list of them.
+    expect(page.page.get_by_label("Queue on")).to_have_count(0)
+
+
+def test_the_docs_example_queues_a_setpoint_from_the_palette(context, rig):
+    rig.get("/task_manager/pause")
+    try:
+        page = open_tab(context, rig)
+        page.page.keyboard.press("Control+k")
+        search = page.page.get_by_role("searchbox", name="Search tasks and instruments")
+        search.press_sequentially("lakeshore set_setpoint output_1 300")
+        expect(page.page.locator(".palette-arg-ready")).to_be_visible()
+
+        search.press("Shift+Enter")
+
+        page.page.wait_for_function(
+            "fetch('/managers/state').then(r => r.json()).then(s => s.data.main.queue.length === 1)"
+        )
+        (task,) = rig.get("/managers/state").json()["data"]["main"]["queue"]
+        assert task["description"] == "lakeshore.set_setpoint(output_channel=OUTPUT_1, setpoint=300.0)"
+    finally:
+        rig.get("/task_manager/clear_tasks")
+        rig.get("/task_manager/resume")

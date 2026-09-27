@@ -907,6 +907,7 @@ async def test_a_failed_task_pauses_the_queue_until_it_is_resumed():
             "outcome": "failed",
             "error": "RuntimeError: boom",
             "finished_at": pytest.approx(time.time(), abs=5),
+            "value": None,  # it read nothing: only a queued query does
         }
 
         manager.resume()

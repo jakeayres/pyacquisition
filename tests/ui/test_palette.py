@@ -206,3 +206,73 @@ def test_the_arrow_keys_pick_another_match_for_the_arguments(page, rig):
     search.press("ArrowDown")
 
     expect(dialog.locator(".task-form-title")).to_have_text("WaitUntil")
+
+
+# -------------------------------------------------------------- queueing a call
+def test_shift_enter_queues_an_instrument_call(page, rig):
+    dialog, search = type_line(page, "clock start_timer lap")
+    expect(dialog.locator(".palette-arg-ready")).to_have_text("✓ Enter to send · Shift+Enter to queue")
+
+    search.press("Shift+Enter")
+
+    expect(palette(page)).to_have_count(0)
+    assert queued(rig) == [("clock.start_timer", {"name": "lap"})]
+
+
+def test_add_to_queue_on_the_form_queues_it(page, rig):
+    dialog, _ = type_line(page, "clock read_timer lap")
+
+    dialog.get_by_role("button", name="Add to queue").click()
+
+    expect(palette(page)).to_have_count(0)
+    assert queued(rig) == [("clock.read_timer", {"name": "lap"})]
+
+
+def test_a_call_can_be_queued_on_another_task_manager(page, rig):
+    dialog, _ = type_line(page, "clock time")
+    expect(dialog.get_by_label("Queue on")).to_have_value("main")
+
+    dialog.get_by_label("Queue on").select_option("control")
+    dialog.get_by_role("button", name="Add to queue").click()
+
+    expect(palette(page)).to_have_count(0)
+    assert queued(rig, "control") == [("clock.time", None)]
+    assert queued(rig) == []
+
+
+def test_a_task_has_no_second_button(page):
+    dialog, _ = type_line(page, "wait")
+
+    expect(dialog.locator(".task-form-title")).to_have_text("WaitFor")
+    expect(dialog.get_by_role("button", name="Add to queue")).to_have_count(1)  # its own
+    expect(dialog.get_by_label("Queue on")).to_have_count(0)
+
+
+def test_a_queued_query_runs_and_its_value_is_the_last_result(page, rig):
+    for line in ("clock start_timer lap", "clock read_timer lap"):
+        _, search = type_line(page, line)
+        search.press("Shift+Enter")
+        expect(palette(page)).to_have_count(0)
+    assert [name for name, _ in queued(rig)] == ["clock.start_timer", "clock.read_timer"]
+
+    rig.get("/task_manager/resume")
+    try:
+        page.page.get_by_role("tab", name="Queue").click()
+        expect(page.page.locator(".queue-last").first).to_contain_text(
+            re.compile(r"clock\.read_timer completed → \d")
+        )
+    finally:
+        rig.get("/task_manager/pause")
+
+
+def test_a_queue_holding_a_call_is_saved_and_loaded_again(page, rig):
+    _, search = type_line(page, "clock start_timer lap")
+    search.press("Shift+Enter")
+    assert rig.get("/sequences/save", name="with a call", manager="main").status_code == 200
+    rig.get("/task_manager/clear_tasks")
+    assert queued(rig) == []
+
+    assert rig.get("/sequences/load", name="with a call", manager="main").status_code == 200
+
+    assert queued(rig) == [("clock.start_timer", {"name": "lap"})]
+    rig.get("/sequences/delete", name="with a call")

@@ -51,7 +51,7 @@ const dockTabs = ({ store, logs, columns, managers }) => [
     id: "instruments",
     label: "Instruments",
     fill: true,
-    content: html`<${InstrumentsTab} />`,
+    content: html`<${InstrumentsTab} managers=${managers} />`,
   },
   {
     id: "logs",
