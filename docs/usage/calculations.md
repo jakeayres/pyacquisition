@@ -41,6 +41,16 @@ from pyacquisition import RollingMean, Sum
 | `Sum("a", "b", name="total")` | The sum of two or more columns. `name` is optional, and defaults to `a+b`. |
 | `RollingMean("a", window=10)` | The mean of the last 10 values of `a`, in a column called `a_mean10`. Give `name=` to choose a different name. It is `NaN` until 10 values have been seen. |
 
+## In a config file
+
+An experiment described by a [TOML file](toml_config.md#calculations-section) can have the built-in calculations too, in a `[calculations]` section. The key is the name of the new column:
+
+```toml
+--8<-- "examples/calculations.toml"
+```
+
+This is the same as adding `Sum("v1", "v2", name="v_total", unit="V")` and then `RollingMean("v_total", window=10, name="v_smooth", unit="V")` in `setup()`. Your own functions and `Calculation` classes are Python only: add them in `setup()`, and [combine the file with Python](toml_config.md#combining-a-config-file-with-python).
+
 ## Units
 
 Give the new columns units with `units`, a dict of column name to unit. They are shown beside the values in the interface and on plot axes, and do not change the data file:

@@ -1,0 +1,16 @@
+[instruments]
+clock = {instrument = "Clock"}
+
+[measurements]
+time = {instrument = "clock", method = "time"}
+timestamp = {instrument = "clock", method = "timestamp_ms"}
+
+[calculations.total]
+calculation = "Sum"
+inputs = ["time", "timestamp"]
+unit = "s"
+
+[calculations.total_smooth]
+calculation = "RollingMean"
+column = "total"
+window = 10

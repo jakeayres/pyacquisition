@@ -1,7 +1,8 @@
-from pyacquisition.core.config_parser import ConfigParser
+from pyacquisition.core.config_parser import ConfigParser, InvalidCalculationError
 import pytest
 import tomllib
 import os
+import re
 
 # Define a directory containing your test TOML files
 TOML_TEST_DIR = "tests/toml/"
@@ -189,3 +190,110 @@ def test_invalid_measurement_unknown_instrument_toml(load_toml_file, file_name):
         assert not ConfigParser.all_measurement_instruments_exist(config), (
             "Config should contain invalid instrument values"
         )
+
+
+# -------------------------------------------------------------- [calculations]
+def test_a_calculations_section_is_valid(load_toml_file):
+    config = load_toml_file("pass_calculations.toml")
+
+    assert ConfigParser.validate(config) is config
+
+
+def test_an_unknown_calculation_is_refused(load_toml_file):
+    config = load_toml_file("fail_calculation_unknown_kind.toml")
+
+    with pytest.raises(
+        InvalidCalculationError, match="no calculation called 'RollingMedian'"
+    ):
+        ConfigParser.validate(config)
+
+
+MEASURED = {"x": {"instrument": "clock", "method": "time"}}
+
+
+def with_calculations(calculations):
+    return {
+        "instruments": {"clock": {"instrument": "Clock"}},
+        "measurements": MEASURED,
+        "calculations": calculations,
+    }
+
+
+@pytest.mark.parametrize(
+    "calculations, message",
+    [
+        ({"s": {"inputs": ["x"]}}, "needs `calculation`"),
+        ({"s": {"calculation": "Sum"}}, "a Sum needs `inputs`"),
+        ({"m": {"calculation": "RollingMean", "column": "x"}}, "needs `window`"),
+        (
+            {"s": {"calculation": "Sum", "inputs": ["x"], "window": 3}},
+            "unknown key 'window'",
+        ),
+        (
+            {"m": {"calculation": "RollingMean", "column": "x", "window": 0}},
+            "`window` must be a whole number of at least 1, got 0",
+        ),
+        (
+            {"m": {"calculation": "RollingMean", "column": "x", "window": 2.5}},
+            "`window` must be a whole number",
+        ),
+        (
+            {"m": {"calculation": "RollingMean", "column": "x", "window": True}},
+            "`window` must be a whole number",
+        ),
+        ({"s": {"calculation": "Sum", "inputs": []}}, "a list of one or more"),
+        ({"s": {"calculation": "Sum", "inputs": "x"}}, "a list of one or more"),
+        (
+            {"s": {"calculation": "Sum", "inputs": ["x"], "unit": 1}},
+            "`unit` must be text",
+        ),
+        ({"s": "Sum"}, "must be a table"),
+        ({"x": {"calculation": "Sum", "inputs": ["x"]}}, "same name as a column"),
+        (
+            {"s": {"calculation": "Sum", "inputs": ["x", "y"]}},
+            "names 'y', which is not a measurement or a calculation above",
+        ),
+        (
+            # A column used before the calculation that makes it.
+            {
+                "m": {"calculation": "RollingMean", "column": "s", "window": 2},
+                "s": {"calculation": "Sum", "inputs": ["x"]},
+            },
+            "Calculation 'm': `column` names 's'",
+        ),
+    ],
+)
+def test_a_calculation_that_cant_be_made_is_refused(calculations, message):
+    with pytest.raises(InvalidCalculationError, match=re.escape(message)):
+        ConfigParser.validate(with_calculations(calculations))
+
+
+def test_a_calculation_can_use_the_ones_above_it():
+    config = with_calculations(
+        {
+            "s": {"calculation": "Sum", "inputs": ["x", "x"]},
+            "m": {"calculation": "RollingMean", "column": "s", "window": 2},
+        }
+    )
+
+    assert ConfigParser.validate(config) is config
+
+
+def test_every_problem_is_found_with_where_it_is():
+    from pyacquisition.core.calculations import config_problems
+
+    problems = list(
+        config_problems(
+            {
+                "s": {"calculation": "Sum", "inputs": ["y"], "colour": "red"},
+                "m": {"calculation": "RollingMean", "column": "x", "window": 0},
+            },
+            ["x"],
+        )
+    )
+
+    assert [where for where, _ in problems] == [
+        ("s", "colour"),
+        ("s", "inputs"),
+        ("m", "window"),
+    ]

@@ -9,6 +9,7 @@ from enum import Enum
 from .logging import logger
 from .api_server import APIServer
 from .rack import Rack
+from . import calculations
 from .calculations import Calculations
 from .task_manager.task_manager import TaskManager
 from .task_manager.task import Task
@@ -302,9 +303,12 @@ class Experiment:
                 experiment._name = Path(toml_file).stem
             cls._configure_instruments(experiment, config)
             cls._configure_measurements(experiment, config)
+            cls._configure_calculations(experiment, config)
             return experiment
         except Exception as e:
-            raise ValueError(f"Failed to configure instruments or measurements: {e}")
+            raise ValueError(
+                f"Failed to configure instruments, measurements or calculations: {e}"
+            )
 
     @classmethod
     def _initialize_experiment(
@@ -405,6 +409,32 @@ class Experiment:
                 )
             except Exception as e:
                 logger.warning(f"Failed to configure measurement '{name}': {e}")
+
+    @classmethod
+    def _configure_calculations(cls, experiment: "Experiment", config: dict) -> None:
+        """
+        Adds the calculations the configuration describes, in order. One that
+        uses a column the experiment doesn't have, because a measurement couldn't
+        be configured, is left out with a warning, as the measurement was.
+
+        Args:
+            experiment (Experiment): The Experiment instance.
+            config (dict): The parsed TOML configuration, already checked.
+        """
+        table = config.get("calculations", {})
+        made = calculations.from_config(table, config.get("measurements", {}))
+        columns = set(experiment.measurements)
+        for (name, options), calculation in zip(table.items(), made):
+            missing = [c for c in calculations.config_inputs(options) if c not in columns]
+            if missing:
+                logger.warning(
+                    f"Calculation '{name}' is left out, as the experiment has no "
+                    f"column {', '.join(repr(c) for c in missing)}"
+                )
+                continue
+            logger.debug(f"Configuring calculation '{name}'")
+            experiment.add_calculation(calculation)
+            columns.add(name)
 
     @staticmethod
     def _resolve_method_args(method, args: dict):

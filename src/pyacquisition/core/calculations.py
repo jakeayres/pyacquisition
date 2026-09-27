@@ -66,7 +66,21 @@ class Sum(Calculation):
 
     Example:
         experiment.add_calculation(Sum("a", "b", name="total"))
+
+    In a TOML config:
+
+        [calculations.total]
+        calculation = "Sum"
+        inputs = ["a", "b"]
     """
+
+    # Its keys in a config's [calculations] section, besides `calculation` and
+    # `unit`, and the kind of value each takes (see `check_config`).
+    config_keys = {"inputs": "columns"}
+
+    @classmethod
+    def from_config(cls, name: str, inputs: list, unit: str | None = None) -> "Sum":
+        return cls(*inputs, name=name, unit=unit)
 
     def __init__(
         self, *inputs: str, name: str | None = None, unit: str | None = None
@@ -98,7 +112,23 @@ class RollingMean(Calculation):
 
     Example:
         experiment.add_calculation(RollingMean("voltage", window=10))
+
+    In a TOML config:
+
+        [calculations.voltage_smooth]
+        calculation = "RollingMean"
+        column = "voltage"
+        window = 10
     """
+
+    # Its keys in a config's [calculations] section (see Sum.config_keys).
+    config_keys = {"column": "column", "window": "count"}
+
+    @classmethod
+    def from_config(
+        cls, name: str, column: str, window: int, unit: str | None = None
+    ) -> "RollingMean":
+        return cls(column, window, name=name, unit=unit)
 
     def __init__(
         self,
@@ -129,6 +159,136 @@ class RollingMean(Calculation):
         if len(self._values) < self.window:
             return {self.name: NAN}
         return {self.name: sum(self._values) / self.window}
+
+
+# The calculations a TOML config can name in its [calculations] section, by the
+# name it uses in `calculation = "..."`, as `instrument_map` does for instruments.
+# Each has `config_keys` and `from_config`.
+calculation_map = {"Sum": Sum, "RollingMean": RollingMean}
+
+
+def config_problems(calculations, measured):
+    """Every problem with a config's [calculations] section, in file order.
+
+    Args:
+        calculations: The section, as `tomllib` reads it.
+        measured: The names of the measurements' columns, which come first.
+
+    Yields:
+        tuple[tuple, str]: Where each problem is, as keys from inside the
+            section (such as `("x_smooth", "window")`), and what it is.
+    """
+    if not isinstance(calculations, dict):
+        yield (), "[calculations] must be a table of calculations"
+        return
+    columns = list(measured)
+    for name, options in calculations.items():
+        if not isinstance(options, dict):
+            yield (name,), (
+                f"Calculation '{name}' must be a table, with `calculation` naming "
+                f"one of {', '.join(calculation_map)}"
+            )
+            continue
+        kind = options.get("calculation")
+        if kind is None:
+            yield (name,), (
+                f"Calculation '{name}' needs `calculation`, naming one of "
+                f"{', '.join(calculation_map)}"
+            )
+            continue
+        if not isinstance(kind, str) or kind not in calculation_map:
+            yield (name, "calculation"), (
+                f"Calculation '{name}': there is no calculation called {kind!r}. "
+                f"The calculations are {', '.join(calculation_map)}"
+            )
+            continue
+        keys = calculation_map[kind].config_keys
+        for key in options:
+            if key not in ("calculation", "unit", *keys):
+                yield (name, key), (
+                    f"Calculation '{name}': unknown key '{key}'. A {kind} takes "
+                    f"{', '.join(f'`{k}`' for k in keys)}, and `unit`"
+                )
+        for key, value_kind in keys.items():
+            if key not in options:
+                yield (name, key), f"Calculation '{name}': a {kind} needs `{key}`"
+            else:
+                problem = _value_problem(value_kind, options[key], columns)
+                if problem:
+                    yield (name, key), f"Calculation '{name}': `{key}` {problem}"
+        if "unit" in options and not isinstance(options["unit"], str):
+            yield (name, "unit"), (
+                f"Calculation '{name}': `unit` must be text, such as \"V\", "
+                f"got {options['unit']!r}"
+            )
+        if name in columns:
+            yield (name,), (
+                f"Calculation '{name}' has the same name as a column before it"
+            )
+        columns.append(name)
+
+
+def _value_problem(kind: str, value, columns: list) -> str | None:
+    """What is wrong with a key's value, given the kind it takes, or None."""
+
+    def unknown(column):
+        if column in columns:
+            return None
+        return (
+            f"names '{column}', which is not a measurement or a calculation above "
+            "this one"
+        )
+
+    if kind == "column":
+        if not isinstance(value, str):
+            return f"must be the name of a column, got {value!r}"
+        return unknown(value)
+    if kind == "columns":
+        if (
+            not isinstance(value, list)
+            or not value
+            or not all(isinstance(column, str) for column in value)
+        ):
+            return f'must be a list of one or more columns, such as ["a", "b"], got {value!r}'
+        return next(filter(None, map(unknown, value)), None)
+    if kind == "count":
+        if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+            return f"must be a whole number of at least 1, got {value!r}"
+        return None
+    raise ValueError(f"unknown kind of value {kind!r}")
+
+
+def from_config(calculations, measured) -> list[Calculation]:
+    """The calculations a config's [calculations] section describes, in order.
+
+    Args:
+        calculations: The section, as `tomllib` reads it.
+        measured: The names of the measurements' columns.
+
+    Raises:
+        ValueError: If the section has a problem (the first, of
+            `config_problems`).
+    """
+    for _, problem in config_problems(calculations, measured):
+        raise ValueError(problem)
+    return [
+        calculation_map[options["calculation"]].from_config(
+            name, **{key: value for key, value in options.items() if key != "calculation"}
+        )
+        for name, options in calculations.items()
+    ]
+
+
+def config_inputs(options: dict) -> list[str]:
+    """The columns that a calculation in a config's [calculations] section uses."""
+    keys = calculation_map[options["calculation"]].config_keys
+    inputs = []
+    for key, kind in keys.items():
+        if kind == "column":
+            inputs.append(options[key])
+        elif kind == "columns":
+            inputs.extend(options[key])
+    return inputs
 
 
 class Calculations(Broadcaster, Consumer):

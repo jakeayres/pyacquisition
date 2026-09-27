@@ -1,0 +1,20 @@
+[instruments]
+lockin1 = {instrument = "SR_830", adapter = "pyvisa", resource = "GPIB0::7::INSTR"}
+lockin2 = {instrument = "SR_830", adapter = "pyvisa", resource = "GPIB0::8::INSTR"}
+
+[measurements]
+v1 = {instrument = "lockin1", method = "get_x", unit = "V"}
+v2 = {instrument = "lockin2", method = "get_x", unit = "V"}
+
+# The voltage across both pairs of contacts.
+[calculations.v_total]
+calculation = "Sum"
+inputs = ["v1", "v2"]
+unit = "V"
+
+# v_total, averaged over the last 10 rows.
+[calculations.v_smooth]
+calculation = "RollingMean"
+column = "v_total"
+window = 10
+unit = "V"

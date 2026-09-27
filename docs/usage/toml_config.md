@@ -122,6 +122,34 @@ Define the instrument methods to poll. The key is a unique label assigned to the
     ```
 
 
+## `[calculations]` Section
+
+Make new columns from the measurements, as [calculations](calculations.md) do in Python, with the built-in `Sum` and `RollingMean`. Each is a table under `[calculations]`, and its key is the name of the new column. `calculation` names which one it is:
+
+| Calculation | Keys | Makes |
+|---|---|---|
+| `Sum` | `inputs`: a list of one or more columns | The sum of the columns. |
+| `RollingMean` | `column`: a column. `window`: a whole number, at least 1 | The mean of the last `window` values of the column. It is `NaN` until that many have been seen. |
+
+Either can have a `unit`, which is shown in the interface, as a measurement's is. For example:
+
+```toml
+[calculations.total]
+calculation = "Sum"
+inputs = ["x", "y"]
+unit = "V"
+
+[calculations.x_smooth]
+calculation = "RollingMean"
+column = "x"
+window = 10
+```
+
+They run in the order they are written, after the measurements, and are saved to the data file after them. Each can use the measurements and the calculations above it. A calculation that names a column that doesn't exist yet, an unknown `calculation` or key, or a value of the wrong kind is refused when the file is loaded. A calculation whose measurement is left out, because its instrument couldn't be opened, is left out too, with a warning.
+
+For anything other than these two, such as `x / 1e-6`, write the calculation in Python and [combine the file with Python](#combining-a-config-file-with-python).
+
+
 ## `[data]` Section
 
 The `[data]` section describes the configuration of the data files.
@@ -176,7 +204,7 @@ This section defines the various logging levels and location of log files produc
 
 ## Mistakes in the file
 
-The `[experiment]`, `[rack]`, `[data]`, `[api_server]`, `[logging]` and `[gui]` sections are checked. A key that is not in the tables above is refused, with a suggestion when it is close to one, and so is a value of the wrong kind, such as `period = "fast"`. A misspelt key would otherwise be ignored and the default used, silently.
+The `[experiment]`, `[rack]`, `[data]`, `[api_server]`, `[logging]` and `[gui]` sections are checked, and so is `[calculations]` (see above). A key that is not in the tables above is refused, with a suggestion when it is close to one, and so is a value of the wrong kind, such as `period = "fast"`. A misspelt key would otherwise be ignored and the default used, silently.
 
 ```text
 ValueError: Unknown key 'pth' in [data] (did you mean 'path'?). Valid keys: path, file_extension, delimiter.

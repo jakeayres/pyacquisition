@@ -1,0 +1,10 @@
+[instruments]
+clock = {instrument = "Clock"}
+
+[measurements]
+time = {instrument = "clock", method = "time"}
+
+[calculations.time_smooth]
+calculation = "RollingMedian"
+column = "time"
+window = 10

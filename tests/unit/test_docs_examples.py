@@ -187,6 +187,17 @@ def test_the_config_file_example_sets_up(examples, fake_visa):
     assert set(experiment.measurements) == {"x", "y", "T"}
 
 
+def test_the_calculations_config_example_sets_up(examples, fake_visa):
+    shutil.copy(EXAMPLES / "calculations.toml", "rig.toml")
+    experiment = Experiment.from_config("rig.toml")
+
+    assert set(experiment.measurements) == {"v1", "v2"}
+    assert experiment._calculations.known_columns == ["v_total", "v_smooth"]
+    assert experiment._calculations.units == {"v_total": "V", "v_smooth": "V"}
+    row = {"v1": 1.5, "v2": 1.5}
+    assert experiment._calculations._apply(row)["v_total"] == 3.0
+
+
 def test_the_config_file_example_is_equivalent_to_the_python_one(examples, fake_visa):
     python = build("front_page")
     config = build_from_config()

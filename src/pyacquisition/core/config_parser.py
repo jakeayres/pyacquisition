@@ -1,6 +1,7 @@
 import tomllib
 from .logging import logger
 from ..instruments import instrument_map
+from . import calculations
 
 
 class TOMLConfigError(Exception):
@@ -27,12 +28,19 @@ class InvalidMeasurementError(Exception):
     pass
 
 
+class InvalidCalculationError(Exception):
+    """A config's [calculations] section describes a calculation that can't be made."""
+
+    pass
+
+
 class ConfigParser:
     ALLOWED_SECTIONS = [
         "experiment",
         "rack",
         "instruments",
         "measurements",
+        "calculations",
         "data",
         "api_server",
         "logging",
@@ -104,6 +112,12 @@ class ConfigParser:
             raise InvalidMeasurementError(
                 'Config contains a measurement whose unit is not text, such as "K".'
             )
+        try:
+            calculations.from_config(
+                config.get("calculations", {}), config.get("measurements", {})
+            )
+        except ValueError as e:
+            raise InvalidCalculationError(str(e)) from e
         return config
 
     @staticmethod

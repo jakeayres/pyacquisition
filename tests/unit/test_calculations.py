@@ -166,3 +166,147 @@ async def test_calculated_columns_reach_the_data_file(tmp_path):
     assert list(data.columns) == ["time", "double_time", "time_mean2"]
     assert len(data) > 2
     assert (data["double_time"] == 2 * data["time"]).all()
+
+
+# ------------------------------------------------------------- from a config
+def from_toml(tmp_path, text, **overrides):
+    config = tmp_path / "rig.toml"
+    config.write_text(
+        f'[experiment]\nroot_path = "{tmp_path.as_posix()}"\n\n{text}', encoding="utf-8"
+    )
+    return Experiment.from_config(str(config), gui=False, **overrides)
+
+
+CLOCK = """
+[instruments]
+clock = {instrument = "Clock"}
+
+[measurements]
+time = {instrument = "clock", method = "timestamp_ms", unit = "ms"}
+"""
+
+
+def test_a_config_adds_its_calculations_in_order(tmp_path):
+    experiment = from_toml(
+        tmp_path,
+        CLOCK
+        + """
+[calculations.double]
+calculation = "Sum"
+inputs = ["time", "time"]
+unit = "ms"
+
+[calculations.double_smooth]
+calculation = "RollingMean"
+column = "double"
+window = 3
+""",
+    )
+
+    made = experiment._calculations._calculations
+    assert [type(c) for c in made] == [Sum, RollingMean]
+    assert made[0].inputs == ("time", "time")
+    assert (made[1].column, made[1].window) == ("double", 3)
+    assert experiment._calculations.known_columns == ["double", "double_smooth"]
+    assert experiment._calculations.units == {"double": "ms"}
+
+
+def test_the_columns_of_a_config_are_listed_with_their_units(tmp_path):
+    from fastapi.testclient import TestClient
+
+    experiment = from_toml(
+        tmp_path,
+        CLOCK
+        + """
+[calculations.time_smooth]
+calculation = "RollingMean"
+column = "time"
+window = 5
+unit = "ms"
+""",
+    )
+    experiment._register_endpoints(experiment._api_server)
+
+    columns = TestClient(experiment._api_server.app).get("/experiment/columns")
+
+    assert columns.json()["data"] == [
+        {"name": "time", "kind": "measurement", "source": "clock.timestamp_ms", "unit": "ms"},
+        {"name": "time_smooth", "kind": "calculation", "source": "", "unit": "ms"},
+    ]
+
+
+def test_a_calculation_on_a_measurement_that_was_left_out_is_left_out(tmp_path):
+    # An instrument that can't be opened is left out with a warning, and so are
+    # its measurements. Their calculations follow, rather than failing each row.
+    experiment = from_toml(
+        tmp_path,
+        """
+[instruments]
+clock = {instrument = "Clock"}
+lockin = {instrument = "SR_830", adapter = "no-such-adapter", resource = "GPIB0::7::INSTR"}
+
+[measurements]
+time = {instrument = "clock", method = "timestamp_ms"}
+x = {instrument = "lockin", method = "get_x"}
+
+[calculations.x_smooth]
+calculation = "RollingMean"
+column = "x"
+window = 5
+
+[calculations.time_smooth]
+calculation = "RollingMean"
+column = "time"
+window = 5
+""",
+    )
+
+    assert list(experiment.measurements) == ["time"]
+    assert experiment._calculations.known_columns == ["time_smooth"]
+
+
+def test_a_config_with_a_bad_calculation_is_refused(tmp_path):
+    from pyacquisition.core.config_parser import InvalidCalculationError
+
+    with pytest.raises(InvalidCalculationError, match="`window` must be a whole number"):
+        from_toml(
+            tmp_path,
+            CLOCK + '\n[calculations.m]\ncalculation = "RollingMean"\ncolumn = "time"\n'
+            "window = 0\n",
+        )
+
+
+@pytest.mark.asyncio
+async def test_the_calculations_of_a_config_reach_the_data_file(tmp_path):
+    experiment = from_toml(
+        tmp_path,
+        CLOCK
+        + """
+[calculations.double]
+calculation = "Sum"
+inputs = ["time", "time"]
+""",
+        data_path="data",
+        api_server_port=free_port(),
+        measurement_period=0.05,
+    )
+
+    async def stop_soon():
+        await asyncio.sleep(1)
+        experiment._shutdown_event.set()
+
+    await asyncio.wait_for(asyncio.gather(experiment._run(), stop_soon()), timeout=20)
+
+    (data_file,) = (tmp_path / "data").glob("*.data")
+    data = pd.read_csv(data_file)
+    assert list(data.columns) == ["time", "double"]
+    assert len(data) > 2
+    assert (data["double"] == 2 * data["time"]).all()
+
+
+def free_port() -> int:
+    import socket
+
+    with socket.socket() as s:
+        s.bind(("localhost", 0))
+        return s.getsockname()[1]
