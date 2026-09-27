@@ -253,6 +253,9 @@ def test_a_real_toml_build(tmp_path):
         '[experiment]\nroot_path = "."\n[gui]\nrun = false\n'
         f"[api_server]\nport = {port}\n"
         '[instruments]\nclock = {instrument = "Clock"}\n'
+        '[measurements]\nt = {instrument = "clock", method = "timestamp_ms"}\n'
+        '[calculations.t_smooth]\ncalculation = "RollingMean"\ncolumn = "t"\n'
+        "window = 3\n"
     )
 
     app_dir = freeze.build_app(
@@ -303,6 +306,9 @@ def test_a_real_toml_build(tmp_path):
                 raise AssertionError("the frozen app never answered /ping")
 
             assert requests.get(f"{base}/ping", timeout=2).json() == "pong"
+            # A config's calculations are read by a frozen app too.
+            columns = requests.get(f"{base}/experiment/columns", timeout=5).json()["data"]
+            assert [c["name"] for c in columns] == ["t", "t_smooth"]
             # The page, as the window loads it: its scripts as modules.
             page = requests.get(f"{base}/", timeout=5)
             assert page.status_code == 200 and 'type="module"' in page.text
