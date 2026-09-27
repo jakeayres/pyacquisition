@@ -92,8 +92,8 @@ export function startingValues(fields) {
   );
 }
 
-const WHOLE = /^[+-]?\d+$/;
-const NUMBER = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;
+export const WHOLE = /^[+-]?\d+$/;
+export const NUMBER = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;
 
 // The values checked, as {params} to send, or {errors} by field name. A field
 // left empty that isn't required is left out, so the server uses its default.
@@ -198,9 +198,16 @@ export function Field({ field, value, error, onChange, id }) {
 // A form for an endpoint. `onSubmit(params)` sends it; if it throws, what the
 // server said is shown, each problem by the field it names where it names one.
 // Give it a `key` of the endpoint's path, so another endpoint starts afresh.
-export function EndpointForm({ endpoint, onSubmit, submitLabel }) {
-  const [values, setValues] = useState(() => startingValues(endpoint.fields));
+// `initialValues` start it with other values than the defaults (the palette's
+// typed arguments), and `lineErrors` are shown by their fields until each is
+// changed: give it a key that changes with them.
+export function EndpointForm({ endpoint, onSubmit, submitLabel, initialValues, lineErrors }) {
+  const [values, setValues] = useState(() => ({
+    ...startingValues(endpoint.fields),
+    ...(initialValues ?? {}),
+  }));
   const [errors, setErrors] = useState({});
+  const [edited, setEdited] = useState(() => new Set());
   const [problem, setProblem] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -239,10 +246,11 @@ export function EndpointForm({ endpoint, onSubmit, submitLabel }) {
             id=${id(field.name)}
             field=${field}
             value=${values[field.name]}
-            error=${errors[field.name]}
+            error=${errors[field.name] ?? (edited.has(field.name) ? undefined : lineErrors?.[field.name])}
             onChange=${(value) => {
               setValues((current) => ({ ...current, [field.name]: value }));
               setErrors((current) => ({ ...current, [field.name]: undefined }));
+              setEdited((current) => new Set(current).add(field.name));
             }}
           />
         `,

@@ -46,7 +46,7 @@ Notice what the queue does next. **An abort pauses the whole queue**, so that th
     Queue a sweep and let it start ramping. Press **Abort**, and watch `T` in the **Values** tab. It settles near where it was when you aborted, rather than continuing to the target. Then press **Resume** to let the next task in the queue begin.
 
 !!! tip "Queue a task from anywhere"
-    ++ctrl+k++ opens a search of every task (and every instrument's queries and commands). Type a few letters, press ++enter++ to go to its form, and ++enter++ again to queue it.
+    ++ctrl+k++ opens a search of every task (and every instrument's queries and commands). Type a few letters, press ++enter++ to go to its form, and ++enter++ again to queue it. Or type its inputs after its name: `wait 0 5` and ++enter++ queues a five-minute wait.
 
 ## Drive it from a script
 

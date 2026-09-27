@@ -131,6 +131,6 @@ To remove an instrument again, call `self.remove_instrument("lockin")`. Like add
 
 ## Using an instrument from the interface
 
-Open the **Instruments** tab. Pick an instrument to list all of its queries and commands, pick one, fill in any inputs, and press **Read** (or **Send**, for a command). The reply is shown beside the form, with the replies before it. ++ctrl+k++ finds any of them from anywhere.
+Open the **Instruments** tab. Pick an instrument to list all of its queries and commands, pick one, fill in any inputs, and press **Read** (or **Send**, for a command). The reply is shown beside the form, with the replies before it. ++ctrl+k++ finds any of them from anywhere, and takes their inputs on the same line: `clock read_timer lap` and ++enter++ reads the clock's timer `lap`.
 
 Reading values continuously and saving them to file is done with a [measurement](measurements.md).

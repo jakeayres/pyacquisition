@@ -11,7 +11,7 @@ Once tasks are [registered](tasks.md#registering-tasks), you run them by adding 
 3. Fill in its inputs. Each starts at its default from your code, if it has one, and an input marked with a star must be given.
 4. Press **Add to queue**. The window stays open, so you can add several tasks in turn, and **Done** closes it.
 
-++ctrl+k++ does the same from anywhere: it searches every task on every task manager, and queues the one you pick.
+++ctrl+k++ does the same from anywhere: it searches every task on every task manager, and queues the one you pick. Its inputs can be typed after its name, as in `wait 0 5`, to queue it with ++enter++ without the form.
 
 The task joins the queue, and starts as soon as the task manager is free. You can queue several tasks, including several copies of the same one with different inputs, and then leave them to run.
 

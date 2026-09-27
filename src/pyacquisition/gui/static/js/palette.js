@@ -2,20 +2,28 @@
 // task manager, and every instrument's queries and commands, with the form for
 // the one picked (forms.js). A task is queued and the palette closes; an
 // instrument's answer is shown here, and in the Instruments tab's results.
+//
+// The inputs can be typed on the search line after the search (palette-line.js):
+// `wait 0 5` fills WaitFor's form with hours 0 and minutes 5 as it is typed, and
+// Enter then queues it. Tab locks in the item picked, so everything typed after
+// its label is an argument.
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { html } from "./html.js";
 import { get } from "./api.js";
 import { EndpointForm, loadSchema, taskEndpoints, withCode } from "./forms.js";
+import { matchArguments, searchItems, splitLine } from "./palette-line.js";
 import { CopyResult, ResultValue, callInstrument, loadInstruments } from "./dock/instruments.js";
 import { SearchIcon } from "./icons.js";
 
-const words = (query) => query.toLowerCase().split(/\s+/).filter(Boolean);
-const hasAll = (text, query) => words(query).every((w) => text.toLowerCase().includes(w));
+export { searchItems } from "./palette-line.js";
+
 const title = (name) => name.charAt(0).toUpperCase() + name.slice(1);
 const KINDS = { query: "Query", command: "Command", other: "Instrument" };
 
-// Everything the palette offers: {id, kind, label, tag, text, endpoint, ...}.
-// `text` is what the search looks in.
+// Everything the palette offers. Each item is {id, kind, label, tag, text,
+// description, fields, submitLabel, run, closes}, with the `endpoint` its form
+// is for. `text` is what the search looks in, and `run(params)` does what the
+// form's button does, giving an answer to show (or nothing).
 export function paletteItems(root, managerNames, instruments) {
   const single = managerNames.length === 1;
   const tasks = managerNames.flatMap((manager) =>
@@ -27,6 +35,13 @@ export function paletteItems(root, managerNames, instruments) {
       label: endpoint.name,
       tag: single ? "Task" : `Task · ${title(manager)}`,
       text: `${endpoint.name} ${endpoint.description} task ${single ? "" : manager}`,
+      description: endpoint.description,
+      fields: endpoint.fields,
+      submitLabel: "Add to queue",
+      run: async (params) => {
+        await get(endpoint.path, { params });
+      },
+      closes: true,
     })),
   );
   const calls = instruments.flatMap(({ uid, endpoints }) =>
@@ -38,38 +53,37 @@ export function paletteItems(root, managerNames, instruments) {
       label: `${uid}.${endpoint.method}`,
       tag: KINDS[endpoint.group],
       text: `${uid} ${endpoint.method} ${endpoint.name} ${endpoint.description} ${KINDS[endpoint.group]}`,
+      description: endpoint.description,
+      fields: endpoint.fields,
+      submitLabel: endpoint.group === "command" ? "Send" : "Read",
+      run: (params) => callInstrument(uid, endpoint, params),
+      closes: false,
     })),
   );
   return [...tasks, ...calls];
 }
 
-// The words of a label: "clock.read_timer" and "WaitFor" as clock, read, timer
-// and wait, for.
-const labelWords = (label) =>
-  label
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .toLowerCase()
-    .split(/[^a-z0-9]+/)
-    .filter(Boolean);
+// What Enter does, in the hint, by the form's button.
+const ENTER = { "Add to queue": "Enter to queue", Send: "Enter to send", Read: "Enter to read" };
 
-// How well an item's label matches the search: every word a word of it (3),
-// the start of one (2), in it anywhere (1), or only in the rest of its text (0).
-function rank(item, query) {
-  const wanted = words(query);
-  const own = labelWords(item.label);
-  if (wanted.every((w) => own.includes(w))) return 3;
-  if (wanted.every((w) => own.some((o) => o.startsWith(w)))) return 2;
-  return hasAll(item.label, query) ? 1 : 0;
-}
-
-// What matches every word of the search, best first (and otherwise in the
-// order given).
-export function searchItems(items, query) {
-  return items
-    .filter((item) => hasAll(item.text, query))
-    .map((item, index) => ({ item, index, rank: rank(item, query) }))
-    .sort((a, b) => b.rank - a.rank || a.index - b.index)
-    .map(({ item }) => item);
+// Under the search box, while arguments are typed: each input given, with its
+// value, those left to their defaults, and each problem.
+function ArgumentHint({ item, match }) {
+  const given = new Set(match.given.map(([name]) => name));
+  const left = item.fields.filter((f) => !given.has(f.name) && !match.errors[f.name]);
+  return html`
+    <p class="palette-args" aria-live="polite">
+      ${match.given.map(
+        ([name, text]) => html`<span class="palette-arg" key=${name}>${name}=${text}</span>`,
+      )}
+      ${left.map((f) => html`<span class="palette-arg palette-arg-left" key=${f.name}>${f.name}: default</span>`)}
+      ${Object.values(match.errors)
+        .concat(match.problems)
+        .map((problem) => html`<span class="palette-arg palette-arg-problem">${withCode(problem)}</span>`)}
+      ${match.ok &&
+      html`<span class="palette-arg palette-arg-ready">✓ ${ENTER[item.submitLabel] ?? "Enter to run"}</span>`}
+    </p>
+  `;
 }
 
 // `managers` is the task managers' states (polled), and `onQueued` is told
@@ -79,6 +93,7 @@ export function Palette({ managers, onQueued, onClose }) {
   const [failed, setFailed] = useState("");
   const [query, setQuery] = useState("");
   const [picked, setPicked] = useState(null); // the id of the item picked
+  const [locked, setLocked] = useState(null); // the id of the item Tab locked in
   const [answer, setAnswer] = useState(null); // an instrument's, as a result entry
   const searchBox = useRef(null);
   const dialog = useRef(null);
@@ -109,8 +124,15 @@ export function Palette({ managers, onQueued, onClose }) {
     };
   }, []);
 
-  const shown = searchItems(items ?? [], query);
-  const current = shown.find((item) => item.id === picked) ?? shown[0] ?? null;
+  const all = items ?? [];
+  const lockedItem = all.find((item) => item.id === locked) ?? null;
+  const line = splitLine(query, all, lockedItem);
+  const shown = searchItems(all, line.search);
+  const current = line.locked
+    ? lockedItem
+    : (shown.find((item) => item.id === picked) ?? shown[0] ?? null);
+  const typed = line.arguments.length > 0;
+  const match = current && typed ? matchArguments(current.fields, line.arguments) : null;
 
   // The item picked stays in view as the arrow keys move through the list.
   useEffect(() => {
@@ -122,32 +144,44 @@ export function Palette({ managers, onQueued, onClose }) {
     setAnswer(null);
   };
 
-  // Up and down in the search move through the list; Enter goes to the form.
+  const form = () => dialog.current?.querySelector(".endpoint-form");
+
+  // Up and down in the search move through the list. Tab locks in the item
+  // picked, so what follows its label is its inputs. Enter runs it when it
+  // takes no inputs, or when those typed are complete and right; otherwise it
+  // goes to the form (to the first input that is wrong, if any).
   const onSearchKey = (event) => {
     const index = shown.indexOf(current);
-    if (event.key === "ArrowDown" && index < shown.length - 1) {
+    if (event.key === "ArrowDown" && index < shown.length - 1 && !line.locked) {
       event.preventDefault();
       pick(shown[index + 1]);
-    } else if (event.key === "ArrowUp" && index > 0) {
+    } else if (event.key === "ArrowUp" && index > 0 && !line.locked) {
       event.preventDefault();
       pick(shown[index - 1]);
+    } else if (event.key === "Tab" && !event.shiftKey && current && query.trim() && !line.locked) {
+      event.preventDefault();
+      setLocked(current.id);
+      setQuery(`${current.label} `);
+      setAnswer(null);
     } else if (event.key === "Enter" && current) {
       event.preventDefault();
-      dialog.current
-        ?.querySelector(".endpoint-form input, .endpoint-form select, .endpoint-form button")
-        ?.focus();
+      if (current.fields.length === 0 || match?.ok) {
+        form()?.requestSubmit();
+      } else if (match) {
+        form()?.querySelector("[aria-invalid='true']")?.focus();
+      } else {
+        form()?.querySelector("input, select, button")?.focus();
+      }
     }
   };
 
   const submit = async (params) => {
-    if (current.kind === "task") {
-      await get(current.endpoint.path, { params });
-      onQueued();
-      onClose();
-    } else {
-      setAnswer(null);
-      setAnswer(await callInstrument(current.uid, current.endpoint, params));
-    }
+    const item = current;
+    setAnswer(null);
+    const result = await item.run(params);
+    if (item.kind === "task") onQueued();
+    if (item.closes) onClose();
+    else if (result) setAnswer(result);
   };
 
   let body;
@@ -172,8 +206,8 @@ export function Palette({ managers, onQueued, onClose }) {
                   <span class="task-option-name">${item.label}</span>
                   <span class="palette-tag" data-kind=${item.kind}>${item.tag}</span>
                 </span>
-                ${item.endpoint.description &&
-                html`<span class="task-option-description">${withCode(item.endpoint.description)}</span>`}
+                ${item.description &&
+                html`<span class="task-option-description">${withCode(item.description)}</span>`}
               </li>
             `,
           )}
@@ -183,16 +217,14 @@ export function Palette({ managers, onQueued, onClose }) {
           ${current &&
           html`
             <h3 class="task-form-title">${current.label}</h3>
-            ${current.endpoint.description &&
-            html`<p class="task-form-description">${withCode(current.endpoint.description)}</p>`}
+            ${current.description &&
+            html`<p class="task-form-description">${withCode(current.description)}</p>`}
             <${EndpointForm}
-              key=${current.id}
-              endpoint=${current.endpoint}
-              submitLabel=${current.kind === "task"
-                ? "Add to queue"
-                : current.endpoint.group === "command"
-                  ? "Send"
-                  : "Read"}
+              key=${match ? `${current.id} ${JSON.stringify(match.values)} ${JSON.stringify(match.errors)}` : current.id}
+              endpoint=${{ path: current.id, fields: current.fields }}
+              submitLabel=${current.submitLabel}
+              initialValues=${match?.values}
+              lineErrors=${match?.errors}
               onSubmit=${submit}
             />
             ${answer &&
@@ -229,13 +261,19 @@ export function Palette({ managers, onQueued, onClose }) {
             aria-label="Search tasks and instruments"
             value=${query}
             onInput=${(e) => {
-              setQuery(e.currentTarget.value);
+              const value = e.currentTarget.value;
+              setQuery(value);
               setAnswer(null);
+              // Deleting into the locked label lets it go.
+              if (lockedItem && !value.toLowerCase().startsWith(`${lockedItem.label} `.toLowerCase())) {
+                setLocked(null);
+              }
             }}
             onKeyDown=${onSearchKey}
           />
           <kbd class="palette-hint">Esc</kbd>
         </label>
+        ${current && match && html`<${ArgumentHint} item=${current} match=${match} />`}
         ${body}
       </div>
     </div>

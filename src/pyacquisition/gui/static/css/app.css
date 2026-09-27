@@ -2454,6 +2454,34 @@ kbd {
   color: var(--text-muted);
 }
 
+/* The inputs typed on the search line, under it: each value given, those left
+   to their defaults, what is wrong, and what Enter will do. */
+.palette-args {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 2px var(--space-3);
+  margin: calc(-1 * var(--space-1)) 0 0;
+  padding: 0 var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+.palette-arg-left {
+  color: var(--text-faint);
+}
+
+.palette-arg-problem {
+  color: var(--bad);
+  font-family: var(--font-sans);
+}
+
+.palette-arg-ready {
+  color: var(--good);
+  font-family: var(--font-sans);
+  font-weight: var(--weight-medium);
+}
+
 .palette-body {
   display: grid;
   flex: 1;
