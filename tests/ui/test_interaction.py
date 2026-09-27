@@ -81,7 +81,9 @@ def over(page):
 def drag(page, start, end, button="left", shift=False):
     """Drags across the plot, from and to fractions of its width and height."""
     box = over(page)
-    at = lambda f: (box["x"] + f[0] * box["width"], box["y"] + f[1] * box["height"])
+    def at(f):
+        return box["x"] + f[0] * box["width"], box["y"] + f[1] * box["height"]
+
     if shift:
         page.keyboard.down("Shift")
     page.mouse.move(*at(start))
@@ -111,7 +113,8 @@ def plot_size(page):
 
 
 # Shown while an axis is not scaling to the data, with the way back.
-autoscale_off = lambda page: page.locator(".autoscale-off")
+def autoscale_off(page):
+    return page.locator(".autoscale-off")
 
 
 def autoscale(page):

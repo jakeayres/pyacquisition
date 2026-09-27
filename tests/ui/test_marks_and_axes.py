@@ -349,7 +349,9 @@ def test_fixed_limits_are_kept_for_the_session(plot_page):
 # -------------------------------------------------------------- the right button
 def drag(page, start, end, button="left"):
     box = page.locator(".u-over").bounding_box()
-    at = lambda f: (box["x"] + f[0] * box["width"], box["y"] + f[1] * box["height"])
+    def at(f):
+        return box["x"] + f[0] * box["width"], box["y"] + f[1] * box["height"]
+
     page.mouse.move(*at(start))
     page.mouse.down(button=button)
     page.mouse.move(*at(end), steps=6)

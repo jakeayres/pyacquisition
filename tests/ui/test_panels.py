@@ -74,7 +74,9 @@ def y_range(page, index):
 
 def box_zoom(page, index, start=(0.2, 0.2), end=(0.6, 0.8)):
     box = panels(page).nth(index).locator(".u-over").bounding_box()
-    at = lambda f: (box["x"] + f[0] * box["width"], box["y"] + f[1] * box["height"])
+    def at(f):
+        return box["x"] + f[0] * box["width"], box["y"] + f[1] * box["height"]
+
     page.mouse.move(*at(start))
     page.mouse.down()
     page.mouse.move(*at(end), steps=6)
