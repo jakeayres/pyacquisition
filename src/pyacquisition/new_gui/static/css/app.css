@@ -1714,6 +1714,108 @@ body.dragging-task * {
   margin-left: 0;
 }
 
+.queue-head-actions {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.link-button.link-button-plain:hover {
+  color: var(--text);
+}
+
+/* ---------------------------------------------------------------- sequences */
+
+.dialog.sequence-dialog {
+  width: min(440px, 100%);
+}
+
+.dialog.sequence-dialog-wide {
+  display: flex;
+  flex-direction: column;
+  width: min(620px, 100%);
+  max-height: min(640px, 100%);
+}
+
+.sequence-list {
+  flex: 1;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.sequence {
+  padding: var(--space-2) 0;
+  border-bottom: var(--border-width) solid var(--border);
+}
+
+.sequence-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sequence-name {
+  font-weight: var(--weight-strong);
+}
+
+.sequence-meta {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.sequence-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-left: auto;
+}
+
+.sequence-ask {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.sequence-tasks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px var(--space-1);
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  list-style: none;
+  counter-reset: task;
+}
+
+.sequence-tasks li {
+  counter-increment: task;
+}
+
+.sequence-tasks li::before {
+  color: var(--text-faint);
+  content: counter(task) ". ";
+}
+
+.sequence-tasks li:not(:last-child)::after {
+  content: ",";
+}
+
+.dialog .sequence-error {
+  margin-top: var(--space-2);
+  white-space: pre-wrap;
+}
+
+.dialog .sequence-skipped {
+  color: var(--warn);
+}
+
+.sequence-replace {
+  margin-left: var(--space-1);
+  color: var(--bad);
+}
+
 /* ------------------------------------------------------- adding a task, forms */
 
 .dialog.task-dialog {

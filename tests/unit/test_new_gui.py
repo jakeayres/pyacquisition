@@ -398,3 +398,16 @@ def test_a_folder_is_opened_only_if_it_exists(monkeypatch, tmp_path):
     assert window.open_folder(str(tmp_path / "missing")) is False
     assert window.open_folder(None) is False
     assert opened == [str(tmp_path)]
+
+
+def test_every_file_the_page_is_made_of_is_utf8():
+    """A character written in another encoding shows as a replacement mark
+    (once, "Load…" showed as "Load�")."""
+    from pathlib import Path
+
+    import pyacquisition.new_gui
+
+    static = Path(pyacquisition.new_gui.__file__).parent / "static"
+    for path in static.rglob("*"):
+        if path.suffix in {".js", ".css", ".html", ".svg"}:
+            path.read_bytes().decode("utf-8")  # raises, naming nothing, if not

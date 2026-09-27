@@ -12,6 +12,7 @@ import { usePolled } from "../hooks.js";
 import { managerAction, managerStates } from "../api.js";
 import { ConfirmDialog } from "../confirm.js";
 import { AddTaskDialog } from "./add-task.js";
+import { LoadSequenceDialog, SaveSequenceDialog } from "./sequences.js";
 import { dropIndex, reorder, useQueueDrag } from "./queue-drag.js";
 import { TaskProgress } from "../progress.js";
 import {
@@ -218,7 +219,7 @@ function QueuedTask({ task, index, count, drag, onDragStart, onKey, onMove, onRe
   `;
 }
 
-function ManagerPanel({ name, manager, single, act, ask, onAdd }) {
+function ManagerPanel({ name, manager, single, act, ask, onAdd, onSequence }) {
   const state = stateOf(manager);
   const paused = manager.status === "Paused";
   const label = single ? "Task queue" : title(name);
@@ -313,8 +314,34 @@ function ManagerPanel({ name, manager, single, act, ask, onAdd }) {
         <span class="queue-count">
           ${queue.length === 0 ? "Nothing queued" : `${queue.length} queued`}
         </span>
-        ${queue.length > 0 &&
-        html`<button class="link-button" onClick=${clear}>Clear queue</button>`}
+        <div class="queue-head-actions">
+          ${(queue.length > 0 || manager.current_task) &&
+          html`
+            <button
+              class="link-button link-button-plain"
+              aria-label=${single ? "Save as a sequence" : `Save ${label} as a sequence`}
+              onClick=${() =>
+                onSequence({
+                  kind: "save",
+                  name,
+                  label,
+                  running: manager.current_task?.name ?? null,
+                  count: queue.length,
+                })}
+            >
+              Save…
+            </button>
+          `}
+          <button
+            class="link-button link-button-plain"
+            aria-label=${single ? "Load a sequence" : `Load a sequence onto ${label}`}
+            onClick=${() => onSequence({ kind: "load", name, label })}
+          >
+            Load…
+          </button>
+          ${queue.length > 0 &&
+          html`<button class="link-button" onClick=${clear}>Clear queue</button>`}
+        </div>
       </div>
       ${queue.length > 0 &&
       html`
@@ -345,6 +372,7 @@ function ManagerPanel({ name, manager, single, act, ask, onAdd }) {
 export function QueueTab({ managers }) {
   const [asking, setAsking] = useState(null); // the question being asked
   const [adding, setAdding] = useState(null); // {name, label} of the manager being added to
+  const [sequence, setSequence] = useState(null); // {kind: "save" or "load", name, label, ...}
   const [error, setError] = useState("");
   const states = managers.states;
 
@@ -375,10 +403,30 @@ export function QueueTab({ managers }) {
               act=${act}
               ask=${setAsking}
               onAdd=${(name, label) => setAdding({ name, label })}
+              onSequence=${setSequence}
             />
           `,
         )}
       </div>
+      ${sequence?.kind === "save" &&
+      html`
+        <${SaveSequenceDialog}
+          manager=${sequence.name}
+          label=${names.length === 1 ? "" : sequence.label}
+          running=${sequence.running}
+          count=${sequence.count}
+          onClose=${() => setSequence(null)}
+        />
+      `}
+      ${sequence?.kind === "load" &&
+      html`
+        <${LoadSequenceDialog}
+          manager=${sequence.name}
+          label=${names.length === 1 ? "" : sequence.label}
+          onLoaded=${managers.refresh}
+          onClose=${() => setSequence(null)}
+        />
+      `}
       ${adding &&
       html`
         <${AddTaskDialog}

@@ -88,6 +88,28 @@ export const managerPath = (name, action) =>
 export const managerAction = (name, action, params) =>
   get(managerPath(name, action), { params });
 
+// Saved sequences (see core/sequences.py): [{name, saved, tasks}].
+export async function sequences() {
+  const { data } = await get("/sequences");
+  return data;
+}
+
+// Saves a task manager's queue as a sequence: {saved, skipped}. A name that is
+// taken fails with status 409, unless `overwrite`.
+export async function saveSequence(name, manager, { includeRunning = true, overwrite = false } = {}) {
+  const query = new URLSearchParams({ name, manager, include_running: includeRunning, overwrite });
+  const response = await fetch(`/sequences/save?${query}`, { signal: AbortSignal.timeout(5000) });
+  if (!response.ok) {
+    const error = await failure("/sequences/save", response);
+    error.status = response.status;
+    throw error;
+  }
+  return response.json();
+}
+
+export const loadSequence = (name, manager) => get("/sequences/load", { params: { name, manager } });
+export const deleteSequence = (name) => get("/sequences/delete", { params: { name } });
+
 // The running task of each task manager, as "name" for the main one and
 // "name (manager)" for the others.
 export async function runningTasks() {
