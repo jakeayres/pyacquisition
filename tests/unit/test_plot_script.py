@@ -502,8 +502,14 @@ def test_the_endpoint_refuses_while_nothing_is_written(experiment):
         (1e-15, "A", Scale(-12, "pA")),  # no prefix below p
         (0.5, "Ω", Scale(-3, "mΩ")),
         (0.5, "Ohm", Scale(-3, "mOhm")),
-        (0.5, "mV", Scale(-3, "10$^{-3}$ mV")),  # already prefixed
-        (0.5, "Ω cm", Scale(-3, "10$^{-3}$ Ω cm")),  # compound
+        (0.005, "mV", Scale(-3, "10$^{-3}$ mV")),  # already prefixed
+        (2e-4, "Ω cm", Scale(-6, "10$^{-6}$ Ω cm")),  # compound
+        (0.5, "mV", Scale(0, "mV")),  # short as it is: left alone
+        (0.01, "Ω cm", Scale(0, "Ω cm")),
+        (999.0, None, Scale(0, None)),
+        (0.5, None, Scale(0, None)),
+        (0.0099, None, Scale(-3, "10$^{-3}$")),
+        (1e6, None, Scale(6, "10$^{6}$")),
         (5e3, None, Scale(3, "10$^{3}$")),
         (5.0, None, Scale(0, None)),
     ],

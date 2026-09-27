@@ -83,6 +83,9 @@ PREFIXES = {-12: "p", -9: "n", -6: "µ", -3: "m", 3: "k", 6: "M", 9: "G"}
 # An axis whose spread is less than this part of its largest value (such as
 # Unix time) isn't scaled: matplotlib's offset shows its changes better.
 OFFSET_SPREAD = 1e-3
+# Largest values short enough to leave as they are on an axis that can't take a
+# prefix: a power of ten in its label would read worse than the numbers.
+SHORT = (0.01, 1000)
 
 
 class Series(BaseModel):
@@ -133,9 +136,13 @@ def axis_scale(largest: float, spread: float, unit: str | None) -> Scale:
     1000 that brings `largest` between 1 and 1000, with the SI prefix put in
     front of a base unit (`µV`), or the power of ten written in the label for
     any other unit, or none (`10$^{-3}$ Ω cm`, `10$^{3}$`). Not at all if the
-    values are all 0, or sit far from 0 compared with their spread."""
+    values are all 0, or sit far from 0 compared with their spread, or if they
+    can't take a prefix and are short as they are (0.01 up to 1000: `0.5`
+    reads better than `500` with `10$^{-3}$` in the label)."""
     unscaled = Scale(0, _math_safe(unit) if unit else None)
     if not (math.isfinite(largest) and largest > 0) or spread < OFFSET_SPREAD * largest:
+        return unscaled
+    if unit not in BASE_UNITS and SHORT[0] <= largest < SHORT[1]:
         return unscaled
     exponent = 3 * math.floor(math.log10(largest) / 3)
     if largest / 10.0**exponent >= 1000:  # log10 rounds down short of a power
