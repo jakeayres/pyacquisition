@@ -29,7 +29,7 @@ import {
   axisSize,
   chooseScales,
   makeReadout,
-  scaleOptions,
+  exactScale,
   themeStyle,
   tipRow,
   toScale,
@@ -204,7 +204,7 @@ function TracePlot({ store, settings: given, theme, view, onView, index, scalesR
         height: container.clientHeight,
         mode: 2,
         padding: [16, 20, 4, 4],
-        scales: { x: scaleOptions(logX), y: scaleOptions(logY) },
+        scales: { x: exactScale(logX), y: exactScale(logY) },
         axes: [
           { ...axisOptions(style, labels.x, logX), size: 32, labelSize: 20 },
           { ...axisOptions(style, labels.y, logY), size: axisSize },
@@ -464,10 +464,10 @@ function TraceNote({ latest }) {
   `;
 }
 
-const NOTHING = { version: 0, subscribe: () => () => {} }; // no store yet
+export const NOTHING = { version: 0, subscribe: () => () => {} }; // no store yet
 
 // One trace's store, following it while the panel shows it.
-function useTraceStore(name) {
+export function useTraceStore(name) {
   const [store, setStore] = useState(null);
   useEffect(() => {
     const made = new TraceStore(name);

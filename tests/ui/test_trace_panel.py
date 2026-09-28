@@ -77,7 +77,8 @@ def test_the_add_menu_offers_a_plot_or_each_trace(trace_page):
     trace_page.get_by_role("button", name="Add plot").click()
     menu = trace_page.get_by_role("menu", name="Add a plot")
     assert [i.inner_text() for i in menu.get_by_role("menuitem").all()] == [
-        "Plot of columns", "Trace: spectrum", "Trace: short", "Trace: slow"]
+        "Plot of columns", "Trace: spectrum", "Trace: short", "Trace: slow",
+        "Map: spectrum", "Map: short", "Map: slow"]
     menu.get_by_role("menuitem", name="Plot of columns").click()
     expect(trace_page.locator(".plot-panel:not(.trace-panel)")).to_have_count(2)
 

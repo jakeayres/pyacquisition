@@ -3,8 +3,9 @@
 // files (for every panel).
 //
 // A panel has a `kind`: "plot" (columns against another, panel.js; the kind of
-// a saved panel that doesn't say) or "trace" (a trace against its axis,
-// trace-panel.js). When the experiment has traces, **+ Add plot** offers either.
+// a saved panel that doesn't say), "trace" (a trace against its axis,
+// trace-panel.js) or "map" (a trace's channel as a colour map, map-panel.js).
+// When the experiment has traces, **+ Add plot** offers each.
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { html } from "../html.js";
 import { usePopover, useStore } from "../hooks.js";
@@ -13,6 +14,7 @@ import { ChartIcon, EyeIcon, EyeOffIcon } from "../icons.js";
 import { colourSlots, isTimeColumn } from "../colours.js";
 import { MAX_SERIES, PlotPanel, defaultX, defaultY, resolve } from "./panel.js";
 import { DEFAULT_OVERLAY, TracePanel, resolveTrace } from "./trace-panel.js";
+import { MapPanel, resolveMap } from "./map-panel.js";
 
 export const MAX_PANELS = 6;
 
@@ -37,16 +39,17 @@ function savedPlots() {
   };
 }
 
-const isTrace = (panel) => panel.kind === "trace";
+// Whether a panel plots columns (not a trace or a map of one).
+const isColumns = (panel) => !panel.kind || panel.kind === "plot";
 
 // A panel made sound for the columns there are, whatever its kind.
 export const resolvePanel = (panel, names) =>
-  isTrace(panel) ? resolveTrace(panel) : resolve(panel, names);
+  panel.kind === "trace" ? resolveTrace(panel) : panel.kind === "map" ? resolveMap(panel) : resolve(panel, names);
 
 // A new panel: against the same x as the first plot, plotting the first column
 // no plot plots yet.
 export function newPanel(panels, names, id) {
-  const x = panels.find((p) => !isTrace(p))?.x ?? defaultX(names);
+  const x = panels.find(isColumns)?.x ?? defaultX(names);
   const plotted = new Set(panels.flatMap((p) => (p.series ?? []).map((s) => s.name)));
   const name =
     names.find((n) => n !== x && !plotted.has(n) && !isTimeColumn(n)) ?? defaultY(names, x);
@@ -63,9 +66,13 @@ export const newTracePanel = (trace, id) => ({
   logY: false,
 });
 
+// A new map panel, of the trace called `trace` (its first channel, against
+// `time` if the rows have it).
+export const newMapPanel = (trace, id) => ({ id, kind: "map", trace, logX: false, logY: false });
+
 // **+ Add plot**: a plot of columns, or, when the experiment has traces, a
-// menu of a plot or a trace panel of each trace.
-function AddButton({ traces, full, onPlot, onTrace }) {
+// menu of a plot, or a trace panel or a map of each trace.
+function AddButton({ traces, full, onPlot, onTrace, onMap }) {
   const [open, setOpen] = useState(false);
   const menu = useRef(null);
   usePopover(menu, open, () => setOpen(false));
@@ -106,6 +113,18 @@ function AddButton({ traces, full, onPlot, onTrace }) {
                 onClick=${choose(() => onTrace(trace.name))}
               >
                 Trace: ${trace.name}
+              </button>
+            `,
+          )}
+          ${traces.map(
+            (trace) => html`
+              <button
+                key=${`map ${trace.name}`}
+                class="export-item"
+                role="menuitem"
+                onClick=${choose(() => onMap(trace.name))}
+              >
+                Map: ${trace.name}
               </button>
             `,
           )}
@@ -181,7 +200,7 @@ export function PlotArea({ store, columns, theme, traces = null }) {
       if (!panel) {
         return done?.(`There is no plot ${plot}: there ${panels.length === 1 ? "is 1" : `are ${panels.length}`}.`);
       }
-      if (isTrace(panel)) return done?.(`Plot ${plot} shows a trace, not columns.`);
+      if (!isColumns(panel)) return done?.(`Plot ${plot} shows a trace, not columns.`);
       if (!names.includes(column)) return done?.(`There is no column called ${column}.`);
       if (panel.series.some((s) => s.name === column)) return done?.(`Plot ${plot} has ${column} already.`);
       if (panel.series.length >= MAX_SERIES) {
@@ -237,6 +256,7 @@ export function PlotArea({ store, columns, theme, traces = null }) {
 
   const add = () => update({ panels: [...panels, newPanel(panels, names, nextId())] });
   const addTrace = (trace) => update({ panels: [...panels, newTracePanel(trace, nextId())] });
+  const addMap = (trace) => update({ panels: [...panels, newMapPanel(trace, nextId())] });
   const duplicate = (id) => {
     const at = panels.findIndex((p) => p.id === id);
     const copy = { ...panels[at], id: nextId() };
@@ -258,9 +278,9 @@ export function PlotArea({ store, columns, theme, traces = null }) {
       const out = { ...current, [id]: next };
       if (!state.link) return out;
       const source = panels.find((p) => p.id === id);
-      if (!source || isTrace(source)) return out;
+      if (!source || !isColumns(source)) return out;
       for (const p of panels) {
-        if (p.id === id || isTrace(p) || p.x !== source.x || p.logX !== source.logX) continue;
+        if (p.id === id || !isColumns(p) || p.x !== source.x || p.logX !== source.logX) continue;
         out[p.id] = next ? { x: next.x, y: null } : null;
       }
       return out;
@@ -277,6 +297,7 @@ export function PlotArea({ store, columns, theme, traces = null }) {
           full=${panels.length >= MAX_PANELS}
           onPlot=${add}
           onTrace=${addTrace}
+          onMap=${addMap}
         />
         ${panels.length > 1 &&
         html`
@@ -309,10 +330,11 @@ export function PlotArea({ store, columns, theme, traces = null }) {
               class="plot-cell"
               style=${index === panels.length - 1 ? { gridColumn: `span ${lastSpan}` } : {}}
             >
-              ${isTrace(panel)
+              ${!isColumns(panel)
                 ? html`
-                    <${TracePanel}
+                    <${panel.kind === "map" ? MapPanel : TracePanel}
                       panel=${panel}
+                      units=${units}
                       traces=${traces}
                       index=${index}
                       onChange=${(delta) => change(panel.id, delta)}

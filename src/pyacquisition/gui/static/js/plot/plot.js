@@ -138,6 +138,10 @@ export function axisOptions(style, label, log) {
 // A scale that is set here, not by uPlot, linear or log.
 export const scaleOptions = (log) => ({ time: false, auto: false, distr: log ? 3 : 1, log: 10 });
 
+// One that also shows exactly the range it is given, not rounded out to round
+// numbers as uPlot does otherwise (a map's rows fill it edge to edge).
+export const exactScale = (log) => ({ ...scaleOptions(log), range: (u, min, max) => [min, max] });
+
 function options(style, { labels, series, logX, logY }, width, height) {
   const axis = (label, log) => axisOptions(style, label, log);
   const line = (stroke, width) => ({
