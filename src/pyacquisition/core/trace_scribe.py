@@ -109,8 +109,18 @@ class TraceScribe:
             append(trace_path(self.folder, data_file, part), batch[start:end], part=part)
             start = end
 
+    # ------------------------------------------------------------ as a component
+    def _register_endpoints(self, api_server) -> None:
+        pass  # the traces' endpoints are the experiment's
+
+    async def setup(self) -> None:
+        pass
+
+    async def teardown(self) -> None:
+        pass
+
     # ------------------------------------------------------------ the worker
-    async def run(self) -> None:
+    async def run(self, experiment=None) -> None:
         """Writes the traces as they come, until `shutdown`. A write happens on a
         worker thread, one at a time, so the event loop carries on meanwhile."""
         while True:

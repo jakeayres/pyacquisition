@@ -52,6 +52,8 @@ class Scribe(Consumer):
         self._pause_event.set()
         self._shutdown_event = asyncio.Event()
         self._file_listeners = []
+        # Rows written to the current data file (a trace notes it, see traces).
+        self.rows_written = 0
 
     def add_file_listener(self, listener) -> None:
         """
@@ -61,6 +63,7 @@ class Scribe(Consumer):
         self._file_listeners.append(listener)
 
     def _file_started(self) -> None:
+        self.rows_written = 0
         for listener in self._file_listeners:
             try:
                 listener(self.current_file())
@@ -199,6 +202,7 @@ class Scribe(Consumer):
                 self._write_line(data)
             else:
                 self._append_line(data)
+            self.rows_written += len(data)
         except Exception as e:
             logger.error(f"[Scribe] Error processing data: {e}")
 

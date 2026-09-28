@@ -19,6 +19,8 @@ from .calculations import Calculations
 from .task_manager.task_manager import TaskManager
 from .task_manager.task import Task
 from .task_manager.instrument_call import register_call_endpoints
+from .trace_scribe import TraceScribe
+from .trace_source import Trace, TraceSource
 from .scribe import Scribe
 from .history import History
 from .log_history import LogHistory
@@ -209,6 +211,11 @@ class Experiment:
         self._scribe.subscribe_to(self._calculations)
         self._history.subscribe_to(self._calculations)
         self._scribe.add_file_listener(self._history.new_file)
+
+        # Traces: each one's source, by name, and what writes them beside the
+        # data files (see add_trace).
+        self._traces: dict[str, TraceSource] = {}
+        self._trace_scribe = TraceScribe(self._data_path)
 
         # History's events (and the log's) are made to be JSON, so sent as they are.
         self._api_server.add_websocket_endpoint("/stream/data").subscribe_to(self._history)
@@ -500,6 +507,19 @@ class Experiment:
         return MappingProxyType(self._rack.measurements)
 
     @property
+    def traces(self) -> MappingProxyType:
+        """
+        The experiment's traces, by name: each a `TraceSource`, whose
+        `acquire()` takes one now.
+
+        The mapping is read-only. Use `add_trace` to add one.
+
+        Example:
+            await experiment.traces["spectrum"].acquire()
+        """
+        return MappingProxyType(self._traces)
+
+    @property
     def task_managers(self) -> MappingProxyType:
         """
         Returns the task managers of the experiment.
@@ -566,6 +586,55 @@ class Experiment:
         """
         self._check_not_started("remove an instrument")
         self._rack.remove_instrument(uid)
+
+    def add_trace(self, trace: Trace) -> None:
+        """
+        Adds a trace: a measurement that is a whole array, such as a spectrum.
+
+        Each one taken is written to the data file's `.h5`, beside it, and its
+        number there (from 0) goes on the first row after it, in the column
+        `<name>_index`, which is empty on the other rows. It is taken on demand
+        (`await experiment.traces[name].acquire()`), and on a clock of its own if
+        it is given `every`.
+
+        Must be called before the experiment starts running, for example in
+        `setup()`.
+
+        Args:
+            trace (Trace): The trace to add.
+
+        Raises:
+            RuntimeError: If the experiment has already started running.
+            ValueError: If its name, or its column's, is taken by a measurement,
+                a calculated column or another trace.
+
+        Example:
+            generator = TraceGenerator("generator")
+            self.add_instrument(generator)
+            self.add_trace(Trace("spectrum", generator.get_spectrum))
+        """
+        self._check_not_started("add a trace")
+        if not isinstance(trace, Trace):
+            raise TypeError(f"Expected a Trace, not {type(trace).__name__}.")
+        taken = {
+            *self._rack.measurements,
+            *self._calculations.known_columns,
+            *(name for source in self._traces.values() for name in (source.name, source.trace.index_column)),
+        }
+        for name in (trace.name, trace.index_column):
+            if name in taken:
+                raise ValueError(f"Trace {trace.name!r}: the name {name!r} is taken already.")
+        source = TraceSource(
+            trace,
+            data_file=self._scribe.current_file,
+            rows_written=lambda: self._scribe.rows_written,
+            latest_row=lambda: self._history.latest,
+            paused=lambda: self._rack.paused,
+        )
+        source.listeners.append(self._trace_scribe.add)
+        self._traces[trace.name] = source
+        self._rack.trace_sources.append(source)
+        logger.debug(f"Trace {trace.name} added, from {trace.source}.")
 
     def add_measurement(self, measurement: Measurement) -> None:
         """
@@ -764,6 +833,8 @@ class Experiment:
                 tg.create_task(self._run_component(self._scribe))
                 tg.create_task(self._run_component(self._history))
                 tg.create_task(self._run_component(self._log_history))
+                tg.create_task(self._run_component(self._trace_scribe))
+                clocks = [tg.create_task(source.run()) for source in self._traces.values()]
                 for task_manager in self._task_managers.values():
                     tg.create_task(self._run_component(task_manager))
                 if self._run_gui:
@@ -776,10 +847,15 @@ class Experiment:
 
                 await self._api_server.shutdown()
                 await self._rack.shutdown()
+                for source in self._traces.values():
+                    source.shutdown()
+                for clock in clocks:
+                    clock.cancel()  # a trace being taken is stopped
                 await self._calculations.shutdown()
                 await self._scribe.shutdown()
                 await self._history.shutdown()
                 await self._log_history.shutdown()
+                self._trace_scribe.shutdown()  # after writing what waits
                 for task_manager in self._task_managers.values():
                     await task_manager.shutdown()
 
@@ -1001,6 +1077,10 @@ class Experiment:
             for name in self._calculations.known_columns
             if name not in measured
         ]
+        columns += [
+            {"name": source.trace.index_column, "kind": "trace", "source": source.name, "unit": None}
+            for source in self._traces.values()
+        ]
         return columns
 
     def _register_endpoints(self, api_server):
@@ -1105,6 +1185,35 @@ class Experiment:
                 raise HTTPException(status_code=422, detail=str(error)) from error
             return {"status": 200, "data": script}
 
+        @api_server.app.get("/traces", tags=["traces"])
+        async def list_traces():
+            """
+            Endpoint for the experiment's traces: each one's `name`, `source`
+            (`instrument.method`), `every` (seconds, or null if it is taken only
+            on demand), its `column` in the rows, and its `latest` trace taken
+            (its `index`, `time`, `data_file`, `points`, `channels`, `x_name`,
+            `x_unit` and `unit`), or null.
+            """
+            return {"status": 200, "data": [_trace_info(source) for source in self._traces.values()]}
+
+        @api_server.app.get("/traces/{name}/acquire", tags=["traces"])
+        async def acquire_trace(name: str):
+            """
+            Endpoint to take a trace now. It answers once it is taken, which can
+            take as long as the trace does (up to its timeout), with its `index`
+            and `time`. It answers 404 for a trace there isn't, and 500 with the
+            reason if it couldn't be taken.
+            """
+            source = self._traces.get(name)
+            if source is None:
+                raise HTTPException(status_code=404, detail=f"There is no trace called {name!r}.")
+            record = await source.acquire()
+            if record is None:
+                raise HTTPException(
+                    status_code=500, detail=f"Trace {name!r} couldn't be taken: see the log."
+                )
+            return {"status": 200, "data": {"index": record.index, "time": record.time}}
+
         @api_server.app.get("/managers", tags=["experiment"])
         async def list_task_managers():
             """
@@ -1135,6 +1244,29 @@ class Experiment:
             logger.info("Shutting down the experiment")
             self._shutdown_event.set()
             return {"status": "success", "message": "Experiment shutdown initiated."}
+
+
+def _trace_info(source: TraceSource) -> dict:
+    """A trace, as /traces describes it."""
+    latest = source.latest
+    return {
+        "name": source.name,
+        "source": source.trace.source,
+        "every": source.trace.every,
+        "column": source.trace.index_column,
+        "latest": None
+        if latest is None
+        else {
+            "index": latest.index,
+            "time": latest.time,
+            "data_file": latest.data_file,
+            "points": latest.data.points,
+            "channels": list(latest.data.channels),
+            "x_name": latest.data.x_name,
+            "x_unit": latest.data.x_unit,
+            "unit": latest.data.unit,
+        },
+    }
 
 
 # The options are class attributes, so that a subclass can set them by name. Their

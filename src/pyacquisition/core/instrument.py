@@ -130,6 +130,7 @@ class QueryCommandProvider(type):
     def __init__(cls, name, bases, attrs):
         queries = set()
         commands = set()
+        traces = set()
 
         for name, method in attrs.items():
             if isinstance(method, property):
@@ -141,8 +142,12 @@ class QueryCommandProvider(type):
             elif hasattr(method, "_is_command"):
                 commands.add(method)
 
+            elif hasattr(method, "_is_trace"):
+                traces.add(method)
+
         cls._queries = queries
         cls._commands = commands
+        cls._traces = traces
 
 
 def mark_query(func):
@@ -155,6 +160,33 @@ def mark_command(func):
     """Decorator for marking method as a query"""
     func._is_command = True
     return func
+
+
+def mark_trace(func=None, *, start=None, ready=None, stop=None, timeout=None):
+    """Marks a method that returns a trace, a `TraceData` (see core/trace.py).
+
+    Use it bare, `@mark_trace`, for a trace that is fetched at once, or name the
+    phases of one that takes time to acquire, by the methods that do them:
+
+        @mark_trace(start="start_sweep", ready="sweep_done", stop="abort_sweep", timeout=300)
+        def get_sweep(self) -> TraceData: ...
+
+    The trace is then taken by calling `start`, then `ready` every 0.1 s until
+    it is true, then the method itself, to fetch it. If it is cancelled (an
+    aborted task, the experiment stopping) or takes longer than `timeout`
+    seconds, `stop` is called, so the instrument isn't left acquiring.
+
+    A trace method isn't an instrument endpoint: it is taken through the trace's
+    own (`/traces/...`).
+    """
+
+    def mark(method):
+        method._is_trace = True
+        method._trace_phases = {"start": start, "ready": ready, "stop": stop}
+        method._trace_timeout = timeout
+        return method
+
+    return mark(func) if func is not None else mark
 
 
 def has_cache(func):
@@ -247,6 +279,11 @@ class Instrument(metaclass=QueryCommandProvider):
         """return dictionary of registered commands as externally executable partials"""
         return {c.__name__: partial(c, self) for c in self._commands}
 
+    @property
+    def traces(self) -> dict[str, callable]:
+        """The methods marked `@mark_trace`, by name, bound to this instrument."""
+        return {t.__name__: getattr(self, t.__name__) for t in self._traces}
+
     def query(self, query_string, *args, **kwargs):
         """Send a query to visa resource"""
         return self._visa_resource.query(query_string, *args, **kwargs)
@@ -310,6 +347,11 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
     def commands(self) -> dict[str, callable]:
         """return dictionary of registered commands as externally executable partials"""
         return {c.__name__: partial(c, self) for c in self._commands}
+
+    @property
+    def traces(self) -> dict[str, callable]:
+        """The methods marked `@mark_trace`, by name, bound to this instrument."""
+        return {t.__name__: getattr(self, t.__name__) for t in self._traces}
 
     @mark_query
     def identify(self):

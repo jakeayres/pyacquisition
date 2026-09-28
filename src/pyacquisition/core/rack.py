@@ -21,6 +21,8 @@ class Rack(Broadcaster):
         self._period = period
         self.instruments = {}
         self.measurements = {}
+        # Each trace's columns (its `<name>_index`) join every row (see traces).
+        self.trace_sources = []
         self._pause_event = asyncio.Event()
         self._pause_event.set()
         self._shutdown_event = asyncio.Event()
@@ -35,6 +37,8 @@ class Rack(Broadcaster):
             dict: A dictionary of results from the measurements.
         """
         result = {k: v.run() for k, v in self.measurements.items()}
+        for source in self.trace_sources:
+            result.update(source.row_columns(result))
         await self.broadcast(result)
 
     async def setup(self):
