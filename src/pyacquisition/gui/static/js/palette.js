@@ -9,10 +9,15 @@
 // Enter then queues it. Tab locks in the item picked, so everything typed after
 // its label is an argument. An instrument's query or command can be queued too,
 // with Shift+Enter or its form's Add to queue, rather than called at once.
+//
+// Each run that works is kept (recents.js), and an empty palette lists the
+// latest first, under Recent: Enter does it again, and Tab opens its form to
+// change it first.
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { html } from "./html.js";
 import { get, sequences } from "./api.js";
-import { EndpointForm, loadSchema, taskEndpoints, withCode } from "./forms.js";
+import { EndpointForm, checkValues, loadSchema, taskEndpoints, withCode } from "./forms.js";
+import { SHOWN, inputsText, recents, recordRun, valuesOf } from "./recents.js";
 import { actionItems } from "./actions.js";
 import { matchArguments, searchItems, splitLine } from "./palette-line.js";
 import {
@@ -116,6 +121,7 @@ export function Palette({ managers, onQueued, onClose, context = {} }) {
   const [picked, setPicked] = useState(null); // the id of the item picked
   const [locked, setLocked] = useState(null); // the id of the item Tab locked in
   const [answer, setAnswer] = useState(null); // an instrument's, as a result entry
+  const [recentList, setRecentList] = useState(recents);
   const searchBox = useRef(null);
   const dialog = useRef(null);
   const list = useRef(null);
@@ -167,9 +173,25 @@ export function Palette({ managers, onQueued, onClose, context = {} }) {
   const lockedItem = all.find((item) => item.id === locked) ?? null;
   const line = splitLine(query, all, lockedItem);
   const shown = searchItems(all, line.search);
+  // With the search empty, the recent runs come first: each as its item (if it
+  // is still offered), with the values it was run with.
+  const recentItems =
+    query.trim() === ""
+      ? recentList
+          .map((recent, i) => {
+            const item = all.find((it) => it.id === recent.id);
+            return item && { ...item, id: `recent:${i}`, itemId: item.id, recent };
+          })
+          .filter(Boolean)
+          .slice(0, SHOWN)
+      : [];
+  const choices = [...recentItems, ...shown];
   const current = line.locked
     ? lockedItem
-    : (shown.find((item) => item.id === picked) ?? shown[0] ?? null);
+    : (choices.find((item) => item.id === picked) ?? choices[0] ?? null);
+  const recentErrors = current?.recent
+    ? (checkValues(current.fields, current.recent.values).errors ?? null)
+    : null;
   const typed = line.arguments.length > 0;
   const match = current && typed ? matchArguments(current.fields, line.arguments) : null;
 
@@ -190,13 +212,27 @@ export function Palette({ managers, onQueued, onClose, context = {} }) {
   // takes no inputs, or when those typed are complete and right; otherwise it
   // goes to the form (to the first input that is wrong, if any).
   const onSearchKey = (event) => {
-    const index = shown.indexOf(current);
-    if (event.key === "ArrowDown" && index < shown.length - 1 && !line.locked) {
+    const index = choices.indexOf(current);
+    if (event.key === "ArrowDown" && index < choices.length - 1 && !line.locked) {
       event.preventDefault();
-      pick(shown[index + 1]);
+      pick(choices[index + 1]);
     } else if (event.key === "ArrowUp" && index > 0 && !line.locked) {
       event.preventDefault();
-      pick(shown[index - 1]);
+      pick(choices[index - 1]);
+    } else if (event.key === "Tab" && !event.shiftKey && current?.recent) {
+      // A recent's form, to change its values first.
+      event.preventDefault();
+      form()?.querySelector("input, select, button")?.focus();
+    } else if (event.key === "Enter" && current?.recent) {
+      // Again, as it was done: queued, or run (or queued with Shift+Enter).
+      event.preventDefault();
+      if (recentErrors) {
+        form()?.querySelector("[aria-invalid='true']")?.focus();
+      } else {
+        const queueing = current.queue && (event.shiftKey || current.recent.queued);
+        const button = queueing ? form()?.querySelector("[data-secondary]") : undefined;
+        form()?.requestSubmit(button ?? undefined);
+      }
     } else if (event.key === "Tab" && !event.shiftKey && current && query.trim() && !line.locked) {
       event.preventDefault();
       setLocked(current.id);
@@ -217,16 +253,26 @@ export function Palette({ managers, onQueued, onClose, context = {} }) {
     }
   };
 
+  // A run that worked is kept, to be offered again.
+  const remember = (item, params, queued) =>
+    setRecentList(
+      recordRun({ id: item.itemId ?? item.id, label: item.label }, valuesOf(item.fields, params), queued),
+    );
+
   const submit = async (params) => {
     const item = current;
     setAnswer(null);
     // An action that asks first closes the palette, and asks in its place.
     if (item.confirm) {
       onClose();
-      if (await context.confirm?.(item.confirm)) await item.run(params);
+      if (await context.confirm?.(item.confirm)) {
+        await item.run(params);
+        remember(item, params, false);
+      }
       return;
     }
     const result = await item.run(params);
+    remember(item, params, false);
     if (item.kind === "task") onQueued();
     if (item.closes) onClose();
     else if (result) setAnswer(result);
@@ -237,7 +283,9 @@ export function Palette({ managers, onQueued, onClose, context = {} }) {
     label: "Add to queue",
     choices: names,
     onSubmit: async (params, manager) => {
-      await current.queue(params, manager);
+      const item = current;
+      await item.queue(params, manager);
+      remember(item, params, true);
       onQueued();
       onClose();
     },
@@ -252,6 +300,31 @@ export function Palette({ managers, onQueued, onClose, context = {} }) {
     body = html`
       <div class="palette-body">
         <ul class="task-list palette-list" role="listbox" aria-label="Tasks, instruments and actions" ref=${list}>
+          ${recentItems.length > 0 &&
+          html`<li class="palette-heading" role="presentation">Recent</li>`}
+          ${recentItems.map(
+            (item) => html`
+              <li
+                key=${item.id}
+                role="option"
+                aria-selected=${item === current}
+                class="task-option palette-option palette-recent"
+                onClick=${() => pick(item)}
+              >
+                <span class="palette-option-head">
+                  <span class="task-option-name">${item.label}</span>
+                  <span class="palette-tag" data-kind=${item.kind}>
+                    ${item.recent.queued ? "Queued" : item.tag}
+                  </span>
+                </span>
+                <span class="task-option-description palette-recent-inputs">
+                  ${inputsText(item.fields, item.recent.values) || "No inputs"}
+                </span>
+              </li>
+            `,
+          )}
+          ${recentItems.length > 0 &&
+          html`<li class="palette-heading" role="presentation">Everything</li>`}
           ${shown.map(
             (item) => html`
               <li
@@ -282,8 +355,8 @@ export function Palette({ managers, onQueued, onClose, context = {} }) {
               key=${match ? `${current.id} ${JSON.stringify(match.values)} ${JSON.stringify(match.errors)}` : current.id}
               endpoint=${{ path: current.id, fields: current.fields }}
               submitLabel=${current.submitLabel}
-              initialValues=${match?.values}
-              lineErrors=${match?.errors}
+              initialValues=${match?.values ?? current.recent?.values}
+              lineErrors=${match?.errors ?? recentErrors ?? undefined}
               onSubmit=${submit}
               secondary=${queue || undefined}
             />
@@ -334,6 +407,19 @@ export function Palette({ managers, onQueued, onClose, context = {} }) {
           <kbd class="palette-hint">Esc</kbd>
         </label>
         ${current && match && html`<${ArgumentHint} item=${current} match=${match} />`}
+        ${current?.recent &&
+        html`
+          <p class="palette-args" aria-live="polite">
+            ${recentErrors
+              ? html`<span class="palette-arg palette-arg-problem">
+                  Its inputs no longer pass: Enter goes to the form.
+                </span>`
+              : html`<span class="palette-arg palette-arg-ready">
+                  ${`✓ ${current.recent.queued ? "Enter to queue it" : (ENTER[current.submitLabel] ?? "Enter to run")} ` +
+                  "again · Tab to change it first"}
+                </span>`}
+          </p>
+        `}
         ${body}
       </div>
     </div>

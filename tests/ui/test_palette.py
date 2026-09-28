@@ -512,3 +512,151 @@ def test_an_action_registered_by_a_later_feature_is_found_and_runs(page):
 
     expect(palette(page)).to_have_count(0)
     assert page.page.evaluate("window.hello") == "hello"
+
+
+# -------------------------------------------------------------- recents
+def options(dialog):
+    return dialog.locator(".palette-list > li")
+
+
+def recent_rows(dialog):
+    return dialog.locator(".palette-recent")
+
+
+def seed_recents(page, recents):
+    """Recents as an earlier session left them, before the palette opens."""
+    page.page.evaluate(
+        "(list) => sessionStorage.setItem('pyacquisition:recents', JSON.stringify(list))", recents
+    )
+
+
+def test_an_empty_palette_offers_the_last_run_first_and_enter_repeats_it(page, rig):
+    _, search = type_line(page, "wait 0 5")
+    search.press("Enter")
+    expect(palette(page)).to_have_count(0)
+
+    dialog = open_palette(page)
+
+    expect(options(dialog).first).to_have_text("Recent")
+    first = recent_rows(dialog).first
+    expect(first).to_have_attribute("aria-selected", "true")
+    expect(first).to_contain_text("WaitFor")
+    expect(first).to_contain_text("hours=0, minutes=5, seconds=0")
+    expect(dialog.locator(".palette-heading")).to_have_text(["Recent", "Everything"])
+    expect(field(dialog, "minutes").locator("input")).to_have_value("5")
+    expect(dialog.locator(".palette-args")).to_contain_text("Enter to queue again")
+
+    dialog.get_by_role("searchbox").press("Enter")
+
+    expect(palette(page)).to_have_count(0)
+    assert queued(rig) == [("WaitFor", {"hours": 0, "minutes": 5, "seconds": 0})] * 2
+
+
+def test_tab_opens_a_recents_form_and_a_change_is_a_new_recent_above_it(page, rig):
+    _, search = type_line(page, "wait 0 5")
+    search.press("Enter")
+    expect(palette(page)).to_have_count(0)
+    dialog = open_palette(page)
+
+    dialog.get_by_role("searchbox").press("Tab")
+
+    hours = field(dialog, "hours").locator("input")
+    expect(hours).to_be_focused()
+    expect(hours).to_have_value("0")
+    minutes = field(dialog, "minutes").locator("input")
+    expect(minutes).to_have_value("5")
+    minutes.fill("7")
+    minutes.press("Enter")
+    expect(palette(page)).to_have_count(0)
+
+    dialog = open_palette(page)
+    expect(recent_rows(dialog)).to_have_count(2)
+    expect(recent_rows(dialog).nth(0)).to_contain_text("minutes=7")
+    expect(recent_rows(dialog).nth(1)).to_contain_text("minutes=5")
+
+
+def test_the_same_run_twice_is_one_recent_and_twenty_are_kept(page, rig):
+    for _ in range(2):
+        _, search = type_line(page, "wait 0 5")
+        search.press("Enter")
+        expect(palette(page)).to_have_count(0)
+    dialog = open_palette(page)
+    expect(recent_rows(dialog)).to_have_count(1)
+    page.page.keyboard.press("Escape")
+
+    kept = page.page.evaluate(
+        """import('/ui/js/recents.js').then((r) => {
+            for (let i = 0; i < 21; i++) r.recordRun({ id: '/tasks/waitfor', label: 'WaitFor' }, { n: String(i) });
+            return r.recents().map((x) => x.values.n);
+        })"""
+    )
+    assert len(kept) == 20
+    assert kept[0] == "20" and kept[-1] == "1"  # newest first, the oldest dropped
+
+
+def test_a_recent_queued_is_queued_again_and_says_so(page, rig):
+    _, search = type_line(page, "clock start_timer lap")
+    search.press("Shift+Enter")
+    expect(palette(page)).to_have_count(0)
+
+    dialog = open_palette(page)
+    first = recent_rows(dialog).first
+    expect(first).to_contain_text("clock.start_timer")
+    expect(first.locator(".palette-tag")).to_have_text("Queued")
+    expect(dialog.locator(".palette-args")).to_contain_text("Enter to queue it again")
+    dialog.get_by_role("searchbox").press("Enter")
+
+    expect(palette(page)).to_have_count(0)
+    assert queued(rig) == [("clock.start_timer", {"name": "lap"})] * 2
+
+
+def test_a_failed_run_is_not_kept(page, rig):
+    dialog, search = type_line(page, "clock read_timer never")
+    search.press("Enter")
+    expect(dialog.locator(".form-error, .form-problem").first).to_be_visible()
+    page.errors = [e for e in page.errors if "500" not in e]
+    page.page.keyboard.press("Escape")
+
+    dialog = open_palette(page)
+
+    expect(dialog.locator(".palette-heading")).to_have_count(0)
+
+
+def test_typing_hides_the_recents(page, rig):
+    _, search = type_line(page, "wait 0 5")
+    search.press("Enter")
+    expect(palette(page)).to_have_count(0)
+    dialog = open_palette(page)
+    expect(recent_rows(dialog)).to_have_count(1)
+
+    dialog.get_by_role("searchbox").press_sequentially("clock")
+
+    expect(recent_rows(dialog)).to_have_count(0)
+    expect(dialog.locator(".palette-heading")).to_have_count(0)
+
+
+def test_a_recent_whose_item_is_gone_is_hidden(page, rig):
+    seed_recents(page, [{"id": "/tasks/retired", "label": "Retired", "values": {}, "at": 1}])
+
+    dialog = open_palette(page)
+
+    expect(dialog.locator(".palette-heading")).to_have_count(0)
+    # Hidden, not deleted: it comes back if the task does.
+    kept = page.page.evaluate("import('/ui/js/recents.js').then((r) => r.recents().length)")
+    assert kept == 1
+
+
+def test_a_recent_whose_inputs_no_longer_pass_goes_to_its_form(page, rig):
+    seed_recents(page, [{
+        "id": "/tasks/waitfor", "label": "WaitFor", "at": 1,
+        "values": {"hours": "soon", "minutes": "5", "seconds": "0"},
+    }])
+    dialog = open_palette(page)
+    expect(dialog.locator(".palette-arg-problem")).to_contain_text("no longer pass")
+
+    dialog.get_by_role("searchbox").press("Enter")
+
+    hours = field(dialog, "hours")
+    expect(hours.locator("input")).to_be_focused()
+    expect(hours.locator(".form-error")).to_be_visible()
+    assert queued(rig) == []

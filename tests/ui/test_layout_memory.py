@@ -137,3 +137,32 @@ def test_this_sessions_layout_wins_over_the_saved_one_on_a_reload(browser, tmp_p
     finally:
         context.close()
         rig.stop()
+
+
+def test_the_palettes_recent_runs_come_back_after_a_restart(browser, tmp_path):
+    first = Running(Rig, tmp_path)
+    context = new_window(browser)
+    try:
+        page = open_page(context, first).page
+        page.keyboard.press("Control+k")
+        search = page.get_by_role("searchbox", name="Search tasks, instruments and actions")
+        search.press_sequentially("wait 0 5")
+        expect(page.locator(".task-form-title")).to_have_text("WaitFor")
+        search.press("Enter")
+        expect(page.get_by_role("dialog", name="Command palette")).to_have_count(0)
+        wait_saved(first, lambda layout: [r["label"] for r in layout.get("recents", [])] == ["WaitFor"])
+    finally:
+        context.close()
+        first.stop()
+
+    second = Running(Rig, tmp_path, port=first.port)
+    context = new_window(browser)
+    try:
+        page = open_page(context, second).page
+        page.keyboard.press("Control+k")
+        recent = page.locator(".palette-recent").first
+        expect(recent).to_contain_text("WaitFor")
+        expect(recent).to_contain_text("hours=0, minutes=5")
+    finally:
+        context.close()
+        second.stop()

@@ -1,6 +1,6 @@
 // The layout that comes back on the next run: the plots (panels, axes, series),
-// the dock (its height, open tab, and whether it is collapsed) and the theme
-// chosen. The experiment keeps it in a file (core/layout.py), since the app's
+// the dock (its height, open tab, and whether it is collapsed), the theme
+// chosen, and the palette's recent runs (recents.js). The experiment keeps it in a file (core/layout.py), since the app's
 // window starts with nothing each run.
 //
 // Before the page first draws, whatever this session hasn't got is filled in from
@@ -9,7 +9,7 @@
 import { get } from "./api.js";
 import { has, load, onSave, save } from "./session.js";
 
-export const LAYOUT_KEYS = ["plots", "dock", "theme"];
+export const LAYOUT_KEYS = ["plots", "dock", "theme", "recents"];
 const SEND_AFTER = 500; // milliseconds after the last change
 const WAIT_AT_START = 1500; // at most, for the server's layout, before drawing anyway
 
