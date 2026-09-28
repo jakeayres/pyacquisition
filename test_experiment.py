@@ -3,9 +3,9 @@ import random
 import time
 from dataclasses import dataclass
 
-from pyacquisition import Experiment, Measurement, Task
+from pyacquisition import Experiment, Measurement, Task, Trace
 from pyacquisition.core.instrument import SoftwareInstrument, mark_command, mark_query
-from pyacquisition.instruments.software import Clock, RandomNumberGenerator, SignalGenerator
+from pyacquisition.instruments.software import Clock, RandomNumberGenerator, SignalGenerator, TraceGenerator
 from pyacquisition.tasks import PID, NewFile, WaitFor
 
 #
@@ -207,3 +207,18 @@ class MyExperiment(Experiment):
         self.add_measurement(Measurement('furnace_temperature', furnace.temperature))
         self.add_measurement(Measurement('furnace_power', lambda: pid.output))
         self.add_measurement(Measurement('furnace_setpoint', lambda: pid.setpoint))
+
+
+        #
+        #  Example: a trace (a whole spectrum at once)
+        #
+        #  A spectrum every second, saved beside the data file in a .h5, with where its
+        #  peak is as a column (spectrum_peak_x). + Add plot -> Trace: spectrum shows the
+        #  latest, and Map: spectrum all of them. Move the peak with Instruments ->
+        #  spectrometer -> set_centre (0 to 10), and watch both. "Acquire now" on the
+        #  trace panel, or the AcquireTrace task, takes one at once.
+        #
+
+        # spectrometer = TraceGenerator("spectrometer")
+        # self.add_instrument(spectrometer)
+        # self.add_trace(Trace("spectrum", spectrometer.get_spectrum, every_rows=1, reduce=["peak_x"]))
