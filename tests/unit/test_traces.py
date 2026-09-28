@@ -409,3 +409,319 @@ def test_the_generators_sweep_takes_its_time_and_can_be_stopped():
     assert generator.sweeps_stopped == 1
     generator.stop_sweep()  # none under way: not counted
     assert generator.sweeps_stopped == 1
+
+
+# ------------------------------------------------------------ row mode
+@pytest.mark.asyncio
+async def test_with_every_row_each_row_has_its_trace_and_its_mean(tmp_path):
+    experiment = rig(tmp_path, trace={"every_rows": 1, "reduce": {"mean": np.mean}})
+
+    await running(experiment, lambda e: asyncio.sleep(1.0), settle=0)
+
+    data = rows(tmp_path)
+    assert len(data) >= 15
+    assert data.spectrum_index.notna().all() and data.spectrum_mean.notna().all()
+    assert data.spectrum_index.astype(int).tolist() == list(range(len(data)))
+    traces = read_traces(tmp_path / "data" / "00.00 start.data")
+    means = np.mean(traces.channels["amplitude"], axis=1)
+    assert np.allclose(data.spectrum_mean.to_numpy(), means[: len(data)], rtol=1e-6)
+    # A fast trace keeps the rows at their period.
+    assert experiment._rack.loop_time < 0.08
+
+
+@pytest.mark.asyncio
+async def test_a_slow_trace_with_every_row_slows_the_rows_and_none_misses_it(tmp_path):
+    experiment = rig(tmp_path, trace={"every_rows": 1}, generator={"sweep_time": 0.2})
+
+    await running(experiment, lambda e: asyncio.sleep(1.5), settle=0.5)
+
+    data = rows(tmp_path)
+    assert data.spectrum_index.notna().all()
+    gaps = np.diff(data.time.to_numpy())
+    assert np.median(gaps) >= 0.19  # the rows wait for their traces
+    assert experiment._rack.loop_time >= 0.19
+
+
+@pytest.mark.asyncio
+async def test_every_fourth_row(tmp_path):
+    experiment = rig(tmp_path, trace={"every_rows": 4, "reduce": ["max"]})
+
+    await running(experiment, lambda e: asyncio.sleep(1.0), settle=0)
+
+    data = rows(tmp_path)
+    linked = data.index[data.spectrum_index.notna()].tolist()
+    assert linked == list(range(0, len(data), 4))
+    assert data.spectrum_max.notna().tolist() == data.spectrum_index.notna().tolist()
+
+
+@pytest.mark.asyncio
+async def test_a_row_mode_trace_that_fails_leaves_its_row_empty_and_the_next_tries(tmp_path, errors):
+    calls = {"n": 0}
+
+    class Glitching(Rig):
+        def setup(self):
+            super().setup()
+            trace = self.traces["spectrum"].trace
+            real = trace.phases["fetch"]
+
+            def fails_the_second():
+                calls["n"] += 1
+                if calls["n"] == 2:
+                    raise RuntimeError("a glitch")
+                return real()
+
+            trace.phases["fetch"] = fails_the_second
+
+    experiment = Glitching(root_path=str(tmp_path), data_path="data", api_server_port=free_port(),
+                           measurement_period=0.05, gui=False)
+    experiment.trace_options = {"every_rows": 4, "reduce": ["mean"]}
+
+    await running(experiment, lambda e: asyncio.sleep(1.0), settle=0)
+
+    data = rows(tmp_path)
+    linked = data.index[data.spectrum_index.notna()].tolist()
+    # Rows 0 and 4 due; 4 failed, so 5 tried again, then every fourth from there.
+    assert linked[:2] == [0, 5] and data.spectrum_mean[4] != data.spectrum_mean[4]
+    assert [e for e in errors if "a glitch" in e]
+
+
+# ------------------------------------------------------------ reductions
+class TwoChannels(SoftwareInstrument):
+    @mark_trace(channels=["X", "Y"])
+    def capture(self):
+        return TraceData({"X": [1.0, 3.0, 2.0], "Y": [4.0, 4.0, 1.0]}, x=(0.0, 2.0), x_unit="s", unit="V")
+
+    @mark_trace
+    def undeclared(self):
+        return self.capture()
+
+
+def reduce_now(trace):
+    source = trace_source.TraceSource(trace)
+    return source._reduce(trace.method())
+
+
+def test_the_built_in_reductions_of_one_channel():
+    generator = TraceGenerator("generator", noise=0.0, centre=4.0, points=101, start=0.0, stop=10.0)
+    trace = Trace("spectrum", generator.get_spectrum, reduce=list(trace_source.REDUCTIONS))
+
+    values = reduce_now(trace)
+
+    data = generator.get_spectrum()
+    amplitude = data.channels["amplitude"].astype(float)
+    assert trace.columns == ["spectrum_index"] + [f"spectrum_{r}" for r in trace_source.REDUCTIONS]
+    assert values["spectrum_mean"] == pytest.approx(amplitude.mean(), rel=1e-6)
+    assert values["spectrum_min"] == pytest.approx(amplitude.min())
+    assert values["spectrum_max"] == pytest.approx(1.0)
+    assert values["spectrum_sum"] == pytest.approx(amplitude.sum(), rel=1e-6)
+    assert values["spectrum_std"] == pytest.approx(amplitude.std(), rel=1e-5)
+    assert values["spectrum_peak_x"] == pytest.approx(4.0)
+    assert values["spectrum_integral"] == pytest.approx(np.trapezoid(amplitude, data.axis()), rel=1e-6)
+
+
+def test_reductions_of_several_channels_are_named_by_channel_with_their_units():
+    probe = TwoChannels("probe")
+    trace = Trace("capture", probe.capture, reduce=["max", "peak_x", "integral"])
+
+    values = reduce_now(trace)
+
+    assert trace.columns == [
+        "capture_index", "capture_X_max", "capture_Y_max", "capture_X_peak_x",
+        "capture_Y_peak_x", "capture_X_integral", "capture_Y_integral",
+    ]
+    assert values["capture_X_max"] == 3.0 and values["capture_Y_max"] == 4.0
+    assert values["capture_X_peak_x"] == 1.0 and values["capture_Y_peak_x"] == 0.0
+    assert values["capture_Y_integral"] == pytest.approx(np.trapezoid([4.0, 4.0, 1.0], [0.0, 1.0, 2.0]))
+    assert trace.column_units("V", "s") == {
+        "capture_X_max": "V", "capture_Y_max": "V", "capture_X_peak_x": "s", "capture_Y_peak_x": "s",
+    }
+    assert Trace("c", probe.capture, reduce=["max"], unit="mV", reduce_units={"max": "dB"}).column_units() == {
+        "c_X_max": "dB", "c_Y_max": "dB"}
+
+
+def test_a_function_reduces_each_channel_and_can_have_the_axis():
+    probe = TwoChannels("probe")
+
+    def centroid(values, x):
+        return float(np.sum(values * x) / np.sum(values))
+
+    trace = Trace("capture", probe.capture, reduce={"first": lambda values: values[0], "centroid": centroid})
+    values = reduce_now(trace)
+
+    assert values["capture_X_first"] == 1.0 and values["capture_Y_first"] == 4.0
+    assert values["capture_X_centroid"] == pytest.approx((0 * 1 + 1 * 3 + 2 * 2) / 6)
+
+
+def test_a_reduction_that_fails_is_empty_and_logged_once(errors):
+    probe = TwoChannels("probe")
+    trace = Trace("capture", probe.capture, reduce={"bad": lambda values: 1 / 0}, channels=["X"])
+    source = trace_source.TraceSource(trace)
+
+    first = source._reduce(probe.capture())
+    second = source._reduce(probe.capture())
+
+    assert math.isnan(first["capture_bad"]) and math.isnan(second["capture_bad"])
+    assert len([e for e in errors if "Reduction 'bad' failed" in e]) == 1
+
+
+def test_undeclared_channels_are_taken_as_one_and_the_first_is_reduced(monkeypatch):
+    warnings = []
+    monkeypatch.setattr(trace_source.logger, "warning", warnings.append)
+    probe = TwoChannels("probe")
+    trace = Trace("capture", probe.undeclared, reduce=["max"])
+
+    values = reduce_now(trace)
+
+    assert trace.columns == ["capture_index", "capture_max"]
+    assert values["capture_max"] == 3.0  # X's
+    assert len(warnings) == 1 and "none were declared" in warnings[0]
+
+
+def test_an_unknown_reduction_and_both_modes_are_refused():
+    generator = TraceGenerator("generator")
+
+    with pytest.raises(ValueError, match="no reduction called 'median'"):
+        Trace("s", generator.get_spectrum, reduce=["median"])
+    with pytest.raises(ValueError, match="not both"):
+        Trace("s", generator.get_spectrum, every=1, every_rows=1)
+    with pytest.raises(ValueError, match="whole number from 1"):
+        Trace("s", generator.get_spectrum, every_rows=0)
+
+
+@pytest.mark.asyncio
+async def test_an_occasional_traces_reduction_is_on_its_row_and_empty_on_the_others(tmp_path):
+    experiment = rig(tmp_path, trace={"reduce": ["peak_x"]})
+
+    async def script(experiment):
+        await experiment.traces["spectrum"].acquire()
+        await asyncio.sleep(0.3)
+
+    await running(experiment, script)
+
+    data = rows(tmp_path)
+    assert data.spectrum_peak_x.notna().tolist() == data.spectrum_index.notna().tolist()
+    assert data.spectrum_peak_x.dropna().iloc[0] == pytest.approx(5.0, abs=0.2)
+    history = experiment._history.current.columns
+    kept = [not math.isnan(v) for v in history["spectrum_peak_x"]]
+    assert kept == [not math.isnan(v) for v in history["spectrum_index"]] and sum(kept) == 1
+    peak = next(c for c in experiment._column_info() if c["name"] == "spectrum_peak_x")
+    assert peak == {"name": "spectrum_peak_x", "kind": "trace", "source": "spectrum", "unit": "Hz"}
+
+
+# ------------------------------------------------------------ TOML
+def toml_rig(tmp_path, traces, monkeypatch):
+    from pyacquisition.instruments import instrument_map
+
+    # Not offered in configs until the feature is shown (milestone 7).
+    monkeypatch.setitem(instrument_map, "TraceGenerator", TraceGenerator)
+    config = tmp_path / "rig.toml"
+    config.write_text(
+        f'[experiment]\nroot_path = "{tmp_path.as_posix()}"\n'
+        '[data]\npath = "data"\n[rack]\nperiod = 0.05\n'
+        '[instruments]\nclock = {instrument = "Clock"}\ngenerator = {instrument = "TraceGenerator"}\n'
+        '[measurements]\ntime = {instrument = "clock", method = "time"}\n'
+        f"[traces]\n{traces}\n",
+        encoding="utf-8",
+    )
+    return Experiment.from_config(str(config), gui=False, api_server_port=free_port())
+
+
+@pytest.mark.asyncio
+async def test_a_toml_trace_with_every_row_reduced_to_its_mean(tmp_path, monkeypatch):
+    experiment = toml_rig(tmp_path, 'spectrum = {instrument = "generator", method = "get_spectrum", '
+                                    'every_rows = 1, reduce = ["mean"], unit = "mV"}', monkeypatch)
+
+    await running(experiment, lambda e: asyncio.sleep(0.6), settle=0)
+
+    data = rows(tmp_path)
+    assert list(data.columns) == ["time", "spectrum_index", "spectrum_mean"]
+    assert data.spectrum_index.astype(int).tolist() == list(range(len(data)))
+    traces = read_traces(tmp_path / "data" / "00.00 start.data")
+    assert traces.unit == "mV"
+    assert np.allclose(data.spectrum_mean, np.mean(traces.channels["amplitude"], axis=1)[: len(data)], rtol=1e-6)
+
+
+def test_a_toml_trace_takes_the_methods_inputs_and_its_options(tmp_path, monkeypatch):
+    experiment = toml_rig(tmp_path, 'spectrum = {instrument = "generator", method = "get_spectrum", '
+                                    'every = 2, timeout = 5, channels = ["amplitude"]}', monkeypatch)
+
+    trace = experiment.traces["spectrum"].trace
+    assert (trace.every, trace.timeout, trace.channels, trace.source) == (
+        2, 5, ["amplitude"], "generator.get_spectrum")
+
+
+@pytest.mark.parametrize(
+    "entry, message",
+    [
+        ('{instrument = "generator", method = "get_centre"}', "'get_centre' isn't a trace of generator"),
+        ('{instrument = "generator", method = "get_spectrum", args = {colour = "red"}}', "'colour' isn't an input"),
+        ('{instrument = "nothing", method = "get_spectrum"}', "no instrument 'nothing'"),
+        ('{instrument = "generator", method = "get_spectrum", reduce = ["median"]}', "no reduction 'median'"),
+        ('{instrument = "generator", method = "get_spectrum", every = 1, every_rows = 1}', "not both"),
+        ('{instrument = "generator", method = "get_spectrum", period = 1}', "'period', which a trace doesn't take"),
+        ('{instrument = "generator"}', "needs `method`"),
+        ('{instrument = "generator", method = "get_spectrum", every = 0}', "`every` must be"),
+    ],
+)
+def test_a_bad_toml_trace_stops_it_naming_the_entry(tmp_path, monkeypatch, entry, message):
+    with pytest.raises(Exception, match=message) as error:
+        toml_rig(tmp_path, f"spectrum = {entry}", monkeypatch)
+    assert "spectrum" in str(error.value)
+
+
+# ------------------------------------------------------------ the task
+@pytest.mark.asyncio
+async def test_acquire_trace_between_setpoints_takes_one_per_step_with_its_row(tmp_path):
+    from pyacquisition.core.task_manager.instrument_call import InstrumentCall
+    from pyacquisition.tasks.traces import AcquireTrace
+    from pyacquisition.tasks import WaitFor
+
+    class SweepRig(Rig):
+        def setup(self):
+            super().setup()
+            self.add_measurement(Measurement("centre", self.generator.get_centre))
+
+    experiment = SweepRig(root_path=str(tmp_path), data_path="data", api_server_port=free_port(),
+                          measurement_period=0.05, gui=False)
+    experiment.generator_options = {"noise": 0.0}
+
+    async def script(experiment):
+        manager = experiment._task_managers["main"]
+        for centre in (3.0, 6.0):
+            manager.add_task(InstrumentCall(instrument="generator", method="set_centre", arguments={"centre": centre}))
+            manager.add_task(WaitFor(seconds=1))  # the row sees the new setpoint
+            manager.add_task(AcquireTrace(trace="spectrum"))
+        await until(lambda: experiment._trace_scribe.written == 2, timeout=20)
+
+    await running(experiment, script)
+
+    traces = read_traces(tmp_path / "data" / "00.00 start.data")
+    assert traces.info["row.centre"].tolist() == [3.0, 6.0]
+    peaks = traces.x[np.argmax(traces.channels["amplitude"], axis=1)]
+    assert peaks.tolist() == pytest.approx([3.0, 6.0], abs=0.05)
+
+
+def test_acquire_trace_is_registered_only_with_traces_and_names_the_one(tmp_path):
+    from fastapi.testclient import TestClient
+
+    lone = rig(tmp_path / "one")
+    lone.setup()
+    lone._register_trace_tasks()
+    paths = TestClient(lone._api_server.app).get("/openapi.json").json()["paths"]
+    assert paths["/tasks/acquiretrace"]["get"].get("parameters", []) == []  # its one trace, filled in
+
+    class TwoTraces(Rig):
+        def setup(self):
+            super().setup()
+            self.add_trace(Trace("again", self.generator.get_spectrum))
+
+    both = TwoTraces(root_path=str(tmp_path / "two"), gui=False)
+    both.setup()
+    both._register_trace_tasks()
+    (name,) = TestClient(both._api_server.app).get("/openapi.json").json()["paths"]["/tasks/acquiretrace"]["get"]["parameters"]
+    assert name["name"] == "trace"
+    assert name["schema"]["enum"] == ["spectrum", "again"]
+
+    none = Experiment(root_path=str(tmp_path / "none"), gui=False)
+    none._register_trace_tasks()
+    assert "/tasks/acquiretrace" not in TestClient(none._api_server.app).get("/openapi.json").json()["paths"]

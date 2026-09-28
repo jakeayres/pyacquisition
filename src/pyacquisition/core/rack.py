@@ -36,9 +36,11 @@ class Rack(Broadcaster):
         Returns:
             dict: A dictionary of results from the measurements.
         """
-        result = {k: v.run() for k, v in self.measurements.items()}
+        measured = {k: v.run() for k, v in self.measurements.items()}
+        result = dict(measured)
+        # A trace taken with the rows is taken now, and the row waits for it.
         for source in self.trace_sources:
-            result.update(source.row_columns(result))
+            result.update(await source.row_columns(measured))
         await self.broadcast(result)
 
     async def setup(self):

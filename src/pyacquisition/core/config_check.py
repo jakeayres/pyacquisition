@@ -14,7 +14,7 @@ from enum import Enum
 from ..instruments import instrument_map
 from . import calculations, settings
 from .adapters import ADAPTERS
-from .config_parser import ConfigParser
+from .config_parser import ConfigParser, trace_problem
 from .instrument import SoftwareInstrument, enum_classes, resolve_enum_kwargs
 
 # The keys an entry of each section can have.
@@ -66,6 +66,7 @@ def problems(config) -> list[Problem]:
             list(measured) if isinstance(measured, dict) else [],
         )
     ]
+    found += _trace_problems(config.get("traces", {}), config.get("instruments", {}))
     return found
 
 
@@ -284,10 +285,13 @@ def _method_problems(name: str, entry: dict, cls) -> list[Problem]:
     return _argument_problems(name, found[method], args)
 
 
-def _argument_problems(name: str, function, args: dict) -> list[Problem]:
-    """Whether `args` bind to a query's signature (without `self`), with enum
+def _argument_problems(
+    name: str, function, args: dict, section: str = "measurements"
+) -> list[Problem]:
+    """Whether `args` bind to a method's signature (without `self`), with enum
     text resolved and the simple types checked, from the class alone."""
-    where = ("measurements", name, "args")
+    where = (section, name, "args")
+    what = {"measurements": "Measurement", "traces": "Trace"}[section]
     parameters = list(inspect.signature(function).parameters.values())[1:]
     try:
         hints = typing.get_type_hints(function)
@@ -300,7 +304,7 @@ def _argument_problems(name: str, function, args: dict) -> list[Problem]:
             found.append(
                 Problem(
                     (*where, key),
-                    f"Measurement '{name}': {function.__name__} takes no `{key}`"
+                    f"{what} '{name}': {function.__name__} takes no `{key}`"
                     + (f". It takes {', '.join(sorted(known))}." if known else "."),
                 )
             )
@@ -313,7 +317,7 @@ def _argument_problems(name: str, function, args: dict) -> list[Problem]:
                 found.append(
                     Problem(
                         (*where, parameter.name),
-                        f"Measurement '{name}': {function.__name__} needs "
+                        f"{what} '{name}': {function.__name__} needs "
                         f"`{parameter.name}`.",
                     )
                 )
@@ -322,7 +326,38 @@ def _argument_problems(name: str, function, args: dict) -> list[Problem]:
         annotation = hints.get(parameter.name, parameter.annotation)
         problem = _value_problem(function, parameter.name, annotation, value)
         if problem:
-            found.append(Problem((*where, parameter.name), f"Measurement '{name}': {problem}"))
+            found.append(Problem((*where, parameter.name), f"{what} '{name}': {problem}"))
+    return found
+
+
+# ---------------------------------------------------------------- traces
+def _trace_problems(traces, instruments) -> list[Problem]:
+    if not isinstance(traces, dict):
+        return [Problem(("traces",), "[traces] must be a table.")]
+    if not isinstance(instruments, dict):
+        instruments = {}
+    found = []
+    for name, entry in traces.items():
+        where = ("traces", name)
+        problem = trace_problem(name, entry, instruments)
+        if problem:
+            found.append(Problem(where, problem))
+            continue
+        driver = instruments[entry["instrument"]]
+        cls = instrument_map.get(driver.get("instrument")) if isinstance(driver, dict) else None
+        if cls is None:
+            continue  # the instrument's own problem says why
+        methods = {trace.__name__: trace for trace in cls._traces}
+        if entry["method"] not in methods:
+            found.append(
+                Problem(
+                    (*where, "method"),
+                    f"Trace '{name}': {cls.__name__} has no trace {entry['method']!r}. "
+                    f"Its traces are {', '.join(sorted(methods)) or 'none'}.",
+                )
+            )
+            continue
+        found += _argument_problems(name, methods[entry["method"]], entry.get("args", {}), "traces")
     return found
 
 

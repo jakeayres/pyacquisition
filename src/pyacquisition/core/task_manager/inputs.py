@@ -10,6 +10,8 @@ values make sense, the choices.
   labels an interface shows (`x-labels`). Other spellings are still accepted.
 - An input that names an instrument (a task's `applies_to`) lists the ids of the
   experiment's instruments of that kind as its choices.
+- A task can offer other choices from the experiment with `input_choices`:
+  `{input name: function of the experiment giving the choices}`.
 """
 
 import re
@@ -97,6 +99,7 @@ def input_parameters(cls, experiment, fixed_kwargs: dict) -> tuple[list, dict]:
     docs = attribute_docs(cls)
     applies_to = getattr(cls, "applies_to", None) or {}
     instruments = getattr(experiment, "instruments", {}) or {}
+    input_choices = getattr(cls, "input_choices", None) or {}
 
     required, optional, annotations = [], [], {}
     for field in fields(cls):
@@ -118,6 +121,10 @@ def input_parameters(cls, experiment, fixed_kwargs: dict) -> tuple[list, dict]:
             ]
             if ids:
                 extra["enum"] = ids
+        if field.name in input_choices:
+            choices = list(input_choices[field.name](experiment))
+            if choices:
+                extra["enum"] = choices
 
         default = Parameter.empty
         if field.default is not MISSING:

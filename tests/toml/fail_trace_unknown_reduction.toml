@@ -1,0 +1,7 @@
+[instruments]
+generator = {instrument = "Clock"}
+
+[traces.spectrum]
+instrument = "generator"
+method = "get_spectrum"
+reduce = ["median"]

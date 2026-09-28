@@ -162,7 +162,7 @@ def mark_command(func):
     return func
 
 
-def mark_trace(func=None, *, start=None, ready=None, stop=None, timeout=None):
+def mark_trace(func=None, *, start=None, ready=None, stop=None, timeout=None, channels=None):
     """Marks a method that returns a trace, a `TraceData` (see core/trace.py).
 
     Use it bare, `@mark_trace`, for a trace that is fetched at once, or name the
@@ -176,6 +176,11 @@ def mark_trace(func=None, *, start=None, ready=None, stop=None, timeout=None):
     aborted task, the experiment stopping) or takes longer than `timeout`
     seconds, `stop` is called, so the instrument isn't left acquiring.
 
+    `channels` names the channels its traces have, so that their columns (a
+    reduction's, see `Trace`) are known before the first is taken: a list, or
+    the name of a method that gives it, for channels that depend on a setting.
+    Without it, a trace is taken to have one channel.
+
     A trace method isn't an instrument endpoint: it is taken through the trace's
     own (`/traces/...`).
     """
@@ -184,6 +189,7 @@ def mark_trace(func=None, *, start=None, ready=None, stop=None, timeout=None):
         method._is_trace = True
         method._trace_phases = {"start": start, "ready": ready, "stop": stop}
         method._trace_timeout = timeout
+        method._trace_channels = channels
         return method
 
     return mark(func) if func is not None else mark

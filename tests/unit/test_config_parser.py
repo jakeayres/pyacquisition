@@ -1,4 +1,4 @@
-from pyacquisition.core.config_parser import ConfigParser, InvalidCalculationError
+from pyacquisition.core.config_parser import ConfigParser, InvalidCalculationError, InvalidTraceError
 import pytest
 import tomllib
 import os
@@ -297,3 +297,51 @@ def test_every_problem_is_found_with_where_it_is():
         ("s", "inputs"),
         ("m", "window"),
     ]
+
+
+# -------------------------------------------------------------------- [traces]
+def test_an_unknown_reduction_is_refused(load_toml_file):
+    config = load_toml_file("fail_trace_unknown_reduction.toml")
+
+    with pytest.raises(InvalidTraceError, match="Trace 'spectrum': there is no reduction 'median'"):
+        ConfigParser.validate(config)
+
+
+def with_traces(traces):
+    return {"instruments": {"vna": {"instrument": "Clock"}}, "traces": traces}
+
+
+SWEEP = {"instrument": "vna", "method": "get_sweep"}
+
+
+def test_a_traces_section_is_valid():
+    entry = {**SWEEP, "every_rows": 10, "reduce": ["mean", "peak_x"], "reduce_units": {"mean": "V"},
+             "x_unit": "Hz", "args": {"points": 256}}
+    config = with_traces({"sweep": entry})
+
+    assert ConfigParser.validate(config) is config
+
+
+@pytest.mark.parametrize(
+    "entry, message",
+    [
+        ("vna.get_sweep", "must be a table"),
+        ({"method": "get_sweep"}, "needs `instrument`"),
+        ({"instrument": "vna"}, "needs `method`"),
+        ({**SWEEP, "instrument": "sa"}, "there is no instrument 'sa'"),
+        ({**SWEEP, "colour": "red"}, "has 'colour', which a trace doesn't take"),
+        ({**SWEEP, "every": 0}, "`every` must be a number of seconds above 0"),
+        ({**SWEEP, "timeout": "long"}, "`timeout` must be a number of seconds above 0"),
+        ({**SWEEP, "every_rows": 0}, "`every_rows` must be a whole number from 1"),
+        ({**SWEEP, "every_rows": 2.5}, "`every_rows` must be a whole number from 1"),
+        ({**SWEEP, "every": 5, "every_rows": 2}, "not both"),
+        ({**SWEEP, "unit": 1}, "`unit` must be text"),
+        ({**SWEEP, "args": [1]}, "`args` must be a table"),
+        ({**SWEEP, "reduce": "mean"}, "`reduce` must be a list"),
+        ({**SWEEP, "reduce_units": {"mean": 1}}, "`reduce_units` must be a table of units"),
+        ({**SWEEP, "channels": []}, "`channels` must be a list of names"),
+    ],
+)
+def test_a_trace_that_cant_be_taken_is_refused(entry, message):
+    with pytest.raises(InvalidTraceError, match=re.escape(message)):
+        ConfigParser.validate(with_traces({"sweep": entry}))

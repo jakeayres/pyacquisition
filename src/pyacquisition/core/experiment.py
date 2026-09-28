@@ -32,9 +32,10 @@ from ..gui import Gui
 from ..gui import mount as serve_gui
 from ..instruments import instrument_map
 from ..tasks import instrument_tasks, standard_tasks
+from ..tasks.traces import AcquireTrace
 from .measurement import Measurement
 from .instrument import Instrument, SoftwareInstrument, resolve_enum_kwargs
-from .config_parser import ConfigParser
+from .config_parser import ConfigParser, InvalidTraceError
 from . import settings
 
 # Seconds that the GUI's window is given to close by itself, once the
@@ -318,10 +319,11 @@ class Experiment:
             cls._configure_instruments(experiment, config)
             cls._configure_measurements(experiment, config)
             cls._configure_calculations(experiment, config)
+            cls._configure_traces(experiment, config)
             return experiment
         except Exception as e:
             raise ValueError(
-                f"Failed to configure instruments, measurements or calculations: {e}"
+                f"Failed to configure instruments, measurements, calculations or traces: {e}"
             )
 
     @classmethod
@@ -449,6 +451,39 @@ class Experiment:
             logger.debug(f"Configuring calculation '{name}'")
             experiment.add_calculation(calculation)
             columns.add(name)
+
+    @classmethod
+    def _configure_traces(cls, experiment: "Experiment", config: dict) -> None:
+        """
+        Adds the traces the configuration describes (already checked). One whose
+        instrument couldn't be configured is left out with a warning, as its
+        measurements are. One whose method isn't a trace method, or that gives
+        an input its method doesn't take, stops the experiment with the reason.
+
+        Args:
+            experiment (Experiment): The Experiment instance.
+            config (dict): The parsed TOML configuration.
+        """
+        for name, entry in config.get("traces", {}).items():
+            instrument = experiment.instruments.get(entry["instrument"])
+            if instrument is None:
+                logger.warning(f"Trace '{name}' is left out, as its instrument '{entry['instrument']}' isn't there.")
+                continue
+            method = instrument.traces.get(entry["method"])
+            if method is None:
+                traces = ", ".join(instrument.traces) or "none"
+                raise InvalidTraceError(
+                    f"Trace '{name}': '{entry['method']}' isn't a trace of {entry['instrument']} "
+                    f"({instrument.name}). Its traces are: {traces}."
+                )
+            options = {k: entry[k] for k in ("every", "every_rows", "unit", "x_unit", "reduce",
+                                             "reduce_units", "channels", "timeout") if k in entry}
+            try:
+                trace = Trace(name, method, **options, **entry.get("args", {}))
+                experiment.add_trace(trace)
+            except (TypeError, ValueError) as error:
+                raise InvalidTraceError(str(error)) from error
+            logger.debug(f"Configuring trace '{name}'")
 
     @staticmethod
     def _resolve_method_args(method, args: dict):
@@ -619,9 +654,9 @@ class Experiment:
         taken = {
             *self._rack.measurements,
             *self._calculations.known_columns,
-            *(name for source in self._traces.values() for name in (source.name, source.trace.index_column)),
+            *(name for source in self._traces.values() for name in (source.name, *source.trace.columns)),
         }
-        for name in (trace.name, trace.index_column):
+        for name in (trace.name, *trace.columns):
             if name in taken:
                 raise ValueError(f"Trace {trace.name!r}: the name {name!r} is taken already.")
         source = TraceSource(
@@ -803,6 +838,7 @@ class Experiment:
             self.setup()
             self._register_instrument_tasks()
             self._register_instrument_calls()
+            self._register_trace_tasks()
             self._started = True
             try:
                 if self._adopted_ui_process is not None:
@@ -969,6 +1005,17 @@ class Experiment:
 
         logger.info("Experiment ended")
 
+    def _register_trace_tasks(self) -> None:
+        """
+        Registers `AcquireTrace` when the experiment has traces, once `setup()`
+        has added them. With one trace, its name is filled in, so the form
+        asks nothing. A registration of the user's own is left as it is.
+        """
+        if not self._traces or AcquireTrace in self._registered_tasks:
+            return
+        fixed = {"trace": next(iter(self._traces))} if len(self._traces) == 1 else {}
+        self.register_task(AcquireTrace, **fixed)
+
     def _register_instrument_calls(self) -> None:
         """
         Lets every query and command of every instrument be queued on every task
@@ -1077,10 +1124,15 @@ class Experiment:
             for name in self._calculations.known_columns
             if name not in measured
         ]
-        columns += [
-            {"name": source.trace.index_column, "kind": "trace", "source": source.name, "unit": None}
-            for source in self._traces.values()
-        ]
+        for source in self._traces.values():
+            latest = source.latest.data if source.latest else None
+            units = source.trace.column_units(
+                latest.unit if latest else None, latest.x_unit if latest else None
+            )
+            columns += [
+                {"name": name, "kind": "trace", "source": source.name, "unit": units.get(name)}
+                for name in source.trace.columns
+            ]
         return columns
 
     def _register_endpoints(self, api_server):

@@ -238,3 +238,51 @@ def test_a_problem_is_json_for_the_page():
         "where": ["rack", "period"],
         "message": "no",
     }
+
+
+# ------------------------------------------------------------------ traces
+@pytest.fixture
+def generator(monkeypatch):
+    """TraceGenerator as a driver (it joins the map when traces are shown)."""
+    from pyacquisition.instruments import instrument_map
+    from pyacquisition.instruments.software.trace_generator import TraceGenerator
+
+    monkeypatch.setitem(instrument_map, "TraceGenerator", TraceGenerator)
+    return {"gen": {"instrument": "TraceGenerator"}}
+
+
+def tracing(entry, instruments):
+    return {"instruments": instruments, "traces": {"spectrum": entry}}
+
+
+def test_a_trace_of_a_driver_has_no_problems(generator):
+    entry = {"instrument": "gen", "method": "get_spectrum", "every_rows": 5, "reduce": ["mean"]}
+
+    assert problems(tracing(entry, generator)) == []
+
+
+@pytest.mark.parametrize(
+    "entry, place, message",
+    [
+        ({"instrument": "gen", "method": "get_centre"}, ("method",),
+         "TraceGenerator has no trace 'get_centre'. Its traces are get_spectrum."),
+        ({"instrument": "gen", "method": "get_spectrum", "args": {"colour": 1}}, ("args", "colour"),
+         "get_spectrum takes no `colour`"),
+        ({"instrument": "gen", "method": "get_spectrum", "reduce": ["median"]}, (),
+         "there is no reduction 'median'"),
+        ({"instrument": "vna", "method": "get_spectrum"}, (), "there is no instrument 'vna'"),
+    ],
+)
+def test_a_trace_problem_is_placed_in_its_section(generator, entry, place, message):
+    (problem,) = problems(tracing(entry, generator))
+
+    assert problem.where == ("traces", "spectrum", *place)
+    assert message in problem.message
+    assert problem.message.startswith("Trace 'spectrum'")
+
+
+def test_a_trace_of_a_clock_is_a_problem():
+    (problem,) = problems(tracing({"instrument": "clock", "method": "time"}, CLOCK))
+
+    assert problem.where == ("traces", "spectrum", "method")
+    assert "Its traces are none" in problem.message

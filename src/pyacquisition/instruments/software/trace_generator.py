@@ -72,9 +72,11 @@ class TraceGenerator(SoftwareInstrument):
             self.sweeps_stopped += 1
         self._started = None
 
-    @mark_trace(start="start_sweep", ready="sweep_done", stop="stop_sweep", timeout=60)
+    @mark_trace(
+        start="start_sweep", ready="sweep_done", stop="stop_sweep", timeout=60, channels=["amplitude"]
+    )
     def get_spectrum(self) -> TraceData:
-        """The spectrum: the peak, with noise, in dB over the frequency axis."""
+        """The spectrum: the peak, with noise, in V over the frequency axis (Hz)."""
         self._started = None
         x = np.linspace(self._start, self._stop, self._points)
         peak = 1.0 / (1.0 + ((x - self._centre) / self._width) ** 2)

@@ -34,6 +34,69 @@ class InvalidCalculationError(Exception):
     pass
 
 
+class InvalidTraceError(Exception):
+    """A config's [traces] section describes a trace that can't be taken."""
+
+    pass
+
+
+# What an entry of [traces] may say.
+TRACE_KEYS = {
+    "instrument", "method", "every", "every_rows", "args", "unit", "x_unit",
+    "reduce", "reduce_units", "channels", "timeout",
+}
+
+
+def _positive(value) -> bool:
+    return not isinstance(value, bool) and isinstance(value, (int, float)) and value > 0
+
+
+def trace_problem(name: str, entry, instruments: dict) -> str | None:
+    """What is wrong with an entry of [traces], or None."""
+    from .trace_source import REDUCTIONS
+
+    where = f"Trace '{name}'"
+    if not isinstance(entry, dict):
+        return f"{where} must be a table, such as {{instrument = \"vna\", method = \"get_sweep\"}}."
+    unknown = sorted(set(entry) - TRACE_KEYS)
+    if unknown:
+        return f"{where} has {', '.join(map(repr, unknown))}, which a trace doesn't take."
+    for key in ("instrument", "method"):
+        if not isinstance(entry.get(key), str):
+            return f"{where} needs `{key}`, as text."
+    if entry["instrument"] not in instruments:
+        return f"{where}: there is no instrument '{entry['instrument']}' in [instruments]."
+    for key in ("every", "timeout"):
+        if key in entry and not _positive(entry[key]):
+            return f"{where}: `{key}` must be a number of seconds above 0."
+    if "every_rows" in entry and (isinstance(entry["every_rows"], bool) or not isinstance(entry["every_rows"], int)
+                                  or entry["every_rows"] < 1):
+        return f"{where}: `every_rows` must be a whole number from 1."
+    if "every" in entry and "every_rows" in entry:
+        return f"{where}: give `every` or `every_rows`, not both."
+    for key in ("unit", "x_unit"):
+        if key in entry and not isinstance(entry[key], str):
+            return f"{where}: `{key}` must be text, such as \"Hz\"."
+    if "args" in entry and not isinstance(entry["args"], dict):
+        return f"{where}: `args` must be a table of the method's inputs."
+    if "reduce" in entry:
+        reduce = entry["reduce"]
+        if not isinstance(reduce, list) or not all(isinstance(r, str) for r in reduce):
+            return f"{where}: `reduce` must be a list of reductions, such as [\"mean\", \"peak_x\"]."
+        unknown = [r for r in reduce if r not in REDUCTIONS]
+        if unknown:
+            return f"{where}: there is no reduction {', '.join(map(repr, unknown))}; there are {', '.join(REDUCTIONS)}."
+    if "reduce_units" in entry and not (
+        isinstance(entry["reduce_units"], dict) and all(isinstance(u, str) for u in entry["reduce_units"].values())
+    ):
+        return f"{where}: `reduce_units` must be a table of units, such as {{mean = \"dB\"}}."
+    if "channels" in entry and not (
+        isinstance(entry["channels"], list) and entry["channels"] and all(isinstance(c, str) for c in entry["channels"])
+    ):
+        return f"{where}: `channels` must be a list of names."
+    return None
+
+
 class ConfigParser:
     ALLOWED_SECTIONS = [
         "experiment",
@@ -41,6 +104,7 @@ class ConfigParser:
         "instruments",
         "measurements",
         "calculations",
+        "traces",
         "data",
         "api_server",
         "logging",
@@ -118,6 +182,10 @@ class ConfigParser:
             )
         except ValueError as e:
             raise InvalidCalculationError(str(e)) from e
+        for name, entry in config.get("traces", {}).items():
+            problem = trace_problem(name, entry, config.get("instruments", {}))
+            if problem:
+                raise InvalidTraceError(problem)
         return config
 
     @staticmethod

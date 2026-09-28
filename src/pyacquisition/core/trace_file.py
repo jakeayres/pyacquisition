@@ -62,6 +62,8 @@ class TraceRecord:
             (Unix seconds).
         rows_start, rows: The rows the scribe had written to the data file then.
         row_start, row: The latest row's numeric values then, by column.
+        columns: The columns it puts on its row, beside its index: its
+            reductions, by column. They aren't written to the trace file.
     """
 
     name: str
@@ -74,6 +76,7 @@ class TraceRecord:
     rows: int = 0
     row_start: dict = field(default_factory=dict)
     row: dict = field(default_factory=dict)
+    columns: dict = field(default_factory=dict)
 
     @property
     def nbytes(self) -> int:
