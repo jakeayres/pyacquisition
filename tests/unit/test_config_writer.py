@@ -63,8 +63,9 @@ def changed(**sections) -> dict:
         RIG.replace("\n", "\r\n"),
         (EXAMPLES / "front_page.toml").read_text(encoding="utf-8"),
         (EXAMPLES / "calculations.toml").read_text(encoding="utf-8"),
+        (EXAMPLES / "traces.toml").read_text(encoding="utf-8"),
     ],
-    ids=["rig", "rig with CRLF", "front_page", "calculations"],
+    ids=["rig", "rig with CRLF", "front_page", "calculations", "traces"],
 )
 def test_nothing_changed_keeps_the_file_byte_for_byte(text):
     assert render(config(text), text) == text
@@ -316,3 +317,13 @@ def test_same_minds_types_and_order():
     assert not same({"a": 1, "b": 2}, {"b": 2, "a": 1})
     assert not same({"a": 1}, {"a": 1.0})
     assert not same({"a": True}, {"a": 1})
+
+
+def test_a_traces_section_the_page_has_no_form_for_stays_as_it_is():
+    text = (EXAMPLES / "traces.toml").read_text(encoding="utf-8")
+    new = config(text)
+    new["rack"] = {"period": 0.5}
+
+    result = render(new, text)
+
+    assert result.startswith(text) and tomllib.loads(result)["traces"] == config(text)["traces"]

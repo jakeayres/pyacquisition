@@ -1,0 +1,12 @@
+[instruments]
+clock = {instrument = "Clock"}
+generator = {instrument = "TraceGenerator"}
+
+[measurements]
+time = {instrument = "clock", method = "time"}
+
+[traces.spectrum]
+instrument = "generator"
+method = "get_spectrum"
+every = 5
+reduce = ["peak_x"]

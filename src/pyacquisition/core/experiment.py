@@ -73,6 +73,14 @@ class Experiment:
         history_points (int): The most rows kept in memory for the GUI (the
             current data file and the one before it), from 100 to 100,000,000. Each
             numeric column takes 8 bytes a row. Defaults to 500,000.
+        trace_history_mb (float): The most memory, in megabytes, that the recent
+            traces kept for the GUI's trace and map panels may take. Defaults to 64.
+        trace_file_mb (float): The size, in megabytes, past which a data file's
+            traces go on in a new part of its trace file. Defaults to 500.
+        trace_pending_mb (float): The most memory, in megabytes, that traces
+            waiting to be written may take while their file can't be written
+            (another program has it open); past it, the oldest are dropped.
+            Defaults to 256.
         log_path (str): The folder for the log file, inside `root_path`. Defaults to "logs".
         log_file_name (str): The name of the log file. Defaults to "debug.log".
         console_log_level (str): The logging level for console output. Defaults to "DEBUG".
@@ -104,6 +112,9 @@ class Experiment:
         data_file_extension: str | None = None,
         data_delimiter: str | None = None,
         history_points: int | None = None,
+        trace_history_mb: float | None = None,
+        trace_file_mb: float | None = None,
+        trace_pending_mb: float | None = None,
         log_path: str | None = None,
         console_log_level: str | None = None,
         file_log_level: str | None = None,
@@ -133,6 +144,9 @@ class Experiment:
                 "data_file_extension": data_file_extension,
                 "data_delimiter": data_delimiter,
                 "history_points": history_points,
+                "trace_history_mb": trace_history_mb,
+                "trace_file_mb": trace_file_mb,
+                "trace_pending_mb": trace_pending_mb,
                 "log_path": log_path,
                 "console_log_level": console_log_level,
                 "file_log_level": file_log_level,
@@ -217,9 +231,13 @@ class Experiment:
         # Traces: each one's source, by name, and what writes them beside the
         # data files (see add_trace).
         self._traces: dict[str, TraceSource] = {}
-        self._trace_scribe = TraceScribe(self._data_path)
+        self._trace_scribe = TraceScribe(
+            self._data_path,
+            file_mb=options["trace_file_mb"],
+            pending_mb=options["trace_pending_mb"],
+        )
         # The recent traces, thinned for the GUI, and streamed as the rows are.
-        self._trace_history = TraceHistory()
+        self._trace_history = TraceHistory(budget_mb=options["trace_history_mb"])
         self._scribe.add_file_listener(self._trace_history.new_file)
 
         # History's events (and the log's) are made to be JSON, so sent as they are.

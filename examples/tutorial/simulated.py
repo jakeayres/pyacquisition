@@ -4,6 +4,7 @@
 as a Lakeshore 350 temperature controller and an SR 830 lock-in amplifier, so
 that the tutorial can be followed without any hardware, and so that swapping
 in the real instruments later changes nothing else in your experiment.
+`SimulatedSpectrometer` takes a spectrum of the sample, for the page on traces.
 
 You do not need to read this file to follow the tutorial.
 """
@@ -12,10 +13,13 @@ import math
 import random
 import time
 
+import numpy as np
+from pyacquisition import TraceData
 from pyacquisition.core.instrument import (
     SoftwareInstrument,
     mark_command,
     mark_query,
+    mark_trace,
 )
 from pyacquisition.instruments.lakeshore.lakeshore_350 import (
     InputChannel,
@@ -154,3 +158,55 @@ class SimulatedLockin(SoftwareInstrument):
         """Set the excitation amplitude, in volts. The signal scales with it."""
         self._amplitude = amplitude
         return 0
+
+
+class SimulatedSpectrometer(SoftwareInstrument):
+    """A simulated spectrometer, measuring the sample's spectrum.
+
+    The sample has one resonance, which moves up in frequency and broadens as
+    it warms. A sweep takes `sweep_time` seconds, as a real one does.
+    """
+
+    name = "Simulated Spectrometer"
+
+    def __init__(self, uid, cryostat, points=2048, sweep_time=1.0):
+        super().__init__(uid)
+        self._cryostat = cryostat
+        self._points = points
+        self._sweep_time = sweep_time
+        self._started = None
+
+    def start_sweep(self):
+        """Start a sweep."""
+        self._started = time.monotonic()
+
+    def sweep_done(self):
+        """Whether the sweep has finished."""
+        return time.monotonic() - self._started >= self._sweep_time
+
+    def stop_sweep(self):
+        """Stop a sweep part way."""
+        self._started = None
+
+    @mark_trace(
+        start="start_sweep",
+        ready="sweep_done",
+        stop="stop_sweep",
+        timeout=30,
+        channels=["intensity"],
+    )
+    def get_spectrum(self) -> TraceData:
+        """Read the spectrum, from 100 to 300 GHz."""
+        kelvin = self._cryostat.get_temperature(InputChannel.INPUT_A)
+        centre = 150.0 + 4.0 * kelvin  # GHz
+        width = 4.0 + 0.3 * kelvin
+        frequency = np.linspace(100.0, 300.0, self._points)
+        peak = 1.0 / (1.0 + ((frequency - centre) / width) ** 2)
+        noise = np.random.normal(0.0, 0.02, self._points)
+        return TraceData(
+            {"intensity": peak + noise},
+            x=(100.0, 300.0),
+            x_name="frequency",
+            x_unit="GHz",
+            unit="V",
+        )

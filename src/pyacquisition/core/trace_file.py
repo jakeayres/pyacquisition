@@ -314,7 +314,7 @@ def _pad(arrays: list, width: int) -> np.ndarray:
     return np.concatenate(rows) if rows else np.empty((0, width))
 
 
-def read_traces(path, name: str | None = None) -> Traces:
+def read_traces(path: str | Path, name: str | None = None) -> Traces:
     """Reads a data file's traces of one name, from its trace file and all its
     parts, in order.
 

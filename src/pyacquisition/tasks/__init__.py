@@ -1,6 +1,7 @@
 from .wait import WaitFor, WaitUntil
 from .files import NewFile
 from .measurements import PauseMeasurements, ResumeMeasurements, SetMeasurementPeriod
+from .traces import AcquireTrace as AcquireTrace
 from .ramp_temperature import RampTemperature as RampTemperature
 from .field_sweep import RampMagnet as RampMagnet
 from .field_sweep import RampMagnetToZero as RampMagnetToZero

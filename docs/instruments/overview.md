@@ -56,6 +56,8 @@ A **hardware** instrument takes an id and an address. A **software** instrument 
     Random numbers from common probability distributions.
 -   [**SignalGenerator**](signal_generator.md)  
     Software waveform generator.
+-   [**TraceGenerator**](trace_generator.md)  
+    Simulated spectrum, to try traces without hardware.
 
 </div>
 

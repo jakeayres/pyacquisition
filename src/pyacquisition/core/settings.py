@@ -99,6 +99,17 @@ def _history_points(name, value):
     return _count(name, value, minimum=100, maximum=100_000_000)
 
 
+def _megabytes(name, value):
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, (int, float))
+        or not math.isfinite(value)
+        or value <= 0
+    ):
+        raise ValueError(f"`{name}` must be a positive number of megabytes, got {value!r}")
+    return value
+
+
 def _flag(name, value):
     if not isinstance(value, bool):
         raise ValueError(f"`{name}` must be True or False, got {value!r}")
@@ -164,7 +175,9 @@ class Setting:
 
 
 # The kinds of value a setting takes (see Setting.kind).
-KINDS = ("path", "text", "port", "ports", "seconds", "count", "level", "flag", "gui")
+KINDS = (
+    "path", "text", "port", "ports", "seconds", "megabytes", "count", "level", "flag", "gui",
+)
 
 
 SETTINGS = {
@@ -197,6 +210,31 @@ SETTINGS = {
                 "to 100,000,000, where each numeric column takes 8 bytes a row."
             ),
             kind="count",
+        ),
+        Setting(
+            "trace_history_mb", 64.0, _megabytes, "data", "trace_history_mb",
+            help=(
+                "The most memory, in megabytes, that the recent traces kept for "
+                "the interface's trace and map panels may take."
+            ),
+            kind="megabytes",
+        ),
+        Setting(
+            "trace_file_mb", 500.0, _megabytes, "data", "trace_file_mb",
+            help=(
+                "The size, in megabytes, past which a data file's traces go on "
+                "in a new part of its trace file."
+            ),
+            kind="megabytes",
+        ),
+        Setting(
+            "trace_pending_mb", 256.0, _megabytes, "data", "trace_pending_mb",
+            help=(
+                "The most memory, in megabytes, that traces waiting to be written "
+                "may take while their file can't be written, past which the "
+                "oldest are dropped."
+            ),
+            kind="megabytes",
         ),
         Setting(
             "log_path", "logs", _path, "logging", "path",

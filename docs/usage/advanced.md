@@ -32,6 +32,7 @@ You do not need to read these pages in order, or before you start. Come to them 
 | [Writing your own instrument](custom_instruments.md) | Wrap a new device, or write a software instrument. |
 | [Measurements and data files](measurements.md) | Queries with arguments, slow queries, failing measurements, file names and reading data. |
 | [Calculations](calculations.md) | Derive new columns as you record: sums, rolling means, and your own. |
+| [Traces and spectra](traces.md) | Take whole arrays, such as spectra, beside the rows: occasionally, on a clock or with every row, reduced to columns, shown live and saved beside the data file. |
 
 ## Tasks and procedures
 

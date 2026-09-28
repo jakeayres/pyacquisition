@@ -152,6 +152,34 @@ They run in the order they are written, after the measurements, and are saved to
 For anything other than these two, such as `x / 1e-6`, write the calculation in Python and [combine the file with Python](#combining-a-config-file-with-python).
 
 
+## `[traces]` Section
+
+Take [traces](traces.md), such as spectra, beside the rows. Each is a table under `[traces]`, and its key is the trace's name:
+
+```toml
+[traces.spectrum]
+instrument = "analyser"
+method = "get_spectrum"
+every_rows = 1
+reduce = ["mean", "peak_x"]
+```
+
+| Key | Description | Example Value |
+|---|---|---|
+| `instrument` | The name of the instrument, in `[instruments]` | `"analyser"` |
+| `method` | Its trace method | `"get_spectrum"` |
+| `every` | (optional) Take one every so many seconds, on its own clock | `10` |
+| `every_rows` | (optional) Take one with every so many rows, which wait for it | `1` |
+| `reduce` | (optional) Reductions, each a column on the trace's row | `["mean", "peak_x"]` |
+| `reduce_units` | (optional) A reduction's unit, where it isn't the channels' | `{mean = "dB"}` |
+| `channels` | (optional) The channels, where the instrument doesn't say | `["X", "Y"]` |
+| `timeout` | (optional) Seconds a trace may take | `300` |
+| `unit`, `x_unit` | (optional) The channels' and the axis's units, where the instrument's aren't the ones to show | `"dBm"` |
+| `args` | (optional) Inputs of the trace method | `{span = 1e6}` |
+
+With neither `every` nor `every_rows`, a trace is taken only when asked, by the `AcquireTrace` task or **Acquire now**. A trace of an instrument that couldn't be opened is left out, with a warning. An unknown key or reduction, a method that isn't a trace method, or an input it doesn't take, is refused when the file is loaded, with a message naming the trace.
+
+
 ## `[data]` Section
 
 The `[data]` section describes the configuration of the data files.
@@ -162,6 +190,9 @@ The `[data]` section describes the configuration of the data files.
 | `file_extension` | The extension of the data files, without the dot. | `data` |
 | `delimiter` | The character between the columns of the data files. | `,` |
 | `history_points` | The most rows kept in memory for the interface's plots, from 100 to 100,000,000, where each numeric column takes 8 bytes a row. | `500000` |
+| `trace_history_mb` | The most memory, in megabytes, that the recent traces kept for the interface's trace and map panels may take. | `64` |
+| `trace_file_mb` | The size, in megabytes, past which a data file's traces go on in a new part of its trace file. | `500` |
+| `trace_pending_mb` | The most memory, in megabytes, that traces waiting to be written may take while their file can't be written, past which the oldest are dropped. | `256` |
 
 
 ## `[api_server]` Section
@@ -207,7 +238,7 @@ This section defines the various logging levels and location of log files produc
 
 ## Mistakes in the file
 
-The `[experiment]`, `[rack]`, `[data]`, `[api_server]`, `[logging]` and `[gui]` sections are checked, and so is `[calculations]` (see above). A key that is not in the tables above is refused, with a suggestion when it is close to one, and so is a value of the wrong kind, such as `period = "fast"`. A misspelt key would otherwise be ignored and the default used, silently.
+The `[experiment]`, `[rack]`, `[data]`, `[api_server]`, `[logging]` and `[gui]` sections are checked, and so are `[calculations]` and `[traces]` (see above). A key that is not in the tables above is refused, with a suggestion when it is close to one, and so is a value of the wrong kind, such as `period = "fast"`. A misspelt key would otherwise be ignored and the default used, silently.
 
 ```text
 ValueError: Unknown key 'pth' in [data] (did you mean 'path'?). Valid keys: path, file_extension, delimiter.

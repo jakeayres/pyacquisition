@@ -19,6 +19,8 @@ import inspect
 import math
 import time
 from collections import deque
+from collections.abc import Callable
+from typing import Any
 
 import numpy as np
 
@@ -110,10 +112,11 @@ class Trace:
         Trace("spectrum", generator.get_spectrum, every_rows=1, reduce=["mean", "peak_x"])
     """
 
-    def __init__(self, name: str, method, every: float | None = None, every_rows: int | None = None,
-                 unit: str | None = None, x_unit: str | None = None, reduce=None,
+    def __init__(self, name: str, method: Callable[..., TraceData], every: float | None = None,
+                 every_rows: int | None = None, unit: str | None = None, x_unit: str | None = None,
+                 reduce: list[str] | dict[str, Callable] | None = None,
                  reduce_units: dict | None = None, channels: list | None = None,
-                 timeout: float | None = None, **kwargs):
+                 timeout: float | None = None, **kwargs: Any):
         if not isinstance(name, str) or not name.strip():
             raise ValueError(f"A trace needs a name, not {name!r}.")
         if not getattr(method, "_is_trace", False) or getattr(method, "__self__", None) is None:

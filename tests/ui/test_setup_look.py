@@ -89,7 +89,9 @@ def test_the_driver_list_shows_several_and_filters_as_you_type(context, setup):
     drivers = page.page.get_by_role("listbox", name="Choices")
 
     options = drivers.get_by_role("option")
-    expect(options).to_have_count(11)  # every driver
+    from pyacquisition.instruments import instrument_map
+
+    expect(options).to_have_count(len(instrument_map))  # every driver
     box = drivers.bounding_box()
     row = options.first.bounding_box()
     assert box["height"] >= 5 * row["height"]  # at least five in view at once

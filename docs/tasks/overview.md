@@ -26,6 +26,10 @@ The following tasks are registered to your experiment by default.
 
 `STANDARD` [`Task` **SetMeasurementPeriod**](measurements.md) - Set the time between measurements.
 
+#### Traces
+
+`STANDARD` [`Task` **AcquireTrace**](acquire_trace.md) - Take a trace now, and wait for it. Registered when the experiment has traces.
+
 
 ## With an instrument
 

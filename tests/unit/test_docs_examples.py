@@ -301,3 +301,108 @@ def test_annotated_snippets_point_at_the_code_they_describe(page, source, html):
         first, _, last = part.partition("-")
         highlighted |= set(range(int(first), int(last or first) + 1))
     assert highlighted == annotated, "hl_lines and the notes cover different lines"
+
+
+# -------------------------------------------------------------------- traces
+TRACE_EXAMPLES = ["traces_occasional", "traces_every_row"]
+
+
+@pytest.mark.parametrize("name", TRACE_EXAMPLES)
+def test_each_trace_example_sets_up_with_its_spectrum(examples, name):
+    experiment = build(name)
+    assert list(experiment.traces) == ["spectrum"]
+    assert experiment.traces["spectrum"].trace.channels == ["intensity"]
+
+
+def test_the_simulated_spectrum_moves_up_as_the_sample_warms(examples):
+    import numpy as np
+    from simulated import SimulatedCryostat, SimulatedSpectrometer
+
+    def peak(kelvin):
+        spectrometer = SimulatedSpectrometer(
+            "s", SimulatedCryostat("c", temperature=kelvin), sweep_time=0
+        )
+        spectrometer.start_sweep()
+        assert spectrometer.sweep_done()
+        data = spectrometer.get_spectrum()
+        return data.axis()[np.argmax(data.channels["intensity"])]
+
+    assert peak(5.0) == pytest.approx(170.0, abs=2.0)
+    assert peak(20.0) == pytest.approx(230.0, abs=2.0)
+
+
+def test_the_traces_config_example_loads_with_no_problems(examples):
+    import tomllib
+
+    from pyacquisition.core.config_check import problems
+
+    shutil.copy(EXAMPLES / "traces.toml", "rig.toml")
+    experiment = Experiment.from_config("rig.toml", gui=False)
+
+    assert list(experiment.traces) == ["spectrum"]
+    assert experiment.traces["spectrum"].trace.every == 5
+    assert problems(tomllib.loads((EXAMPLES / "traces.toml").read_text(encoding="utf-8"))) == []
+
+
+def running(experiment, script):
+    """Runs an experiment while `script(experiment)` does its part."""
+    import asyncio
+
+    async def drive():
+        try:
+            while not experiment._started:
+                await asyncio.sleep(0.01)
+            await asyncio.sleep(0.3)
+            return await script(experiment)
+        finally:
+            experiment._shutdown_event.set()
+
+    async def both():
+        return (await asyncio.gather(experiment._run(), drive()))[1]
+
+    return asyncio.run(asyncio.wait_for(both(), timeout=60))
+
+
+def free_port():
+    import socket
+
+    with socket.socket() as s:
+        s.bind(("localhost", 0))
+        return s.getsockname()[1]
+
+
+def test_the_spectrum_sweep_takes_a_spectrum_with_its_temperature(examples, tmp_path):
+    from pyacquisition import read_traces
+
+    module = importlib.import_module("traces_occasional")
+    experiment = module.MyExperiment(gui=False, api_server_port=free_port())
+
+    async def sweep(experiment):
+        # One point, at the temperature the cryostat starts at: no waiting for it.
+        await module.SpectrumSweep(low=20.0, high=20.0, step=1.0).start(experiment)
+
+    running(experiment, sweep)
+    traces = read_traces(Path("my_data") / "00.00 start.data")
+    assert list(traces.index) == [0]
+    assert traces.info["row.T"].iloc[0] == pytest.approx(20.0, abs=0.1)
+    assert traces.x_unit == "GHz" and traces.channels["intensity"].shape == (1, 2048)
+
+
+def test_the_every_row_example_has_a_peak_on_every_row(examples, tmp_path):
+    import asyncio
+
+    import pandas as pd
+
+    module = importlib.import_module("traces_every_row")
+    experiment = module.MyExperiment(
+        gui=False, api_server_port=free_port(), measurement_period=0.1
+    )
+
+    async def wait(experiment):
+        await asyncio.sleep(1.5)
+
+    running(experiment, wait)
+    rows = pd.read_csv(Path("my_data") / "00.00 start.data")
+    assert len(rows) >= 3
+    assert rows["spectrum_index"].tolist() == list(range(len(rows)))
+    assert rows["spectrum_peak_x"].between(225, 235).all()  # 150 + 4 x 20 K

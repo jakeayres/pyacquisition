@@ -9,15 +9,26 @@ from ...core.trace import TraceData
 class TraceGenerator(SoftwareInstrument):
     """A simulated instrument that gives a spectrum: a Lorentzian peak on a
     little noise, over a frequency axis. Its centre and width can be set, and a
-    sweep can be made to take time, as a real instrument's does, to try traces
-    without hardware.
+    sweep can be made to take time, as a real instrument's does, to try
+    [traces](../usage/traces.md) without hardware.
+
+    `get_spectrum` is its trace method: it gives one channel, `amplitude` (V),
+    over `frequency` (Hz), and waits for a sweep of `sweep_time` seconds first.
+
+    Example:
+        ```python
+        generator = TraceGenerator("generator", sweep_time=2)
+        self.add_instrument(generator)
+        self.add_trace(Trace("spectrum", generator.get_spectrum, reduce=["peak_x"]))
+        ```
 
     Args:
         uid: The instrument's id.
         centre: Where the peak is, on the axis.
         width: The peak's half width at half maximum.
         points: How many points a spectrum has.
-        start, stop: The axis's ends.
+        start: Where the axis starts.
+        stop: Where the axis ends.
         noise: The noise's standard deviation, as a fraction of the peak.
         sweep_time: Seconds a sweep takes, from `start_sweep` until
             `sweep_done`.
@@ -25,7 +36,7 @@ class TraceGenerator(SoftwareInstrument):
 
     name = "Trace Generator"
 
-    def __init__(self, uid, centre: float = 5.0, width: float = 0.5, points: int = 512,
+    def __init__(self, uid: str, centre: float = 5.0, width: float = 0.5, points: int = 512,
                  start: float = 0.0, stop: float = 10.0, noise: float = 0.02, sweep_time: float = 0.0):
         super().__init__(uid)
         self._centre = centre
@@ -76,7 +87,8 @@ class TraceGenerator(SoftwareInstrument):
         start="start_sweep", ready="sweep_done", stop="stop_sweep", timeout=60, channels=["amplitude"]
     )
     def get_spectrum(self) -> TraceData:
-        """The spectrum: the peak, with noise, in V over the frequency axis (Hz)."""
+        """Take a spectrum: the peak, with noise, in V over the frequency axis
+        (Hz). A trace method: add it to an experiment with `Trace`."""
         self._started = None
         x = np.linspace(self._start, self._stop, self._points)
         peak = 1.0 / (1.0 + ((x - self._centre) / self._width) ** 2)

@@ -1,4 +1,4 @@
-from .software import Clock, Calculator, RandomNumberGenerator, SignalGenerator
+from .software import Clock, Calculator, RandomNumberGenerator, SignalGenerator, TraceGenerator
 from .stanford_research import SR_830, SR_860
 from .keithley import Keithley_2000, Keithley_6221
 from .lakeshore import Lakeshore_340, Lakeshore_350
@@ -10,6 +10,7 @@ instrument_map = {
     "Clock": Clock,
     "RandomNumberGenerator": RandomNumberGenerator,
     "SignalGenerator": SignalGenerator,
+    "TraceGenerator": TraceGenerator,
     "Keithley_2000": Keithley_2000,
     "Keithley_6221": Keithley_6221,
     "SR_830": SR_830,

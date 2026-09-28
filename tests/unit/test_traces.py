@@ -756,3 +756,13 @@ def test_acquire_trace_is_registered_only_with_traces_and_names_the_one(tmp_path
     none = Experiment(root_path=str(tmp_path / "none"), gui=False)
     none._register_trace_tasks()
     assert "/tasks/acquiretrace" not in TestClient(none._api_server.app).get("/openapi.json").json()["paths"]
+
+
+def test_the_trace_options_reach_the_scribe_and_the_history(tmp_path):
+    experiment = Experiment(root_path=str(tmp_path), gui=False, trace_history_mb=1.5,
+                            trace_file_mb=20, trace_pending_mb=8)
+
+    assert experiment._trace_history.budget == 1.5e6
+    assert (experiment._trace_scribe.file_mb, experiment._trace_scribe.pending_mb) == (20, 8)
+    with pytest.raises(ValueError, match="positive number of megabytes"):
+        Experiment(root_path=str(tmp_path), gui=False, trace_history_mb=0)

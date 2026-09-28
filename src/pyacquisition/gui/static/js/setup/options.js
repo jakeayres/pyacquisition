@@ -23,6 +23,7 @@ function field(option) {
     case "count":
       return { ...base, type: "integer" };
     case "seconds":
+    case "megabytes":
       return { ...base, type: "number" };
     case "level":
       return {
@@ -62,6 +63,7 @@ export function value(option, typed) {
     case "count":
       return WHOLE.test(t) ? Number(t) : typed;
     case "seconds":
+    case "megabytes":
       return NUMBER.test(t) ? Number(t) : typed;
     case "ports": {
       const parts = t.split(/[\s,]+/).filter(Boolean);

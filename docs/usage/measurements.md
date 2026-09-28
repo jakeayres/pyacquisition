@@ -130,4 +130,4 @@ Plot it with whatever you prefer, for example `matplotlib` (which you would need
 
 ## Viewing data live
 
-Everything that is measured (and calculated) is shown in the **Values** tab, and can be plotted: choose what to plot with the plot's chips and **+ Add**, and what goes on the horizontal axis with **against**. **+ Add plot** adds more plots, up to six. The plots show the whole of the current data file and the one before it. See [the interface](running.md#the-interface) for the rest.
+Everything that is measured (and calculated) is shown in the **Values** tab, and can be plotted: choose what to plot with the plot's chips and **+ Add**, and what goes on the horizontal axis with **against**. **+ Add plot** adds more plots, up to six. The plots show the whole of the current data file and the one before it. See [the interface](running.md#the-interface) for the rest. An experiment with [traces](traces.md) can add a trace panel or a map of one, too.
