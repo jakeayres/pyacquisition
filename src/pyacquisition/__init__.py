@@ -10,6 +10,7 @@ from .core.calculations import RollingMean as RollingMean
 from .core.calculations import Sum as Sum
 from .core.experiment import Experiment as Experiment
 from .core.measurement import Measurement as Measurement
+from .core.trace_file import read_traces as read_traces
 from .core.task_manager.task import Task as Task
 
 # The GUI runs in its own process (see `gui.Gui.run_in_new_process`). On Windows,
