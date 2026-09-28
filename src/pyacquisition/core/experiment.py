@@ -19,6 +19,7 @@ from .calculations import Calculations
 from .task_manager.task_manager import TaskManager
 from .task_manager.task import Task
 from .task_manager.instrument_call import register_call_endpoints
+from .trace_history import TraceHistory
 from .trace_scribe import TraceScribe
 from .trace_source import Trace, TraceSource
 from .scribe import Scribe
@@ -217,9 +218,15 @@ class Experiment:
         # data files (see add_trace).
         self._traces: dict[str, TraceSource] = {}
         self._trace_scribe = TraceScribe(self._data_path)
+        # The recent traces, thinned for the GUI, and streamed as the rows are.
+        self._trace_history = TraceHistory()
+        self._scribe.add_file_listener(self._trace_history.new_file)
 
         # History's events (and the log's) are made to be JSON, so sent as they are.
         self._api_server.add_websocket_endpoint("/stream/data").subscribe_to(self._history)
+        self._api_server.add_websocket_endpoint("/stream/traces").subscribe_to(
+            self._trace_history
+        )
 
         self._api_server.add_websocket_endpoint("/stream/logs").subscribe_to(
             self._log_history
@@ -667,6 +674,7 @@ class Experiment:
             paused=lambda: self._rack.paused,
         )
         source.listeners.append(self._trace_scribe.add)
+        source.listeners.append(self._trace_history.add)
         self._traces[trace.name] = source
         self._rack.trace_sources.append(source)
         logger.debug(f"Trace {trace.name} added, from {trace.source}.")
@@ -1141,6 +1149,7 @@ class Experiment:
         """
         self._sequences._register_endpoints(api_server)
         self._layout._register_endpoints(api_server)
+        self._trace_history._register_endpoints(api_server, lambda: self._traces)
 
         @api_server.app.get("/experiment/info", tags=["experiment"])
         async def experiment_info():
@@ -1241,19 +1250,27 @@ class Experiment:
         async def list_traces():
             """
             Endpoint for the experiment's traces: each one's `name`, `source`
-            (`instrument.method`), `every` (seconds, or null if it is taken only
-            on demand), its `column` in the rows, and its `latest` trace taken
-            (its `index`, `time`, `data_file`, `points`, `channels`, `x_name`,
-            `x_unit` and `unit`), or null.
+            (`instrument.method`), `every` (seconds, or null), `every_rows` (or
+            null; with neither, it is taken only on demand), `channels` (as
+            declared, or null), its `column` in the rows, its reductions'
+            `columns`, and its `latest` trace taken (its `seq`, `index`, `time`,
+            `data_file`, `points`, `channels`, `x_name`, `x_unit` and `unit`),
+            or null. Get a trace itself from `/traces/<name>/latest`.
             """
-            return {"status": 200, "data": [_trace_info(source) for source in self._traces.values()]}
+            return {
+                "status": 200,
+                "data": [
+                    _trace_info(source, self._trace_history.latest(source.name))
+                    for source in self._traces.values()
+                ],
+            }
 
         @api_server.app.get("/traces/{name}/acquire", tags=["traces"])
         async def acquire_trace(name: str):
             """
             Endpoint to take a trace now. It answers once it is taken, which can
-            take as long as the trace does (up to its timeout), with its `index`
-            and `time`. It answers 404 for a trace there isn't, and 500 with the
+            take as long as the trace does (up to its timeout), with its `index`,
+            `time` and `seq` (its event's number, on `/stream/traces`). It answers 404 for a trace there isn't, and 500 with the
             reason if it couldn't be taken.
             """
             source = self._traces.get(name)
@@ -1264,7 +1281,9 @@ class Experiment:
                 raise HTTPException(
                     status_code=500, detail=f"Trace {name!r} couldn't be taken: see the log."
                 )
-            return {"status": 200, "data": {"index": record.index, "time": record.time}}
+            stored = self._trace_history.latest(name)
+            seq = stored.seq if stored is not None and stored.record is record else None
+            return {"status": 200, "data": {"index": record.index, "time": record.time, "seq": seq}}
 
         @api_server.app.get("/managers", tags=["experiment"])
         async def list_task_managers():
@@ -1298,17 +1317,22 @@ class Experiment:
             return {"status": "success", "message": "Experiment shutdown initiated."}
 
 
-def _trace_info(source: TraceSource) -> dict:
-    """A trace, as /traces describes it."""
+def _trace_info(source: TraceSource, stored=None) -> dict:
+    """A trace, as /traces describes it, with its latest as the trace history
+    has it (for its `seq`)."""
     latest = source.latest
     return {
         "name": source.name,
         "source": source.trace.source,
         "every": source.trace.every,
+        "every_rows": source.trace.every_rows,
+        "channels": source.trace.channels,
         "column": source.trace.index_column,
+        "columns": [column for column, *_ in source.trace.reductions],
         "latest": None
         if latest is None
         else {
+            "seq": stored.seq if stored is not None and stored.record is latest else None,
             "index": latest.index,
             "time": latest.time,
             "data_file": latest.data_file,

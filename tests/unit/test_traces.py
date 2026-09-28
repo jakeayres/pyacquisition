@@ -375,13 +375,44 @@ async def test_the_trace_endpoints(tmp_path):
     before, taken, missing, after, columns = await running(experiment, script)
 
     assert before == [{"name": "spectrum", "source": "generator.get_spectrum", "every": None,
-                       "column": "spectrum_index", "latest": None}]
+                       "every_rows": None, "channels": ["amplitude"], "column": "spectrum_index",
+                       "columns": [], "latest": None}]
     assert taken.status_code == 200 and taken.json()["data"]["index"] == 0
+    assert taken.json()["data"]["seq"] == after[0]["latest"]["seq"] == experiment._trace_history.seq
     assert missing.status_code == 404 and "no trace called 'nothing'" in missing.json()["detail"]
     latest = after[0]["latest"]
     assert (latest["index"], latest["points"], latest["channels"], latest["x_unit"], latest["data_file"]) == (
         0, 512, ["amplitude"], "Hz", "00.00 start.data")
     assert {"name": "spectrum_index", "kind": "trace", "source": "spectrum", "unit": None} in columns
+
+
+@pytest.mark.asyncio
+async def test_the_trace_stream_and_the_latest_on_a_running_experiment(tmp_path):
+    from aiohttp import ClientSession
+
+    experiment = rig(tmp_path)
+    port = experiment._api_server.port
+
+    async def script(experiment):
+        async with ClientSession() as session:
+            async with session.ws_connect(f"ws://localhost:{port}/stream/traces") as ws:
+                await experiment.traces["spectrum"].acquire()
+                event = await asyncio.wait_for(ws.receive_json(), timeout=5)
+                async with session.get(f"http://localhost:{port}/scribe/next_file?title=sweep"):
+                    pass
+                new_file = await asyncio.wait_for(ws.receive_json(), timeout=5)
+            async with session.get(f"http://localhost:{port}/traces/spectrum/latest?format=json") as response:
+                latest = (await response.json())["data"]
+        return event, new_file, latest
+
+    event, new_file, latest = await running(experiment, script)
+
+    assert event == {"type": "trace", "seq": event["seq"], "name": "spectrum", "index": 0,
+                     "time": experiment.traces["spectrum"].latest.time}
+    assert new_file == {"type": "new_file", "seq": event["seq"] + 1, "file": "00.01 sweep.data"}
+    (trace,) = latest["traces"]
+    assert (trace["seq"], trace["points"], trace["binned"], trace["channels"]) == (event["seq"], 512, False, ["amplitude"])
+    assert latest["seq"] == new_file["seq"]
 
 
 # ------------------------------------------------------------ the generator
