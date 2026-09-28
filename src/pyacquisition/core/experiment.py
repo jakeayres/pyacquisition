@@ -1251,7 +1251,8 @@ class Experiment:
             """
             Endpoint for the experiment's traces: each one's `name`, `source`
             (`instrument.method`), `every` (seconds, or null), `every_rows` (or
-            null; with neither, it is taken only on demand), `channels` (as
+            null; with neither, it is taken only on demand), `timeout` (the
+            seconds a trace may take), `channels` (as
             declared, or null), its `column` in the rows, its reductions'
             `columns`, and its `latest` trace taken (its `seq`, `index`, `time`,
             `data_file`, `points`, `channels`, `x_name`, `x_unit` and `unit`),
@@ -1326,6 +1327,7 @@ def _trace_info(source: TraceSource, stored=None) -> dict:
         "source": source.trace.source,
         "every": source.trace.every,
         "every_rows": source.trace.every_rows,
+        "timeout": source.trace.timeout,
         "channels": source.trace.channels,
         "column": source.trace.index_column,
         "columns": [column for column, *_ in source.trace.reductions],

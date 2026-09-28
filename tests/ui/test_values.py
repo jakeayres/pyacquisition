@@ -202,3 +202,31 @@ def test_a_nan_is_formatted_as_a_dash(page):
         page.page.evaluate("import('/ui/js/format.js').then(m => m.formatValue(NaN))")
         == "—"
     )
+
+
+# -------------------------------------------------------------- a sparse column
+def values_module(page, expression):
+    return page.page.evaluate(f"import('/ui/js/dock/values.js').then((v) => {expression})")
+
+
+def test_an_age_is_said_in_the_largest_unit_that_fits(page):
+    ages = values_module(page, "[5.9, 125, 7200, 3 * 86400 + 1, NaN].map(v.formatAge)")
+    assert ages == ["5 s ago", "2 min ago", "2 h ago", "3 d ago", "earlier"]
+
+
+def test_the_last_value_is_found_in_the_file_before_if_need_be(page):
+    found = values_module(
+        page,
+        """(() => {
+            const segment = (columns, dropped = 0) => ({
+                dropped, column: (name) => columns[name] ?? null });
+            const store = {
+                current: segment({ m: new Float64Array([NaN, NaN]), time: new Float64Array([8, 9]) }),
+                previous: segment({ m: new Float64Array([1, 2, NaN]), time: new Float64Array([5, 6, 7]) }),
+            };
+            const first = v.lastValue(store, 'm');
+            store.current = segment({ m: new Float64Array([NaN, 4, NaN]), time: new Float64Array([8, 9, 10]) });
+            return [first, v.lastValue(store, 'm'), v.lastValue(store, 'nothing')];
+        })()""",
+    )
+    assert found == [{"value": 2, "time": 6}, {"value": 4, "time": 9}, None]

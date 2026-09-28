@@ -1,7 +1,7 @@
 // The app shell: a slim top bar, the plot area filling the window, and the dock.
 import { useEffect, useState } from "preact/hooks";
 import { html } from "./html.js";
-import { columnInfo, experimentInfo } from "./api.js";
+import { columnInfo, experimentInfo, traceList } from "./api.js";
 import { DataStore } from "./store.js";
 import { LogStore } from "./logs.js";
 import { dataFeed, logFeed } from "./feed.js";
@@ -93,6 +93,16 @@ function useColumns(connection) {
   return columns;
 }
 
+// The experiment's traces, fetched each time it connects, like the columns.
+function useTraces(connection) {
+  const [traces, setTraces] = useState(null);
+  useEffect(() => {
+    if (connection !== "connected") return;
+    traceList().then(setTraces, () => {});
+  }, [connection]);
+  return traces;
+}
+
 // The experiment's name, fetched once it answers.
 function useExperimentName(connection) {
   const [name, setName] = useState(null);
@@ -159,6 +169,7 @@ export function App() {
   const managers = useManagers(connection);
   const rack = useRack(connection);
   const columns = useColumns(connection);
+  const traces = useTraces(connection);
   const [alerts] = useState(() => new AlertStore());
   useAlertWatch({ alerts, connection, store, logs, managers, rack });
   const [palette, setPalette] = useState(false);
@@ -189,7 +200,7 @@ export function App() {
         rack=${rack}
         alerts=${alerts}
       />
-      <${PlotArea} store=${store} columns=${columns} theme=${theme} />
+      <${PlotArea} store=${store} columns=${columns} theme=${theme} traces=${traces} />
       <${Dock} tabs=${dockTabs({ store, logs, columns, managers })} />
     </div>
     <${AlertToasts} alerts=${alerts} />

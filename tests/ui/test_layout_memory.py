@@ -166,3 +166,50 @@ def test_the_palettes_recent_runs_come_back_after_a_restart(browser, tmp_path):
     finally:
         context.close()
         second.stop()
+
+
+def test_a_trace_panel_comes_back_and_an_older_layout_loads_as_plots(browser, tmp_path):
+    from test_trace_panel import TraceRig
+
+    first = Running(TraceRig, tmp_path)
+    context = new_window(browser)
+    try:
+        page = open_page(context, first).page
+        page.get_by_role("button", name="Add plot").click()
+        page.get_by_role("menuitem", name="Trace: spectrum").click()
+        panel = page.locator(".trace-panel")
+        panel.get_by_label("Earlier traces shown behind").select_option("5")
+        wait_saved(first, lambda layout: any(
+            p.get("kind") == "trace" and p.get("overlay") == 5
+            for p in layout.get("plots", {}).get("panels", [])))
+    finally:
+        context.close()
+        first.stop()
+
+    second = Running(TraceRig, tmp_path, port=first.port)
+    context = new_window(browser)
+    try:
+        page = open_page(context, second)
+        panel = page.page.locator(".trace-panel[data-trace='spectrum']")
+        expect(panel).to_be_visible()
+        expect(panel.get_by_label("Earlier traces shown behind")).to_have_value("5")
+        expect(page.page.locator(".plot-panel")).to_have_count(2)
+
+        # A layout from before panels had kinds: every panel is a plot.
+        import requests
+
+        older = {"plots": {"panels": [{"id": 1, "x": "time", "series": [{"name": "time"}]},
+                                      {"id": 2, "x": "time", "series": [{"name": "spectrum_index"}]}],
+                           "link": False, "showPrevious": True}}
+        requests.put(f"{second.address}/experiment/layout", json=older, timeout=5)
+    finally:
+        context.close()
+    context = new_window(browser)
+    try:
+        page = open_page(context, second)
+        expect(page.page.locator(".plot-panel")).to_have_count(2)
+        expect(page.page.locator(".trace-panel")).to_have_count(0)
+        assert page.errors == []
+    finally:
+        context.close()
+        second.stop()

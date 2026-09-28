@@ -375,7 +375,7 @@ async def test_the_trace_endpoints(tmp_path):
     before, taken, missing, after, columns = await running(experiment, script)
 
     assert before == [{"name": "spectrum", "source": "generator.get_spectrum", "every": None,
-                       "every_rows": None, "channels": ["amplitude"], "column": "spectrum_index",
+                       "every_rows": None, "timeout": 60, "channels": ["amplitude"], "column": "spectrum_index",
                        "columns": [], "latest": None}]
     assert taken.status_code == 200 and taken.json()["data"]["index"] == 0
     assert taken.json()["data"]["seq"] == after[0]["latest"]["seq"] == experiment._trace_history.seq

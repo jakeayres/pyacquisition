@@ -13,6 +13,7 @@ class Segment {
     this.rows = 0;
     this.capacity = 0;
     this.buffers = new Map(); // name -> Float64Array, longer than `rows`
+    this.dropped = 0; // rows dropped from its start, to keep within maxRows
   }
 
   static fromSnapshot({ file, rows, data }) {
@@ -70,6 +71,7 @@ class Segment {
       buffer.fill(NaN, this.rows - count, this.rows);
     }
     this.rows -= count;
+    this.dropped += count;
   }
 }
 

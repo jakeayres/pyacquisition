@@ -587,3 +587,41 @@ def test_the_y_extent_within_an_x_range(page):
         "d.extentWithin(new Float64Array([0, 1, 2, 3]), [new Float64Array([9, 4, 6, 8])],"
         " {min: 1, max: 2})",
     ) == [4, 6]
+
+
+def test_a_point_that_joins_nothing_is_drawn_as_a_dot(page):
+    area = "{left: 0, top: 0, width: 100, height: 100}"
+    scale = "{min: 0, max: 10, log: false}"
+    # Three lone points between gaps, and a pair that makes a line.
+    xs = "new Float64Array([0, 1, 2, 3, 4, 5, 6, 7, 8])"
+    ys = "new Float64Array([1, NaN, 2, NaN, NaN, 3, 4, NaN, 5])"
+    for sorted_ in ("true", "false"):
+        dots = draw(page.page, f"d.linePath({xs}, {ys}, {area}, {scale}, {scale}, {sorted_}, 2).dots")
+        assert dots == 3, sorted_
+    # Without a radius (points or both marks), none.
+    assert draw(page.page, f"d.linePath({xs}, {ys}, {area}, {scale}, {scale}, true).dots") == 0
+    # A lone point in a column of its own that isn't flat is a short line, not a dot.
+    assert draw(
+        page.page,
+        f"d.linePath(new Float64Array([1, 1.001]), new Float64Array([1, 9]), {area}, {scale}, {scale}, true, 2).dots",
+    ) == 0
+
+
+def test_a_band_between_two_lines_breaks_at_a_gap(page):
+    # Filled on a canvas 40 px wide: x 0 to 4, so each step is 10 px. The gap at
+    # x = 2 leaves 10 to 30 px empty.
+    filled = draw(
+        page.page,
+        """(() => {
+            const canvas = document.createElement('canvas');
+            canvas.width = 40;
+            canvas.height = 10;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#000';
+            ctx.fill(d.bandPath(new Float64Array([0, 1, 2, 3, 4]), new Float64Array([0, 0, NaN, 0, 0]),
+                new Float64Array([1, 1, 1, 1, 1]), {left: 0, top: 0, width: 40, height: 10},
+                {min: 0, max: 4, log: false}, {min: 0, max: 1, log: false}));
+            return [5, 20, 35].map((x) => ctx.getImageData(x, 5, 1, 1).data[3] > 0);
+        })()""",
+    )
+    assert filled == [True, False, True]

@@ -233,7 +233,7 @@ export function axisSummary(limits, logX, logY) {
 // and whether it is logarithmic. Opens from an icon in the toolbar, starting
 // from the settings, and for an automatic axis from what it shows now. Nothing
 // changes until Apply.
-function AxesMenu({ limits, logX, logY, scalesRef, onApply }) {
+export function AxesMenu({ limits, logX, logY, scalesRef, onApply }) {
   const [draft, setDraft] = useState(null); // open while there is one
   const [error, setError] = useState("");
   const menu = useRef(null);

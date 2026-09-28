@@ -956,6 +956,39 @@ button {
   touch-action: none;
 }
 
+/* A trace panel (trace-panel.js): when its trace was taken, and a note while
+   there is none yet. */
+.trace-note {
+  overflow: hidden;
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.trace-name {
+  font-weight: var(--weight-medium);
+}
+
+.trace-waiting {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  color: var(--text-faint);
+  pointer-events: none;
+}
+
+/* **+ Add plot**'s menu, when there are traces to offer. */
+.add-control {
+  position: relative;
+}
+
+.add-menu {
+  left: 0;
+  right: auto;
+}
+
 /* Shown while an axis is not scaling to the data (zoomed, panned or fixed),
    with the way back. The data still arrives and is drawn meanwhile. */
 .autoscale-off {
@@ -1301,6 +1334,19 @@ body.resizing-dock {
 .value-unit {
   color: var(--text-muted);
   font-size: var(--text-md);
+}
+
+/* A value from an earlier row, as a sparse column's is: dimmed, with its age. */
+.value-stale .value-number,
+.value-stale .value-unit {
+  color: var(--text-faint);
+}
+
+.value-age {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+  white-space: nowrap;
 }
 
 .spark {

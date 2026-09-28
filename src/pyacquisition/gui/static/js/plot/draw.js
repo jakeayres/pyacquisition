@@ -102,8 +102,13 @@ export function ascending(values) {
 // points a pixel, however long the data). Otherwise the line may double back (a
 // sweep up and down), so every point is kept in order, leaving out only those
 // that land on the same pixel as the one before.
-export function linePath(xs, ys, area, x, y, sorted = ascending(xs)) {
+//
+// With a `dot` radius, a point that joins nothing (between gaps, as a sparse
+// column's are) is drawn as a small circle, which the stroke fills in, so it
+// shows. `path.dots` says how many were.
+export function linePath(xs, ys, area, x, y, sorted = ascending(xs), dot = 0) {
   const path = new Path2D();
+  path.dots = 0;
   const n = Math.min(xs.length, ys.length);
   if (n === 0 || x.max === x.min || y.max === y.min) return path;
   const bottom = area.top + area.height;
@@ -111,6 +116,16 @@ export function linePath(xs, ys, area, x, y, sorted = ascending(xs)) {
   const toY = (v) => bottom - unitOf(y, v) * area.height;
 
   let pen = false; // whether the next point joins the one before
+  // The start of the piece of line being drawn, until it joins another point.
+  let lone = null;
+  const endPiece = () => {
+    if (lone && dot > 0) {
+      path.moveTo(lone[0] + dot, lone[1]);
+      path.arc(lone[0], lone[1], dot, 0, 2 * Math.PI);
+      path.dots++;
+    }
+    lone = null;
+  };
 
   if (sorted) {
     let column = null;
@@ -120,8 +135,13 @@ export function linePath(xs, ys, area, x, y, sorted = ascending(xs)) {
     let last = 0;
     const flush = () => {
       if (column === null) return;
-      if (pen) path.lineTo(column, first);
-      else path.moveTo(column, first);
+      if (pen) {
+        path.lineTo(column, first);
+        lone = null;
+      } else {
+        path.moveTo(column, first);
+        lone = low === high ? [column, first] : null;
+      }
       if (low !== high) {
         path.lineTo(column, low);
         path.lineTo(column, high);
@@ -134,6 +154,7 @@ export function linePath(xs, ys, area, x, y, sorted = ascending(xs)) {
       const py = toY(ys[i]);
       if (px !== px || py !== py) {
         flush();
+        endPiece();
         column = null;
         pen = false;
         continue;
@@ -149,6 +170,7 @@ export function linePath(xs, ys, area, x, y, sorted = ascending(xs)) {
       first = low = high = last = py;
     }
     flush();
+    endPiece();
     return path;
   }
 
@@ -158,16 +180,54 @@ export function linePath(xs, ys, area, x, y, sorted = ascending(xs)) {
     const px = Math.round(toX(xs[i]));
     const py = Math.round(toY(ys[i]));
     if (px !== px || py !== py) {
+      endPiece();
       pen = false;
       continue;
     }
     if (pen && px === lastX && py === lastY) continue;
-    if (pen) path.lineTo(px, py);
-    else path.moveTo(px, py);
+    if (pen) {
+      path.lineTo(px, py);
+      lone = null;
+    } else {
+      path.moveTo(px, py);
+      lone = [px, py];
+    }
     pen = true;
     lastX = px;
     lastY = py;
   }
+  endPiece();
+  return path;
+}
+
+// The band between two lines over the same x (a binned trace's lowest and
+// highest values), as a Path2D to fill: along the highs and back along the
+// lows, in pieces between points with no place on a scale.
+export function bandPath(xs, lows, highs, area, x, y) {
+  const path = new Path2D();
+  const n = Math.min(xs.length, lows.length, highs.length);
+  if (n === 0 || x.max === x.min || y.max === y.min) return path;
+  const bottom = area.top + area.height;
+  const toX = (v) => area.left + unitOf(x, v) * area.width;
+  const toY = (v) => bottom - unitOf(y, v) * area.height;
+  let piece = [];
+  const close = () => {
+    if (piece.length > 0) {
+      path.moveTo(piece[0][0], piece[0][2]);
+      for (const [px, , high] of piece) path.lineTo(px, high);
+      for (let i = piece.length - 1; i >= 0; i--) path.lineTo(piece[i][0], piece[i][1]);
+      path.closePath();
+    }
+    piece = [];
+  };
+  for (let i = 0; i < n; i++) {
+    const px = toX(xs[i]);
+    const low = toY(lows[i]);
+    const high = toY(highs[i]);
+    if (px !== px || low !== low || high !== high) close();
+    else piece.push([px, low, high]);
+  }
+  close();
   return path;
 }
 

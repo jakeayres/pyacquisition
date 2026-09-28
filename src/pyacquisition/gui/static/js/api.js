@@ -74,6 +74,22 @@ export function websocketUrl(path) {
   return `${scheme}//${location.host}${path}`;
 }
 
+// The experiment's traces: each one's name, source, timeout, channels and
+// latest (see /traces).
+export async function traceList() {
+  const { data } = await get("/traces");
+  return data;
+}
+
+// Takes a trace now, waiting as long as it may take (its timeout, and a little
+// more), and gives its {index, time, seq}.
+export async function acquireTrace(name, timeout = 600) {
+  const { data } = await get(`/traces/${encodeURIComponent(name)}/acquire`, {
+    timeout: timeout * 1000 + 5000,
+  });
+  return data;
+}
+
 // Each column's kind, source and unit (see /experiment/columns).
 export async function columnInfo() {
   const { data } = await get("/experiment/columns");

@@ -1,13 +1,18 @@
-// The plot area: one or more plot panels in an automatic grid, a way to add
-// more, an option to link their x axes, and a key to the current and previous
-// data files (for every panel).
+// The plot area: one or more panels in an automatic grid, a way to add more,
+// an option to link their x axes, and a key to the current and previous data
+// files (for every panel).
+//
+// A panel has a `kind`: "plot" (columns against another, panel.js; the kind of
+// a saved panel that doesn't say) or "trace" (a trace against its axis,
+// trace-panel.js). When the experiment has traces, **+ Add plot** offers either.
 import { useEffect, useLayoutEffect, useRef, useState } from "preact/hooks";
 import { html } from "../html.js";
-import { useStore } from "../hooks.js";
+import { usePopover, useStore } from "../hooks.js";
 import { load, save } from "../session.js";
 import { ChartIcon, EyeIcon, EyeOffIcon } from "../icons.js";
 import { colourSlots, isTimeColumn } from "../colours.js";
 import { MAX_SERIES, PlotPanel, defaultX, defaultY, resolve } from "./panel.js";
+import { DEFAULT_OVERLAY, TracePanel, resolveTrace } from "./trace-panel.js";
 
 export const MAX_PANELS = 6;
 
@@ -32,14 +37,82 @@ function savedPlots() {
   };
 }
 
-// A new panel: against the same x as the first, plotting the first column no
-// panel plots yet.
+const isTrace = (panel) => panel.kind === "trace";
+
+// A panel made sound for the columns there are, whatever its kind.
+export const resolvePanel = (panel, names) =>
+  isTrace(panel) ? resolveTrace(panel) : resolve(panel, names);
+
+// A new panel: against the same x as the first plot, plotting the first column
+// no plot plots yet.
 export function newPanel(panels, names, id) {
-  const x = panels[0]?.x ?? defaultX(names);
-  const plotted = new Set(panels.flatMap((p) => p.series.map((s) => s.name)));
+  const x = panels.find((p) => !isTrace(p))?.x ?? defaultX(names);
+  const plotted = new Set(panels.flatMap((p) => (p.series ?? []).map((s) => s.name)));
   const name =
     names.find((n) => n !== x && !plotted.has(n) && !isTimeColumn(n)) ?? defaultY(names, x);
   return { id, x, series: [{ name }], logX: false, logY: false };
+}
+
+// A new trace panel, of the trace called `trace`.
+export const newTracePanel = (trace, id) => ({
+  id,
+  kind: "trace",
+  trace,
+  overlay: DEFAULT_OVERLAY,
+  logX: false,
+  logY: false,
+});
+
+// **+ Add plot**: a plot of columns, or, when the experiment has traces, a
+// menu of a plot or a trace panel of each trace.
+function AddButton({ traces, full, onPlot, onTrace }) {
+  const [open, setOpen] = useState(false);
+  const menu = useRef(null);
+  usePopover(menu, open, () => setOpen(false));
+  const title = full ? "At most 6 plots" : "Add a plot";
+  if (!traces?.length) {
+    return html`
+      <button class="bar-button" disabled=${full} title=${title} onClick=${onPlot}>+ Add plot</button>
+    `;
+  }
+  const choose = (then) => () => {
+    setOpen(false);
+    then();
+  };
+  return html`
+    <div class="axes-control add-control" ref=${menu}>
+      <button
+        class="bar-button"
+        disabled=${full}
+        title=${title}
+        aria-expanded=${open}
+        aria-haspopup="menu"
+        onClick=${() => setOpen(!open)}
+      >
+        + Add plot
+      </button>
+      ${open &&
+      html`
+        <div class="axes-menu export-menu add-menu" role="menu" aria-label="Add a plot">
+          <button class="export-item" role="menuitem" onClick=${choose(onPlot)}>
+            Plot of columns
+          </button>
+          ${traces.map(
+            (trace) => html`
+              <button
+                key=${trace.name}
+                class="export-item"
+                role="menuitem"
+                onClick=${choose(() => onTrace(trace.name))}
+              >
+                Trace: ${trace.name}
+              </button>
+            `,
+          )}
+        </div>
+      `}
+    </div>
+  `;
 }
 
 function FileKey({ store, showPrevious, onTogglePrevious }) {
@@ -67,7 +140,8 @@ function FileKey({ store, showPrevious, onTogglePrevious }) {
   `;
 }
 
-export function PlotArea({ store, columns, theme }) {
+// `traces` are the experiment's (from /traces), or null until they are known.
+export function PlotArea({ store, columns, theme, traces = null }) {
   useStore(store);
   const names = store.columns;
   const units = Object.fromEntries(
@@ -91,7 +165,7 @@ export function PlotArea({ store, columns, theme }) {
   useEffect(() => {
     const addPlot = (event) => {
       const names = store.columns;
-      const panels = stateNow.current.panels.map((p) => resolve(p, names));
+      const panels = stateNow.current.panels.map((p) => resolvePanel(p, names));
       if (panels.length >= MAX_PANELS) {
         return event.detail?.done?.(`There are ${MAX_PANELS} plots already, the most there can be.`);
       }
@@ -102,11 +176,12 @@ export function PlotArea({ store, columns, theme }) {
     const addSeries = (event) => {
       const { column, plot = 1, done } = event.detail ?? {};
       const names = store.columns;
-      const panels = stateNow.current.panels.map((p) => resolve(p, names));
+      const panels = stateNow.current.panels.map((p) => resolvePanel(p, names));
       const panel = panels[plot - 1];
       if (!panel) {
         return done?.(`There is no plot ${plot}: there ${panels.length === 1 ? "is 1" : `are ${panels.length}`}.`);
       }
+      if (isTrace(panel)) return done?.(`Plot ${plot} shows a trace, not columns.`);
       if (!names.includes(column)) return done?.(`There is no column called ${column}.`);
       if (panel.series.some((s) => s.name === column)) return done?.(`Plot ${plot} has ${column} already.`);
       if (panel.series.length >= MAX_SERIES) {
@@ -155,12 +230,13 @@ export function PlotArea({ store, columns, theme }) {
     `;
   }
 
-  const panels = state.panels.map((p) => resolve(p, names));
+  const panels = state.panels.map((p) => resolvePanel(p, names));
   const slots = colourSlots(names); // each quantity's colour, as in the Values tab
   const update = (change) => setState((s) => ({ ...s, ...change }));
   const nextId = () => Math.max(0, ...panels.map((p) => p.id)) + 1;
 
   const add = () => update({ panels: [...panels, newPanel(panels, names, nextId())] });
+  const addTrace = (trace) => update({ panels: [...panels, newTracePanel(trace, nextId())] });
   const duplicate = (id) => {
     const at = panels.findIndex((p) => p.id === id);
     const copy = { ...panels[at], id: nextId() };
@@ -182,8 +258,9 @@ export function PlotArea({ store, columns, theme }) {
       const out = { ...current, [id]: next };
       if (!state.link) return out;
       const source = panels.find((p) => p.id === id);
+      if (!source || isTrace(source)) return out;
       for (const p of panels) {
-        if (p.id === id || p.x !== source.x || p.logX !== source.logX) continue;
+        if (p.id === id || isTrace(p) || p.x !== source.x || p.logX !== source.logX) continue;
         out[p.id] = next ? { x: next.x, y: null } : null;
       }
       return out;
@@ -195,14 +272,12 @@ export function PlotArea({ store, columns, theme }) {
   return html`
     <main class="plot-area plot-area-panels">
       <div class="plot-area-bar">
-        <button
-          class="bar-button"
-          disabled=${panels.length >= MAX_PANELS}
-          title=${panels.length >= MAX_PANELS ? `At most ${MAX_PANELS} plots` : "Add a plot"}
-          onClick=${add}
-        >
-          + Add plot
-        </button>
+        <${AddButton}
+          traces=${traces}
+          full=${panels.length >= MAX_PANELS}
+          onPlot=${add}
+          onTrace=${addTrace}
+        />
         ${panels.length > 1 &&
         html`
           <button
@@ -234,22 +309,39 @@ export function PlotArea({ store, columns, theme }) {
               class="plot-cell"
               style=${index === panels.length - 1 ? { gridColumn: `span ${lastSpan}` } : {}}
             >
-              <${PlotPanel}
-                store=${store}
-                names=${names}
-                units=${units}
-                slots=${slots}
-                panel=${panel}
-                index=${index}
-                onChange=${(delta) => change(panel.id, delta)}
-                onDuplicate=${panels.length < MAX_PANELS ? () => duplicate(panel.id) : null}
-                onRemove=${panels.length > 1 ? () => remove(panel.id) : null}
-                showPrevious=${showPrevious}
-                theme=${theme}
-                view=${views[panel.id] ?? null}
-                onView=${(next) => setView(panel.id, next)}
-                scalesRef=${scalesOf(panel.id)}
-              />
+              ${isTrace(panel)
+                ? html`
+                    <${TracePanel}
+                      panel=${panel}
+                      traces=${traces}
+                      index=${index}
+                      onChange=${(delta) => change(panel.id, delta)}
+                      onDuplicate=${panels.length < MAX_PANELS ? () => duplicate(panel.id) : null}
+                      onRemove=${panels.length > 1 ? () => remove(panel.id) : null}
+                      theme=${theme}
+                      view=${views[panel.id] ?? null}
+                      onView=${(next) => setView(panel.id, next)}
+                      scalesRef=${scalesOf(panel.id)}
+                    />
+                  `
+                : html`
+                    <${PlotPanel}
+                      store=${store}
+                      names=${names}
+                      units=${units}
+                      slots=${slots}
+                      panel=${panel}
+                      index=${index}
+                      onChange=${(delta) => change(panel.id, delta)}
+                      onDuplicate=${panels.length < MAX_PANELS ? () => duplicate(panel.id) : null}
+                      onRemove=${panels.length > 1 ? () => remove(panel.id) : null}
+                      showPrevious=${showPrevious}
+                      theme=${theme}
+                      view=${views[panel.id] ?? null}
+                      onView=${(next) => setView(panel.id, next)}
+                      scalesRef=${scalesOf(panel.id)}
+                    />
+                  `}
             </div>
           `,
         )}
