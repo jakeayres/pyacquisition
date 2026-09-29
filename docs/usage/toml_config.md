@@ -238,11 +238,15 @@ This section defines the various logging levels and location of log files produc
 
 ## Mistakes in the file
 
-The `[experiment]`, `[rack]`, `[data]`, `[api_server]`, `[logging]` and `[gui]` sections are checked, and so are `[calculations]` and `[traces]` (see above). A key that is not in the tables above is refused, with a suggestion when it is close to one, and so is a value of the wrong kind, such as `period = "fast"`. A misspelt key would otherwise be ignored and the default used, silently.
+The whole file is checked before anything starts: every section, instrument, measurement, calculation and trace. A key that is not in the tables above is refused, with a suggestion when it is close to one, and so is a value of the wrong kind, such as `period = "fast"`, a driver that doesn't exist, or a method an instrument doesn't have. A misspelt key would otherwise be ignored and the default used, silently. Every mistake is listed at once, not only the first:
 
 ```text
-ValueError: Unknown key 'pth' in [data] (did you mean 'path'?). Valid keys: path, file_extension, delimiter.
+pyacquisition run: my_experiment.toml has 2 problems:
+  - Unknown key 'pth' in [data] (did you mean 'path'?). Valid keys: path, file_extension, delimiter, history_points, trace_history_mb, trace_file_mb, trace_pending_mb.
+  - Instrument 'lockin': there is no driver called 'SR830' (did you mean 'SR_830'?).
 ```
+
+In Python, `from_config` raises the same list, as a `ConfigError`, which is a kind of `ValueError`. An instrument that is described correctly but can't be opened is not a mistake in the file, so it is skipped with a warning, as [above](#instruments-section).
 
 
 ## Combining a config file with Python

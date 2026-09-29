@@ -10,7 +10,7 @@ import subprocess
 import pytest
 
 from pyacquisition import freeze
-from pyacquisition.core.config_parser import InvalidInstrumentError
+from pyacquisition.core.config_check import ConfigError
 
 
 @pytest.fixture
@@ -65,7 +65,7 @@ def test_a_bad_toml_is_refused_before_pyinstaller_runs(fake_pyinstaller, tmp_pat
     bad = tmp_path / "bad.toml"
     bad.write_text("[instruments]\nx = 1\n")  # not a dict
 
-    with pytest.raises(InvalidInstrumentError):
+    with pytest.raises(ConfigError, match="Instrument 'x' must be a table"):
         freeze.build_app(toml_file=str(bad), out_dir=tmp_path)
 
     assert fake_pyinstaller == []

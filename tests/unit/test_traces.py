@@ -684,8 +684,8 @@ def test_a_toml_trace_takes_the_methods_inputs_and_its_options(tmp_path, monkeyp
 @pytest.mark.parametrize(
     "entry, message",
     [
-        ('{instrument = "generator", method = "get_centre"}', "'get_centre' isn't a trace of generator"),
-        ('{instrument = "generator", method = "get_spectrum", args = {colour = "red"}}', "'colour' isn't an input"),
+        ('{instrument = "generator", method = "get_centre"}', "TraceGenerator has no trace 'get_centre'. Its traces are get_spectrum"),
+        ('{instrument = "generator", method = "get_spectrum", args = {colour = "red"}}', "get_spectrum takes no `colour`"),
         ('{instrument = "nothing", method = "get_spectrum"}', "no instrument 'nothing'"),
         ('{instrument = "generator", method = "get_spectrum", reduce = ["median"]}', "no reduction 'median'"),
         ('{instrument = "generator", method = "get_spectrum", every = 1, every_rows = 1}', "not both"),

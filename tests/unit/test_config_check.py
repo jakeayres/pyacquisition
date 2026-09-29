@@ -7,7 +7,7 @@ from pathlib import Path
 import pytest
 
 from pyacquisition import Experiment
-from pyacquisition.core.config_check import Problem, problems
+from pyacquisition.core.config_check import ConfigError, Problem, problems
 
 TOML = Path(__file__).resolve().parents[1] / "toml"
 EXAMPLES = Path(__file__).resolve().parents[2] / "examples"
@@ -136,6 +136,23 @@ def test_an_unknown_driver_is_a_problem():
     assert where({"instruments": {"x": {"instrument": "Mongolia"}}}) == [
         ("instruments", "x", "instrument")
     ]
+
+
+@pytest.mark.parametrize("driver, meant", [("SR830", "SR_830"), ("signalgenerator", "SignalGenerator")])
+def test_a_misspelt_driver_is_given_the_closest_name(driver, meant):
+    (problem,) = problems({"instruments": {"x": {"instrument": driver}}})
+
+    assert problem.message == (
+        f"Instrument 'x': there is no driver called '{driver}' (did you mean '{meant}'?)."
+    )
+
+
+def test_a_driver_with_no_close_name_lists_them_all():
+    (problem,) = problems({"instruments": {"x": {"instrument": "Mongolia"}}})
+
+    assert problem.message.startswith(
+        "Instrument 'x': there is no driver called 'Mongolia'. The drivers are Calculator, Clock,"
+    )
 
 
 # ------------------------------------------------------------ measurements
@@ -286,3 +303,28 @@ def test_a_trace_of_a_clock_is_a_problem():
 
     assert problem.where == ("traces", "spectrum", "method")
     assert "Its traces are none" in problem.message
+
+
+# ------------------------------------------------------------------ a file
+def test_a_file_with_problems_is_refused_listing_every_one(tmp_path):
+    path = tmp_path / "rig.toml"
+    path.write_text(
+        '[rack]\nperiod = "fast"\n\n[instruments]\n'
+        'lockin = {instrument = "SR830", adapter = "mock", resource = "x"}\n',
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ConfigError) as refused:
+        Experiment.from_config(str(path), gui=False)
+
+    # An option's message is led by its place, which the rest say themselves.
+    assert str(refused.value) == (
+        f"{path} has 2 problems:\n"
+        "  - [rack] period: `period` must be a positive number, got 'fast'\n"
+        "  - Instrument 'lockin': there is no driver called 'SR830' (did you mean 'SR_830'?)."
+    )
+    assert [p.where for p in refused.value.problems] == [
+        ("rack", "period"),
+        ("instruments", "lockin", "instrument"),
+    ]
+    assert isinstance(refused.value, ValueError)

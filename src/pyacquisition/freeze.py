@@ -23,7 +23,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from .core.config_parser import ConfigParser
+from .core import config_check
 
 # The instrument backends that PyInstaller's static analysis cannot see, because
 # they are found at runtime rather than imported directly: pyvisa's VISA backends.
@@ -106,6 +106,8 @@ def build_app(
 
     Raises:
         ValueError: If `toml_file` and `py_file` are not given exactly one.
+        ConfigError: If `toml_file` has problems, listing every one (a
+            ValueError, from `core.config_check`).
         FileNotFoundError: If PyInstaller is not installed, or `py_file` does
             not exist.
         RuntimeError: If PyInstaller fails.
@@ -123,7 +125,7 @@ def build_app(
     dist_dir = out_dir / "dist"
 
     if toml_file:
-        ConfigParser.parse(toml_file)  # fails fast, before PyInstaller runs at all
+        config_check.load(toml_file)  # fails fast, before PyInstaller runs at all
         work_dir.mkdir(parents=True, exist_ok=True)
         script = work_dir / "_entry.py"
         script.write_text(_ENTRY_SCRIPT, encoding="utf-8")

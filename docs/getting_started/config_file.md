@@ -189,7 +189,7 @@ Everything in the window comes from the file:
 
 ??? failure "Something not working?"
     - **`Cannot declare ('instruments',) twice`.** A table appears twice. Put the new lines under the `[instruments]` or `[measurements]` you already have.
-    - **`Config contains instruments that are not in the instrument map`.** A driver's name is misspelt. Names are case sensitive: `SignalGenerator`, not `signalgenerator`. The [Instruments](../instruments/overview.md) pages list them.
+    - **`rig.toml has 1 problem`.** The file is checked before anything starts, and every mistake in it is listed, naming the instrument or measurement it's in. A misspelt driver is given the closest name, as in `there is no driver called 'signalgenerator' (did you mean 'SignalGenerator'?)`, since names are case sensitive. The [Instruments](../instruments/overview.md) pages list them.
     - **A real instrument is missing from the Instruments tab.** An instrument that can't be opened, at a wrong address say, is skipped with a warning in the log, and the rest of the experiment still starts. Check its address, and that a VISA library is installed for GPIB.
     - **No window appears.** Look at the terminal for an error. The page is also at [http://localhost:8000](http://localhost:8000) in a browser.
 

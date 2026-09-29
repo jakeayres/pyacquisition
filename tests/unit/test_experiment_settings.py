@@ -324,7 +324,7 @@ def test_a_misspelt_toml_key_is_refused_with_a_suggestion(tmp_path):
 def test_an_invalid_toml_value_is_refused(tmp_path):
     path = write_toml(tmp_path, '[rack]\nperiod = "fast"\n')
 
-    with pytest.raises(ValueError, match="measurement_period"):
+    with pytest.raises(ValueError, match=r"\[rack\] period: `period` must be a positive number"):
         Experiment.from_config(path)
 
 

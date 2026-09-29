@@ -82,6 +82,33 @@ def test_an_unknown_python_file_is_a_clear_error():
         main("run", "--py", "no_such_file.py")
 
 
+# A mistake in the file stops the run with what is wrong, and no traceback.
+def test_a_toml_file_with_problems_is_refused_listing_them(no_run, tmp_path):
+    config = tmp_path / "rig.toml"
+    config.write_text('[instruments]\nlockin = {instrument = "SR830"}\n')
+
+    with pytest.raises(SystemExit, match=r"(?s)pyacquisition run: .*rig.toml has 1 problem:\n"
+                       r"  - .*there is no driver called 'SR830' \(did you mean 'SR_830'\?\)"):
+        main("run", "--toml", str(config))
+
+    assert no_run == []
+
+
+def test_a_file_that_is_not_toml_is_refused_saying_why(no_run, tmp_path):
+    config = tmp_path / "rig.toml"
+    config.write_text("[instruments]\n[instruments]\n")
+
+    with pytest.raises(SystemExit, match=r"is not valid TOML: Cannot declare \('instruments',\) twice"):
+        main("run", "--toml", str(config))
+
+    assert no_run == []
+
+
+def test_a_toml_file_that_is_not_there_is_refused(no_run):
+    with pytest.raises(SystemExit, match="there is no file no_such_file.toml"):
+        main("run", "--toml", "no_such_file.toml")
+
+
 # ------------------------------------------------------------------- build
 def test_build_calls_build_app_with_the_toml_file(monkeypatch, tmp_path, capsys):
     config = tmp_path / "rig.toml"

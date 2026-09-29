@@ -243,7 +243,7 @@ def test_a_calculation_on_a_measurement_that_was_left_out_is_left_out(tmp_path):
         """
 [instruments]
 clock = {instrument = "Clock"}
-lockin = {instrument = "SR_830", adapter = "no-such-adapter", resource = "GPIB0::7::INSTR"}
+lockin = {instrument = "SR_830", adapter = "prologix", resource = "not an address"}
 
 [measurements]
 time = {instrument = "clock", method = "timestamp_ms"}
@@ -266,9 +266,9 @@ window = 5
 
 
 def test_a_config_with_a_bad_calculation_is_refused(tmp_path):
-    from pyacquisition.core.config_parser import InvalidCalculationError
+    from pyacquisition.core.config_check import ConfigError
 
-    with pytest.raises(InvalidCalculationError, match="`window` must be a whole number"):
+    with pytest.raises(ConfigError, match="Calculation 'm': `window` must be a whole number"):
         from_toml(
             tmp_path,
             CLOCK + '\n[calculations.m]\ncalculation = "RollingMean"\ncolumn = "time"\n'

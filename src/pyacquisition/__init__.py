@@ -3,11 +3,13 @@ import importlib.util
 import inspect
 import multiprocessing
 import sys
+import tomllib
 from pathlib import Path
 
 from .core.calculations import Calculation as Calculation
 from .core.calculations import RollingMean as RollingMean
 from .core.calculations import Sum as Sum
+from .core.config_check import ConfigError
 from .core.experiment import Experiment as Experiment
 from .core.measurement import Measurement as Measurement
 from .core.trace import TraceData as TraceData
@@ -119,7 +121,19 @@ def _build_parser() -> argparse.ArgumentParser:
 def _run(toml_file: str | None, py_file: str | None) -> None:
     if toml_file:
         print(f"Running experiment from TOML file: {toml_file}")
-        Experiment.from_config(toml_file=toml_file).run()
+        # A mistake in the file is the user's to fix, so it is said plainly,
+        # without a traceback.
+        try:
+            experiment = Experiment.from_config(toml_file=toml_file)
+        except FileNotFoundError:
+            raise SystemExit(f"pyacquisition run: there is no file {toml_file}.")
+        except tomllib.TOMLDecodeError as error:
+            raise SystemExit(
+                f"pyacquisition run: {toml_file} is not valid TOML: {error}"
+            )
+        except ConfigError as error:
+            raise SystemExit(f"pyacquisition run: {error}")
+        experiment.run()
     else:
         print(f"Running experiment from Python script: {py_file}")
         module = _import_from_file(py_file)

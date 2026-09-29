@@ -36,8 +36,8 @@ from ..tasks import instrument_tasks, standard_tasks
 from ..tasks.traces import AcquireTrace
 from .measurement import Measurement
 from .instrument import Instrument, SoftwareInstrument, resolve_enum_kwargs
-from .config_parser import ConfigParser, InvalidTraceError
-from . import settings
+from .config_parser import InvalidTraceError
+from . import config_check, settings
 
 # Seconds that the GUI's window is given to close by itself, once the
 # experiment has stopped, before its process is terminated.
@@ -332,10 +332,12 @@ class Experiment:
             Experiment: An instance of the Experiment class.
 
         Raises:
-            ValueError: If the TOML file cannot be loaded or parsed, or holds an
-                option that is not valid.
+            ConfigError: If the file has problems, such as a misspelt driver or
+                option, listing every one (a ValueError, from `config_check`).
+            ValueError: If an override is not a valid option.
+            FileNotFoundError: If there is no such file.
         """
-        config = ConfigParser.parse(toml_file)
+        config = config_check.load(toml_file)
 
         try:
             experiment = cls._initialize_experiment(config, overrides)

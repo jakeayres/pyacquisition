@@ -3,7 +3,8 @@
 `problems(config)` finds every problem with a config (a dict, as `tomllib` reads
 a file), not only the first, and says where each one is, so that the setup page
 (`pyacquisition new`) can show it by the field it belongs to. A config with no
-problems loads with `Experiment.from_config`.
+problems loads with `Experiment.from_config`, which reads its file with `load`,
+so that one with problems is refused with all of them listed.
 """
 
 import inspect
@@ -37,6 +38,49 @@ class Problem:
 
     def to_json(self) -> dict:
         return {"where": list(self.where), "message": self.message}
+
+
+class ConfigError(ValueError):
+    """A config file that has problems, refused before anything is made.
+
+    Attributes:
+        problems: Every `Problem` with the file.
+    """
+
+    def __init__(self, path, found: list[Problem]):
+        self.problems = found
+        count = f"{len(found)} problem{'' if len(found) == 1 else 's'}"
+        super().__init__(
+            f"{path} has {count}:\n" + "\n".join(f"  - {_placed(p)}" for p in found)
+        )
+
+
+def _placed(problem: Problem) -> str:
+    """A problem's message, led by where it is in the file ([rack] period) unless
+    it says so already. An option's doesn't, since the setup page shows it by its
+    field; the rest name their table or entry."""
+    where, message = problem.where, problem.message
+    if not where or f"[{where[0]}]" in message or (
+        len(where) > 1 and f"'{where[1]}'" in message
+    ):
+        return message
+    place = " ".join([f"[{where[0]}]", ".".join(map(str, where[1:]))]).strip()
+    return f"{place}: {message}"
+
+
+def load(toml_file: str) -> dict:
+    """The config in a TOML file, once it is checked.
+
+    Raises:
+        ConfigError: If the file has problems, listing every one.
+        FileNotFoundError: If there is no such file.
+        tomllib.TOMLDecodeError: If the file is not TOML.
+    """
+    if str(toml_file).endswith(".toml"):
+        found = problems(ConfigParser.load_toml(toml_file))
+        if found:
+            raise ConfigError(toml_file, found)
+    return ConfigParser.parse(toml_file)
 
 
 def problems(config) -> list[Problem]:
@@ -125,10 +169,14 @@ def _instrument_problems(instruments) -> list[Problem]:
             )
             continue
         if driver not in instrument_map:
+            # The closest name, or else every name
+            hint = settings._suggestion(driver, instrument_map) or (
+                f". The drivers are {', '.join(instrument_map)}"
+            )
             found.append(
                 Problem(
                     (*where, "instrument"),
-                    f"Instrument '{name}': there is no driver called {driver!r}.",
+                    f"Instrument '{name}': there is no driver called {driver!r}{hint}.",
                 )
             )
             continue
