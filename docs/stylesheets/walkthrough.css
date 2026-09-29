@@ -1,6 +1,7 @@
-/* Getting Started (docs/getting_started.md): rig.toml is built up a few lines at a time.
+/* Walkthroughs: Getting Started's pages and the Usage tutorials, where files are built
+   up a few lines at a time beside a terminal.
 
-   On a wide screen, docs/javascripts/getting_started.js adds .gs--live: the file and a
+   On a wide screen, docs/javascripts/walkthrough.js adds .gs--live: the file and the
    terminal are pinned while the page scrolls, and each step's note is placed against
    the lines it adds, joined to them as the front page's annotated code is (.pa-note in
    showcase.css). Without the script, or on a narrow screen, the steps are an ordinary
@@ -56,6 +57,8 @@
   pointer-events: none;
 }
 .gs--live .gs-step.is-active { opacity: 1; transform: none; pointer-events: auto; }
+/* A note whose step adds no lines sits at the top, with no tab */
+.gs--live .gs-step.is-unanchored::before { display: none; }
 /* The tab: at the line the note starts or ends at (--tab, set by the script) */
 .gs--live .gs-step::before {
   content: "";
@@ -86,8 +89,9 @@
   font-size: 0.6rem;
   border-top: 1px solid var(--pa-border);
 }
-/* The step's code is in the panels. Screen readers skip those, so it stays for them. */
-.gs--live .gs-step .highlight {
+/* The step's own code is in the panels. Screen readers skip those, so it stays for them.
+   Code in an aside in the note stays where it is. */
+.gs--live .gs-step > .highlight {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -133,6 +137,12 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .gs-panel__name span { font-weight: 400; }
+/* A tab for each file: the one shown marked, one not made yet dimmed */
+.gs-panel__name.gs-tabs { justify-content: flex-start; gap: 1.3rem; }
+.gs-tab { position: relative; align-self: stretch; display: flex; align-items: center; transition: color 0.25s, opacity 0.25s; }
+.gs-tab.is-shown { font-weight: 700; color: #d6deeb; }
+.gs-tab.is-shown::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--pa-orange); }
+.gs-tab.is-unmade { opacity: 0.45; }
 .gs-panel__body {
   position: relative;
   padding: 0.9rem 0;
@@ -145,6 +155,10 @@
    file scrolls, as an editor would, to keep its new lines in view. */
 .gs-panel--file .gs-panel__body { height: calc(var(--file-lines, 15) * var(--lh) + 1.8rem); overflow: hidden; }
 .gs-scroll { transition: transform 0.45s cubic-bezier(0.2, 0, 0, 1); }
+/* Several files: only the one shown is laid out, and it fades in when it changes */
+.gs-scroll.is-away { display: none; }
+.gs-scroll.is-arriving { animation: gs-arrive 0.3s ease-out both; }
+@keyframes gs-arrive { from { opacity: 0; } to { opacity: 1; } }
 .gs-panel--term .gs-panel__body {
   display: flex;
   flex-direction: column;
@@ -203,7 +217,7 @@
 }
 @keyframes gs-blink { 50% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) {
-  .gs-line.is-typing > span, .gs-caret { animation: none; }
+  .gs-line.is-typing > span, .gs-caret, .gs-scroll.is-arriving { animation: none; }
   .gs--live .gs-step { transition: none; }
 }
 
@@ -211,7 +225,7 @@
 .gs-shot { position: relative; margin: 1.2rem 0; }
 .md-typeset .gs-shot p { margin: 0; }
 /* The top 90% of the screenshot: below the tiles it is empty. The pins' heights in
-   docs/getting_started.md are fractions of what is shown. */
+   page are fractions of what is shown. */
 .md-typeset .gs-shot img.pa-shot { width: 100%; margin: 0; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; }
 .gs-pin {
   position: absolute;

@@ -387,54 +387,10 @@ def test_the_simulated_rig_sets_up(examples):
 
 
 # -- Getting Started ---------------------------------------------------------------
-# Part 1's page builds rig.toml from its steps' snippets, and part 2's page includes
-# the six versions of lab.py. Both are checked against examples/getting_started.
+# Part 1's page builds rig.toml from its steps' snippets (checked by
+# test_docs_walkthroughs.py), and part 2's includes the six versions of lab.py.
 
 GETTING_STARTED = EXAMPLES / "getting_started"
-TABLE = re.compile(r"\[([^\]]+)\]")
-
-
-def built_from_the_steps(page):
-    """The TOML file a Getting Started page builds from its steps' snippets, as
-    docs/javascripts/getting_started.js builds it: a line under a table that is there
-    already goes at its end, and a new table goes after its family ([instruments.lockin]
-    after [instruments]), or at the end."""
-    steps = page.read_text(encoding="utf-8").split("## What you built")[0]
-    rows = []
-    for snippet in re.findall(r"```toml\n(.*?)```", steps, flags=re.S):
-        blocks = []
-        for line in snippet.splitlines():
-            line = line.rstrip()
-            header = TABLE.fullmatch(line)
-            if header:
-                blocks.append((header.group(1), line, []))
-            elif line and blocks:
-                blocks[-1][2].append(line)
-        for name, header, lines in blocks:
-            tables = []  # each table's name, and the row after its last line
-            for i, row in enumerate(rows):
-                found = TABLE.fullmatch(row)
-                if found:
-                    tables.append([found.group(1), i + 1])
-                elif row and tables:
-                    tables[-1][1] = i + 1
-            same = [end for table, end in tables if table == name]
-            if same:
-                rows[same[0] : same[0]] = lines
-                continue
-            family = name.split(".")[0]
-            ends = [end for table, end in tables if table.split(".")[0] == family]
-            at = ends[-1] if ends else len(rows)
-            rows[at:at] = ([""] if rows else []) + [header, *lines]
-    return "\n".join(rows) + "\n"
-
-
-def test_the_config_file_page_builds_the_example_rig():
-    page = DOCS / "getting_started" / "config_file.md"
-    rig = (GETTING_STARTED / "rig.toml").read_text(encoding="utf-8")
-    assert built_from_the_steps(page) == rig
-
-
 def test_the_getting_started_rig_loads_with_no_problems(examples):
     import tomllib
 

@@ -4,8 +4,8 @@ site_url = "https://pyacquisition.readthedocs.io"
 repo_url = "https://github.com/jakeayres/pyacquisition"
 repo_name = "pyacquisition"
 
-extra_css = ["stylesheets/home.css", "stylesheets/showcase.css", "stylesheets/tutorial.css", "stylesheets/instruments.css", "stylesheets/getting_started.css"]
-extra_javascript = ["javascripts/getting_started.js"] # only acts on the Getting Started page
+extra_css = ["stylesheets/home.css", "stylesheets/showcase.css", "stylesheets/tutorial.css", "stylesheets/instruments.css", "stylesheets/walkthrough.css"]
+extra_javascript = ["javascripts/walkthrough.js"] # only acts on a page with a walkthrough (.gs)
 
 nav = [
   { "Overview" = [

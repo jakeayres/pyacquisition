@@ -1,25 +1,44 @@
-/* Getting Started: a file is built up a few lines at a time as the page scrolls.
+/* A walkthrough: files built up a few lines at a time as the page scrolls, beside a
+   terminal, with each step's note placed against the lines it changes. Getting Started's
+   pages are walkthroughs, and so is each Usage tutorial.
 
-   The steps' own code blocks are the source, in one of two ways:
+   A walkthrough is a .gs element holding a .gs-stage, which holds .gs-notes, which holds
+   a <section class="gs-step"> for each step: its heading, its note and its code. The
+   steps' own code blocks are the source. A block inside an aside (an admonition or a
+   <details>) isn't: it stays where it is, as it would in any page.
 
-   - TOML blocks are merged into the file under its tables, as you would edit the real
-     file: a line under a table that is already there goes at the end of it, and a new
-     table goes after its family ([instruments.lockin] after [instruments]), or at the
-     end. (1. The Config File)
-   - With data-mode="versions" on the .gs element, each step's block (any language but
-     the shell) is the whole file as it is after the step, and the differences from the
-     step before are shown: lines added, and lines removed. (0. Installation, and
-     2. The Python API)
+   - A shell block's commands go into the terminal, and a text block is output there, a
+     line for each line. A step's data-result adds one more line of output.
+   - Any other block belongs to the file its title names (```python title="lab.py"),
+     or, with no title, to the walkthrough's first file. A file is built in one of two
+     modes:
+     - merge: each block is a TOML snippet, merged into the file under its tables, as
+       you would edit the real file. A line under a table that is already there goes at
+       the end of it, and a new table goes after its family ([instruments.lockin] after
+       [instruments]), or at the end. (1. The Config File)
+     - versions: each block is the whole file as it is after the step, and the
+       differences from the version before are shown: lines added, and lines removed.
+       (0. Installation, and 2. The Python API)
 
-   Each shell block's commands go into the terminal, followed by the step's data-result,
-   if it has one. The step with data-new-file is the one that makes the file. On the
-   .gs element, data-file names the file, and data-lines and data-term-lines are how
-   many lines of it and of the terminal are in view.
+   On the .gs element:
 
-   On a wide screen the file and the terminal are pinned while the page scrolls past
-   the steps, and the note of the step in view is placed against the lines it changes.
-   Otherwise, or without this script, the steps are an ordinary lesson.
-   docs/stylesheets/getting_started.css has the styles. */
+   - data-files="thermometer.py:versions lab.py:versions" lists the files, in order,
+     each with its mode (versions if it has none). The file panel shows the file of the
+     step in view, with a tab for each. data-files="" is a walkthrough in the terminal
+     alone.
+   - Or, for one file, data-file names it ("rig.toml" if it is left out), and
+     data-mode="versions" sets its mode (merge if it is left out).
+   - data-lines and data-term-lines are how many lines of the file and of the terminal
+     are in view.
+
+   A step with data-new-file makes a file that starts empty: the one it names, or the
+   first. Otherwise a file is made by the first step that writes it. A step with no code
+   of a file's shows the file of the step before it.
+
+   On a wide screen the panels are pinned while the page scrolls past the steps, and the
+   note of the step in view is placed against the lines it adds, or at the top when it
+   adds none. Otherwise, or without this script, the steps are an ordinary lesson, each
+   with its code in place. docs/stylesheets/walkthrough.css has the styles. */
 (() => {
   "use strict";
 
@@ -60,7 +79,7 @@
     });
   }
 
-  // The TOML file, merged from the steps' snippets. A row is shown from step `from`.
+  // A TOML file, merged from the steps' snippets. A row is shown from step `from`.
   function tables(rows) {
     const found = [];
     rows.forEach((row, i) => {
@@ -93,9 +112,9 @@
     }
   }
 
-  // The Python file, from its versions: each line's rows are shown from the step that
-  // adds them until the step that removes them. Deletions come before insertions, so
-  // an edited line goes, and its new form appears where it was.
+  // A file from its versions: each line's rows are shown from the step that adds them
+  // until the step that removes them. Deletions come before insertions, so an edited line
+  // goes, and its new form appears where it was.
   function diff(a, b) {
     const n = a.length, m = b.length;
     const lcs = Array.from({ length: n + 1 }, () => new Array(m + 1).fill(0));
@@ -151,11 +170,9 @@
     }
     return out;
   }
-  function versions(rows, steps) {
+  function versions(rows, blocks) {
     let alive = [];
-    steps.forEach((el, step) => {
-      const code = el.querySelector(".highlight:not(.language-bash) code");
-      if (!code) return;
+    for (const { step, code } of blocks) {
       const next = linesOf(code);
       const now = [];
       let after = null;
@@ -174,8 +191,22 @@
         }
       }
       alive = now;
-    });
+    }
   }
+
+  // The files a walkthrough declares (see the top of this file)
+  function declared(root) {
+    if (root.hasAttribute("data-files")) {
+      return root.dataset.files.split(/\s+/).filter(Boolean).map((entry) => {
+        const [name, mode] = entry.split(":");
+        return { name, mode: mode === "merge" ? "merge" : "versions" };
+      });
+    }
+    return [{ name: root.dataset.file || "rig.toml", mode: root.dataset.mode === "versions" ? "versions" : "merge" }];
+  }
+  // A step's own code blocks that match: not those in an aside, which stay where they are
+  const own = (step, selector) => [...step.querySelectorAll(selector)].filter((b) => !b.closest(".admonition, details"));
+  const titleOf = (block) => block.querySelector(".filename")?.textContent.trim() || "";
 
   function mount(root) {
     if (root.dataset.ready) return;
@@ -183,28 +214,59 @@
     const stage = root.querySelector(".gs-stage");
     const steps = [...root.querySelectorAll(".gs-notes > .gs-step")];
     if (!stage || !steps.length) return;
+    const fileLines = +(root.dataset.lines || 15), termLines = +(root.dataset.termLines || 7);
     root.style.setProperty("--steps", steps.length);
-    root.style.setProperty("--file-lines", root.dataset.lines || 15);
-    root.style.setProperty("--term-lines", root.dataset.termLines || 7);
+    root.style.setProperty("--file-lines", fileLines);
 
-    const file = [];
-    if (root.dataset.mode === "versions") versions(file, steps);
-    else steps.forEach((el, i) => el.querySelectorAll(".language-toml code").forEach((c) => merge(file, c.textContent, i)));
+    // The files: each step's blocks sorted into them, and each built in its mode
+    const files = declared(root).map((f) => ({ ...f, rows: [], blocks: [], madeAt: -1, made: false }));
+    const writes = new Array(steps.length).fill(-1); // the file each step writes, if any
+    steps.forEach((el, i) => {
+      for (const block of own(el, "div.highlight:not(.language-bash):not(.language-text)")) {
+        const title = titleOf(block);
+        const k = title ? files.findIndex((f) => f.name === title) : files.length ? 0 : -1;
+        if (k < 0) {
+          console.warn(`walkthrough: a block for ${title || "a file"}, which the walkthrough doesn't list`);
+          continue;
+        }
+        files[k].blocks.push({ step: i, code: block.querySelector("code") });
+        writes[i] = k;
+      }
+      if (el.hasAttribute("data-new-file") && files.length) {
+        const k = Math.max(0, files.findIndex((f) => f.name === el.getAttribute("data-new-file")));
+        if (files[k].madeAt < 0) files[k].madeAt = i;
+      }
+    });
+    for (const f of files) {
+      const first = f.blocks.length ? f.blocks[0].step : -1;
+      if (f.madeAt < 0 || (first >= 0 && first < f.madeAt)) f.madeAt = first;
+      if (f.mode === "versions") versions(f.rows, f.blocks);
+      else f.blocks.forEach(({ step, code }) => merge(f.rows, code.textContent, step));
+    }
+    // The file each step shows: the one it writes, or the one before
+    const shows = [];
+    steps.forEach((_, i) => { shows[i] = writes[i] >= 0 ? writes[i] : i > 0 ? shows[i - 1] : 0; });
+
+    // The terminal: each step's commands and output, in the order they are on the page
     const term = [];
     steps.forEach((el, i) => {
-      el.querySelectorAll(".language-bash code").forEach((c) => {
-        for (const cmd of c.textContent.trim().split("\n")) {
+      for (const block of own(el, "div.language-bash, div.language-text")) {
+        const text = block.querySelector("code").textContent.replace(/\n$/, "");
+        if (block.classList.contains("language-text")) {
+          for (const out of text.split("\n")) term.push({ html: `<span class="t-out">${esc(out)}</span>`, from: i, to: Infinity });
+          continue;
+        }
+        for (const cmd of text.trim().split("\n")) {
           const html = cmd.startsWith("#") ? `<span class="t-c">${esc(cmd)}</span>` : `<span class="t-prompt">$</span> ${esc(cmd)}`;
           term.push({ html, from: i, to: Infinity });
         }
-      });
+      }
       if (el.dataset.result) term.push({ html: `<span class="t-out">${esc(el.dataset.result)}</span>`, from: i, to: Infinity });
     });
-    const madeAt = steps.findIndex((s) => s.hasAttribute("data-new-file"));
 
-    // The panels: the file, and the terminal
-    const panel = (kind, name) => {
-      const p = make("div", `gs-panel gs-panel--${kind}`, `<div class="gs-panel__name">${esc(name)}</div>`);
+    // The panels: the file, with a tab for each when there are several, and the terminal
+    const panel = (kind, nameHtml) => {
+      const p = make("div", `gs-panel gs-panel--${kind}`, `<div class="gs-panel__name">${nameHtml}</div>`);
       const body = make("div", "gs-panel__body highlight");
       p.append(body);
       return [p, body];
@@ -215,26 +277,44 @@
       r.dataset.to = to;
       return r;
     };
-    const [filePanel, fileBody] = panel("file", root.dataset.file || "rig.toml");
-    const scroller = make("div", "gs-scroll");
-    const blank = line("", -1, Infinity); // an empty file's one line
-    const fileRows = file.map((r) => line(r.html, r.from, r.to));
-    scroller.append(blank, ...fileRows);
-    const empty = make("div", "gs-empty", "Not made yet");
-    fileBody.append(scroller, empty);
+    const panels = make("div", "gs-panels");
+    panels.setAttribute("aria-hidden", "true");
+    let fileBody = null, empty = null, tabs = [];
+    if (files.length) {
+      const names = files.length > 1
+        ? files.map((f) => `<span class="gs-tab">${esc(f.name)}</span>`).join("")
+        : esc(files[0].name);
+      const [filePanel, body] = panel("file", names);
+      fileBody = body;
+      if (files.length > 1) filePanel.firstChild.classList.add("gs-tabs");
+      tabs = [...filePanel.querySelectorAll(".gs-tab")];
+      for (const f of files) {
+        f.scroller = make("div", "gs-scroll is-away");
+        f.blank = line("", -1, Infinity); // an empty file's one line
+        f.rowEls = f.rows.map((r) => line(r.html, r.from, r.to));
+        f.scroller.append(f.blank, ...f.rowEls);
+        fileBody.append(f.scroller);
+      }
+      empty = make("div", "gs-empty", "Not made yet");
+      fileBody.append(empty);
+      panels.append(filePanel);
+      root.style.setProperty("--term-lines", termLines);
+    } else {
+      // The terminal alone, as tall as the file and the terminal would be together
+      root.style.setProperty("--term-lines", fileLines + termLines + 3);
+      root.classList.add("gs--terminal");
+    }
     const [termPanel, termBody] = panel("term", "Terminal");
     const termRows = term.map((t) => line(t.html, t.from, t.to));
     termBody.append(...termRows);
-    const panels = make("div", "gs-panels");
-    panels.setAttribute("aria-hidden", "true");
-    panels.append(filePanel, termPanel);
+    panels.append(termPanel);
     stage.prepend(panels);
 
     // Showing a step
-    let active = -1;
+    let active = -1, current = -1; // the step in view, and the file shown
     let target = [], up = false;
     const shownAt = (r, i) => +r.dataset.from <= i && i < +r.dataset.to;
-    function reveal(rows, i, forward) {
+    function reveal(rows, i, animate) {
       let order = 0;
       for (const r of rows) {
         const was = r.classList.contains("is-hidden");
@@ -242,7 +322,7 @@
         r.classList.toggle("is-hidden", !shown);
         r.classList.toggle("is-new", added && shown);
         r.classList.remove("is-typing");
-        if (added && shown && was && forward && !reduced()) {
+        if (added && shown && was && animate && !reduced()) {
           r.style.setProperty("--delay", `${0.1 + order++ * 0.05}s`);
           void r.offsetWidth;
           r.classList.add("is-typing");
@@ -255,18 +335,41 @@
       active = i;
       steps.forEach((s, j) => s.classList.toggle("is-active", j === i));
 
-      const made = madeAt >= 0 && i >= madeAt;
-      const newInFile = reveal(fileRows, i, forward);
+      let newInFile = [];
+      if (files.length) {
+        const k = shows[i];
+        files.forEach((f, j) => {
+          f.made = f.madeAt >= 0 && i >= f.madeAt;
+          const added = reveal(f.rowEls, i, forward && j === k);
+          const written = f.rowEls.some((r) => shownAt(r, i));
+          f.blank.classList.toggle("is-hidden", !f.made || written);
+          if (j === k) newInFile = added;
+        });
+        const f = files[k];
+        if (k !== current) {
+          files.forEach((g, j) => g.scroller.classList.toggle("is-away", j !== k));
+          if (current >= 0 && !reduced()) {
+            f.scroller.classList.remove("is-arriving");
+            void f.scroller.offsetWidth;
+            f.scroller.classList.add("is-arriving");
+          }
+          current = k;
+        }
+        tabs.forEach((t, j) => {
+          t.classList.toggle("is-shown", j === k);
+          t.classList.toggle("is-unmade", !files[j].made);
+        });
+        empty.classList.toggle("is-hidden", f.made);
+        fileBody.querySelectorAll(".gs-caret").forEach((c) => c.remove());
+        const written = f.rowEls.some((r) => shownAt(r, i));
+        const caretAt = newInFile[newInFile.length - 1] || (f.made && !written ? f.blank : null);
+        if (caretAt) caretAt.firstChild.append(make("span", "gs-caret"));
+      }
       const newInTerm = reveal(termRows, i, forward);
-      const written = fileRows.some((r) => shownAt(r, i));
-      blank.classList.toggle("is-hidden", !made || written);
-      empty.classList.toggle("is-hidden", made);
-      scroller.querySelectorAll(".gs-caret").forEach((c) => c.remove());
-      const caretAt = newInFile[newInFile.length - 1] || (made && !written ? blank : null);
-      if (caretAt) caretAt.firstChild.append(make("span", "gs-caret"));
 
       target = newInFile.length ? newInFile : newInTerm;
       up = !newInFile.length;
+      steps[i].classList.toggle("is-unanchored", !target.length);
       setTimeout(scrollFile, 0);
       follow(700);
     }
@@ -275,6 +378,8 @@
     // the lines will be, a line apart, since those being shown or hidden are still growing
     // or shrinking: after a jump of several steps, most of them are.
     function scrollFile() {
+      if (current < 0) return;
+      const scroller = files[current].scroller;
       const rows = target.length && !up ? target : [];
       const shown = [...scroller.children].filter((r) => !r.classList.contains("is-hidden"));
       const lh = parseFloat(getComputedStyle(fileBody).lineHeight);
@@ -296,16 +401,22 @@
     // The note beside the lines it adds, its bar at least as tall as they are. It starts
     // at their first line, or hangs above their last (the terminal's, or when there is
     // no room below), and moves as little as it must to stay in the window. Its tab
-    // points at the line it starts or ends at.
+    // points at the line it starts or ends at. A step that adds no lines has its note at
+    // the top, with no tab.
     function place() {
-      if (active < 0 || !target.length) return;
+      if (active < 0) return;
+      const note = steps[active];
+      if (!target.length) {
+        note.style.setProperty("--span", "0px");
+        note.style.setProperty("--top", "0px");
+        return;
+      }
       const box = stage.getBoundingClientRect();
       // The lines' extent within what their panel shows, from the stage's top
       const view = (up ? termBody : fileBody).getBoundingClientRect();
       const first = Math.max(target[0].getBoundingClientRect().top, view.top) - box.top;
       const last = Math.min(target[target.length - 1].getBoundingClientRect().bottom, view.bottom) - box.top;
       const row = target[0].offsetHeight;
-      const note = steps[active];
       const span = Math.max(0, last - first);
       const height = Math.max(span, note.offsetHeight);
       const room = window.innerHeight - box.top - 16;
@@ -341,6 +452,9 @@
       const done = (pinnedAt() - root.getBoundingClientRect().top) / travel();
       const i = Math.floor(clamp(done, 0, 0.9999) * steps.length);
       if (i !== active) show(i);
+      // The note is placed for where the stage is: until it is pinned, that changes as the
+      // page scrolls, within one step (the first, shown as the page loads).
+      else follow(0);
       // The contents: before the steps nothing is current, and after them all are passed.
       const at = done < 0 ? -1 : done >= 1 ? steps.length : i;
       tocLinks.forEach((a, j) => {
