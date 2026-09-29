@@ -7,7 +7,7 @@ import pytest
 from pyacquisition import Experiment
 from pyacquisition.core.adapters.mock import MockResource
 from pyacquisition.core.instrument import SoftwareInstrument
-from pyacquisition.instruments import Clock, Keithley_6221
+from pyacquisition.instruments import SR_830, Clock, Keithley_6221, instrument_map
 
 
 # -------------------------------------------------------------- opening
@@ -107,6 +107,32 @@ def test_closing_twice_is_harmless():
 
 def test_a_software_instrument_can_be_closed_too():
     Clock("clock").close()
+
+
+# -------------------------------------------------------------- names
+# The name is what the interface's Instruments tab shows under an instrument's id.
+@pytest.mark.parametrize("config_name, driver", instrument_map.items())
+def test_each_driver_is_shown_by_its_own_name(config_name, driver):
+    assert driver.name not in ("Base Instrument", "Software Instrument")
+
+
+def test_a_driver_without_a_name_is_shown_by_its_class_name():
+    assert SR_830.name == "SR_830"
+    assert Keithley_6221("k", "GPIB0::12::INSTR", adapter="mock").name == "Keithley_6221"
+
+
+def test_a_driver_with_a_name_keeps_it():
+    assert Clock.name == "Clock"
+
+
+def test_a_subclass_without_a_name_is_shown_by_its_own_class_name():
+    class Thermometer(SoftwareInstrument):
+        name = "My Thermometer"
+
+    class ColdThermometer(Thermometer):
+        pass
+
+    assert ColdThermometer("t").name == "ColdThermometer"
 
 
 # -------------------------------------------------------------- the experiment

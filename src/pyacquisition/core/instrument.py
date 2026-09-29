@@ -149,6 +149,11 @@ class QueryCommandProvider(type):
         cls._commands = commands
         cls._traces = traces
 
+        # The name the interface shows for the instrument: the driver's own, or
+        # else its class name (SR_830), not a name inherited from its base class.
+        if "name" not in attrs:
+            cls.name = cls.__name__
+
 
 def mark_query(func):
     """Decorator for marking method as a query"""

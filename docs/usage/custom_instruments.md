@@ -55,7 +55,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         return random.uniform(*self._parameters)
 ```
 
-1. A readable name for the instrument.
+1. A readable name for the instrument, shown under its id in the interface's Instruments tab. Without one, the class name is shown.
 2. `SoftwareInstrument.__init__` takes the instrument's id. Pass it on.
 3. A **command** changes the state of the instrument.
 4. Type hints on the arguments are required. The interface uses them to validate input and to choose the right kind of input box.
