@@ -82,7 +82,7 @@ if __name__ == "__main__":
 1. `read` is any function that takes no arguments and returns the measured value. Pass the method, not its result: no brackets. For a method that needs arguments, use a `lambda` or `functools.partial`, for example `lambda: sensor.get_temperature(Channel.A)`.
 2. `write` is any function that takes the output. It is called on every cycle, and once more when the PID ends.
 3. Always set limits that suit your hardware. Here the output is a heater power between 0 and 100 %.
-4. Give the PID a [task manager of its own](../usage/running_tasks.md#several-task-managers), so that it runs for the whole experiment while the main queue is free for everything else. Queueing it there starts it when the experiment starts. Nothing else queued on that task manager would run, because the PID never finishes, so name it for what it holds, such as `"pid"`, and keep it for the PID.
+4. Give the PID a [task manager of its own](../../usage/running_tasks.md#several-task-managers), so that it runs for the whole experiment while the main queue is free for everything else. Queueing it there starts it when the experiment starts. Nothing else queued on that task manager would run, because the PID never finishes, so name it for what it holds, such as `"pid"`, and keep it for the PID.
 5. The PID's output and error are ordinary attributes, so record them like any other measurement. See [What the PID is doing](#what-the-pid-is-doing).
 
 Run it, and plot `temperature` and `power`. The temperature rises with the heater at full power, and settles at 60 °C with the power at about 50 %.
@@ -148,7 +148,7 @@ class Staircase(Task):
 
 1. A task receives the PID as an input, like any other object. Queue it in `setup()` with `self.task_managers["main"].add_task(Staircase(pid))`, next to the PID on its own task manager. Because its input is an object, it is created in code and is not registered for the interface.
 
-The interface cannot change these while it runs, because a PID is created in code. To be able to change the setpoint from the interface, put it in a small [software instrument](../usage/custom_instruments.md) whose command sets `pid.setpoint`, and give the instrument the PID.
+The interface cannot change these while it runs, because a PID is created in code. To be able to change the setpoint from the interface, put it in a small [software instrument](../../usage/custom_instruments.md) whose command sets `pid.setpoint`, and give the instrument the PID.
 
 ## What the PID is doing
 
@@ -161,7 +161,7 @@ In the **Queue** tab, the PID's card shows its setpoint and gains, and once it i
 - **A failed cycle is logged and skipped.** If `read` or `write` raises an error (an instrument times out, say), or the reading is not a number, the output stays where it was and the PID tries again on the next cycle.
 - **Too many in a row stops it.** After `max_failures` failed cycles in a row, the PID stops with an error. It never carries on blind.
 - **It always writes `final_output`.** That happens when it is aborted, when it reaches its `duration`, when the experiment shuts down, and when it stops with an error.
-- **The error reaches the parent.** If the PID is running as a subtask, or [alongside](../usage/composing_tasks.md#in-the-background-alongside) another block of work, the error interrupts that work and is raised there. See [Composing tasks](../usage/composing_tasks.md).
+- **The error reaches the parent.** If the PID is running as a subtask, or [alongside](../../usage/composing_tasks.md#in-the-background-alongside) another block of work, the error interrupts that work and is raised there. See [Composing tasks](../../usage/composing_tasks.md).
 
 !!! warning "The software cannot protect the hardware if it stops"
     If the Python process dies, nothing writes `final_output`, and the instrument keeps whatever output it was last given. For anything that can be damaged or is dangerous, such as a heater, set limits on the instrument itself, and use its own over-temperature protection, as a second line of defence.
@@ -171,7 +171,7 @@ In the **Queue** tab, the PID's card shows its setpoint and gains, and once it i
 
 ## Using the controller without a task
 
-`PIDController` is the calculation on its own: give it the setpoint, the measured value and the time since the last call, and it returns the output. Use it if you want a PID somewhere other than a task, for example in a [calculation](../usage/calculations.md).
+`PIDController` is the calculation on its own: give it the setpoint, the measured value and the time since the last call, and it returns the output. Use it if you want a PID somewhere other than a task, for example in a [calculation](../../usage/calculations.md).
 
 ```python
 from pyacquisition.tasks import PIDController

@@ -30,7 +30,7 @@ await self.run_subtask(
 await self.run_subtask(RampTemperature("lakeshore", "OUTPUT_1", 4.2, 2.0))
 ```
 
-It does not stop the ramp if it is paused or aborted, so add a `teardown()` of your own to a task that needs the setpoint held. To turn the automatic registration off, see [tasks that are already included](../usage/tasks.md#tasks-that-are-already-included).
+It does not stop the ramp if it is paused or aborted, so add a `teardown()` of your own to a task that needs the setpoint held. To turn the automatic registration off, see [tasks that are already included](../../usage/tasks.md#tasks-that-are-already-included).
 
 ## Reference
 

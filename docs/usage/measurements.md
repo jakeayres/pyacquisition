@@ -63,7 +63,7 @@ All three do the same. Text is worked out when the measurement is created, so a 
 ValueError: `input_channel`: 'INPUT_Z' is not one of INPUT_A, INPUT_B, INPUT_C, INPUT_D
 ```
 
-The same works in a [TOML file](toml_config.md#measurements-section): `args = {input_channel = "INPUT_A"}`.
+The same works in a [TOML file](../reference/config_file.md#measurements): `args = {input_channel = "INPUT_A"}`.
 
 ## Slow queries
 
@@ -87,7 +87,7 @@ You can pause and resume measuring, and change the period, while the experiment 
 
 ## Data files
 
-Data is saved as comma separated text in the folder given by `root_path` and `data_path` ([see the options](setting_up.md#experiment-options)). Each file starts with a header row holding the name of every measurement, followed by one row per cycle:
+Data is saved as comma separated text in the folder given by `root_path` and `data_path` ([see the options](../reference/experiment_options.md)). Each file starts with a header row holding the name of every measurement, followed by one row per cycle:
 
 ```
 time,random
@@ -98,13 +98,7 @@ time,random
 
 ### File names
 
-Files are named `<block>.<step> <title>.<extension>`, for example `00.01 gaussian.data`.
-
-| Part | Meaning |
-|---|---|
-| **block** | Groups the files of one run. A new block is started each time you run the experiment, so files from earlier runs are never overwritten. |
-| **step** | Counts the files within a block, starting at `00`. |
-| **title** | A label you choose when you start a new file. The first file is always called `start`. |
+Files are named `<block>.<step> <title>.<extension>`, for example `00.01 gaussian.data`. Each run of the experiment starts a new block, and each new file in it a new step, so no file is written over. [Data files](../reference/data_files.md#file-names) has the details.
 
 ### Starting a new file
 
@@ -130,4 +124,4 @@ Plot it with whatever you prefer, for example `matplotlib` (which you would need
 
 ## Viewing data live
 
-Everything that is measured (and calculated) is shown in the **Values** tab, and can be plotted: choose what to plot with the plot's chips and **+ Add**, and what goes on the horizontal axis with **against**. **+ Add plot** adds more plots, up to six. The plots show the whole of the current data file and the one before it. See [the interface](running.md#the-interface) for the rest. An experiment with [traces](traces.md) can add a trace panel or a map of one, too.
+Everything that is measured (and calculated) is shown in the **Values** tab, and can be plotted: choose what to plot with the plot's chips and **+ Add**, and what goes on the horizontal axis with **against**. **+ Add plot** adds more plots, up to six. The plots show the whole of the current data file and the one before it. See [the interface](../reference/interface.md) for the rest. An experiment with [traces](traces.md) can add a trace panel or a map of one, too.

@@ -83,33 +83,7 @@ Only messages matching those patterns (or containing `?`) can reach the magnet s
 
 ## Writing a spec
 
-The spec for `keithley_6221.py` is `keithley_6221.toml`, in the same folder. A spec is validated against its class when it is loaded, and **a typo is an error, not a silent default**. The full format is described in `pyacquisition/verify/spec.py`. The shape is:
-
-```toml
-[identity]                       # *IDN? must contain all of these (any case)
-contains = ["KEITHLEY", "6221"]
-
-[safe_state]                     # required before anything can be written
-steps = [{ call = "set_output_state", args = { state = "OFF" } }]
-verify = [{ call = "get_output_state", equals = "OFF" }]
-
-[read.get_buffer_selected]       # only for getters that need help
-args = [{ start = 1, count = 1 }]
-requires = ["nanovoltmeter"]     # skipped unless the inventory lists it
-# skip = "why it is not run"     # or leave one out, with the reason
-# range = [0, 500]               # the reading must lie in this range
-
-[roundtrip.current]              # set_current / get_current, unless named
-hazard = "reversible"            # required: "reversible" or "hazardous"
-values = [1e-9, -1e-9]           # or "*" for every member of an enum
-select = { line = ["TOP", "BOTTOM"] }   # other arguments, in every combination
-rel = 1e-3                       # how closely the readback must match
-abs = 1e-12
-preconditions = [{ call = "get_output_state", equals = "OFF" }]
-note = "why, for whoever reads this next"
-```
-
-Enum arguments and values are written by member name (`"OFF"`, `"SINUSOID"`). A getter whose parameters are not enums is skipped, visibly, until the spec supplies its `args`. A spec with no `[safe_state]` can be read but never written.
+The spec for `keithley_6221.py` is `keithley_6221.toml`, in the same folder. It is checked against its class when it is loaded, and a typo is an error, not a silent default. Every table and key is listed in [Verification specs](../reference/verification_specs.md).
 
 The specs that ship were written from the classes and the manuals and have not been run against real instruments. Expect to adjust values and tolerances the first time each is on the bench, and treat every `hazard` as a claim to review.
 

@@ -1,6 +1,6 @@
 # Setting Up in the Interface
 
-You can describe an experiment in a [TOML file](toml_config.md) without writing it yourself. `pyacquisition new` opens a window in which you add the instruments, choose what to measure, add calculations and set the options, all from forms. The file it makes is shown beside them, checked as it changes, and saved when you say. **Run** then starts the experiment from it, in the same window.
+You can describe an experiment in a [TOML file](../reference/config_file.md) without writing it yourself. `pyacquisition new` opens a window in which you add the instruments, choose what to measure, add calculations and set the options, all from forms. The file it makes is shown beside them, checked as it changes, and saved when you say. **Run** then starts the experiment from it, in the same window.
 
 ```
 uv run pyacquisition new rig.toml
@@ -24,7 +24,7 @@ Each instrument has a name, which is how measurements and the interface refer to
 
 An instrument with hardware also has:
 
-- **adapter**: how it is reached. `pyvisa` for most instruments, `prologix` behind a Prologix GPIB-USB controller, and `mock` to run with no device at all (see [Running hardware instruments without the device](toml_config.md#running-hardware-instruments-without-the-device)).
+- **adapter**: how it is reached. `pyvisa` for most instruments, `prologix` behind a Prologix GPIB-USB controller, and `mock` to run with no device at all (see [Running hardware instruments without the device](../reference/adapters.md#mock)).
 - **resource**: its address, such as `GPIB0::7::INSTR`.
 - **timeout**, **read_termination** and **write_termination**, which most instruments don't need. Type a line ending as `\n`.
 
@@ -46,11 +46,11 @@ The arrows move a measurement up or down. Their order is the order of the column
 
 ![The Calculations section: a rolling mean of x](../images/setup/calculations.png){ .pa-shot }
 
-The built-in [calculations](calculations.md#in-a-config-file) make new columns from the ones above them: `Sum` adds up the columns you tick, and `RollingMean` averages the last `window` values of a column. Only the measurements, and the calculations above one, can be its inputs, so moving it above a column it uses is a problem. Anything else, such as `x / 1e-6`, is written in Python (see below).
+The built-in [calculations](../reference/calculations.md#in-a-config-file) make new columns from the ones above them: `Sum` adds up the columns you tick, and `RollingMean` averages the last `window` values of a column. Only the measurements, and the calculations above one, can be its inputs, so moving it above a column it uses is a problem. Anything else, such as `x / 1e-6`, is written in Python (see below).
 
 ## Options
 
-Every [experiment option](setting_up.md#experiment-options) has a field, grouped by the section of the file it goes in, with what it is for. An empty field keeps the default, which it shows, and only the options you set are written to the file.
+Every [experiment option](../reference/experiment_options.md) has a field, grouped by the section of the file it goes in, with what it is for. An empty field keeps the default, which it shows, and only the options you set are written to the file.
 
 ![An option with a problem, shown by its field and above the file](../images/setup/problem.png){ .pa-shot }
 
@@ -62,7 +62,7 @@ To change the experiment afterwards, stop it and run `pyacquisition new rig.toml
 
 ## With Python
 
-The page makes TOML files. The parts of an experiment that are Python, such as your own tasks and calculations, go in a subclass that reads the file, as in [Combining a config file with Python](toml_config.md#combining-a-config-file-with-python):
+The page makes TOML files. The parts of an experiment that are Python, such as your own tasks and calculations, go in a subclass that reads the file, as in [Combining a config file with Python](../reference/experiment_options.md#where-a-value-comes-from):
 
 ```python
 class MyExperiment(Experiment):

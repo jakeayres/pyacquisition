@@ -162,23 +162,17 @@ with h5py.File("my_data/00.01 sweep.h5", "r") as f:
 
 ## In a config file
 
-A [TOML file](toml_config.md#traces-section) describes traces in a `[traces]` section. The key is the trace's name:
+A [TOML file](../reference/config_file.md#traces) describes traces in a `[traces]` section. The key is the trace's name:
 
 ```toml
 --8<-- "examples/traces.toml"
 ```
 
-This takes a spectrum from the included [`TraceGenerator`](../instruments/trace_generator.md) every 5 seconds. `every_rows`, `reduce`, `reduce_units`, `channels`, `timeout`, `unit`, `x_unit` and `args` (the trace method's inputs) can be given too. Your own reduction functions are Python only.
+This takes a spectrum from the included [`TraceGenerator`](../reference/instruments/trace_generator.md) every 5 seconds. `every_rows`, `reduce`, `reduce_units`, `channels`, `timeout`, `unit`, `x_unit` and `args` (the trace method's inputs) can be given too. Your own reduction functions are Python only.
 
 ## Memory and file size
 
-Three options in `[data]` (or on `Experiment`) set how much traces may take:
-
-| Option | Default | |
-|---|---|---|
-| `trace_history_mb` | 64 | The memory the recent traces kept for the trace and map panels may take. The oldest go first. |
-| `trace_file_mb` | 500 | The size past which a trace file goes on in a new part. |
-| `trace_pending_mb` | 256 | The memory traces may take while their file can't be written. Past it, the oldest are dropped. |
+Three options set how much traces may take: `trace_history_mb`, the memory the recent traces kept for the panels may take (64 MB); `trace_file_mb`, the size past which a trace file goes on in a new part (500 MB); and `trace_pending_mb`, the memory traces may take while their file can't be written (256 MB). They are in `[data]`, or on `Experiment`: see [the `[data]` table](../reference/config_file.md#data).
 
 ## Your own instrument's traces
 

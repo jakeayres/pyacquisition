@@ -16,3 +16,7 @@ def test_a_redirect_goes_from_a_page_that_is_gone_to_one_that_is_there(old, new)
     assert not (DOCS / old).exists(), f"{old} is a page, which its redirect would hide"
     assert (DOCS / new).exists(), f"{old} goes to {new}, which is not a page"
 
+
+def test_no_redirect_goes_to_another_redirect():
+    chained = {old: new for old, new in REDIRECTS.items() if new in REDIRECTS}
+    assert chained == {}

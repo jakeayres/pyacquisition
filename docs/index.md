@@ -122,7 +122,7 @@ Or build the file in a window, from forms, with `uv run pyacquisition new rig.to
 
     Describe the rig in a `.toml` file: instruments, measurements, data folder and logging. Drivers are included for lock-ins, temperature controllers, source meters and a magnet supply, and a mock adapter lets you develop without the device.
 
-    [TOML configuration](usage/toml_config.md)
+    [TOML configuration](reference/config_file.md)
 
 -   :material-monitor-dashboard:{ .middle } **A GUI for free**
 
@@ -157,16 +157,16 @@ Or build the file in a window, from forms, with `uv run pyacquisition new rig.to
 ## Supported instruments
 
 <div class="pa-chips" markdown>
-[Keithley 2000](instruments/keithley_2000.md)
-[Keithley 6221](instruments/keithley_6221.md)
-[Lakeshore 340](instruments/lakeshore_340.md)
-[Lakeshore 350](instruments/lakeshore_350.md)
-[Oxford Mercury iPS](instruments/mercury_ips.md)
-[SR 830](instruments/sr_830.md)
-[SR 860](instruments/sr_860.md)
-[Signal generator](instruments/signal_generator.md)
-[Clock](instruments/clock.md)
-[Random number generator](instruments/random_number_generator.md)
+[Keithley 2000](reference/instruments/keithley_2000.md)
+[Keithley 6221](reference/instruments/keithley_6221.md)
+[Lakeshore 340](reference/instruments/lakeshore_340.md)
+[Lakeshore 350](reference/instruments/lakeshore_350.md)
+[Oxford Mercury iPS](reference/instruments/mercury_ips.md)
+[SR 830](reference/instruments/sr_830.md)
+[SR 860](reference/instruments/sr_860.md)
+[Signal generator](reference/instruments/signal_generator.md)
+[Clock](reference/instruments/clock.md)
+[Random number generator](reference/instruments/random_number_generator.md)
 </div>
 
 Missing one? [Write your own instrument](usage/custom_instruments.md) by

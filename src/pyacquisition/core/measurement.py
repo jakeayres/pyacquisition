@@ -40,7 +40,7 @@ class Measurement:
             unit (str | None): The unit of the value, such as `"K"`, shown beside it
                 in the interface and on plot axes. It is for display only: the data
                 file is unchanged. Default is no unit.
-            **kwargs: Additional keyword arguments to pass to the function. Where
+            **kwargs (object): Additional keyword arguments to pass to the function. Where
                 the function takes an enum, give the member (`InputChannel.INPUT_A`)
                 or the text that names it (`"INPUT_A"`, or its label `"Input A"`).
 

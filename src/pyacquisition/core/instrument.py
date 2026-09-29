@@ -231,7 +231,7 @@ class Instrument(metaclass=QueryCommandProvider):
             yours to close.
         adapter (str): How to reach the instrument: `"pyvisa"` (the default),
             `"prologix"`, `"mock"` or `"record"`. Only for an address.
-        **resource_kwargs: Options for opening the resource, such as `timeout`
+        **resource_kwargs (object): Options for opening the resource, such as `timeout`
             (in milliseconds, 5000 by default) or `read_termination`. Only for
             an address.
 

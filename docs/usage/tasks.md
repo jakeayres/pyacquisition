@@ -238,9 +238,9 @@ Both are listed in **Add task**, asking only for `seconds`.
 
 ### Tasks that are already included
 
-A few tasks come with `pyacquisition`. `NewFile`, `WaitFor` and `WaitUntil` are always registered for you, and so are `PauseMeasurements`, `ResumeMeasurements` and `SetMeasurementPeriod`, to pause the measurements or change how often they are taken at a point in a queue ([Measurements](../tasks/measurements.md)).
+A few tasks come with `pyacquisition`. `NewFile`, `WaitFor` and `WaitUntil` are always registered for you, and so are `PauseMeasurements`, `ResumeMeasurements` and `SetMeasurementPeriod`, to pause the measurements or change how often they are taken at a point in a queue ([Measurements](../reference/tasks/measurements.md)).
 
-**Tasks for an instrument register themselves when it is there.** `RampTemperature` is for the Lakeshore 340 and 350, and `SweepMagneticField` is for the Mercury IPS. Add one of those instruments, in `setup()` or in a [TOML file](toml_config.md), and its task can be queued (as **Ramp Temperature** and **Sweep Magnetic Field**) with nothing else to write. They are registered once `setup()` has finished, so it does not matter in which order you add things.
+**Tasks for an instrument register themselves when it is there.** `RampTemperature` is for the Lakeshore 340 and 350, and `SweepMagneticField` is for the Mercury IPS. Add one of those instruments, in `setup()` or in a [TOML file](../reference/config_file.md), and its task can be queued (as **Ramp Temperature** and **Sweep Magnetic Field**) with nothing else to write. They are registered once `setup()` has finished, so it does not matter in which order you add things.
 
 - **The instrument's id is filled in for you** when there is exactly one such instrument, so the form does not ask for it. With two, such as a Lakeshore 340 and a 350, the form asks which, from a list of them.
 - **A task that you registered yourself is left as you registered it.** Do that to choose the label, to fix some of its inputs, or to limit it to a task manager.
@@ -257,7 +257,7 @@ class MyExperiment(Experiment):
         self.register_task(RampTemperature, label="Ramp", lakeshore="cryostat")
 ```
 
-In a TOML file, it is `auto_tasks = false` under `[experiment]`. See the [list of tasks](../tasks/overview.md) for which tasks are registered by themselves. Tasks that are only building blocks, such as `RampMagnet`, and ones that need more than an instrument, such as `PID`, are imported from `pyacquisition.tasks` and registered like your own.
+In a TOML file, it is `auto_tasks = false` under `[experiment]`. See the [list of tasks](../reference/tasks/overview.md) for which tasks are registered by themselves. Tasks that are only building blocks, such as `RampMagnet`, and ones that need more than an instrument, such as `PID`, are imported from `pyacquisition.tasks` and registered like your own.
 
 **A task input that is a choice** (which output to ramp, say) is asked for as text in the form and the API: `OUTPUT_1`, or the label `Output 1`, in any case. A name that matches nothing is refused, and the message lists the ones that do.
 

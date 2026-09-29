@@ -26,7 +26,7 @@ uv run pyacquisition --toml rig.toml
 
 It makes a `data` folder for its data files, and a `logs` folder too. Close the window, and choose **Stop experiment**.
 
-**More:** [a tour of the window](../usage/running.md#the-interface), and [everything a config file can say](../usage/toml_config.md).
+**More:** [a tour of the window](../reference/interface.md), and [everything a config file can say](../reference/config_file.md).
 { .gs-more }
 
 </section>
@@ -46,7 +46,7 @@ On the left, `clock` is the instrument's name: yours to choose, and how the rest
 
 An instrument has **queries**, values it can be asked for, and **commands**, which change it. The clock's `time` query is the seconds since it was made.
 
-**More:** [every driver](../instruments/overview.md), and [the `[instruments]` table](../usage/toml_config.md#instruments-section).
+**More:** [every driver](../reference/instruments/overview.md), and [the `[instruments]` table](../reference/config_file.md#instruments).
 { .gs-more }
 
 </section>
@@ -64,7 +64,7 @@ time = { instrument = "clock", method = "time" }
 
 The experiment **polls** its measurements: once a cycle, over and over, it reads each of them. Every reading is a live value in the window, a point you can plot, and an entry in the data file.
 
-**More:** [the Clock's queries](../instruments/clock.md), and [the `[measurements]` table](../usage/toml_config.md#measurements-section).
+**More:** [the Clock's queries](../reference/instruments/clock.md), and [the `[measurements]` table](../reference/config_file.md#measurements).
 { .gs-more }
 
 </section>
@@ -87,7 +87,7 @@ Some queries take arguments. A `SignalGenerator` is another software instrument,
 
 Add each line under its table. A table can only appear once in a file, so the tables are shown here only to say where the lines go.
 
-**More:** [the Signal Generator's waveforms and their arguments](../instruments/signal_generator.md), and [queries with arguments](../usage/measurements.md#queries-with-arguments).
+**More:** [the Signal Generator's waveforms and their arguments](../reference/instruments/signal_generator.md), and [queries with arguments](../usage/measurements.md#queries-with-arguments).
 { .gs-more }
 
 </section>
@@ -105,7 +105,7 @@ The **rack** is the part of the experiment that polls the measurements, and `[ra
 
 `period` is the polling period: the time from the start of one cycle to the start of the next, in seconds. It is 0.25 unless you say otherwise, and a cycle that takes longer delays the next. `0.2` polls five times a second, so the data file gains five rows a second.
 
-**More:** [the `[rack]` table](../usage/toml_config.md#rack-section), and [how often data is recorded](../usage/measurements.md#how-often-is-data-recorded).
+**More:** [the `[rack]` table](../reference/config_file.md#rack), and [how often data is recorded](../usage/measurements.md#how-often-is-data-recorded).
 { .gs-more }
 
 </section>
@@ -132,7 +132,7 @@ The `mock` adapter stands in for the device, answering each query with the value
 
 `[instruments.lockin]` is the same as a line under `[instruments]`, as a table of its own because it is longer.
 
-**More:** [the SR 830](../instruments/sr_830.md), [the `mock` adapter](../usage/toml_config.md#running-hardware-instruments-without-the-device), [finding an instrument's address](../usage/instruments.md#finding-the-address), [a Prologix controller](../usage/toml_config.md#instruments-behind-a-prologix-gpib-usb-controller), and [installing a VISA library](installation.md#before-you-connect-real-instruments) for GPIB.
+**More:** [the SR 830](../reference/instruments/sr_830.md), [the `mock` adapter](../reference/adapters.md#mock), [finding an instrument's address](../usage/instruments.md#finding-the-address), [a Prologix controller](../reference/adapters.md#prologix), and [installing a VISA library](installation.md#before-you-connect-real-instruments) for GPIB.
 { .gs-more }
 
 </section>
@@ -149,7 +149,7 @@ The same command as before, now with the whole rig. The experiment polls the mea
 
 Each run starts a new data file, numbered on from those already there, so that none is overwritten: after the empty file's `00.00 start.data`, this one is `01.00 start.data`. That is a whole experiment, in fifteen lines.
 
-**More:** [data files and their names](../usage/measurements.md#data-files), and [reading your data](../usage/measurements.md#reading-your-data).
+**More:** [data files and their names](../reference/data_files.md), and [reading your data](../usage/measurements.md#reading-your-data).
 { .gs-more }
 
 </section>
@@ -193,7 +193,7 @@ Everything in the window comes from the file:
 
 ??? failure "Something not working?"
     - **`Cannot declare ('instruments',) twice`.** A table appears twice. Put the new lines under the `[instruments]` or `[measurements]` you already have.
-    - **`rig.toml has 1 problem`.** The file is checked before anything starts, and every mistake in it is listed, naming the instrument or measurement it's in. A misspelt driver is given the closest name, as in `there is no driver called 'signalgenerator' (did you mean 'SignalGenerator'?)`, since names are case sensitive. The [Instruments](../instruments/overview.md) pages list them.
+    - **`rig.toml has 1 problem`.** The file is checked before anything starts, and every mistake in it is listed, naming the instrument or measurement it's in. A misspelt driver is given the closest name, as in `there is no driver called 'signalgenerator' (did you mean 'SignalGenerator'?)`, since names are case sensitive. The [Instruments](../reference/instruments/overview.md) pages list them.
     - **A real instrument is missing from the Instruments tab.** An instrument that can't be opened, at a wrong address say, is skipped with a warning in the log, and the rest of the experiment still starts. Check its address, and that a VISA library is installed for GPIB.
     - **No window appears.** Look at the terminal for an error. The page is also at [http://localhost:8000](http://localhost:8000) in a browser.
 
@@ -207,4 +207,4 @@ Everything in the window comes from the file:
 Next: [2. The Python API](python_api.md) keeps this file as it is, and builds on it in Python: setting up the lock-in as the experiment starts and leaving it safe as it ends, a calculated column, and a task of your own.
 
 !!! tip "Every option the file can take"
-    [TOML Configuration](../usage/toml_config.md) lists them all, section by section. To write the file from forms instead, run `uv run pyacquisition new rig.toml` (see [Setting Up in the Interface](../usage/setup_page.md)).
+    [TOML Configuration](../reference/config_file.md) lists them all, section by section. To write the file from forms instead, run `uv run pyacquisition new rig.toml` (see [Setting Up in the Interface](../usage/setup_page.md)).

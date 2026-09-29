@@ -13,15 +13,15 @@ Instrument classes are imported from `pyacquisition.instruments`.
 
 | Instrument | Type | Description |
 |---|---|---|
-| [`Clock`](../instruments/clock.md) | Software | Elapsed time and named timers. |
-| [`RandomNumberGenerator`](../instruments/random_number_generator.md) | Software | Random numbers from the common probability distributions. Stands in for real hardware while you develop. |
-| [`SignalGenerator`](../instruments/signal_generator.md) | Software | Waveforms (sine, square, triangle, chirp and more) computed from the time. |
+| [`Clock`](../reference/instruments/clock.md) | Software | Elapsed time and named timers. |
+| [`RandomNumberGenerator`](../reference/instruments/random_number_generator.md) | Software | Random numbers from the common probability distributions. Stands in for real hardware while you develop. |
+| [`SignalGenerator`](../reference/instruments/signal_generator.md) | Software | Waveforms (sine, square, triangle, chirp and more) computed from the time. |
 | `Calculator` | Software | A mock calculator (addition, trigonometry) that is mainly used to test the framework. |
-| [`SR_830`](../instruments/sr_830.md), [`SR_860`](../instruments/sr_860.md) | Hardware | Stanford Research Systems lock-in amplifiers. |
-| [`Keithley_2000`](../instruments/keithley_2000.md) | Hardware | Keithley 6½-digit multimeter: volts, current, resistance, frequency, temperature, with an optional scanner card. |
-| [`Keithley_6221`](../instruments/keithley_6221.md) | Hardware | Keithley AC and DC current source, with wave generator, sweeps and delta mode. |
-| [`Lakeshore_340`](../instruments/lakeshore_340.md), [`Lakeshore_350`](../instruments/lakeshore_350.md) | Hardware | Lakeshore temperature controllers. |
-| [`Mercury_IPS`](../instruments/mercury_ips.md) | Hardware | Oxford Instruments magnet power supply. |
+| [`SR_830`](../reference/instruments/sr_830.md), [`SR_860`](../reference/instruments/sr_860.md) | Hardware | Stanford Research Systems lock-in amplifiers. |
+| [`Keithley_2000`](../reference/instruments/keithley_2000.md) | Hardware | Keithley 6½-digit multimeter: volts, current, resistance, frequency, temperature, with an optional scanner card. |
+| [`Keithley_6221`](../reference/instruments/keithley_6221.md) | Hardware | Keithley AC and DC current source, with wave generator, sweeps and delta mode. |
+| [`Lakeshore_340`](../reference/instruments/lakeshore_340.md), [`Lakeshore_350`](../reference/instruments/lakeshore_350.md) | Hardware | Lakeshore temperature controllers. |
+| [`Mercury_IPS`](../reference/instruments/mercury_ips.md) | Hardware | Oxford Instruments magnet power supply. |
 
 If your device is not on the list, [write your own instrument class](custom_instruments.md). It takes a few lines.
 
@@ -70,13 +70,7 @@ lockin = SR_830("lockin", "GPIB0::7::INSTR", timeout=10000)
 cryostat = Lakeshore_350("lakeshore", "COM3::12", adapter="prologix")
 ```
 
-| Adapter | Use it for | Address |
-|---|---|---|
-| `pyvisa` (the default) | GPIB, USB, serial and Ethernet instruments, through a VISA library | `GPIB0::7::INSTR` |
-| `prologix` | GPIB instruments behind a [Prologix GPIB-USB controller](toml_config.md#instruments-behind-a-prologix-gpib-usb-controller) | `COM3::7` (serial port, then GPIB address) |
-| `mock` | Running the instrument class with no device, to [develop without the hardware](toml_config.md#running-hardware-instruments-without-the-device) | anything |
-
-The options are those of the adapter. For `pyvisa` and `prologix` they include `timeout` (in milliseconds, 5000 by default), `read_termination` and `write_termination`. For `mock` they include `responses`, the replies to give:
+The adapters are `pyvisa` (the default), `prologix` for GPIB instruments behind a Prologix GPIB-USB controller, and `mock` to run the instrument class with no device. Their addresses and options, such as `timeout` and `responses`, are listed in [Adapters](../reference/adapters.md). For example, a `mock` Lakeshore that answers its temperature query with 4.2:
 
 ```python
 thermometer = Lakeshore_350(

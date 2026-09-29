@@ -1,1 +1,0 @@
-::: pyacquisition.core.scribe.Scribe

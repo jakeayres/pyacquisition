@@ -1,2 +1,0 @@
-This section of the documentation dives deeper into the inner workings of the package—beyond what end users typically need to know. Here, you'll find detailed explanations of the architecture and design decisions that power PyAcquisition. Whether you're looking to add features, fix bugs, or simply understand how everything fits together, this is the place to start. Your contributions are very welcome!
-

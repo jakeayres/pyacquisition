@@ -1,6 +1,6 @@
-Instrument classes are shipped with `pyacquisition` and imported from `pyacquisition.instruments`. Choose one for its queries and commands, which are documented from the code.
+Every instrument driver that comes with PyAcquisition. [Adding instruments](../../usage/instruments.md) shows them in use, and [Writing your own instrument](../../usage/custom_instruments.md) shows how to write another.
 
-A **hardware** instrument takes an id and an address. A **software** instrument needs only an id. If yours is not here, [write your own](../usage/custom_instruments.md). It takes a few lines.
+The name on each card is the driver's: the class to import from `pyacquisition.instruments`, and what a config file's `instrument` takes. A **hardware** instrument takes a name and an address, and a **software** instrument only a name. Each page lists the driver's queries and commands, from its code.
 
 <div class="pa-makers" markdown>
 
@@ -50,6 +50,8 @@ A **hardware** instrument takes an id and an address. A **software** instrument 
 
 ## Software instruments
 
+-   [**Calculator**](calculator.md)  
+    Arithmetic and trigonometry, for trying queries and commands.
 -   [**Clock**](clock.md)  
     Software clock.
 -   [**RandomNumberGenerator**](random_number_generator.md)  

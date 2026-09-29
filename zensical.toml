@@ -20,64 +20,77 @@ nav = [
     { "1. The Config File" = "getting_started/config_file.md" },
     { "2. The Python API" = "getting_started/python_api.md" },
   ] },
-  { "Advanced Usage" = [
-    { "Overview" = "usage/advanced.md" },
-    { "The Experiment" = [
-      { "Experiment Options" = "usage/setting_up.md" },
-      { "The Interface and the API" = "usage/running.md" },
-      { "TOML Configuration" = "usage/toml_config.md" },
-      { "Setting Up in the Interface" = "usage/setup_page.md" },
-    ] },
-    { "Instruments and Data" = [
+  { "Usage" = [
+    { "Overview" = "usage/index.md" },
+    { "Instruments" = [
       { "Adding Instruments" = "usage/instruments.md" },
       { "Writing Your Own Instrument" = "usage/custom_instruments.md" },
+      { "Verifying Hardware" = "dev/verifying_hardware.md" },
+    ] },
+    { "Data" = [
       { "Measurements and Data Files" = "usage/measurements.md" },
       { "Calculations" = "usage/calculations.md" },
       { "Traces and Spectra" = "usage/traces.md" },
     ] },
-    { "Tasks and Procedures" = [
+    { "Tasks" = [
       { "Writing Tasks" = "usage/tasks.md" },
       { "Composing Tasks" = "usage/composing_tasks.md" },
       { "Running Tasks" = "usage/running_tasks.md" },
     ] },
+    { "The Experiment" = [
+      { "Experiment Options" = "usage/setting_up.md" },
+      { "Setting Up in the Interface" = "usage/setup_page.md" },
+      { "The Interface and the API" = "usage/running.md" },
+    ] },
   ] },
-  { "Experiment API" = [
-    { "Experiment" = "experiment/experiment.md" },
-    { "Rack" = "experiment/rack.md" },
-    { "Calculations" = "experiment/calculations.md" },
-    { "Traces" = "experiment/traces.md" },
-    { "Scribe" = "experiment/scribe.md" },
-    { "Task Manager" = "experiment/task_manager.md" },
-  ] },
-  { "Instruments" = [
-    { "Overview" = "instruments/overview.md" },
-    { "Clock" = "instruments/clock.md" },
-    { "Random Number Generator" = "instruments/random_number_generator.md" },
-    { "Signal Generator" = "instruments/signal_generator.md" },
-    { "Trace Generator" = "instruments/trace_generator.md" },
-    { "Keithley_2000" = "instruments/keithley_2000.md" },
-    { "Keithley_6221" = "instruments/keithley_6221.md" },
-    { "Lakeshore_340" = "instruments/lakeshore_340.md" },
-    { "Lakeshore_350" = "instruments/lakeshore_350.md" },
-    { "Mercury IPS" = "instruments/mercury_ips.md" },
-    { "SR_830" = "instruments/sr_830.md" },
-    { "SR_860" = "instruments/sr_860.md" },
-  ] },
-  { "Tasks" = [
-    { "Overview" = "tasks/overview.md" },
-    { "NewFile" = "tasks/new_file.md" },
-    { "WaitFor" = "tasks/wait_for.md" },
-    { "WaitUntil" = "tasks/wait_until.md" },
-    { "Measurements" = "tasks/measurements.md" },
-    { "AcquireTrace" = "tasks/acquire_trace.md" },
-    { "RampTemperature" = "tasks/ramp_temperature.md" },
-    { "PID" = "tasks/pid.md" },
-    { "Magnet sweeps" = "tasks/field_sweep.md" },
-  ] },
-  { "For Developers" = [
-    { "Overview" = "dev/overview.md" },
-    { "Contributing" = "dev/contributing.md" },
-    { "Verifying Hardware" = "dev/verifying_hardware.md" },
+  { "Reference" = [
+    { "Overview" = "reference/index.md" },
+    { "Config File" = "reference/config_file.md" },
+    { "Experiment Options" = "reference/experiment_options.md" },
+    { "Command Line" = "reference/command_line.md" },
+    { "Web API" = "reference/web_api.md" },
+    { "The Interface" = "reference/interface.md" },
+    { "Data Files" = "reference/data_files.md" },
+    { "Adapters" = "reference/adapters.md" },
+    { "Calculations" = "reference/calculations.md" },
+    { "Verification Specs" = "reference/verification_specs.md" },
+    { "Instruments" = [
+      { "Overview" = "reference/instruments/overview.md" },
+      { "Calculator" = "reference/instruments/calculator.md" },
+      { "Clock" = "reference/instruments/clock.md" },
+      { "Random Number Generator" = "reference/instruments/random_number_generator.md" },
+      { "Signal Generator" = "reference/instruments/signal_generator.md" },
+      { "Trace Generator" = "reference/instruments/trace_generator.md" },
+      { "Keithley_2000" = "reference/instruments/keithley_2000.md" },
+      { "Keithley_6221" = "reference/instruments/keithley_6221.md" },
+      { "Lakeshore_340" = "reference/instruments/lakeshore_340.md" },
+      { "Lakeshore_350" = "reference/instruments/lakeshore_350.md" },
+      { "Mercury IPS" = "reference/instruments/mercury_ips.md" },
+      { "SR_830" = "reference/instruments/sr_830.md" },
+      { "SR_860" = "reference/instruments/sr_860.md" },
+    ] },
+    { "Tasks" = [
+      { "Overview" = "reference/tasks/overview.md" },
+      { "NewFile" = "reference/tasks/new_file.md" },
+      { "WaitFor" = "reference/tasks/wait_for.md" },
+      { "WaitUntil" = "reference/tasks/wait_until.md" },
+      { "Measurements" = "reference/tasks/measurements.md" },
+      { "AcquireTrace" = "reference/tasks/acquire_trace.md" },
+      { "RampTemperature" = "reference/tasks/ramp_temperature.md" },
+      { "PID" = "reference/tasks/pid.md" },
+      { "Magnet sweeps" = "reference/tasks/field_sweep.md" },
+    ] },
+    { "Python API" = [
+      { "Experiment" = "reference/python_api/experiment.md" },
+      { "Measurement" = "reference/python_api/measurement.md" },
+      { "Instrument" = "reference/python_api/instrument.md" },
+      { "Task" = "reference/python_api/task.md" },
+      { "Task Manager" = "reference/python_api/task_manager.md" },
+      { "Rack" = "reference/python_api/rack.md" },
+      { "Calculations" = "reference/python_api/calculations.md" },
+      { "Traces" = "reference/python_api/traces.md" },
+      { "Scribe" = "reference/python_api/scribe.md" },
+    ] },
   ] },
 ]
 
@@ -114,8 +127,9 @@ show_docstring_examples = true
 modernize_annotations = true
 show_source = false
 
-# The lessons of Basic Usage, which Getting Started replaced, send their readers to
-# the page that covers the same ground now, so links and bookmarks to them still work.
+# Pages that moved or went send their readers to the page that covers the same ground
+# now, so links and bookmarks to them still work: Basic Usage's lessons, which Getting
+# Started replaced, and the pages that moved into Reference.
 [project.plugins.redirects.redirect_maps]
 "usage/introduction.md" = "getting_started/installation.md"
 "usage/installation.md" = "getting_started/installation.md"
@@ -126,6 +140,37 @@ show_source = false
 "usage/building_a_sweep.md" = "usage/composing_tasks.md"
 "usage/queueing_tasks.md" = "usage/running_tasks.md"
 "usage/real_instruments.md" = "usage/instruments.md"
+"usage/advanced.md" = "usage/index.md"
+"usage/toml_config.md" = "reference/config_file.md"
+"dev/contributing.md" = "index.md"
+"dev/overview.md" = "dev/verifying_hardware.md"
+"instruments/clock.md" = "reference/instruments/clock.md"
+"instruments/keithley_2000.md" = "reference/instruments/keithley_2000.md"
+"instruments/keithley_6221.md" = "reference/instruments/keithley_6221.md"
+"instruments/lakeshore_340.md" = "reference/instruments/lakeshore_340.md"
+"instruments/lakeshore_350.md" = "reference/instruments/lakeshore_350.md"
+"instruments/mercury_ips.md" = "reference/instruments/mercury_ips.md"
+"instruments/overview.md" = "reference/instruments/overview.md"
+"instruments/random_number_generator.md" = "reference/instruments/random_number_generator.md"
+"instruments/signal_generator.md" = "reference/instruments/signal_generator.md"
+"instruments/sr_830.md" = "reference/instruments/sr_830.md"
+"instruments/sr_860.md" = "reference/instruments/sr_860.md"
+"instruments/trace_generator.md" = "reference/instruments/trace_generator.md"
+"tasks/acquire_trace.md" = "reference/tasks/acquire_trace.md"
+"tasks/field_sweep.md" = "reference/tasks/field_sweep.md"
+"tasks/measurements.md" = "reference/tasks/measurements.md"
+"tasks/new_file.md" = "reference/tasks/new_file.md"
+"tasks/overview.md" = "reference/tasks/overview.md"
+"tasks/pid.md" = "reference/tasks/pid.md"
+"tasks/ramp_temperature.md" = "reference/tasks/ramp_temperature.md"
+"tasks/wait_for.md" = "reference/tasks/wait_for.md"
+"tasks/wait_until.md" = "reference/tasks/wait_until.md"
+"experiment/calculations.md" = "reference/python_api/calculations.md"
+"experiment/experiment.md" = "reference/python_api/experiment.md"
+"experiment/rack.md" = "reference/python_api/rack.md"
+"experiment/scribe.md" = "reference/python_api/scribe.md"
+"experiment/task_manager.md" = "reference/python_api/task_manager.md"
+"experiment/traces.md" = "reference/python_api/traces.md"
 
 [project.markdown_extensions]
 admonition = {}

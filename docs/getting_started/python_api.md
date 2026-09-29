@@ -30,7 +30,7 @@ uv run lab.py
 
 The window is the same, but titled `Lab`, after the class. Keep `.run()` under `if __name__ == "__main__":`. The interface starts by importing this file again, and without that line it would start a second experiment.
 
-**More:** [combining a config file with Python](../usage/toml_config.md#combining-a-config-file-with-python), and [why the main guard matters](../usage/running.md#always-use-a-main-guard).
+**More:** [combining a config file with Python](../reference/experiment_options.md#where-a-value-comes-from), and [why the main guard matters](../usage/running.md#always-use-a-main-guard).
 { .gs-more }
 
 </section>
@@ -47,7 +47,7 @@ The window is the same, but titled `Lab`, after the class. Keep `.run()` under `
 
 An instrument's queries and commands are methods you can call. The file says there is a lock-in, but not what state to put it in, so this `setup()` sets its reference frequency to 137 Hz, and every run starts from the same settings. Once it runs, the lock-in's `get_frequency` in the **Instruments** tab answers `137`, since the `mock` adapter answers with the value last set.
 
-**More:** [`setup()`](../usage/setting_up.md#setup-and-teardown), and [the SR 830's commands](../instruments/sr_830.md).
+**More:** [`setup()`](../usage/setting_up.md#setup-and-teardown), and [the SR 830's commands](../reference/instruments/sr_830.md).
 { .gs-more }
 
 </section>
@@ -64,7 +64,7 @@ An instrument's queries and commands are methods you can call. The file says the
 
 The lock-in's sine output drives whatever it is wired to, and would go on doing so after the experiment. So this `teardown()` turns it down to 4 mV, the least an SR830 gives, and says so. When you stop the experiment, the line is among the last in the terminal.
 
-**More:** [`teardown()`](../usage/setting_up.md#setup-and-teardown), and [the SR 830's commands](../instruments/sr_830.md).
+**More:** [`teardown()`](../usage/setting_up.md#setup-and-teardown), and [the SR 830's commands](../reference/instruments/sr_830.md).
 { .gs-more }
 
 </section>
@@ -81,7 +81,7 @@ A **calculation** makes new columns from each row as it is recorded. This one is
 
 The new columns are saved beside the measurements in the data file, and can be plotted like them. A function of your own can only be written in Python, so it is added in `setup()`. The ready-made calculations, such as a rolling mean, can also go in the file.
 
-**More:** [calculations](../usage/calculations.md), and [the ready-made ones](../usage/calculations.md#built-in-calculations).
+**More:** [calculations](../usage/calculations.md), and [the ready-made ones](../reference/calculations.md).
 { .gs-more }
 
 </section>
@@ -100,7 +100,7 @@ A task is a `dataclass` of `Task`. Its fields, with their types and defaults, ar
 
 `run()` is `async`, so that while it waits at each `await`, the experiment goes on measuring. The imports grow, for `dataclass`, `Task` and the two tasks.
 
-**More:** [writing tasks](../usage/tasks.md), [what `run_subtask()` does](../usage/composing_tasks.md#what-run_subtask-does), and [every ready-made task](../tasks/overview.md), such as [NewFile](../tasks/new_file.md) and [WaitFor](../tasks/wait_for.md).
+**More:** [writing tasks](../usage/tasks.md), [what `run_subtask()` does](../usage/composing_tasks.md#what-run_subtask-does), and [every ready-made task](../reference/tasks/overview.md), such as [NewFile](../reference/tasks/new_file.md) and [WaitFor](../reference/tasks/wait_for.md).
 { .gs-more }
 
 </section>
@@ -175,4 +175,4 @@ And running. The queue shows `Record` and the step it is on, and the plot draws 
 - A **calculation** makes new columns from each row, saved beside the measurements.
 - A **task** is a procedure the experiment runs from its queue: a dataclass with an `async` `run()`, which can run other tasks. Once registered, it is in **Add task**, with a form made from its fields.
 
-Next: [Advanced Usage](../usage/advanced.md) takes each part further, a topic to a page.
+Next: [Usage](../usage/index.md) takes each part further, a topic to a page.

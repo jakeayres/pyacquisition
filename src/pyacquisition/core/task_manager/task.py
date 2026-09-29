@@ -191,7 +191,7 @@ class Task:
         Logs a message under the name of the task. It is shown in the interface.
 
         Args:
-            message: What to say.
+            message (str): What to say.
             level (str): `"info"` (the default), `"debug"`, `"warning"` or `"error"`.
         """
         getattr(logger, level)(f"[{self.name}] {message}")
@@ -246,7 +246,7 @@ class Task:
         paused does not count towards `timeout`.
 
         Args:
-            condition: A function that returns whether to stop waiting. It may be
+            condition (callable): A function that returns whether to stop waiting. It may be
                 an `async` function.
             poll (float): Seconds between checks.
             timeout (float | None): Give up after this many seconds of running time.
@@ -354,14 +354,14 @@ class Task:
         setting, and raises if it is not what was wanted. If it is, that is logged.
 
         Args:
-            actual: The value that was found.
-            wanted: The value that was needed.
+            actual (object): The value that was found.
+            wanted (object): The value that was needed.
             what (str): What is being checked, for the message.
-            tolerance: If given, numbers within this of each other match. Left out,
+            tolerance (float | None): If given, numbers within this of each other match. Left out,
                 the values must be equal.
 
         Returns:
-            The value that was found.
+            actual (object): The value that was found.
 
         Raises:
             ValueError: If the value is not the one that was wanted.
@@ -525,8 +525,8 @@ class Task:
 
         Args:
             subtask (Task): The task to run.
-            experiment: The experiment to pass to the subtask. Defaults to the
-                experiment this task was started with.
+            experiment (Experiment | None): The experiment to pass to the subtask.
+                Defaults to the experiment this task was started with.
 
         Example:
             async def run(self, experiment):
@@ -565,8 +565,8 @@ class Task:
 
         Args:
             *subtasks (Task): The tasks to run. Each must be a different task object.
-            experiment: The experiment to pass to the subtasks. Defaults to the
-                experiment this task was started with.
+            experiment (Experiment | None): The experiment to pass to the subtasks.
+                Defaults to the experiment this task was started with.
 
         Example:
             async def run(self, experiment):
@@ -639,8 +639,8 @@ class Task:
         Args:
             *subtasks (Task): The tasks to run in the background. Each must be a
                 different task object.
-            experiment: The experiment to pass to the subtasks. Defaults to the
-                experiment this task was started with.
+            experiment (Experiment | None): The experiment to pass to the subtasks.
+                Defaults to the experiment this task was started with.
 
         Example:
             async def run(self, experiment):
@@ -882,12 +882,12 @@ class Task:
         the parameters and type hints.
 
         Args:
-            experiment: The experiment instance to register the endpoints with.
+            experiment (Experiment): The experiment instance to register the endpoints with.
             label (str | None): The name of the endpoint. Defaults to the class name.
             task_manager (TaskManager | None): The task manager that the endpoint
                 queues the task on. Defaults to the experiment's main task manager.
             tasks_path (str): The path the endpoint is placed under.
-            **fixed_kwargs: Values for the task's inputs that are fixed, and so are
+            **fixed_kwargs (object): Values for the task's inputs that are fixed, and so are
                 not offered by the endpoint.
         """
 

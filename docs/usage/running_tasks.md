@@ -65,7 +65,7 @@ def setup(self):
 A task that never finishes holds up only the queue it is in, and it is stopped, running its `teardown()`, when the experiment shuts down.
 
 !!! warning "Anything queued behind a task that never finishes waits for ever"
-    A queue runs one task at a time. If an endless task, such as a [PID](../tasks/pid.md), is running on a task manager, the tasks you queue on that same task manager wait behind it until it is stopped. Give an endless task a task manager of its own (`self.add_task_manager("pid")`), and use the others for tasks that finish.
+    A queue runs one task at a time. If an endless task, such as a [PID](../reference/tasks/pid.md), is running on a task manager, the tasks you queue on that same task manager wait behind it until it is stopped. Give an endless task a task manager of its own (`self.add_task_manager("pid")`), and use the others for tasks that finish.
  The task managers share one thread, so [the same rules apply as when tasks run together](composing_tasks.md#running-tasks-at-the-same-time): every loop needs an `await`, and a task that blocks holds up all the others. Nothing stops two task managers from changing the same instrument setting, so decide which one owns each.
 
 Use one task manager for a set of tasks that must run *one after another*. To run things at the same time *within* one task, see [Running tasks at the same time](composing_tasks.md#running-tasks-at-the-same-time).
@@ -84,7 +84,7 @@ With more than one task manager, the **Queue** tab has a section for each, one u
 
 ## Running tasks from a script
 
-The interface is only one client of the [API](running.md#the-api). You can queue and manage tasks from any Python script or notebook with `requests`. Every input is passed as a query parameter. An input with a default can be left out:
+The interface is only one client of the [API](../reference/web_api.md). You can queue and manage tasks from any Python script or notebook with `requests`. Every input is passed as a query parameter. An input with a default can be left out:
 
 ```python
 import requests

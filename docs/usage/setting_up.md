@@ -31,25 +31,7 @@ class MyExperiment(Experiment):
 
 This saves data to `C:/data/cooldown_1`, keeps the terminal quiet, and records every half second. There is no `__init__` to write, so there is nothing in it to get wrong.
 
-| Option | Default | Meaning |
-|---|---|---|
-| `root_path` | `"."` | The base folder for the data and log folders below. |
-| `data_path` | `"data"` | Folder for data files, inside `root_path`. |
-| `data_file_extension` | `"data"` | File extension for data files. |
-| `data_delimiter` | `","` | Column separator in data files. |
-| `measurement_period` | `0.25` | Target time between measurement cycles, in seconds. |
-| `log_path` | `"logs"` | Folder for the log file, inside `root_path`. |
-| `log_file_name` | `"debug.log"` | Name of the log file. |
-| `console_log_level` | `"DEBUG"` | How much is printed in the terminal. `"DEBUG"` is very verbose. `"INFO"` is quieter. |
-| `file_log_level` | `"DEBUG"` | How much is written to the log file. |
-| `gui_log_level` | `"DEBUG"` | How much is shown in the interface's log window. |
-| `api_server_host` | `"localhost"` | Address of the local API server. |
-| `api_server_port` | `8000` | Port of the local API server. Use a different port for each experiment running at the same time. |
-| `api_server_fallback_ports` | `()` | Ports to try in turn if `api_server_port` is taken by another program, such as `[8001, 8002, 8003]`. The experiment moves to the first free one, logs which, and the interface follows it. |
-| `gui` | `True` | Set to `False` to run without the interface's window. It can still be opened in a browser at the API server's address. |
-| `auto_tasks` | `True` | Register the tasks that come with an instrument, such as `RampTemperature` for a Lakeshore, when the instrument is in the experiment. Set to `False` to register the ones you want yourself. See [tasks that are already included](tasks.md#tasks-that-are-already-included). |
-
-The log levels are `TRACE`, `DEBUG`, `INFO`, `SUCCESS`, `WARNING`, `ERROR` and `CRITICAL`.
+Every option, with its default and its key in a config file, is listed in [Experiment options](../reference/experiment_options.md) in the Reference.
 
 ### Mistakes are caught
 
@@ -62,7 +44,7 @@ ValueError: `measurement_period` must be a positive number, got 'fast'
 A misspelt option would otherwise be ignored without a word, and your data would go to the wrong folder. So a name in your class that is close to an option, but is not one, is refused as soon as the class is defined:
 
 ```text
-TypeError: `data_pth` in MyExperiment looks like a misspelling of the option `data_path`, so it would do nothing.
+TypeError: `data_pth` in MyExperiment looks like a misspelling of the option `data_path`, so it would do nothing. Use `data_path`, or give `data_pth` a different name if it is something else.
 ```
 
 Other names are fine. You can keep your own constants and helper methods in the class, such as `sample_name = "S1"`, as long as they are not close to an option.
@@ -90,7 +72,7 @@ Options can also be given as arguments when the experiment is created, and an ar
 MyExperiment(gui=False).run()
 ```
 
-If you also describe the rig in a [TOML file](toml_config.md), the file wins over the class attribute, and an argument wins over both. See [the order of precedence](toml_config.md#combining-a-config-file-with-python).
+If you also describe the rig in a [TOML file](../reference/config_file.md), the file wins over the class attribute, and an argument wins over both. See [the order of precedence](../reference/experiment_options.md#where-a-value-comes-from).
 
 !!! tip "You do not need an `__init__`"
     Setting the options in the class body means you never have to write `__init__` or call `super().__init__()`. If you do write one, call `super().__init__()` first, and put the rest of your set-up in `setup()`, where it belongs.

@@ -1,4 +1,4 @@
-Traces are added with `Experiment.add_trace`, taken by a `TraceSource` each, and read back with `read_traces`. See [Traces and Spectra](../usage/traces.md).
+Traces are added with `Experiment.add_trace`, taken by a `TraceSource` each, and read back with `read_traces`. See [Traces and Spectra](../../usage/traces.md).
 
 ::: pyacquisition.core.trace_source.Trace
 

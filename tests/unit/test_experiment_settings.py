@@ -358,14 +358,14 @@ def test_a_removed_toml_key_is_ignored_with_a_warning(tmp_path, root, monkeypatc
 
 
 # -------------------------------------------------------------- described
-TOML_DOCS = Path(__file__).resolve().parents[2] / "docs" / "usage" / "toml_config.md"
+TOML_DOCS = Path(__file__).resolve().parents[2] / "docs" / "reference" / "config_file.md"
 
 
 def documented_rows() -> dict:
-    """Each key's description in toml_config.md, by (section, key)."""
+    """Each key's description in the reference's config_file.md, by (section, key)."""
     rows, section = {}, None
     for line in TOML_DOCS.read_text(encoding="utf-8").splitlines():
-        heading = re.match(r"## `\[(\w+)\]` Section", line)
+        heading = re.match(r"## `\[(\w+)\]`$", line.rstrip())
         if heading:
             section = heading[1]
         elif line.startswith("## "):

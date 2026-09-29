@@ -10,7 +10,7 @@ class TraceGenerator(SoftwareInstrument):
     """A simulated instrument that gives a spectrum: a Lorentzian peak on a
     little noise, over a frequency axis. Its centre and width can be set, and a
     sweep can be made to take time, as a real instrument's does, to try
-    [traces](../usage/traces.md) without hardware.
+    [traces](../../usage/traces.md) without hardware.
 
     `get_spectrum` is its trace method: it gives one channel, `amplitude` (V),
     over `frequency` (Hz), and waits for a sweep of `sweep_time` seconds first.
