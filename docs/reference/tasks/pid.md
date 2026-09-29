@@ -148,7 +148,7 @@ class Staircase(Task):
 
 1. A task receives the PID as an input, like any other object. Queue it in `setup()` with `self.task_managers["main"].add_task(Staircase(pid))`, next to the PID on its own task manager. Because its input is an object, it is created in code and is not registered for the interface.
 
-The interface cannot change these while it runs, because a PID is created in code. To be able to change the setpoint from the interface, put it in a small [software instrument](../../usage/custom_instruments.md) whose command sets `pid.setpoint`, and give the instrument the PID.
+The interface cannot change these while it runs, because a PID is created in code. To be able to change the setpoint from the interface, put it in a small [software instrument](../../usage/software_instrument.md) whose command sets `pid.setpoint`, and give the instrument the PID.
 
 ## What the PID is doing
 

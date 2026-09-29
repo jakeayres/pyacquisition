@@ -33,7 +33,9 @@
 
    A step with data-new-file makes a file that starts empty: the one it names, or the
    first. Otherwise a file is made by the first step that writes it. A step with no code
-   of a file's shows the file of the step before it.
+   of a file's shows the file of the step before it. A step with data-given shows its
+   files as the reader already has them, the tutorial's starting point: none of their
+   lines is new, and its note sits at the top.
 
    On a wide screen the panels are pinned while the page scrolls past the steps, and the
    note of the step in view is placed against the lines it adds, or at the top when it
@@ -311,6 +313,7 @@
     stage.prepend(panels);
 
     // Showing a step
+    const given = steps.map((s) => s.hasAttribute("data-given"));
     let active = -1, current = -1; // the step in view, and the file shown
     let target = [], up = false;
     const shownAt = (r, i) => +r.dataset.from <= i && i < +r.dataset.to;
@@ -318,7 +321,7 @@
       let order = 0;
       for (const r of rows) {
         const was = r.classList.contains("is-hidden");
-        const shown = shownAt(r, i), added = +r.dataset.from === i;
+        const shown = shownAt(r, i), added = +r.dataset.from === i && !given[i];
         r.classList.toggle("is-hidden", !shown);
         r.classList.toggle("is-new", added && shown);
         r.classList.remove("is-typing");
@@ -328,7 +331,7 @@
           r.classList.add("is-typing");
         }
       }
-      return rows.filter((r) => +r.dataset.from === i && shownAt(r, i) && r.textContent.trim());
+      return given[i] ? [] : rows.filter((r) => +r.dataset.from === i && shownAt(r, i) && r.textContent.trim());
     }
     function show(i) {
       const forward = i > active;
@@ -376,7 +379,9 @@
 
     // The file scrolls, as an editor would, to keep the new lines in view. It goes by where
     // the lines will be, a line apart, since those being shown or hidden are still growing
-    // or shrinking: after a jump of several steps, most of them are.
+    // or shrinking: after a jump of several steps, most of them are. When the new lines
+    // can't all be in view (an import at the top, and code further down), the longest run
+    // of them is.
     function scrollFile() {
       if (current < 0) return;
       const scroller = files[current].scroller;
@@ -388,7 +393,19 @@
       const most = Math.max(0, shown.length * lh + 2 * pad - height);
       let offset = 0;
       if (rows.length && most > 0) {
-        const top = shown.indexOf(rows[0]) * lh, bottom = (shown.indexOf(rows[rows.length - 1]) + 1) * lh;
+        let from = shown.indexOf(rows[0]), to = shown.indexOf(rows[rows.length - 1]);
+        if ((to - from + 1) * lh > height - 2 * pad) {
+          // The runs of new lines, blank ones included, and the longest of them
+          const runs = [];
+          shown.forEach((r, j) => {
+            if (!r.classList.contains("is-new")) return;
+            const run = runs[runs.length - 1];
+            if (run && run[1] === j - 1) run[1] = j;
+            else runs.push([j, j]);
+          });
+          [from, to] = runs.reduce((a, b) => (b[1] - b[0] > a[1] - a[0] ? b : a));
+        }
+        const top = from * lh, bottom = (to + 1) * lh;
         offset = clamp((top + bottom) / 2 - height / 2, 0, most);
       } else {
         offset = Math.min(+scroller.dataset.offset || 0, most);

@@ -1,7 +1,49 @@
 # Writing Tasks
 
 !!! note "These pages use a different example"
-    The three pages on tasks build one small experiment out of a random number generator, which is written on [Writing your own instrument](custom_instruments.md#a-software-instrument).
+    The three pages on tasks build one small experiment out of a random number generator, a [software instrument](software_instrument.md). Save it beside your experiment as `random_number_generator.py`.
+
+    ??? abstract "random_number_generator.py"
+        ```python title="random_number_generator.py"
+        import random
+
+        from pyacquisition.core.instrument import SoftwareInstrument, mark_command, mark_query
+
+
+        class RandomNumberGenerator(SoftwareInstrument):
+            """A software random number generator with a choice of distribution."""
+
+            name = "Random Number Generator"
+
+            def __init__(self, uid):
+                super().__init__(uid)
+                self._distribution = "gaussian"
+                self._parameters = (0.0, 1.0)
+
+            @mark_command
+            def use_gaussian(self, mean: float = 0.0, sigma: float = 1.0) -> None:
+                """Draw numbers from a Gaussian distribution."""
+                self._distribution = "gaussian"
+                self._parameters = (mean, sigma)
+
+            @mark_command
+            def use_uniform(self, low: float = 0.0, high: float = 1.0) -> None:
+                """Draw numbers uniformly between low and high."""
+                self._distribution = "uniform"
+                self._parameters = (low, high)
+
+            @mark_query
+            def get_distribution(self) -> str:
+                """Get the name of the distribution that is in use."""
+                return self._distribution
+
+            @mark_query
+            def random_number(self) -> float:
+                """Draw one random number from the current distribution."""
+                if self._distribution == "gaussian":
+                    return random.gauss(*self._parameters)
+                return random.uniform(*self._parameters)
+        ```
 
 A **task** is a procedure that you want to run on your experiment: record data under one condition, wait an hour, start a new file, ramp a temperature. Tasks are run from a queue, one at a time, and can be paused or aborted while they run. You can queue them from the interface, and you can build bigger tasks [out of smaller ones](composing_tasks.md).
 

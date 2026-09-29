@@ -24,6 +24,7 @@ nav = [
     { "Overview" = "usage/index.md" },
     { "Instruments" = [
       { "Adding Instruments" = "usage/instruments.md" },
+      { "Write a Software Instrument" = "usage/software_instrument.md" },
       { "Writing Your Own Instrument" = "usage/custom_instruments.md" },
       { "Verifying Hardware" = "dev/verifying_hardware.md" },
     ] },

@@ -15,7 +15,8 @@
 | Page | Covers |
 |---|---|
 | [Adding instruments](instruments.md) | Adding the included instruments, software and hardware, and finding an instrument's address. |
-| [Writing your own instrument](custom_instruments.md) | Wrapping a new device, or writing a software instrument. |
+| [Write a software instrument](software_instrument.md) | A simulated thermometer: a query, a command, and a choice of sensor, in the Instruments tab. About 15 minutes. |
+| [Writing your own instrument](custom_instruments.md) | A driver for a device, and a trace method. |
 | [Verifying instruments on real hardware](../dev/verifying_hardware.md) | Checking a driver against the device it drives. |
 
 ## Data

@@ -7,7 +7,9 @@ from .adapters import DEFAULT_ADAPTER, open_resource
 
 
 class BaseEnum(Enum):
-    """Base class for Enums used as args in query/command methods."""
+    """The choices an argument of a query or command can take. Each member is a
+    code, which the instrument is sent, and a label, which the interface shows:
+    `SAMPLE = ("A", "Sample")`."""
 
     def __init__(self, raw_value, label):
         self.raw_value = raw_value
@@ -156,13 +158,15 @@ class QueryCommandProvider(type):
 
 
 def mark_query(func):
-    """Decorator for marking method as a query"""
+    """Marks a method as a query, which reads a value: the interface lists it under
+    Queries, the API serves it, and a measurement can record it."""
     func._is_query = True
     return func
 
 
 def mark_command(func):
-    """Decorator for marking method as a query"""
+    """Marks a method as a command, which changes the instrument: the interface
+    lists it under Commands, and the API serves it."""
     func._is_command = True
     return func
 
