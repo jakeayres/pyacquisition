@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from websockets.exceptions import ConnectionClosed
 import uvicorn
 import inspect
@@ -312,7 +312,15 @@ class APIServer:
             """
             An endpoint function to handle the request.
             """
-            return {"status": 200, "data": method(**kwargs)}
+            try:
+                result = method(**kwargs)
+            except Exception as error:
+                # The method's own reason, which the interface shows, rather
+                # than a bare 500 that says nothing of why.
+                reason = str(error) or type(error).__name__
+                logger.error(f"{method.__name__} failed: {reason}")
+                raise HTTPException(status_code=500, detail=reason) from error
+            return {"status": 200, "data": result}
 
         endpoint_func.__name__ = method.__name__
         # A copy: the method's own annotations are the class's, and setting the

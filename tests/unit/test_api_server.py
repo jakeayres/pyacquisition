@@ -96,3 +96,27 @@ def test_an_endpoint_from_a_method_that_returns_a_number_answers(api_server):
 
     assert response.status_code == 200, response.text
     assert response.json() == {"status": 200, "data": 5.0}
+
+
+def test_an_endpoint_whose_method_raises_answers_with_the_reason(api_server):
+    """The interface shows a failed call's `detail`: the method's own words,
+    not "The server had an error handling the request (HTTP 500)"."""
+
+    def set_folder(folder: str) -> None:
+        raise ValueError(f"There is no folder called {folder!r}.")
+
+    def get_level() -> float:
+        raise KeyError  # no words of its own: its kind stands in
+
+    for method in (set_folder, get_level):
+        api_server.app.add_api_route(
+            f"/probe/{method.__name__}",
+            api_server.create_endpoint_function(method),
+            methods=["GET"],
+        )
+    client = TestClient(api_server.app)
+
+    response = client.get("/probe/set_folder", params={"folder": "nowhere"})
+    assert response.status_code == 500
+    assert response.json() == {"detail": "There is no folder called 'nowhere'."}
+    assert client.get("/probe/get_level").json() == {"detail": "KeyError"}
