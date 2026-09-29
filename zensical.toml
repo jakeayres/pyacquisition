@@ -89,6 +89,7 @@ features = [
   "navigation.footer",
   "navigation.sections",
   "navigation.tabs",
+  "navigation.tabs.sticky", # the tabs stay at the top as the page scrolls
   "toc.integrate", # the page's headings go under it in the left menu, not in a right-hand column
 ]
 palette.scheme = "default"

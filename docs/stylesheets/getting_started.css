@@ -26,6 +26,11 @@
   grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
   align-items: start;
 }
+/* Where the tabs show, they stay at the top under the header (navigation.tabs.sticky),
+   so the stage is pinned below them. */
+@media screen and (min-width: 76.25em) {
+  .gs--live .gs-stage { top: 6rem; }
+}
 .gs--live .gs-panels { display: block; }
 .gs--live .gs-notes { position: relative; align-self: stretch; }
 
