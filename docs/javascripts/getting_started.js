@@ -113,7 +113,43 @@
     }
     while (i < n) ops.push({ op: "del", i: i++ });
     while (j < m) ops.push({ op: "ins", j: j++ });
-    return ops;
+    return compact(ops, n, b);
+  }
+  // A run of new lines can often be placed more than one way: of two blank lines, either
+  // can be the new one. Each run moves up as far as the file allows, joining any run it
+  // meets, so that what a step adds is one block, highlighted together.
+  function compact(ops, n, b) {
+    const m = b.length;
+    const added = new Array(m).fill(false);
+    const kept = []; // the old lines kept, in order: moving a run keeps their order
+    for (const op of ops) {
+      if (op.op === "ins") added[op.j] = true;
+      else if (op.op === "keep") kept.push(op.i);
+    }
+    for (let j = 0; j < m; ) {
+      if (!added[j]) { j++; continue; }
+      let s = j, e = j;
+      while (e < m && added[e]) e++;
+      while (s > 0 && !added[s - 1] && b[s - 1] === b[e - 1]) {
+        added[--s] = true;
+        added[--e] = false;
+        while (s > 0 && added[s - 1]) s--;
+      }
+      j = e;
+    }
+    // The operations again, deletions first where lines change, as before
+    const out = [];
+    let i = 0, k = 0;
+    const gone = (upto) => { while (i < upto) out.push({ op: "del", i: i++ }); };
+    gone(kept.length ? kept[0] : n);
+    for (let j = 0; j < m; j++) {
+      if (added[j]) { out.push({ op: "ins", j }); continue; }
+      const at = kept[k++];
+      out.push({ op: "keep", i: at, j });
+      i = at + 1;
+      gone(k < kept.length ? kept[k] : n);
+    }
+    return out;
   }
   function versions(rows, steps) {
     let alive = [];
@@ -235,15 +271,19 @@
       follow(700);
     }
 
-    // The file scrolls, as an editor would, to keep the new lines in view.
+    // The file scrolls, as an editor would, to keep the new lines in view. It goes by where
+    // the lines will be, a line apart, since those being shown or hidden are still growing
+    // or shrinking: after a jump of several steps, most of them are.
     function scrollFile() {
       const rows = target.length && !up ? target : [];
+      const shown = [...scroller.children].filter((r) => !r.classList.contains("is-hidden"));
+      const lh = parseFloat(getComputedStyle(fileBody).lineHeight);
       // In the body's own coordinates, padding included, before any scrolling
       const height = fileBody.clientHeight, pad = parseFloat(getComputedStyle(fileBody).paddingTop);
-      const most = Math.max(0, scroller.scrollHeight + 2 * pad - height);
+      const most = Math.max(0, shown.length * lh + 2 * pad - height);
       let offset = 0;
       if (rows.length && most > 0) {
-        const top = rows[0].offsetTop, bottom = rows[rows.length - 1].offsetTop + rows[rows.length - 1].offsetHeight;
+        const top = shown.indexOf(rows[0]) * lh, bottom = (shown.indexOf(rows[rows.length - 1]) + 1) * lh;
         offset = clamp((top + bottom) / 2 - height / 2, 0, most);
       } else {
         offset = Math.min(+scroller.dataset.offset || 0, most);
