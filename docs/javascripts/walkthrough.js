@@ -22,7 +22,7 @@
 
    On the .gs element:
 
-   - data-files="thermometer.py:versions lab.py:versions" lists the files, in order,
+   - data-files="disk_space.py:versions lab.py:versions" lists the files, in order,
      each with its mode (versions if it has none). The file panel shows the file of the
      step in view, with a tab for each. data-files="" is a walkthrough in the terminal
      alone.

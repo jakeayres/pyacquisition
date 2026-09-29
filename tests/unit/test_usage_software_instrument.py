@@ -1,5 +1,5 @@
 """Usage › Write a software instrument (docs/usage/software_instrument.md): each
-version of thermometer.py and lab.py runs, and does what the page says."""
+version of disk_space.py and lab.py runs, and does what the page says."""
 
 import importlib.util
 import shutil
@@ -16,10 +16,10 @@ GETTING_STARTED = ROOT / "examples" / "getting_started"
 
 def load(name: str, monkeypatch=None):
     """An example file as a module of its own name, so that it can't be mistaken for
-    Getting Started's lab_1.py and the rest. lab.py's `import thermometer` is the
+    Getting Started's lab_1.py and the rest. lab.py's `import disk_space` is the
     finished driver's."""
     if monkeypatch is not None:
-        monkeypatch.setitem(sys.modules, "thermometer", load("thermometer_5"))
+        monkeypatch.setitem(sys.modules, "disk_space", load("disk_space_5"))
     spec = importlib.util.spec_from_file_location(f"software_instrument_{name}", HERE / f"{name}.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -34,50 +34,58 @@ def test_it_starts_from_the_end_of_getting_started():
     assert text(HERE / "lab_1.py") == text(GETTING_STARTED / "lab_6.py")
 
 
-# -------------------------------------------------------------- thermometer.py
+# -------------------------------------------------------------- disk_space.py
 @pytest.mark.parametrize("version", [1, 2, 3, 4, 5])
-def test_each_version_makes_a_thermometer_called_thermometer(version):
-    thermometer = load(f"thermometer_{version}").Thermometer("thermometer")
-    assert thermometer.name == "Thermometer"
-    assert thermometer.identify() == "Thermometer"  # under Other, it answers its name
+def test_each_version_makes_a_disk_space_instrument(version):
+    disk = load(f"disk_space_{version}").DiskSpace("disk")
+    assert disk.name == "Disk Space"
+    assert disk.identify() == "Disk Space"  # under Other, it answers its name
 
 
 def test_what_each_version_offers_in_the_instruments_tab():
-    offered = {v: (sorted(t.queries), sorted(t.commands)) for v in range(1, 6)
-               for t in [load(f"thermometer_{v}").Thermometer("t")]}
+    offered = {v: (sorted(d.queries), sorted(d.commands)) for v in range(1, 6)
+               for d in [load(f"disk_space_{v}").DiskSpace("d")]}
     assert offered == {
         1: ([], []),
-        2: (["get_temperature"], []),
-        3: (["get_temperature"], ["set_setpoint"]),
-        4: (["get_temperature"], ["set_setpoint"]),
-        5: (["get_temperature"], ["set_setpoint"]),
+        2: (["get_space"], []),
+        3: (["get_space"], ["set_folder"]),
+        4: (["get_space"], ["set_folder"]),
+        5: (["get_space"], ["set_folder"]),
     }
 
 
-def test_the_temperature_starts_at_300_k():
-    assert load("thermometer_2").Thermometer("t").get_temperature() == 300.0
+def test_the_query_answers_the_free_space_where_the_experiment_runs_in_gb(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    free = shutil.disk_usage(tmp_path).free / 1e9
+    assert load("disk_space_2").DiskSpace("d").get_space() == pytest.approx(free, abs=0.1)
 
 
-def test_each_reading_moves_the_temperature_5_percent_towards_the_setpoint():
-    thermometer = load("thermometer_3").Thermometer("t")
-    thermometer.set_setpoint(100.0)
-    assert thermometer.get_temperature() == pytest.approx(300 - 0.05 * 200)
-    for _ in range(45):  # nine seconds, at Getting Started's 0.2 s: most of the way there
-        kelvin = thermometer.get_temperature()
-    assert 100 < kelvin < 100 + 0.12 * 200
+def test_the_command_watches_another_folder_and_refuses_one_that_isnt_there(tmp_path):
+    disk = load("disk_space_3").DiskSpace("d")
+    assert disk._folder == "."
+    disk.set_folder(str(tmp_path))
+    assert disk._folder == str(tmp_path)
+    with pytest.raises(ValueError, match=r"^There is no folder called 'nowhere'\.$"):
+        disk.set_folder("nowhere")
+    assert disk._folder == str(tmp_path)  # unchanged
 
 
-def test_the_sensors_are_a_code_and_a_label():
-    sensor = load("thermometer_4").Sensor
-    assert [(s.name, s.raw_value, s.label) for s in sensor] == [("SAMPLE", "A", "Sample"), ("STAGE", "B", "Stage")]
+def test_the_choices_codes_are_the_names_disk_usage_gives_its_figures():
+    space = load("disk_space_4").Space
+    assert [(s.name, s.raw_value, s.label) for s in space] == [
+        ("FREE", "free", "Free"), ("USED", "used", "Used"), ("TOTAL", "total", "Total")
+    ]
+    assert {s.raw_value for s in space} == set(shutil.disk_usage(".")._fields)
 
 
-def test_the_stage_reads_the_setpoint_and_the_sample_follows():
-    module = load("thermometer_5")
-    thermometer = module.Thermometer("t")
-    thermometer.set_setpoint(150.0)
-    assert thermometer.get_temperature(module.Sensor.STAGE) == 150.0
-    assert thermometer.get_temperature() == pytest.approx(300 - 0.05 * 150)  # the sample, by default
+def test_the_query_reads_the_chosen_space(tmp_path):
+    module = load("disk_space_5")
+    disk = module.DiskSpace("d")
+    disk.set_folder(str(tmp_path))
+    usage = shutil.disk_usage(tmp_path)
+    assert disk.get_space(module.Space.TOTAL) == usage.total / 1e9
+    assert disk.get_space(module.Space.USED) == pytest.approx(usage.used / 1e9, abs=0.1)
+    assert disk.get_space() == pytest.approx(usage.free / 1e9, abs=0.1)  # free, by default
 
 
 # -------------------------------------------------------------- lab.py
@@ -91,33 +99,37 @@ def lab(tmp_path, monkeypatch):
     return experiment
 
 
-def test_the_lab_has_the_thermometer_and_records_both_sensors(lab):
-    assert lab.instruments["thermometer"].name == "Thermometer"
-    assert {"T_sample", "T_stage"} <= set(lab.measurements)
-    assert lab.measurements["T_sample"].unit == lab.measurements["T_stage"].unit == "K"
-    lab.instruments["thermometer"].set_setpoint(150.0)
-    assert lab.measurements["T_stage"].run() == 150.0
-    assert lab.measurements["T_sample"].run() == pytest.approx(300 - 0.05 * 150)
+def test_the_lab_has_the_instrument_and_records_the_free_space(lab, tmp_path):
+    assert lab.instruments["disk"].name == "Disk Space"
+    free_space = lab.measurements["free_space"]
+    assert free_space.unit == "GB"
+    assert free_space.run() == pytest.approx(shutil.disk_usage(tmp_path).free / 1e9, abs=0.1)
 
 
-def test_the_interface_describes_each_method_with_its_docstring_and_offers_the_sensors(lab):
+def client(lab) -> TestClient:
     api = lab._api_server
     lab._rack._register_endpoints(api)  # the instruments' endpoints, as a run registers them
-    schema = TestClient(api.app).get("/openapi.json").json()
-    query = schema["paths"]["/thermometer/get_temperature"]["get"]
-    command = schema["paths"]["/thermometer/set_setpoint"]["get"]
-    assert query["description"] == "The temperature at a sensor, in kelvin."
-    assert command["description"] == "Sets the temperature to go to, in kelvin."
-    (sensor,) = query["parameters"]
-    assert sensor["schema"]["default"] == "Sample"
-    assert schema["components"]["schemas"]["Sensor"]["enum"] == ["Sample", "Stage"]
-    (kelvin,) = command["parameters"]
-    assert kelvin["required"] and kelvin["schema"]["type"] == "number"
+    return TestClient(api.app)
 
 
-def test_a_setpoint_that_isnt_a_number_is_refused(lab):
-    api = lab._api_server
-    lab._rack._register_endpoints(api)
-    answer = TestClient(api.app).get("/thermometer/set_setpoint", params={"kelvin": "abc"})
-    assert answer.status_code == 422
-    assert "Input should be a valid number" in answer.text
+def test_the_interface_describes_each_method_with_its_docstring_and_offers_the_choice(lab):
+    schema = client(lab).get("/openapi.json").json()
+    query = schema["paths"]["/disk/get_space"]["get"]
+    command = schema["paths"]["/disk/set_folder"]["get"]
+    assert query["description"] == "The space on the drive, in GB: free, used, or in total."
+    assert command["description"] == "Watches the drive that a folder is on."
+    (space,) = query["parameters"]
+    assert space["schema"]["default"] == "Free"
+    assert schema["components"]["schemas"]["Space"]["enum"] == ["Free", "Used", "Total"]
+    assert schema["components"]["schemas"]["Space"]["description"] == "Which space on the drive."
+    (folder,) = command["parameters"]
+    assert folder["required"] and folder["schema"]["type"] == "string"
+
+
+def test_the_interface_reads_the_total_and_shows_why_a_folder_is_refused(lab, tmp_path):
+    api = client(lab)
+    total = api.get("/disk/get_space", params={"space": "Total"})
+    assert total.json()["data"] == shutil.disk_usage(tmp_path).total / 1e9
+    refused = api.get("/disk/set_folder", params={"folder": "nowhere"})
+    assert refused.json() == {"detail": "There is no folder called 'nowhere'."}
+    assert api.get("/disk/set_folder", params={"folder": str(tmp_path)}).json()["data"] is None

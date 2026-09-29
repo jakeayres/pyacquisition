@@ -20,7 +20,7 @@ Most answer `{"status": 200, "data": ...}`. The rack's, and a few others, answer
 
 | Endpoint | Does | Answers, for example |
 |---|---|---|
-| `/<instrument>/<method>` | Calls a query or command, with its arguments as parameters: `/lockin/set_frequency?frequency=1000`. A choice is given by its name. | `{"status": 200, "data": 1000.0}` |
+| `/<instrument>/<method>` | Calls a query or command, with its arguments as parameters: `/lockin/set_frequency?frequency=1000`. A choice is given by its label, exactly as the interface shows it. | `{"status": 200, "data": 1000.0}` |
 | `/<instrument>/queries/` | The instrument's queries. | `{"status": 200, "data": ["list_timers", "time", ...]}` |
 | `/<instrument>/commands/` | The instrument's commands. | |
 | `/rack/list_instruments` | Each instrument's name, with its driver's. | `{"status": "success", "instruments": {"lockin": "SR_830", ...}}` |

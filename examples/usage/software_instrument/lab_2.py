@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 
+from disk_space import DiskSpace, Space
 from pyacquisition import Experiment, Measurement, Task
 from pyacquisition.tasks import NewFile, WaitFor
-from thermometer import Sensor, Thermometer
 
 
 @dataclass
@@ -29,14 +29,15 @@ class Lab(Experiment):
         self.add_calculation(lambda row: {"power": row["wave"] ** 2})
         self.register_task(Record, label="Record")
 
-        thermometer = Thermometer("thermometer")
-        self.add_instrument(thermometer)
-        temperature = thermometer.get_temperature
+        disk = DiskSpace("disk")
+        self.add_instrument(disk)
         self.add_measurement(
-            Measurement("T_sample", temperature, sensor=Sensor.SAMPLE, unit="K")
-        )
-        self.add_measurement(
-            Measurement("T_stage", temperature, sensor=Sensor.STAGE, unit="K")
+            Measurement(
+                "free_space",
+                disk.get_space,
+                space=Space.FREE,
+                unit="GB",
+            )
         )
 
     def teardown(self):
