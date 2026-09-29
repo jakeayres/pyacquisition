@@ -1,6 +1,6 @@
 # Composing Tasks
 
-[Lesson 5](building_a_sweep.md) builds a temperature sweep out of tasks. This page goes further, including running tasks at the same time.
+[Getting Started](../getting_started/python_api.md) builds a task out of two ready-made ones. This page goes further, including running tasks at the same time.
 
 Real procedures are made of stages: start a file, record something, start another file, record something else. Rather than write one long task, write each stage as a small task, and then have a larger task run them in order. Any task can run any other task by calling `await self.run_subtask(...)` from its `run()` method.
 

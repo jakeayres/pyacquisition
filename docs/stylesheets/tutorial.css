@@ -1,4 +1,4 @@
-/* The Basic Usage tutorial: lesson headers and screenshots. */
+/* Lesson headers and screenshots: the Getting Started pages, and screenshots elsewhere. */
 
 /* "About 10 minutes · Needs: ..." under a lesson title */
 .md-typeset .pa-meta {
@@ -35,5 +35,5 @@
 }
 .pa-pair figure { margin: 0; flex: 0 1 auto; }
 
-/* The lessons table on the introduction page */
+/* Tables: the first column on one line */
 .md-typeset table:not([class]) td:first-child { white-space: nowrap; }

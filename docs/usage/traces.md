@@ -2,7 +2,7 @@
 
 A **measurement** is one number a row: a temperature, a voltage. A **trace** is a whole array at once: a spectrum from a spectrum analyser, a sweep from a network analyser, a lock-in's capture buffer. `pyacquisition` takes traces beside the rows, saves them in a file of their own beside the data file, links each one to the row it was taken with, and shows them live in the interface.
 
-This page uses the [simulated rig](simulated_rig.md) of the lessons, with a simulated spectrometer added: its sample has one resonance, which moves up in frequency as the sample warms. Nothing here needs hardware.
+This page uses a simulated rig, a cryostat with a lock-in on a sample in it (`examples/simulated_rig/simulated.py` in the repository), with a simulated spectrometer added: its sample has one resonance, which moves up in frequency as the sample warms. Nothing here needs hardware.
 
 ## Two ways to use a trace
 
@@ -18,15 +18,15 @@ Both are the same `Trace`, taken at different times.
 Add the instrument, then the trace, in `setup()`:
 
 ```python title="traces_occasional.py"
---8<-- "examples/tutorial/traces_occasional.py:trace"
+--8<-- "examples/simulated_rig/traces_occasional.py:trace"
 ```
 
 `get_spectrum` is the spectrometer's **trace method** (the instrument's author marks it as one, as a query is marked, and says what its channels are). `"spectrum"` names the trace. `reduce=["peak_x"]` adds a column, `spectrum_peak_x`, with the frequency at the spectrum's highest point.
 
-A trace with no `every` or `every_rows` is taken only when it is asked for. A task asks with `AcquireTrace`, which takes a trace and waits for it. Here it is at each step of a temperature sweep, after `SetTemperature` from [lesson 4](first_task.md):
+A trace with no `every` or `every_rows` is taken only when it is asked for. A task asks with `AcquireTrace`, which takes a trace and waits for it. Here it is at each step of a temperature sweep, after `SetTemperature`, a small task that ramps the cryostat to a temperature and waits until it gets there:
 
 ```python title="traces_occasional.py"
---8<-- "examples/tutorial/traces_occasional.py:sweep"
+--8<-- "examples/simulated_rig/traces_occasional.py:sweep"
 ```
 
 `AcquireTrace` is registered by itself when an experiment has traces, so it is in **Add a task** and the command palette as well. If the trace can't be taken (the instrument raises an error, or takes longer than the trace's timeout), the task fails, which pauses the queue.
@@ -61,7 +61,7 @@ A **map panel** shows every spectrum of the current data file at once, as a colo
 Give the trace `every_rows`:
 
 ```python title="traces_every_row.py"
---8<-- "examples/tutorial/traces_every_row.py:trace"
+--8<-- "examples/simulated_rig/traces_every_row.py:trace"
 ```
 
 Now each row takes a spectrum, and waits for it, so every row has `spectrum_index`, `spectrum_mean` and `spectrum_peak_x`. If the spectrum takes longer than the measurement period, the rows slow down to its pace. The **Every 0.5 s** button in the top bar shows how long the rows really take. `every_rows=4` takes one with every fourth row, and the rows in between leave its columns empty. A spectrum that fails leaves its row's columns empty, and the next row tries again.

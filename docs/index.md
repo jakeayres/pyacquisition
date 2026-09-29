@@ -18,8 +18,8 @@ using ready-made instruments or your own, and write only the logic that is
 unique to your science. Scheduling, logging, data files, live graphing and a
 full GUI all come free.
 
-[Get started](usage/introduction.md){ .md-button .md-button--primary }
-[Install](usage/installation.md){ .md-button }
+[Get started](getting_started/installation.md){ .md-button .md-button--primary }
+[Install](getting_started/installation.md){ .md-button }
 [GitHub](https://github.com/jakeayres/pyacquisition){ .md-button }
 
 <div class="pa-install" markdown>
@@ -116,7 +116,7 @@ Or build the file in a window, from forms, with `uv run pyacquisition new rig.to
 
     Instruments, measurements, tasks and calculations are ordinary Python. Analyse the data with pandas, script a run from a notebook, and keep the whole experiment in version control.
 
-    [Introduction](usage/introduction.md)
+    [The Python API](getting_started/python_api.md)
 
 -   :material-file-cog-outline:{ .middle } **Configure, don't code**
 
@@ -178,7 +178,7 @@ following a worked example.
 
 ## Ready to record some data?
 
-[Get started](usage/introduction.md){ .md-button .md-button--primary }
+[Get started](getting_started/installation.md){ .md-button .md-button--primary }
 [How it compares](overview/comparison.md){ .md-button }
 
 </div>

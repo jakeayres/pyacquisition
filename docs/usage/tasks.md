@@ -1,7 +1,7 @@
 # Writing Tasks
 
 !!! note "These pages use a different example"
-    The three pages on tasks build one small experiment out of a random number generator, which is written on [Writing your own instrument](custom_instruments.md#a-software-instrument). If you are following the [lessons](introduction.md), you do not need it: the lessons use their own examples.
+    The three pages on tasks build one small experiment out of a random number generator, which is written on [Writing your own instrument](custom_instruments.md#a-software-instrument).
 
 A **task** is a procedure that you want to run on your experiment: record data under one condition, wait an hour, start a new file, ramp a temperature. Tasks are run from a queue, one at a time, and can be paused or aborted while they run. You can queue them from the interface, and you can build bigger tasks [out of smaller ones](composing_tasks.md).
 

@@ -14,9 +14,9 @@ pytest.importorskip("playwright")
 from playwright.sync_api import expect
 from ui_helpers import Page, Running
 
-TUTORIAL = Path(__file__).parents[2] / "examples" / "tutorial"
-sys.path.insert(0, str(TUTORIAL))
-from step_5_composing_tasks import MyExperiment as Tutorial  # noqa: E402
+SIMULATED_RIG = Path(__file__).parents[2] / "examples" / "simulated_rig"
+sys.path.insert(0, str(SIMULATED_RIG))
+from sweep_rig import MyExperiment as Tutorial  # noqa: E402
 
 NUMBER = re.compile(r"^-?\d+(\.\d+)?(e[-+]?\d+)?$")
 

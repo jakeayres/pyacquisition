@@ -1,6 +1,6 @@
 # The Interface and the API
 
-[Lesson 1](first_experiment.md) introduces running an experiment and the window it opens. This page has the detail: every part of the interface, running without a window, and the local web API.
+[Getting Started](../getting_started/config_file.md) runs a first experiment and opens its window. This page has the detail: every part of the interface, running without a window, and the local web API.
 
 ## Start it
 

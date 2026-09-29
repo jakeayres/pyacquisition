@@ -4,7 +4,8 @@ site_url = "https://pyacquisition.readthedocs.io"
 repo_url = "https://github.com/jakeayres/pyacquisition"
 repo_name = "pyacquisition"
 
-extra_css = ["stylesheets/home.css", "stylesheets/showcase.css", "stylesheets/tutorial.css", "stylesheets/instruments.css"]
+extra_css = ["stylesheets/home.css", "stylesheets/showcase.css", "stylesheets/tutorial.css", "stylesheets/instruments.css", "stylesheets/getting_started.css"]
+extra_javascript = ["javascripts/getting_started.js"] # only acts on the Getting Started page
 
 nav = [
   { "Overview" = [
@@ -14,17 +15,10 @@ nav = [
     { "Comparison" = "overview/comparison.md" },
     { "Roadmap" = "overview/roadmap.md" },
   ] },
-  { "Basic Usage" = [
-    { "Introduction" = "usage/introduction.md" },
-    { "Installation" = "usage/installation.md" },
-    { "Setting Up in the Interface" = "usage/setup_page.md" },
-    { "1. Your First Experiment" = "usage/first_experiment.md" },
-    { "2. A Simulated Rig" = "usage/simulated_rig.md" },
-    { "3. Recording Data" = "usage/recording_data.md" },
-    { "4. Your First Task" = "usage/first_task.md" },
-    { "5. Composing Tasks" = "usage/building_a_sweep.md" },
-    { "6. Running Tasks" = "usage/queueing_tasks.md" },
-    { "7. Real Instruments" = "usage/real_instruments.md" },
+  { "Getting Started" = [
+    { "0. Installation" = "getting_started/installation.md" },
+    { "1. The Config File" = "getting_started/config_file.md" },
+    { "2. The Python API" = "getting_started/python_api.md" },
   ] },
   { "Advanced Usage" = [
     { "Overview" = "usage/advanced.md" },
@@ -32,6 +26,7 @@ nav = [
       { "Experiment Options" = "usage/setting_up.md" },
       { "The Interface and the API" = "usage/running.md" },
       { "TOML Configuration" = "usage/toml_config.md" },
+      { "Setting Up in the Interface" = "usage/setup_page.md" },
     ] },
     { "Instruments and Data" = [
       { "Adding Instruments" = "usage/instruments.md" },

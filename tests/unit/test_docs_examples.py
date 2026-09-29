@@ -1,7 +1,7 @@
 """The example code that the documentation shows must keep working.
 
-The tutorial and the front page include their code straight from `examples/`, so these
-tests are what keep the documentation honest.
+The front page and the Traces page include their code straight from `examples/`, so
+these tests are what keep the documentation honest.
 """
 
 import dataclasses
@@ -19,14 +19,9 @@ from pyacquisition import Experiment
 
 EXAMPLES = Path(__file__).resolve().parents[2] / "examples"
 
-SIMULATED_STEPS = [
-    "step_1_first_experiment",
-    "step_2_simulated_rig",
-    "step_3_recording_data",
-    "step_4_first_task",
-    "step_5_composing_tasks",
-]
-HARDWARE_EXAMPLES = ["step_7_real_instruments", "front_page"]
+HARDWARE_EXAMPLES = ["front_page"]
+# The examples that register tasks, whose inputs the interface shows as forms
+TASK_EXAMPLES = ["traces_occasional", "traces_every_row"]
 
 # The types that the interface can draw an input box for.
 FORM_TYPES = (int, float, str, bool)
@@ -36,7 +31,8 @@ FORM_TYPES = (int, float, str, bool)
 def examples(monkeypatch, tmp_path):
     """Make the examples importable, and keep their files out of the repository."""
     monkeypatch.syspath_prepend(str(EXAMPLES))
-    monkeypatch.syspath_prepend(str(EXAMPLES / "tutorial"))
+    monkeypatch.syspath_prepend(str(EXAMPLES / "simulated_rig"))
+    monkeypatch.syspath_prepend(str(EXAMPLES / "getting_started"))
     monkeypatch.chdir(tmp_path)
     before = set(sys.modules)
     yield
@@ -61,19 +57,13 @@ def build(name):
     return experiment
 
 
-@pytest.mark.parametrize("name", SIMULATED_STEPS)
-def test_each_simulated_step_sets_up(examples, name):
-    experiment = build(name)
-    assert "clock" in experiment.instruments
-
-
 @pytest.mark.parametrize("name", HARDWARE_EXAMPLES)
 def test_each_hardware_example_sets_up(examples, fake_visa, name):
     experiment = build(name)
     assert {"lockin", "lakeshore"} <= set(experiment.instruments)
 
 
-@pytest.mark.parametrize("name", SIMULATED_STEPS[3:] + ["step_7_real_instruments"])
+@pytest.mark.parametrize("name", TASK_EXAMPLES)
 def test_task_inputs_can_be_shown_in_the_interface(examples, fake_visa, name):
     # A task input of any other type (a tuple, say) makes the interface raise
     # "Unsupported parameter type" when the task is opened from the Tasks menu.
@@ -126,14 +116,14 @@ def test_the_simulated_cryostat_ramps_and_then_settles(examples):
 
 
 def stub_experiment(cryostat):
-    """Just enough of an experiment for the tutorial tasks to run against."""
+    """Just enough of an experiment for SetTemperature to run against."""
     return SimpleNamespace(instruments={"lakeshore": cryostat}, _scribe=MagicMock())
 
 
 @pytest.mark.asyncio
 async def test_set_temperature_arrives_and_leaves_the_cryostat_holding(examples):
     from simulated import SimulatedCryostat
-    from step_4_first_task import SetTemperature
+    from set_temperature import SetTemperature
 
     from pyacquisition.instruments.lakeshore.lakeshore_350 import (
         InputChannel,
@@ -150,29 +140,6 @@ async def test_set_temperature_arrives_and_leaves_the_cryostat_holding(examples)
     )
     # teardown stopped the ramp where it was, so it holds
     assert cryostat.get_setpoint(OutputChannel.OUTPUT_1) == pytest.approx(19.0, abs=0.1)
-
-
-@pytest.mark.asyncio
-async def test_the_sweep_records_a_file_at_each_temperature(examples):
-    from simulated import SimulatedCryostat
-    from step_5_composing_tasks import TemperatureSweep
-
-    cryostat = SimulatedCryostat("lakeshore", temperature=20.0, lag=0.05)
-    experiment = stub_experiment(cryostat)
-
-    await TemperatureSweep(low=19.0, high=20.0, step=0.5, dwell=0).start(experiment)
-
-    titles = [
-        call.kwargs["title"] for call in experiment._scribe.next_file.call_args_list
-    ]
-    assert titles == [
-        "19K ramp",
-        "19K hold",
-        "19.5K ramp",
-        "19.5K hold",
-        "20K ramp",
-        "20K hold",
-    ]
 
 
 def build_from_config():
@@ -246,7 +213,8 @@ def annotated_snippets():
 
 
 def test_there_are_annotated_snippets_to_check():
-    assert len(list(annotated_snippets())) >= 5
+    # The front page's two, of the Python and the config file
+    assert len(list(annotated_snippets())) >= 2
 
 
 @pytest.mark.parametrize(
@@ -406,3 +374,122 @@ def test_the_every_row_example_has_a_peak_on_every_row(examples, tmp_path):
     assert len(rows) >= 3
     assert rows["spectrum_index"].tolist() == list(range(len(rows)))
     assert rows["spectrum_peak_x"].between(225, 235).all()  # 150 + 4 x 20 K
+
+
+# -- The simulated rig -------------------------------------------------------------
+# The rig for trying a change in the real app, with no hardware (see specs/README.md).
+
+
+def test_the_simulated_rig_sets_up(examples):
+    experiment = build("rig")
+    assert {"clock", "lakeshore", "lockin"} <= set(experiment.instruments)
+    assert set(experiment.measurements) == {"time", "T", "x", "y"}
+
+
+# -- Getting Started ---------------------------------------------------------------
+# Part 1's page builds rig.toml from its steps' snippets, and part 2's page includes
+# the four versions of lab.py. Both are checked against examples/getting_started.
+
+GETTING_STARTED = EXAMPLES / "getting_started"
+TABLE = re.compile(r"\[([^\]]+)\]")
+
+
+def built_from_the_steps(page):
+    """The TOML file a Getting Started page builds from its steps' snippets, as
+    docs/javascripts/getting_started.js builds it: a line under a table that is there
+    already goes at its end, and a new table goes after its family ([instruments.lockin]
+    after [instruments]), or at the end."""
+    steps = page.read_text(encoding="utf-8").split("## What you built")[0]
+    rows = []
+    for snippet in re.findall(r"```toml\n(.*?)```", steps, flags=re.S):
+        blocks = []
+        for line in snippet.splitlines():
+            line = line.rstrip()
+            header = TABLE.fullmatch(line)
+            if header:
+                blocks.append((header.group(1), line, []))
+            elif line and blocks:
+                blocks[-1][2].append(line)
+        for name, header, lines in blocks:
+            tables = []  # each table's name, and the row after its last line
+            for i, row in enumerate(rows):
+                found = TABLE.fullmatch(row)
+                if found:
+                    tables.append([found.group(1), i + 1])
+                elif row and tables:
+                    tables[-1][1] = i + 1
+            same = [end for table, end in tables if table == name]
+            if same:
+                rows[same[0] : same[0]] = lines
+                continue
+            family = name.split(".")[0]
+            ends = [end for table, end in tables if table.split(".")[0] == family]
+            at = ends[-1] if ends else len(rows)
+            rows[at:at] = ([""] if rows else []) + [header, *lines]
+    return "\n".join(rows) + "\n"
+
+
+def test_the_config_file_page_builds_the_example_rig():
+    page = DOCS / "getting_started" / "config_file.md"
+    rig = (GETTING_STARTED / "rig.toml").read_text(encoding="utf-8")
+    assert built_from_the_steps(page) == rig
+
+
+def test_the_getting_started_rig_loads_with_no_problems(examples):
+    import tomllib
+
+    from pyacquisition.core import config_check
+
+    rig = (GETTING_STARTED / "rig.toml").read_text(encoding="utf-8")
+    assert config_check.problems(tomllib.loads(rig)) == []
+    Path("rig.toml").write_text(rig, encoding="utf-8")
+    experiment = Experiment.from_config("rig.toml")
+    assert set(experiment.instruments) == {"clock", "signal", "lockin"}
+    assert set(experiment.measurements) == {"time", "wave"}
+    assert experiment._name == "rig"  # what the interface is called
+
+
+def test_the_python_api_page_shows_each_version_of_lab_py():
+    page = (DOCS / "getting_started" / "python_api.md").read_text(encoding="utf-8")
+    shown = re.findall(r'--8<-- "examples/getting_started/(lab_\d)\.py"', page)
+    assert shown == ["lab_1", "lab_2", "lab_3", "lab_4"]
+
+
+def lab(step):
+    """Part 2's lab.py as it is after a step, made from the example rig."""
+    shutil.copy(GETTING_STARTED / "rig.toml", "rig.toml")
+    module = importlib.import_module(f"lab_{step}")
+    experiment = module.Lab.from_config("rig.toml")
+    experiment.setup()
+    return experiment
+
+
+@pytest.mark.parametrize("step", [1, 2, 3, 4])
+def test_each_version_of_lab_py_makes_the_experiment(examples, step):
+    experiment = lab(step)
+    assert experiment._name == "Lab"
+    assert set(experiment.instruments) == {"clock", "signal", "lockin"}
+    registered = [task.__name__ for task, _ in experiment._shared_tasks]
+    assert ("Record" in registered) == (step == 4)
+
+
+def test_the_calculation_adds_power_to_each_row(examples):
+    row = lab(4)._calculations._apply({"time": 1.0, "wave": 0.5})
+    assert row["power"] == pytest.approx(0.25)
+
+
+def test_record_can_be_queued_from_a_form(examples):
+    from lab_4 import Record
+
+    for field in dataclasses.fields(Record):
+        assert field.type in FORM_TYPES, f"Record.{field.name}"
+
+
+@pytest.mark.asyncio
+async def test_record_starts_a_file_for_each_run(examples):
+    from lab_4 import Record
+
+    experiment = SimpleNamespace(instruments={}, _scribe=MagicMock())
+    await Record(files=2, seconds=0).start(experiment)
+    calls = experiment._scribe.next_file.call_args_list
+    assert [call.kwargs["title"] for call in calls] == ["run 1", "run 2"]

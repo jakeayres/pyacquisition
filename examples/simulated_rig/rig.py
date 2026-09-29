@@ -1,3 +1,9 @@
+"""The simulated rig: a clock, and a cryostat with a lock-in on a sample in it, from
+simulated.py. Run it to try a change in the real app, with no hardware:
+
+    uv run examples/simulated_rig/rig.py
+"""
+
 from pyacquisition import Experiment, Measurement
 from pyacquisition.instruments import Clock
 from pyacquisition.instruments.lakeshore.lakeshore_350 import InputChannel

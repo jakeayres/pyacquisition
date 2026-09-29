@@ -1,6 +1,6 @@
 # Experiment Options
 
-This page lists the options of an `Experiment`, and the two hooks, `setup()` and `teardown()`, that you can override. [Lesson 1](first_experiment.md) walks through writing and running a complete first experiment.
+This page lists the options of an `Experiment`, and the two hooks, `setup()` and `teardown()`, that you can override. [Getting Started](../getting_started/installation.md) builds a complete first experiment, step by step.
 
 ## `setup()` and `teardown()`
 

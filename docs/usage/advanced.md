@@ -1,20 +1,16 @@
 # Advanced Usage
 
-**Basic Usage** is a walkthrough: it takes you from nothing to a working, automated experiment, one lesson at a time. **Advanced Usage** is the other half. Each page takes one topic, such as composing tasks, writing your own instruments or running several task managers, and covers all of it, including the parts a walkthrough leaves out.
+**Getting Started** is a walkthrough: it takes you from nothing to a working, automated experiment, one step at a time. **Advanced Usage** is the other half. Each page takes one topic, such as composing tasks, writing your own instruments or running several task managers, and covers all of it, including the parts a walkthrough leaves out.
 
-You do not need to read these pages in order, or before you start. Come to them when a lesson points you here, or when you need the detail.
+You do not need to read these pages in order, or before you start. Come to them when Getting Started points you here, or when you need the detail.
 
-## From the lessons to the detail
+## From Getting Started to the detail
 
 | When you have done | Read this for the whole story |
 |---|---|
-| [Lesson 1: your first experiment](first_experiment.md) | [Experiment options](setting_up.md), and [the interface and the API](running.md) |
-| [Lesson 2: a simulated rig](simulated_rig.md) | [Adding instruments](instruments.md) and [writing your own instrument](custom_instruments.md) |
-| [Lesson 3: recording data](recording_data.md) | [Measurements and data files](measurements.md) and [calculations](calculations.md) |
-| [Lesson 4: your first task](first_task.md) | [Writing tasks](tasks.md) |
-| [Lesson 5: composing tasks](building_a_sweep.md) | [Composing tasks](composing_tasks.md), including running tasks at the same time |
-| [Lesson 6: running tasks](queueing_tasks.md) | [Running tasks](running_tasks.md), including several task managers and scripting |
-| [Lesson 7: real instruments](real_instruments.md) | [Adding instruments](instruments.md#adding-hardware-instruments), and [verifying hardware](../dev/verifying_hardware.md) |
+| [0. Installation](../getting_started/installation.md) | [Adding instruments](instruments.md#adding-hardware-instruments), when you connect real hardware |
+| [1. The Config File](../getting_started/config_file.md) | [TOML configuration](toml_config.md), [measurements and data files](measurements.md), and [the interface and the API](running.md) |
+| [2. The Python API](../getting_started/python_api.md) | [Experiment options](setting_up.md), [calculations](calculations.md), [writing tasks](tasks.md), [composing tasks](composing_tasks.md) and [running tasks](running_tasks.md) |
 
 ## The experiment
 
@@ -23,6 +19,7 @@ You do not need to read these pages in order, or before you start. Come to them 
 | [Experiment options](setting_up.md) | Every option you can pass to `Experiment`, and the `setup()` and `teardown()` hooks. |
 | [The interface and the API](running.md) | The windows and menus in detail, running without the interface, the local web API, and why `if __name__ == "__main__":` matters. |
 | [TOML configuration](toml_config.md) | Describe an experiment in a `.toml` file instead of Python, and run hardware instruments without the device. |
+| [Setting up in the interface](setup_page.md) | Build or change a TOML config from forms, with `pyacquisition new`, and run it from there. |
 
 ## Instruments and data
 

@@ -15,9 +15,9 @@ from ui_helpers import Page, Running
 from pyacquisition import Task
 from pyacquisition.instruments import Lakeshore_350, Mercury_IPS
 
-TUTORIAL = Path(__file__).parents[2] / "examples" / "tutorial"
-sys.path.insert(0, str(TUTORIAL))
-from step_5_composing_tasks import MyExperiment as Tutorial  # noqa: E402
+SIMULATED_RIG = Path(__file__).parents[2] / "examples" / "simulated_rig"
+sys.path.insert(0, str(SIMULATED_RIG))
+from sweep_rig import MyExperiment as Tutorial  # noqa: E402
 
 
 @dataclass

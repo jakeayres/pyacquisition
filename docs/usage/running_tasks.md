@@ -1,7 +1,5 @@
 # Running Tasks
 
-[Lesson 6](queueing_tasks.md) is a hands-on introduction to the queue. This page covers everything in it.
-
 Once tasks are [registered](tasks.md#registering-tasks), you run them by adding them to the **queue**. The task manager takes tasks from the queue one at a time, in the order they were added, and runs each to completion before starting the next.
 
 ## Queueing a task

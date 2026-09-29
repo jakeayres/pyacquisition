@@ -1,0 +1,271 @@
+/* Getting Started (docs/getting_started.md): rig.toml is built up a few lines at a time.
+
+   On a wide screen, docs/javascripts/getting_started.js adds .gs--live: the file and a
+   terminal are pinned while the page scrolls, and each step's note is placed against
+   the lines it adds, joined to them as the front page's annotated code is (.pa-note in
+   showcase.css). Without the script, or on a narrow screen, the steps are an ordinary
+   lesson, each with its code in place. Scoped to .gs-*. */
+
+/* Each step's heading is numbered, as the lessons are. */
+.gs-notes { counter-reset: gs-step; }
+.gs-step { counter-increment: gs-step; }
+.md-typeset .gs-step h2::before { content: counter(gs-step) ". "; }
+
+/* The pinned stage ------------------------------------------------------- */
+.gs-panels { display: none; }
+.gs--live {
+  --lh: 0.928rem; /* the code's line height, as in .pa-annot */
+  position: relative;
+  height: calc(var(--steps) * 55vh + 36rem);
+  margin: 1.6rem 0 2.4rem;
+}
+.gs--live .gs-stage {
+  position: sticky;
+  top: 3.6rem;
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  align-items: start;
+}
+.gs--live .gs-panels { display: block; }
+.gs--live .gs-notes { position: relative; align-self: stretch; }
+
+/* The contents' links to the steps follow the step shown, since the theme can't tell
+   which is in view when they are pinned: passed and current, in the theme's colours. */
+.md-nav .md-nav__link[data-gs-step] { color: var(--md-default-fg-color); }
+.md-nav .md-nav__link[data-gs-step].gs-done { color: var(--md-default-fg-color--light); }
+.md-nav .md-nav__link[data-gs-step].gs-now { color: var(--md-typeset-a-color); }
+
+/* A step's note: an orange bar beside it, and a tab to its first line */
+.gs--live .gs-step {
+  position: absolute;
+  left: 1.2rem;
+  right: 0;
+  top: var(--top, 0);
+  min-height: var(--span, 0);
+  box-sizing: border-box;
+  padding-left: 0.8rem;
+  border-left: 2px solid var(--pa-orange);
+  opacity: 0;
+  transform: translateY(0.4rem);
+  transition: opacity 0.3s, transform 0.4s cubic-bezier(0.2, 0, 0, 1);
+  pointer-events: none;
+}
+.gs--live .gs-step.is-active { opacity: 1; transform: none; pointer-events: auto; }
+/* The tab: at the line the note starts or ends at (--tab, set by the script) */
+.gs--live .gs-step::before {
+  content: "";
+  position: absolute;
+  left: -1.2rem;
+  top: calc(var(--tab, calc(var(--lh) / 2)) - 1px);
+  width: 1.2rem;
+  height: 2px;
+  background: var(--pa-orange);
+}
+.md-typeset .gs--live .gs-step h2 { margin: -0.15rem 0 0.35rem; font-size: 0.72rem; font-weight: 700; line-height: 1.3; }
+.md-typeset .gs--live .gs-step h2 .headerlink { display: none; }
+.md-typeset .gs--live .gs-step p { margin: 0 0 0.45rem; font-size: 0.64rem; line-height: 1.5; color: var(--md-default-fg-color--light); }
+.md-typeset .gs--live .gs-step p:last-child { margin-bottom: 0; }
+.md-typeset .gs--live .gs-step code { font-size: 0.92em; }
+
+/* An aside in a note, such as the tip for a real instrument: a small, closed box */
+.md-typeset .gs--live .gs-step details { margin: 0.5rem 0; font-size: 0.6rem; }
+.md-typeset .gs--live .gs-step details > summary { padding-top: 0.3rem; padding-bottom: 0.3rem; font-size: 0.6rem; }
+.md-typeset .gs--live .gs-step details > p { font-size: 0.6rem; line-height: 1.5; }
+
+/* A note's "More:" line: where the docs go further on what the step introduced */
+.md-typeset .gs-step p.gs-more { font-size: 0.64rem; color: var(--md-default-fg-color--light); }
+.md-typeset .gs-step p.gs-more strong { font-weight: 600; color: var(--md-default-fg-color); }
+.md-typeset .gs--live .gs-step p.gs-more {
+  margin-top: 0.6rem;
+  padding-top: 0.45rem;
+  font-size: 0.6rem;
+  border-top: 1px solid var(--pa-border);
+}
+/* The step's code is in the panels. Screen readers skip those, so it stays for them. */
+.gs--live .gs-step .highlight {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The panels: the front page's code panel (.pa-ide in showcase.css), with its colours
+   for the highlighter's classes, which the Python lines keep. */
+.gs-panel {
+  --md-code-hl-keyword-color: #ff9f43;
+  --md-code-hl-string-color: #4ade80;
+  --md-code-hl-number-color: #f78c6c;
+  --md-code-hl-function-color: #8fd3ff;
+  --md-code-hl-name-color: #d6deeb;
+  --md-code-hl-variable-color: #d6deeb;
+  --md-code-hl-constant-color: #ff9f43;
+  --md-code-hl-special-color: #ffcb6b;
+  --md-code-hl-operator-color: #89ddff;
+  --md-code-hl-punctuation-color: #9fb0c8;
+  --md-code-hl-comment-color: #5f6f89;
+  --md-code-hl-generic-color: #d6deeb;
+
+  overflow: hidden;
+  color: #d6deeb;
+  background: #0e131d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.8rem;
+  box-shadow: 0 30px 60px -30px rgba(10, 15, 26, 0.65);
+}
+.gs-panel + .gs-panel { margin-top: 0.7rem; }
+.gs-panel__name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 2rem;
+  padding: 0 1rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #5f6f89;
+  background: #0a0e16;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.gs-panel__name span { font-weight: 400; }
+.gs-panel__body {
+  position: relative;
+  padding: 0.9rem 0;
+  font-family: var(--md-code-font-family);
+  font-size: 0.58rem;
+  line-height: var(--lh);
+  counter-reset: gs-line;
+}
+/* Room for as many lines as the page asks for (data-lines and data-term-lines). A longer
+   file scrolls, as an editor would, to keep its new lines in view. */
+.gs-panel--file .gs-panel__body { height: calc(var(--file-lines, 15) * var(--lh) + 1.8rem); overflow: hidden; }
+.gs-scroll { transition: transform 0.45s cubic-bezier(0.2, 0, 0, 1); }
+.gs-panel--term .gs-panel__body {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  height: calc(var(--term-lines, 7) * var(--lh) + 1.8rem);
+  overflow: hidden;
+}
+
+.gs-line {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.4s cubic-bezier(0.2, 0, 0, 1), opacity 0.3s, background-color 0.4s, box-shadow 0.4s;
+}
+.gs-line > span { min-height: 0; overflow: hidden; padding-right: 1rem; white-space: pre; }
+.gs-line.is-hidden { grid-template-rows: 0fr; opacity: 0; }
+.gs-panel--file .gs-line:not(.is-hidden) > span::before {
+  counter-increment: gs-line;
+  content: counter(gs-line);
+  display: inline-block;
+  width: 1.6em;
+  margin: 0 1.1em 0 0.9rem;
+  text-align: right;
+  color: #3d4a61;
+}
+.gs-panel--term .gs-line > span { padding-left: 1rem; }
+.gs-line.is-new { background-color: rgba(255, 159, 67, 0.13); box-shadow: inset 2px 0 var(--pa-orange); }
+.gs-line.is-typing > span { animation: gs-type 0.5s cubic-bezier(0.3, 0, 0.2, 1) both; animation-delay: var(--delay, 0s); }
+@keyframes gs-type { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+.gs-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--md-text-font-family);
+  color: #3d4a61;
+  transition: opacity 0.3s;
+}
+.gs-empty.is-hidden { opacity: 0; }
+
+/* TOML and the terminal, in the front page's code colours */
+.t-h { color: #ff9f43; }
+.t-s { color: #4ade80; }
+.t-n { color: #f78c6c; }
+.t-p { color: #9fb0c8; }
+.t-c { color: #5f6f89; }
+.t-prompt { color: #4ade80; }
+.t-out { color: #8a97ad; }
+.gs-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 1px;
+  vertical-align: -0.2em;
+  background: #d6deeb;
+  animation: gs-blink 1.1s steps(1) infinite;
+}
+@keyframes gs-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .gs-line.is-typing > span, .gs-caret { animation: none; }
+  .gs--live .gs-step { transition: none; }
+}
+
+/* What you built: the real interface, with numbered pins ------------------ */
+.gs-shot { position: relative; margin: 1.2rem 0; }
+.md-typeset .gs-shot p { margin: 0; }
+/* The top 90% of the screenshot: below the tiles it is empty. The pins' heights in
+   docs/getting_started.md are fractions of what is shown. */
+.md-typeset .gs-shot img.pa-shot { width: 100%; margin: 0; aspect-ratio: 16 / 9; object-fit: cover; object-position: top; }
+.gs-pin {
+  position: absolute;
+  left: var(--x);
+  top: var(--y);
+  display: grid;
+  place-items: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: -0.575rem 0 0 -0.575rem;
+  font-size: 0.55rem;
+  font-weight: 700;
+  color: #2a1400;
+  background: var(--pa-orange);
+  border-radius: 50%;
+  box-shadow: 0 0 0 0.2rem rgba(255, 159, 67, 0.3), 0 4px 12px rgba(0, 0, 0, 0.45);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.gs-shot.is-armed .gs-pin { transform: scale(0); }
+.gs-shot.is-armed.is-shown .gs-pin { transform: scale(1); }
+.gs-shot.is-shown .gs-pin:nth-of-type(2) { transition-delay: 0.08s; }
+.gs-shot.is-shown .gs-pin:nth-of-type(3) { transition-delay: 0.16s; }
+.gs-shot.is-shown .gs-pin:nth-of-type(4) { transition-delay: 0.24s; }
+.gs-shot.is-shown .gs-pin:nth-of-type(5) { transition-delay: 0.32s; }
+.gs-shot.is-shown .gs-pin:nth-of-type(6) { transition-delay: 0.4s; }
+
+.md-typeset .gs-legend ol {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem 1.6rem;
+  margin: 0 0 1.2rem;
+  padding: 0;
+  list-style: none;
+  counter-reset: gs-pin;
+}
+[dir] .md-typeset .gs-legend ol li {
+  position: relative;
+  margin: 0;
+  padding-left: 1.6rem;
+  font-size: 0.68rem;
+  counter-increment: gs-pin;
+}
+.md-typeset .gs-legend ol li::before {
+  content: counter(gs-pin);
+  position: absolute;
+  left: 0;
+  top: 0.2em;
+  display: grid;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  font-size: 0.52rem;
+  font-weight: 700;
+  color: #2a1400;
+  background: var(--pa-orange);
+  border-radius: 50%;
+}
+
+@media (max-width: 40em) {
+  .md-typeset .gs-legend ol { grid-template-columns: minmax(0, 1fr); }
+  .gs-pin { width: 0.95rem; height: 0.95rem; margin: -0.475rem 0 0 -0.475rem; font-size: 0.46rem; }
+}

@@ -1,3 +1,7 @@
+"""The rig the browser tests run: a simulated cryostat and lock-in (from
+examples/simulated_rig/simulated.py), and tasks that set the temperature, record at one,
+and sweep it. It was lesson 5 of the tutorial."""
+
 import math
 from dataclasses import dataclass
 
@@ -42,7 +46,6 @@ class SetTemperature(Task):
         cryostat.set_setpoint(OutputChannel.OUTPUT_1, here)
 
 
-# --8<-- [start:record_at]
 @dataclass
 class RecordAt(Task):
     """Go to a temperature and hold there, with a file for each part."""
@@ -60,10 +63,8 @@ class RecordAt(Task):
         await self.run_subtask(NewFile(file_name=f"{self.kelvin:g}K hold"))
         await self.run_subtask(WaitFor(seconds=self.dwell))
         self.log(f"Recorded at {self.kelvin} K")
-        # --8<-- [end:record_at]
 
 
-# --8<-- [start:sweep]
 @dataclass
 class TemperatureSweep(Task):
     """Record a data file at each temperature from low to high."""
@@ -84,7 +85,6 @@ class TemperatureSweep(Task):
                 RecordAt(self.low + i * self.step, self.dwell)
             )
             self.log(f"Finished point {i + 1} of {points}")
-        # --8<-- [end:sweep]
 
 
 class MyExperiment(Experiment):

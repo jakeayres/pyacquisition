@@ -4,8 +4,8 @@ from pyacquisition import Experiment, Measurement, Task, Trace
 from pyacquisition.instruments import Clock
 from pyacquisition.instruments.lakeshore.lakeshore_350 import InputChannel
 from pyacquisition.tasks import AcquireTrace
+from set_temperature import SetTemperature
 from simulated import SimulatedCryostat, SimulatedSpectrometer
-from step_4_first_task import SetTemperature
 
 
 # --8<-- [start:sweep]

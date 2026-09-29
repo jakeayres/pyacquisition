@@ -1,8 +1,8 @@
 from pyacquisition import Experiment, Measurement, Trace
 from pyacquisition.instruments import Clock
 from pyacquisition.instruments.lakeshore.lakeshore_350 import InputChannel
+from set_temperature import SetTemperature
 from simulated import SimulatedCryostat, SimulatedSpectrometer
-from step_4_first_task import SetTemperature
 
 
 class MyExperiment(Experiment):

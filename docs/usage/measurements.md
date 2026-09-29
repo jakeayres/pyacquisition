@@ -1,6 +1,6 @@
 # Measurements and Data Files
 
-The [lessons](introduction.md) introduce measurements in [lesson 2](simulated_rig.md) and data files in [lesson 3](recording_data.md). This page covers the rest.
+[Getting Started](../getting_started/config_file.md) introduces measurements and data files. This page covers the rest.
 
 A **measurement** is a value that is read on every cycle, shown live and saved to the data file. You make one from a name and a query method of one of your instruments.
 
