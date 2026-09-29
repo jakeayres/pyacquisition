@@ -3,9 +3,9 @@ import random
 import time
 from dataclasses import dataclass
 
-from pyacquisition import Experiment, Measurement, Task, Trace
+from pyacquisition import Experiment, Measurement, Task
 from pyacquisition.core.instrument import SoftwareInstrument, mark_command, mark_query
-from pyacquisition.instruments.software import Clock, RandomNumberGenerator, SignalGenerator, TraceGenerator
+from pyacquisition.instruments.software import Clock, RandomNumberGenerator, SignalGenerator
 from pyacquisition.tasks import PID, NewFile, WaitFor
 
 #
