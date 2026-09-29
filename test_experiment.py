@@ -219,6 +219,8 @@ class MyExperiment(Experiment):
         #  trace panel, or the AcquireTrace task, takes one at once.
         #
 
+        # from pyacquisition import Trace
+        # from pyacquisition.instruments.software import TraceGenerator
         # spectrometer = TraceGenerator("spectrometer")
         # self.add_instrument(spectrometer)
         # self.add_trace(Trace("spectrum", spectrometer.get_spectrum, every_rows=1, reduce=["peak_x"]))
