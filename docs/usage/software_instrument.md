@@ -197,4 +197,4 @@ Your driver, in the interface:
 - A `BaseEnum` gives an argument a list of choices, each a code and a label.
 - In `setup()`, `add_instrument` adds the instrument, and a `Measurement` records a query, with its arguments.
 
-Next: [Writing your own instrument](custom_instruments.md#a-hardware-instrument) drives a real device the same way, with `Instrument`.
+Next: [Write a hardware instrument](hardware_instrument.md) drives a real device the same way, with `Instrument`.

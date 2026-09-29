@@ -616,7 +616,8 @@ class Experiment:
         Must be called before the experiment starts running, for example in `setup()`.
 
         A hardware instrument opens its own connection from the address it is
-        given, and the experiment closes it when the experiment ends.
+        given, and the experiment closes it when the experiment ends. An
+        instrument with the name of one already added replaces it.
 
         Args:
             instrument (Instrument | SoftwareInstrument): The instrument to add.
@@ -639,6 +640,8 @@ class Experiment:
         Removes an instrument from the experiment.
 
         Must be called before the experiment starts running, for example in `setup()`.
+        The experiment then no longer closes the instrument's connection: call its
+        `close()` when you are done with it.
 
         Args:
             uid (str): The uid of the instrument to remove.

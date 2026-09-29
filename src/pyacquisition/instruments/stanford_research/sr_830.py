@@ -493,14 +493,29 @@ class SR_830(Instrument):
 
     @mark_query
     def get_x(self) -> float:
+        """Queries X, the part of the signal in phase with the reference.
+
+        Returns:
+            float: X, in volts (amps with a current input).
+        """
         return float(self.query("OUTP? 1"))
 
     @mark_query
     def get_y(self) -> float:
+        """Queries Y, the part of the signal 90 degrees out of phase with the reference.
+
+        Returns:
+            float: Y, in volts (amps with a current input).
+        """
         return float(self.query("OUTP? 2"))
 
     @mark_query
     def get_xy(self) -> list[float]:
+        """Queries X and Y together, taken at the same moment.
+
+        Returns:
+            list[float]: X and Y, in volts (amps with a current input).
+        """
         return [float(s) for s in self.query("SNAP? 1,2").split(",")]
 
     @mark_query

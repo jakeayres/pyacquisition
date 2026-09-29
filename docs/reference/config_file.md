@@ -38,6 +38,8 @@ period = 0.5
 
 One entry for each instrument. The entry's name is the instrument's name, which the rest of the file and the interface use. A long entry can be a table of its own, `[instruments.lockin]`.
 
+Each instrument needs a name of its own: a second with the same name replaces the first. A name can't be one that the experiment's own addresses start with, which are `docs`, `experiment`, `history`, `logs`, `managers`, `rack`, `scribe`, `sequences`, `stream`, `task_manager`, `tasks`, `traces` and `ui`, since the instrument's queries are served under its name (`/lockin/get_x`).
+
 | Key | Meaning | Example |
 |---|---|---|
 | `instrument` | The driver: a name from the [instruments](instruments/overview.md). Required. | `"SR_830"` |

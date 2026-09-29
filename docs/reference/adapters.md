@@ -1,6 +1,6 @@
 # Adapters
 
-How a hardware instrument reaches its device, the address each expects, and the options each takes. [Adding instruments](../usage/instruments.md) shows them in use.
+How a hardware instrument reaches its device, the address each expects, and the options each takes. [Connect a real instrument](../usage/connect_instrument.md) shows them in use.
 
 An adapter is named in a [config file](config_file.md#instruments) with `adapter`, and its options go in `args`:
 

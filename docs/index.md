@@ -169,7 +169,7 @@ Or build the file in a window, from forms, with `uv run pyacquisition new rig.to
 [Random number generator](reference/instruments/random_number_generator.md)
 </div>
 
-Missing one? [Write your own instrument](usage/custom_instruments.md) by
+Missing one? [Write your own instrument](usage/hardware_instrument.md) by
 following a worked example.
 
 </div>

@@ -132,7 +132,7 @@ The `mock` adapter stands in for the device, answering each query with the value
 
 `[instruments.lockin]` is the same as a line under `[instruments]`, as a table of its own because it is longer.
 
-**More:** [the SR 830](../reference/instruments/sr_830.md), [the `mock` adapter](../reference/adapters.md#mock), [finding an instrument's address](../usage/instruments.md#finding-the-address), [a Prologix controller](../reference/adapters.md#prologix), and [installing a VISA library](installation.md#before-you-connect-real-instruments) for GPIB.
+**More:** [the SR 830](../reference/instruments/sr_830.md), [the `mock` adapter](../reference/adapters.md#mock), [finding an instrument's address](../usage/connect_instrument.md#find-the-instruments-address), [a Prologix controller](../reference/adapters.md#prologix), and [installing a VISA library](installation.md#before-you-connect-real-instruments) for GPIB.
 { .gs-more }
 
 </section>

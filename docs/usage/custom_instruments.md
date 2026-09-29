@@ -1,40 +1,6 @@
-# Writing Your Own Instrument
+# A trace method
 
-A driver for a device that isn't among the [included instruments](instruments.md#instruments-that-are-included) is a class of your own, with a method for each thing to read or set. [Write a software instrument](software_instrument.md) shows the shape of one, a step at a time: the class, its queries and commands, and its choices. A driver for hardware is written the same way, as below.
-
-## A hardware instrument
-
-A hardware instrument is written as [a software instrument](software_instrument.md) is, with two differences. The class inherits from `Instrument`, and it receives an open connection to the device. Use `self.query()` to ask the device something and get its reply, and `self.command()` to send something without expecting a reply.
-
-```python title="my_thermometer.py" linenums="1"
-from pyacquisition.core.instrument import Instrument, mark_command, mark_query
-
-
-class MyThermometer(Instrument):
-    """A temperature controller."""
-
-    name = "My Thermometer"
-
-    @mark_query
-    def get_temperature(self) -> float:
-        """Read the temperature in kelvin."""
-        return float(self.query("KRDG? A")) # (1)!
-
-    @mark_command
-    def set_setpoint(self, kelvin: float = 300.0) -> None:
-        """Set the temperature setpoint in kelvin."""
-        self.command(f"SETP 1,{kelvin}") # (2)!
-```
-
-1. `self.query()` sends the text to the device and returns its reply as text, so convert it to the type you promised.
-2. `self.command()` sends the text and returns nothing.
-
-The strings sent are whatever your instrument's manual says. Create it just like any [hardware instrument](instruments.md#adding-hardware-instruments):
-
-```python
-thermometer = MyThermometer("thermometer", resource)
-self.add_instrument(thermometer)
-```
+[Write a software instrument](software_instrument.md) and [Write a hardware instrument](hardware_instrument.md) show how to write a driver. This page shows one more kind of method a driver can have.
 
 ## A trace method
 
