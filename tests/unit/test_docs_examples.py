@@ -388,7 +388,7 @@ def test_the_simulated_rig_sets_up(examples):
 
 # -- Getting Started ---------------------------------------------------------------
 # Part 1's page builds rig.toml from its steps' snippets, and part 2's page includes
-# the four versions of lab.py. Both are checked against examples/getting_started.
+# the six versions of lab.py. Both are checked against examples/getting_started.
 
 GETTING_STARTED = EXAMPLES / "getting_started"
 TABLE = re.compile(r"\[([^\]]+)\]")
@@ -452,7 +452,7 @@ def test_the_getting_started_rig_loads_with_no_problems(examples):
 def test_the_python_api_page_shows_each_version_of_lab_py():
     page = (DOCS / "getting_started" / "python_api.md").read_text(encoding="utf-8")
     shown = re.findall(r'--8<-- "examples/getting_started/(lab_\d)\.py"', page)
-    assert shown == ["lab_1", "lab_2", "lab_3", "lab_4"]
+    assert shown == ["lab_1", "lab_2", "lab_3", "lab_4", "lab_5", "lab_6"]
 
 
 def lab(step):
@@ -464,22 +464,42 @@ def lab(step):
     return experiment
 
 
-@pytest.mark.parametrize("step", [1, 2, 3, 4])
+@pytest.mark.parametrize("step", [1, 2, 3, 4, 5, 6])
 def test_each_version_of_lab_py_makes_the_experiment(examples, step):
     experiment = lab(step)
     assert experiment._name == "Lab"
     assert set(experiment.instruments) == {"clock", "signal", "lockin"}
     registered = [task.__name__ for task, _ in experiment._shared_tasks]
-    assert ("Record" in registered) == (step == 4)
+    assert ("Record" in registered) == (step == 6)
+    row = experiment._calculations._apply({"time": 1.0, "wave": 0.5})
+    assert ("power" in row) == (step >= 4)
+
+
+@pytest.mark.parametrize("step", [1, 2, 3, 4, 5, 6])
+def test_setup_puts_the_lock_in_at_137_hz_from_step_2(examples, step):
+    # What the Instruments tab's get_frequency answers: the mock gives the value last set.
+    lockin = lab(step).instruments["lockin"]
+    assert lockin.get_frequency() == (137.0 if step >= 2 else 0.0)
+
+
+@pytest.mark.parametrize("step", [1, 2, 3, 4, 5, 6])
+def test_teardown_turns_the_lock_in_output_down_from_step_3(examples, step, capsys):
+    experiment = lab(step)
+    lockin = experiment.instruments["lockin"]
+    lockin.set_reference_amplitude(1.5)
+    experiment.teardown()
+    assert lockin.get_reference_amplitude() == (0.004 if step >= 3 else 1.5)
+    said = "The lock-in's output is turned down." in capsys.readouterr().out
+    assert said == (step >= 3)
 
 
 def test_the_calculation_adds_power_to_each_row(examples):
-    row = lab(4)._calculations._apply({"time": 1.0, "wave": 0.5})
+    row = lab(6)._calculations._apply({"time": 1.0, "wave": 0.5})
     assert row["power"] == pytest.approx(0.25)
 
 
 def test_record_can_be_queued_from_a_form(examples):
-    from lab_4 import Record
+    from lab_6 import Record
 
     for field in dataclasses.fields(Record):
         assert field.type in FORM_TYPES, f"Record.{field.name}"
@@ -487,7 +507,7 @@ def test_record_can_be_queued_from_a_form(examples):
 
 @pytest.mark.asyncio
 async def test_record_starts_a_file_for_each_run(examples):
-    from lab_4 import Record
+    from lab_6 import Record
 
     experiment = SimpleNamespace(instruments={}, _scribe=MagicMock())
     await Record(files=2, seconds=0).start(experiment)

@@ -5,7 +5,8 @@ class Lab(Experiment):
     """The rig is in rig.toml. What a file can't say goes here."""
 
     def setup(self):
-        self.add_calculation(lambda row: {"power": row["wave"] ** 2})
+        lockin = self.instruments["lockin"]
+        lockin.set_frequency(137.0)
 
 
 if __name__ == "__main__":

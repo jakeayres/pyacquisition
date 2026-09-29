@@ -10,7 +10,7 @@ You do not need to read these pages in order, or before you start. Come to them 
 |---|---|
 | [0. Installation](../getting_started/installation.md) | [Adding instruments](instruments.md#adding-hardware-instruments), when you connect real hardware |
 | [1. The Config File](../getting_started/config_file.md) | [TOML configuration](toml_config.md), [measurements and data files](measurements.md), and [the interface and the API](running.md) |
-| [2. The Python API](../getting_started/python_api.md) | [Experiment options](setting_up.md), [calculations](calculations.md), [writing tasks](tasks.md), [composing tasks](composing_tasks.md) and [running tasks](running_tasks.md) |
+| [2. The Python API](../getting_started/python_api.md) | [`setup()`, `teardown()` and experiment options](setting_up.md), [calculations](calculations.md), [writing tasks](tasks.md), [composing tasks](composing_tasks.md) and [running tasks](running_tasks.md) |
 
 ## The experiment
 

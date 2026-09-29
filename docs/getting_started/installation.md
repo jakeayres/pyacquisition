@@ -34,7 +34,7 @@ You don't need to install Python yourself: if you don't have one that a project 
 
 <section class="gs-step" data-new-file markdown>
 
-## Make a project
+## Create a project
 
 ```bash
 uv init my-lab
@@ -93,7 +93,7 @@ Nothing outside `my-lab` changes, so another project can use other versions of t
 
 <section class="gs-step" data-result="pyacquisition is installed" markdown>
 
-## Check it worked
+## Check the install worked
 
 ```bash
 uv run python -c "import pyacquisition; print('pyacquisition is installed')"
@@ -114,13 +114,6 @@ Start every command in this guide with `uv run`, from the `my-lab` folder. There
 
 </div>
 
-## Real instruments, later
-
-Nothing more is needed until you connect real instruments. PyAcquisition talks to them through [`pyvisa`](https://pyvisa.readthedocs.io/), which it installs, and `pyvisa` talks to the hardware through a *VISA library*:
-
-- For **GPIB** instruments, install one. [PyVISA recommends the National Instruments implementation](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html), and it is what PyAcquisition has been tested against.
-- `pyvisa-py`, a pure Python backend installed alongside it, talks to many serial, USB and Ethernet instruments without a separate VISA installation.
-
 !!! success "Checkpoint"
     In the `my-lab` folder, the check prints `pyacquisition is installed`.
 
@@ -139,6 +132,13 @@ Nothing more is needed until you connect real instruments. PyAcquisition talks t
     ```
 
     On macOS and Linux, activate with `source .venv/bin/activate`.
+
+## Before you connect real instruments
+
+This guide needs nothing more, since its instruments are software ones, or stand-ins for real ones. Real instruments need one more thing. PyAcquisition talks to them through [`pyvisa`](https://pyvisa.readthedocs.io/), which it installs, and `pyvisa` talks to the hardware through a *VISA library*:
+
+- For **GPIB** instruments, install one. [PyVISA recommends the National Instruments implementation](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html), and it is what PyAcquisition has been tested against.
+- `pyvisa-py`, a pure Python backend installed alongside it, talks to many serial, USB and Ethernet instruments without a separate VISA installation.
 
 ## What you learned
 

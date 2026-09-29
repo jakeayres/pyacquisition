@@ -1,6 +1,6 @@
 # Experiment Options
 
-This page lists the options of an `Experiment`, and the two hooks, `setup()` and `teardown()`, that you can override. [Getting Started](../getting_started/installation.md) builds a complete first experiment, step by step.
+This page lists the options of an `Experiment`, and the two hooks, `setup()` and `teardown()`, that you can override. [Getting Started](../getting_started/python_api.md#experiment-setup) uses `setup()` to put an instrument into a known state, and `teardown()` to leave it safe, as part of a complete first experiment.
 
 ## `setup()` and `teardown()`
 
@@ -8,7 +8,7 @@ This page lists the options of an `Experiment`, and the two hooks, `setup()` and
 
 | Method | Called | Use it to |
 |---|---|---|
-| `setup()` | Once, just before the experiment starts running | Add instruments, measurements and tasks |
+| `setup()` | Once, just before the experiment starts running | Put instruments into a known state, and add instruments, measurements, calculations and tasks |
 | `teardown()` | Once, after the experiment has ended | Clean up, for example put an instrument into a safe state |
 
 !!! warning "Instruments and measurements must be added before the experiment runs"

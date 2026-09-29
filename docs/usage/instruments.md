@@ -100,7 +100,7 @@ import pyvisa
 print(pyvisa.ResourceManager().list_resources())
 ```
 
-Vendor tools such as NI MAX also show addresses. If nothing is listed, see [installing a VISA library](../getting_started/installation.md#real-instruments-later).
+Vendor tools such as NI MAX also show addresses. If nothing is listed, see [installing a VISA library](../getting_started/installation.md#before-you-connect-real-instruments).
 
 !!! tip "Try it without hardware first"
     Build and test your whole experiment with software instruments such as the one in [Writing your own instrument](custom_instruments.md#a-software-instrument), then swap in the real one. Nothing else needs to change if the two have the same queries and commands.

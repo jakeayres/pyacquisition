@@ -2,9 +2,9 @@
 
 <p class="pa-meta" markdown="span">About 10 minutes · Needs [0. Installation](installation.md)</p>
 
-An experiment in PyAcquisition is made of **instruments**, the things it reads from and controls, and **measurements**, the values it reads from them on every cycle. From those it makes the rest: the interface, a data file with a column for each measurement, and a log.
+An experiment in PyAcquisition is made of **instruments**, the things it reads from and controls, and **measurements**, the values it reads from them, over and over, as it runs. From those it makes the rest: the interface, a data file with a column for each measurement, and a log.
 
-All of that can be described in one small file. It is written in [TOML](https://toml.io/en/), a simple format: `[tables]`, each with `key = value` lines under it. In this part you build the file a few lines at a time. There is no Python to write and nothing to plug in, since every instrument here is a software one or a stand-in for the real thing. Keep the `my-lab` project from [installation](installation.md) open in your editor, and follow along: every step runs.
+All of that can be described in one small file. It is written in [TOML](https://toml.io/en/), a simple format: `[tables]`, each with `key = value` lines under it. In this part you build the file a few lines at a time. There is no Python to write and nothing to plug in, since every instrument here is a software one or a stand-in for the real thing. Keep the `my-lab` project from [installation](installation.md) open in your editor, and follow along: the file runs after every step.
 
 <div class="gs" markdown>
 
@@ -33,7 +33,7 @@ It makes a `data` folder for its data files, and a `logs` folder too. Close the 
 
 <section class="gs-step" markdown>
 
-## Add an instrument
+## Add an instrument: a clock
 
 ```toml
 [instruments]
@@ -44,6 +44,8 @@ clock = { instrument = "Clock" }
 
 On the left, `clock` is the instrument's name: yours to choose, and how the rest of the file refers to it. `instrument = "Clock"` names its **driver**, the code that knows how to talk to it. `Clock` is a *software* instrument, which runs on your computer, so there is nothing to connect.
 
+An instrument has **queries**, values it can be asked for, and **commands**, which change it. The clock's `time` query is the seconds since it was made.
+
 **More:** [every driver](../instruments/overview.md), and [the `[instruments]` table](../usage/toml_config.md#instruments-section).
 { .gs-more }
 
@@ -51,16 +53,16 @@ On the left, `clock` is the instrument's name: yours to choose, and how the rest
 
 <section class="gs-step" markdown>
 
-## Measure it
+## Add a measurement: time
 
 ```toml
 [measurements]
 time = { instrument = "clock", method = "time" }
 ```
 
-`[measurements]` is a table of what to read. Each names an instrument, and a `method`: one of the instrument's **queries**, here the clock's `time`, the seconds since the clock was made. The name on the left, `time`, is the column's.
+`[measurements]` is a table of what to record, one measurement to a line. Each names an instrument, and a `method`: one of its queries, here the clock's `time`. The name on the left, also `time`, is the measurement's own, and its column's in the data file.
 
-On every cycle each measurement is read once, and becomes a live value, a line you can plot, and a column in the data file.
+The experiment **polls** its measurements: once a cycle, over and over, it reads each of them. Every reading is a live value in the window, a point you can plot, and an entry in the data file.
 
 **More:** [the Clock's queries](../instruments/clock.md), and [the `[measurements]` table](../usage/toml_config.md#measurements-section).
 { .gs-more }
@@ -69,7 +71,7 @@ On every cycle each measurement is read once, and becomes a live value, a line y
 
 <section class="gs-step" markdown>
 
-## Give it something to watch
+## Add a measurement with arguments
 
 ```toml
 [instruments]
@@ -79,7 +81,9 @@ signal = { instrument = "SignalGenerator" }
 wave = { instrument = "signal", method = "sine", args = { frequency = 0.2 } }
 ```
 
-`SignalGenerator` is another software instrument: it makes waveforms from the time. The `wave` measurement reads its sine wave, and `args` passes the query its arguments, here a `frequency` of 0.2 Hz, one cycle every five seconds. The others, such as `amplitude`, keep their defaults.
+Some queries take arguments. A `SignalGenerator` is another software instrument, which makes waveforms from the time, and its `sine` query takes a `frequency`, an `amplitude`, a `phase` and an `offset`, each with a default.
+
+`args` gives a query its arguments, as a table of names and values. Here the `wave` measurement asks for a `frequency` of 0.2 Hz, one cycle every five seconds, and the rest keep their defaults.
 
 Add each line under its table. A table can only appear once in a file, so the tables are shown here only to say where the lines go.
 
@@ -90,16 +94,16 @@ Add each line under its table. A table can only appear once in a file, so the ta
 
 <section class="gs-step" markdown>
 
-## Measure faster
+## Change the polling period
 
 ```toml
 [rack]
 period = 0.2
 ```
 
-The **rack** is the part of the experiment that reads the measurements, each in turn, once a cycle. `[rack]` sets its options.
+The **rack** is the part of the experiment that polls the measurements, and `[rack]` sets its options.
 
-`period` is the time from one cycle to the next, in seconds: 0.25 unless you say otherwise. `0.2` makes it five times a second.
+`period` is the polling period: the time from the start of one cycle to the start of the next, in seconds. It is 0.25 unless you say otherwise, and a cycle that takes longer delays the next. `0.2` polls five times a second, so the data file gains five rows a second.
 
 **More:** [the `[rack]` table](../usage/toml_config.md#rack-section), and [how often data is recorded](../usage/measurements.md#how-often-is-data-recorded).
 { .gs-more }
@@ -108,7 +112,7 @@ The **rack** is the part of the experiment that reads the measurements, each in 
 
 <section class="gs-step" markdown>
 
-## Add a real instrument
+## Add a hardware instrument
 
 ```toml
 [instruments.lockin]
@@ -117,7 +121,7 @@ adapter = "mock"
 resource = "GPIB0::8::INSTR"
 ```
 
-`SR_830` is the driver for a Stanford Research SR830 lock-in amplifier. A hardware instrument needs two more keys: an `adapter`, how the computer reaches it, and a `resource`, its address.
+A *hardware* instrument is a device that the computer talks to, here a Stanford Research SR830 lock-in amplifier, whose driver is `SR_830`. It needs two keys that a software one doesn't: an `adapter`, how the computer reaches it, and a `resource`, its address.
 
 The `mock` adapter stands in for the device, answering each query with the value last set, or 0. So the driver runs without one, and its queries and commands are all in the interface's **Instruments** tab to try.
 
@@ -128,22 +132,22 @@ The `mock` adapter stands in for the device, answering each query with the value
 
 `[instruments.lockin]` is the same as a line under `[instruments]`, as a table of its own because it is longer.
 
-**More:** [the SR 830](../instruments/sr_830.md), [the `mock` adapter](../usage/toml_config.md#running-hardware-instruments-without-the-device), [finding an instrument's address](../usage/instruments.md#finding-the-address), [a Prologix controller](../usage/toml_config.md#instruments-behind-a-prologix-gpib-usb-controller), and [installing a VISA library](installation.md#real-instruments-later) for GPIB.
+**More:** [the SR 830](../instruments/sr_830.md), [the `mock` adapter](../usage/toml_config.md#running-hardware-instruments-without-the-device), [finding an instrument's address](../usage/instruments.md#finding-the-address), [a Prologix controller](../usage/toml_config.md#instruments-behind-a-prologix-gpib-usb-controller), and [installing a VISA library](installation.md#before-you-connect-real-instruments) for GPIB.
 { .gs-more }
 
 </section>
 
 <section class="gs-step" data-result="Recording every 0.2 s to data/01.00 start.data" markdown>
 
-## Run it
+## Run the experiment
 
 ```bash
 uv run pyacquisition --toml rig.toml
 ```
 
-The same command as before, now with the whole rig. The experiment reads the measurements every 0.2 s, and writes each cycle as a row of a data file in `data`, with a column for each measurement.
+The same command as before, now with the whole rig. The experiment polls the measurements every 0.2 s, and writes each cycle as a row of a data file in `data`, with a column for each measurement.
 
-Each run starts a new data file, numbered on from those already there, so that none is overwritten: after the empty run's `00.00 start.data`, this one is `01.00 start.data`. That is a whole experiment, in fifteen lines.
+Each run starts a new data file, numbered on from those already there, so that none is overwritten: after the empty file's `00.00 start.data`, this one is `01.00 start.data`. That is a whole experiment, in fifteen lines.
 
 **More:** [data files and their names](../usage/measurements.md#data-files), and [reading your data](../usage/measurements.md#reading-your-data).
 { .gs-more }
@@ -176,7 +180,7 @@ Everything in the window comes from the file:
 <div class="gs-legend" markdown>
 
 1. **The data file.** Every row, saved as it is measured. Click it for more.
-2. **Every 0.2 s.** The period from `[rack]`. The button beside it pauses measuring.
+2. **Every 0.2 s.** The polling period, from `[rack]`. The button beside it pauses polling.
 3. **The plot.** Any measurement against any other, live.
 4. **Values.** A tile for each measurement, with its latest reading.
 5. **Queue.** Waits, new files, and later your own tasks.
@@ -185,7 +189,7 @@ Everything in the window comes from the file:
 </div>
 
 !!! success "Checkpoint"
-    The plot shows `wave` swinging between -1 and 1, the top bar says **Every 0.2 s**, and the newest file in `data` grows while it runs.
+    The plot shows `wave` swinging between -1 and 1, the top bar says **Every 0.2 s**, the **Instruments** tab lists `lockin`, and the newest file in `data` grows while it runs.
 
 ??? failure "Something not working?"
     - **`Cannot declare ('instruments',) twice`.** A table appears twice. Put the new lines under the `[instruments]` or `[measurements]` you already have.
@@ -197,9 +201,10 @@ Everything in the window comes from the file:
 
 - A TOML file is a whole experiment: `[instruments]`, `[measurements]`, and options such as `[rack]`.
 - An instrument has a name and a driver. A hardware one also needs an `adapter` and a `resource`, and `mock` stands in until the device is connected.
-- A measurement reads one of an instrument's queries on every cycle, into a column of the data file. Each run starts a new data file.
+- A measurement reads one of an instrument's queries, with `args` if it takes any, into a column of the data file.
+- The experiment polls every measurement once a cycle, and `period` sets how often. Each run starts a new data file.
 
-Next: [2. The Python API](python_api.md) keeps this file as it is, and adds a calculation and a task of your own in a short Python file beside it.
+Next: [2. The Python API](python_api.md) keeps this file as it is, and builds on it in Python: setting up the lock-in as the experiment starts and leaving it safe as it ends, a calculated column, and a task of your own.
 
 !!! tip "Every option the file can take"
     [TOML Configuration](../usage/toml_config.md) lists them all, section by section. To write the file from forms instead, run `uv run pyacquisition new rig.toml` (see [Setting Up in the Interface](../usage/setup_page.md)).
