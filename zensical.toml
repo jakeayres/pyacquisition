@@ -113,6 +113,19 @@ show_docstring_examples = true
 modernize_annotations = true
 show_source = false
 
+# The lessons of Basic Usage, which Getting Started replaced, send their readers to
+# the page that covers the same ground now, so links and bookmarks to them still work.
+[project.plugins.redirects.redirect_maps]
+"usage/introduction.md" = "getting_started/installation.md"
+"usage/installation.md" = "getting_started/installation.md"
+"usage/first_experiment.md" = "getting_started/config_file.md"
+"usage/simulated_rig.md" = "getting_started/config_file.md"
+"usage/recording_data.md" = "getting_started/python_api.md"
+"usage/first_task.md" = "getting_started/python_api.md"
+"usage/building_a_sweep.md" = "usage/composing_tasks.md"
+"usage/queueing_tasks.md" = "usage/running_tasks.md"
+"usage/real_instruments.md" = "usage/instruments.md"
+
 [project.markdown_extensions]
 admonition = {}
 attr_list = {}
