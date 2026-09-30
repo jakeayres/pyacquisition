@@ -66,7 +66,8 @@ def rows(folder: Path, name: str) -> int:
 @pytest.fixture(scope="module")
 def my_lab(tmp_path_factory):
     """`my-lab` after Getting Started: the empty file's run, the rig's, lab.py's
-    first and lab.py's last, with Record queued (for 1 s a file, not 10)."""
+    first and lab.py's last, with Record queued (for 2 s a file, not 10: enough for
+    the five rows that step 2 prints, at 0.25 s a row)."""
     folder = tmp_path_factory.mktemp("my-lab")
     before = os.getcwd()
     os.chdir(folder)
@@ -85,7 +86,7 @@ def my_lab(tmp_path_factory):
 
         def recorded(address):
             if not queued and rows(folder, "03.00 start.data") >= 2:
-                queued.append(requests.get(f"{address}/tasks/record", params={"files": 3, "seconds": 1}, timeout=5))
+                queued.append(requests.get(f"{address}/tasks/record", params={"files": 3, "seconds": 2}, timeout=5))
             return rows(folder, "03.03 run 3.data") >= 3
 
         run(made(lab_class("lab_6"), "lab_6"), recorded)
