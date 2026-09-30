@@ -1,12 +1,13 @@
-"""A simulated rig for the tutorial.
+"""A simulated rig: a cryostat, a lock-in on a sample in it, and a spectrometer,
+which stand in for real instruments in the tutorials.
 
-`SimulatedCryostat` and `SimulatedLockin` have the same queries and commands
-as a Lakeshore 350 temperature controller and an SR 830 lock-in amplifier, so
-that the tutorial can be followed without any hardware, and so that swapping
-in the real instruments later changes nothing else in your experiment.
-`SimulatedSpectrometer` takes a spectrum of the sample, for the page on traces.
+`SimulatedCryostat` and `SimulatedLockin` have the same queries and commands as
+a Lakeshore 350 temperature controller and an SR 830 lock-in amplifier, so a
+tutorial can be followed with no hardware, and swapping in the real instruments
+later changes nothing else in your experiment. The sample's signal rises as it
+cools through 14 K. `SimulatedSpectrometer` takes a spectrum of the sample.
 
-You do not need to read this file to follow the tutorial.
+You don't need to read this file to follow a tutorial.
 """
 
 import math

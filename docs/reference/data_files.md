@@ -1,6 +1,6 @@
 # Data files
 
-Where an experiment writes, what its files are called, and what is in them. [Measurements and data files](../usage/measurements.md#reading-your-data) reads them back.
+Where an experiment writes, what its files are called, and what is in them. [Read your data](../usage/read_data.md) reads them back.
 
 ## Folders
 
@@ -46,6 +46,7 @@ time,wave,power
 - **A measurement that fails** keeps its last good value, and the error is logged. One that has never had a value is empty.
 - **A calculation that fails** is empty for that row, and the error is logged.
 - **A row without a trace** has that trace's columns empty.
+- **An experiment that measures nothing** writes a file with no header, only empty lines, which pandas can't read (`EmptyDataError`).
 
 An empty value reads as `NaN` in pandas.
 

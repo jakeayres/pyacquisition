@@ -7,7 +7,7 @@
 | When you have done | Go further with |
 |---|---|
 | [0. Installation](../getting_started/installation.md) | [Connect a real instrument](connect_instrument.md), when you connect real hardware |
-| [1. The Config File](../getting_started/config_file.md) | [Measurements and data files](measurements.md), [Setting up in the interface](setup_page.md), and [the interface and the API](running.md) |
+| [1. The Config File](../getting_started/config_file.md) | [Tune your measurements](measurements.md), [Read your data](read_data.md), [Setting up in the interface](setup_page.md), and [the interface and the API](running.md) |
 | [2. The Python API](../getting_started/python_api.md) | [Experiment options](setting_up.md), [Calculations](calculations.md), [Writing tasks](tasks.md), [Composing tasks](composing_tasks.md) and [Running tasks](running_tasks.md) |
 
 ## Instruments
@@ -24,7 +24,8 @@
 
 | Page | Covers |
 |---|---|
-| [Measurements and data files](measurements.md) | Units, queries with arguments, slow queries, failing measurements, and reading the data back. |
+| [Tune your measurements](measurements.md) | A sample in a cryostat: units, a choice as an argument, a slow value read less often, and what a failed reading leaves in the file. About 10 minutes. |
+| [Read your data](read_data.md) | Your data files in pandas: find them, read one, plot it, read every file of a run, and let the interface write the script. About 10 minutes. |
 | [Calculations](calculations.md) | New columns worked out as you record: sums, rolling means, and your own. |
 | [Traces and spectra](traces.md) | Whole arrays, such as spectra, taken beside the rows, reduced to columns, shown live, and saved beside the data file. |
 

@@ -51,7 +51,7 @@ Every measurement you add becomes another column.
 Files are named `<block>.<step> <title>.data`, for example `00.00 start.data`.
 
 - Each time you run the experiment, a new **block** is started, so nothing from a previous run is overwritten. The first run in a folder writes `00.00 start.data`, the next run `01.00 start.data`, and so on.
-- Within a block, starting a new file increments the **step**: `00.01 gaussian.data`, `00.02 uniform.data`. You can start a new file from the **Data file** button in the top bar, or from a task. [Measurements and data files](measurements.md) covers this in more detail.
+- Within a block, starting a new file increments the **step**: `00.01 gaussian.data`, `00.02 uniform.data`. You can start a new file from the **Data file** button in the top bar, or from a task. [Data files](../reference/data_files.md#file-names) has the details.
 
 The log is written to `logs/debug.log` (see [`log_path` and `log_file_name`](../reference/experiment_options.md)).
 

@@ -87,7 +87,7 @@ Some queries take arguments. A `SignalGenerator` is another software instrument,
 
 Add each line under its table. A table can only appear once in a file, so the tables are shown here only to say where the lines go.
 
-**More:** [the Signal Generator's waveforms and their arguments](../reference/instruments/signal_generator.md), and [queries with arguments](../usage/measurements.md#queries-with-arguments).
+**More:** [the Signal Generator's waveforms and their arguments](../reference/instruments/signal_generator.md), and [queries with arguments](../usage/measurements.md#pass-a-choice-the-input-channel).
 { .gs-more }
 
 </section>
@@ -105,7 +105,7 @@ The **rack** is the part of the experiment that polls the measurements, and `[ra
 
 `period` is the polling period: the time from the start of one cycle to the start of the next, in seconds. It is 0.25 unless you say otherwise, and a cycle that takes longer delays the next. `0.2` polls five times a second, so the data file gains five rows a second.
 
-**More:** [the `[rack]` table](../reference/config_file.md#rack), and [how often data is recorded](../usage/measurements.md#how-often-is-data-recorded).
+**More:** [the `[rack]` table](../reference/config_file.md#rack), and [how long the cycles really take](../reference/interface.md#the-top-bar).
 { .gs-more }
 
 </section>
@@ -149,7 +149,7 @@ The same command as before, now with the whole rig. The experiment polls the mea
 
 Each run starts a new data file, numbered on from those already there, so that none is overwritten: after the empty file's `00.00 start.data`, this one is `01.00 start.data`. That is a whole experiment, in fifteen lines.
 
-**More:** [data files and their names](../reference/data_files.md), and [reading your data](../usage/measurements.md#reading-your-data).
+**More:** [data files and their names](../reference/data_files.md), and [reading your data](../usage/read_data.md).
 { .gs-more }
 
 </section>
