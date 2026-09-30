@@ -13,7 +13,7 @@ import pytest
 
 from pyacquisition.core import instrument as instrument_module
 from pyacquisition.tasks import PID
-from pyacquisition.tasks.pid import PIDController
+from pyacquisition.tasks.pid import PIDCalculation
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = ROOT / "examples" / "usage" / "pid"
@@ -124,20 +124,24 @@ def test_the_pid_reads_the_resistance_and_writes_the_heater(tmp_path, connection
     assert experiment.measurements["setpoint"].run() == 1650.0
 
 
-def test_the_controls_change_the_pid(tmp_path, connections):
+def test_the_pid_controller_changes_the_pid_and_records_its_setpoint(tmp_path, connections):
+    from pyacquisition.instruments import PIDController
+
     _, experiment = hold(5, tmp_path)
     pid = the_pid(experiment)
-    controls = experiment.instruments["pid"]
-    controls.set_setpoint(1560.0)
-    controls.set_gains(0.5, 0.1)
-    assert (pid.setpoint, pid.kp, pid.ki) == (1560.0, 0.5, 0.1)
-    assert controls.get_setpoint() == 1560.0
+    controller = experiment.instruments["pid"]
+    assert isinstance(controller, PIDController)
+    controller.set_setpoint(1560.0)
+    controller.set_pid(0.5, 0.1, 0.0)
+    controller.set_ramp_rate(50.0)
+    assert (pid.setpoint, pid.kp, pid.ki, pid.kd, pid.ramp_rate) == (1560.0, 0.5, 0.1, 0.0, 50.0)
+    assert experiment.measurements["setpoint"].run() == 1560.0
 
 
 @pytest.mark.parametrize("inverted, heats", [(True, True), (False, False)])
 def test_a_resistance_above_the_setpoint_heats_only_when_inverted(inverted, heats):
     """Cold, a RuOx reads above the setpoint: only an inverted PID heats."""
-    controller = PIDController(kp=1.0, ki=0.2, output_min=0.0, output_max=100.0, inverted=inverted)
+    controller = PIDCalculation(kp=1.0, ki=0.2, output_min=0.0, output_max=100.0, inverted=inverted)
     output = controller.update(setpoint=1650.0, process_value=1995.0, dt=1.0)
     assert (output > 0) is heats
 

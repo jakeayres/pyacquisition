@@ -7,9 +7,9 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 
-class PIDController:
+class PIDCalculation:
     """
-    A PID controller. It is a plain calculation: give it the setpoint, the
+    A PID calculation, with no task and no instruments: give it the setpoint, the
     measured value and the time since the last call, and it returns the output.
     Use `PID` to run one as a task.
 
@@ -156,8 +156,13 @@ class PID(Task):
 
     Its inputs are functions, so create it in your own code (it cannot be queued
     from the interface). The settings `setpoint`, `kp`, `ki`, `kd`, `output_min`,
-    `output_max`, `period` and `derivative_filter` are read on every cycle, so
-    change them while it runs by assigning to them.
+    `output_max`, `period`, `ramp_rate` and `derivative_filter` are read on every
+    cycle, so change them while it runs by assigning to them, or from the interface
+    with a `PIDController` instrument.
+
+    With a `ramp_rate`, a new setpoint isn't taken at once: the setpoint the loop
+    uses, `ramped_setpoint`, moves towards it at that rate, starting from the
+    measured value when the PID starts.
 
     Run it on its own task manager to have it run for the whole experiment, or
     with `alongside()` to run it while something else happens. See the PID page.
@@ -174,6 +179,8 @@ class PID(Task):
         output_min (float | None): The lowest output, or `None` for no limit.
         output_max (float | None): The highest output, or `None` for no limit.
         period (float): The time in seconds between cycles.
+        ramp_rate (float): How fast the setpoint the loop uses moves towards
+            `setpoint`, in its units per minute. 0 takes a new setpoint at once.
         derivative_filter (float): The time constant in seconds of a low-pass filter
             on the derivative. 0 does not filter.
         inverted (bool): False if raising the output raises the measured value (a
@@ -200,6 +207,7 @@ class PID(Task):
     output_min: float | None = None
     output_max: float | None = None
     period: float = 1.0
+    ramp_rate: float = 0.0
     derivative_filter: float = 0.0
     inverted: bool = False
     initial_output: float | None = None
@@ -215,6 +223,8 @@ class PID(Task):
             raise TypeError("read and write must be functions.")
         if self.period <= 0:
             raise ValueError("period must be positive.")
+        if self.ramp_rate < 0:
+            raise ValueError("ramp_rate must not be negative.")
         if self.duration < 0:
             raise ValueError("duration must not be negative.")
         if self.max_failures < 1:
@@ -226,8 +236,9 @@ class PID(Task):
         ):
             raise ValueError("output_min must not be above output_max.")
 
-        self._controller = PIDController(inverted=self.inverted)
+        self._controller = PIDCalculation(inverted=self.inverted)
         self._process_value = math.nan
+        self._ramped = math.nan
         self._failures = 0
 
     @property
@@ -247,10 +258,14 @@ class PID(Task):
             "ki": self.ki,
             "kd": self.kd,
         }
+        if self.ramp_rate:
+            parameters["ramp_rate"] = self.ramp_rate
         if math.isfinite(self._process_value):
             parameters["value"] = self._process_value
             parameters["output"] = self.output
             parameters["error"] = self.error
+            if self.ramp_rate:
+                parameters["ramped_setpoint"] = self._ramped
         return parameters
 
     @property
@@ -265,8 +280,25 @@ class PID(Task):
 
     @property
     def error(self) -> float:
-        """The last error: the setpoint minus the measured value."""
+        """The last error: the setpoint the loop used minus the measured value."""
         return self._controller.error
+
+    @property
+    def ramped_setpoint(self) -> float:
+        """The setpoint the loop is using: on its way to `setpoint` at
+        `ramp_rate`, or `setpoint` itself with no ramp. `nan` until the first
+        cycle."""
+        return self._ramped
+
+    def _next_setpoint(self, value: float, dt: float) -> float:
+        """Moves the setpoint the loop uses towards `setpoint`, by at most
+        `ramp_rate` per minute, from the measured value the first time."""
+        if not self.ramp_rate:
+            return self.setpoint
+        if not math.isfinite(self._ramped):
+            self._ramped = value
+        step = self.ramp_rate / 60.0 * dt
+        return self._ramped + max(-step, min(step, self.setpoint - self._ramped))
 
     def _apply_settings(self) -> None:
         """Passes the settings, which may have changed, to the controller."""
@@ -282,6 +314,7 @@ class PID(Task):
     async def setup(self, experiment=None):
         self._controller.reset(self.initial_output)
         self._process_value = math.nan
+        self._ramped = math.nan
         self._failures = 0
 
     async def run(self, experiment=None):
@@ -296,8 +329,9 @@ class PID(Task):
             self._apply_settings()
             try:
                 self._process_value = float(self.read())
+                self._ramped = self._next_setpoint(self._process_value, now - last)
                 output = self._controller.update(
-                    self.setpoint, self._process_value, now - last
+                    self._ramped, self._process_value, now - last
                 )
                 self.write(output)
                 self._failures = 0

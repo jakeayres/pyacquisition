@@ -4,11 +4,11 @@ import math
 import pytest
 
 from pyacquisition import Task
-from pyacquisition.tasks import PID, PIDController
+from pyacquisition.tasks import PID, PIDCalculation
 
 
 # ---------------------------------------------------------------------------
-# PIDController: the calculation
+# PIDCalculation: the calculation
 # ---------------------------------------------------------------------------
 
 
@@ -17,20 +17,20 @@ def run_controller(controller, setpoint, values, dt=1.0):
 
 
 def test_proportional_output_starts_at_kp_times_error():
-    controller = PIDController(kp=2.0)
+    controller = PIDCalculation(kp=2.0)
     assert controller.update(10, 4, 1.0) == 12.0
     assert controller.update(10, 7, 1.0) == 6.0
     assert controller.error == 3
 
 
 def test_the_integral_accumulates_ki_times_error_times_time():
-    controller = PIDController(kp=0.0, ki=0.5)
+    controller = PIDCalculation(kp=0.0, ki=0.5)
     # The first update has no elapsed time, so nothing has been integrated yet.
     assert run_controller(controller, 1.0, [0, 0, 0, 0], dt=2.0) == [0, 1, 2, 3]
 
 
 def test_the_integral_is_in_output_units_so_changing_ki_does_not_jump():
-    controller = PIDController(kp=0.0, ki=1.0)
+    controller = PIDCalculation(kp=0.0, ki=1.0)
     run_controller(controller, 1.0, [0, 0, 0])
     before = controller.output
 
@@ -39,19 +39,19 @@ def test_the_integral_is_in_output_units_so_changing_ki_does_not_jump():
 
 
 def test_changing_the_setpoint_does_not_kick_the_output():
-    controller = PIDController(kp=0.0, kd=5.0)
+    controller = PIDCalculation(kp=0.0, kd=5.0)
     run_controller(controller, 0.0, [3, 3, 3])
     assert controller.update(100.0, 3, 1.0) == 0.0
 
 
 def test_the_derivative_opposes_a_rising_value():
-    controller = PIDController(kp=0.0, kd=2.0)
+    controller = PIDCalculation(kp=0.0, kd=2.0)
     # The value rises 1 per second, so the error falls 1 per second.
     assert run_controller(controller, 0.0, [0, 1, 2, 3]) == [0, -2, -2, -2]
 
 
 def test_the_derivative_filter_smooths_a_step():
-    controller = PIDController(kp=0.0, kd=1.0, derivative_filter=1.0)
+    controller = PIDCalculation(kp=0.0, kd=1.0, derivative_filter=1.0)
     controller.update(0.0, 0.0, 1.0)
     # A jump of 2 is a rate of -2. With alpha = dt / (tau + dt) = 0.5, half shows.
     assert controller.update(0.0, 2.0, 1.0) == pytest.approx(-1.0)
@@ -59,17 +59,17 @@ def test_the_derivative_filter_smooths_a_step():
 
 
 def test_output_limits():
-    controller = PIDController(kp=10.0, output_min=0.0, output_max=5.0)
+    controller = PIDCalculation(kp=10.0, output_min=0.0, output_max=5.0)
     assert controller.update(10, 0, 1.0) == 5.0
     assert controller.update(0, 10, 1.0) == 0.0
 
 
 def test_no_limits_by_default():
-    assert PIDController(kp=1000.0).update(10, 0, 1.0) == 10000.0
+    assert PIDCalculation(kp=1000.0).update(10, 0, 1.0) == 10000.0
 
 
 def test_the_integral_does_not_wind_up_at_a_limit():
-    controller = PIDController(kp=0.0, ki=1.0, output_min=0.0, output_max=1.0)
+    controller = PIDCalculation(kp=0.0, ki=1.0, output_min=0.0, output_max=1.0)
     run_controller(controller, 10.0, [0] * 200)  # a large error, held for a long time
     assert controller.output == 1.0
     assert controller.i_term <= 1.0, "The integral should have stopped growing."
@@ -80,13 +80,13 @@ def test_the_integral_does_not_wind_up_at_a_limit():
 
 def test_windup_would_otherwise_delay_leaving_the_limit():
     """The same scenario with a huge limit shows why the check matters."""
-    controller = PIDController(kp=0.0, ki=1.0)
+    controller = PIDCalculation(kp=0.0, ki=1.0)
     run_controller(controller, 10.0, [0] * 200)
     assert controller.i_term > 1000.0
 
 
 def test_a_lower_limit_is_handled_the_same_way():
-    controller = PIDController(kp=0.0, ki=1.0, output_min=-1.0, output_max=1.0)
+    controller = PIDCalculation(kp=0.0, ki=1.0, output_min=-1.0, output_max=1.0)
     run_controller(controller, -10.0, [0] * 200)
     assert controller.output == -1.0
     assert controller.i_term >= -1.0
@@ -94,20 +94,20 @@ def test_a_lower_limit_is_handled_the_same_way():
 
 
 def test_inverted_raises_the_output_when_the_value_is_too_high():
-    cooler = PIDController(kp=2.0, inverted=True)
+    cooler = PIDCalculation(kp=2.0, inverted=True)
     assert cooler.update(10, 15, 1.0) == 10.0  # too hot, so cool harder
     assert cooler.update(10, 5, 1.0) == -10.0  # too cold
 
 
 def test_inverted_derivative_still_opposes_the_change():
-    controller = PIDController(kp=0.0, kd=2.0, inverted=True)
+    controller = PIDCalculation(kp=0.0, kd=2.0, inverted=True)
     # A rising value is moving away from the target for a cooler... the error
     # (value minus setpoint) rises 1 per second, so the derivative is positive.
     assert run_controller(controller, 0.0, [0, 1, 2]) == [0, 2, 2]
 
 
 def test_a_starting_output_makes_the_first_output_that_and_carries_on_smoothly():
-    controller = PIDController(kp=3.0, ki=0.0)
+    controller = PIDCalculation(kp=3.0, ki=0.0)
     controller.reset(output=40.0)
 
     assert controller.update(10, 4, 1.0) == 40.0
@@ -116,13 +116,13 @@ def test_a_starting_output_makes_the_first_output_that_and_carries_on_smoothly()
 
 
 def test_a_starting_output_is_kept_within_the_limits():
-    controller = PIDController(kp=1.0, output_max=50.0)
+    controller = PIDCalculation(kp=1.0, output_max=50.0)
     controller.reset(output=80.0)
     assert controller.update(10, 4, 1.0) == 50.0
 
 
 def test_reset_forgets_everything():
-    controller = PIDController(kp=0.0, ki=1.0)
+    controller = PIDCalculation(kp=0.0, ki=1.0)
     run_controller(controller, 1.0, [0, 0, 0])
     controller.reset()
     assert controller.output == 0.0
@@ -130,7 +130,7 @@ def test_reset_forgets_everything():
 
 
 def test_no_elapsed_time_changes_nothing():
-    controller = PIDController(kp=1.0, ki=1.0, kd=1.0)
+    controller = PIDCalculation(kp=1.0, ki=1.0, kd=1.0)
     run_controller(controller, 5.0, [0, 1])
     before = controller.output
     assert controller.update(5.0, 2, 0.0) == before
@@ -138,14 +138,14 @@ def test_no_elapsed_time_changes_nothing():
 
 
 def test_max_dt_limits_how_much_one_long_gap_can_integrate():
-    controller = PIDController(kp=0.0, ki=1.0, max_dt=2.0)
+    controller = PIDCalculation(kp=0.0, ki=1.0, max_dt=2.0)
     controller.update(1.0, 0, 1.0)
     assert controller.update(1.0, 0, 1000.0) == 2.0
 
 
 @pytest.mark.parametrize("bad", [math.nan, math.inf, -math.inf])
 def test_a_value_that_is_not_a_number_is_rejected(bad):
-    controller = PIDController()
+    controller = PIDCalculation()
     with pytest.raises(ValueError):
         controller.update(1.0, bad, 1.0)
     with pytest.raises(ValueError):
@@ -153,7 +153,7 @@ def test_a_value_that_is_not_a_number_is_rejected(bad):
 
 
 def test_the_parts_of_the_output_are_available():
-    controller = PIDController(kp=2.0, ki=1.0, kd=1.0)
+    controller = PIDCalculation(kp=2.0, ki=1.0, kd=1.0)
     run_controller(controller, 10.0, [0, 2], dt=1.0)
     assert controller.p_term == 16.0
     assert controller.d_term == -2.0
@@ -174,30 +174,30 @@ def simulate(
 
 
 def test_pi_control_removes_the_steady_state_error():
-    y, peak = simulate(PIDController(kp=1.5, ki=0.5), setpoint=10.0)
+    y, peak = simulate(PIDCalculation(kp=1.5, ki=0.5), setpoint=10.0)
     assert y == pytest.approx(10.0, rel=0.01)
     assert peak < 12.5, "It should not overshoot badly."
 
 
 def test_proportional_only_leaves_a_steady_state_error():
-    y, _ = simulate(PIDController(kp=1.5), setpoint=10.0)
+    y, _ = simulate(PIDCalculation(kp=1.5), setpoint=10.0)
     assert y == pytest.approx(10.0 * 3 / 4, rel=0.01)  # gain*kp / (1 + gain*kp)
 
 
 def test_integral_action_rejects_a_disturbance():
-    y, _ = simulate(PIDController(kp=1.5, ki=0.5), setpoint=10.0, disturbance=-3.0)
+    y, _ = simulate(PIDCalculation(kp=1.5, ki=0.5), setpoint=10.0, disturbance=-3.0)
     assert y == pytest.approx(10.0, rel=0.01)
 
 
 def test_a_limited_output_still_reaches_the_setpoint_without_a_big_overshoot():
-    controller = PIDController(kp=1.5, ki=0.5, output_min=0.0, output_max=8.0)
+    controller = PIDCalculation(kp=1.5, ki=0.5, output_min=0.0, output_max=8.0)
     y, peak = simulate(controller, setpoint=10.0, seconds=400)
     assert y == pytest.approx(10.0, rel=0.01)
     assert peak < 11.0
 
 
 def test_a_cooler_is_controlled_with_inverted():
-    controller = PIDController(kp=1.5, ki=0.5, inverted=True)
+    controller = PIDCalculation(kp=1.5, ki=0.5, inverted=True)
     y = 30.0
     for _ in range(2000):
         u = controller.update(10.0, y, 0.1)
@@ -570,3 +570,75 @@ def test_the_display_of_a_pid_carries_its_parameters(clock):
     assert display["name"] == "furnace"
     assert display["description"] == "Hold 10.0 with a PID controller"
     assert display["parameters"]["setpoint"] == 10.0
+
+
+# ------------------------------------------------------------ the setpoint ramp
+def ramping(clock, **kwargs):
+    """A PID on the plant, and the setpoint its loop used on each cycle."""
+    used = []
+    pid, plant = make(clock, **kwargs)
+    write = pid.write
+
+    def recorded(output):
+        used.append(pid.ramped_setpoint)
+        write(output)
+
+    pid.write = recorded
+    return pid, plant, used
+
+
+def test_with_no_ramp_the_setpoint_in_use_is_the_setpoint_once_it_runs(clock):
+    pid, _, used = ramping(clock, duration=5)
+    assert math.isnan(pid.ramped_setpoint)  # before the first cycle
+    asyncio.run(run(pid))
+    assert used[:5] == [10.0] * 5
+
+
+def test_a_ramp_starts_from_the_measured_value_and_moves_at_its_rate(clock):
+    pid, plant, used = ramping(clock, duration=15, ramp_rate=60.0)  # 1 a second
+    asyncio.run(run(pid))
+    assert used[0] == pytest.approx(0.0)  # the plant's value on the first read
+    assert used[1:11] == pytest.approx([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0])
+    assert used[11:15] == [10.0] * 4  # it stops at the setpoint
+
+
+def test_a_new_setpoint_is_ramped_to_from_where_the_ramp_is_down_as_well_as_up(clock):
+    def change(p):
+        if p.reads == 12:
+            pid.setpoint = 4.0
+
+    plant = Plant(clock, on_read=change)
+    pid, _, used = ramping(clock, duration=20, ramp_rate=120.0)  # 2 a second
+    pid.read = plant.read
+    asyncio.run(run(pid))
+    at = used.index(10.0)
+    assert used[11:15] == pytest.approx([8.0, 6.0, 4.0, 4.0])
+    assert at < 11
+
+
+def test_turning_the_ramp_off_takes_the_setpoint_at_once(clock):
+    def change(p):
+        if p.reads == 3:
+            pid.ramp_rate = 0.0
+
+    plant = Plant(clock, on_read=change)
+    pid, _, used = ramping(clock, duration=6, ramp_rate=60.0)
+    pid.read = plant.read
+    asyncio.run(run(pid))
+    assert used[:2] == pytest.approx([0.0, 1.0])  # ramping, until it is turned off
+    assert set(used[2:]) == {10.0}
+
+
+def test_a_negative_ramp_rate_is_refused(clock):
+    with pytest.raises(ValueError, match="ramp_rate must not be negative"):
+        make(clock, ramp_rate=-1.0)
+
+
+def test_the_parameters_show_the_ramp_only_with_one(clock):
+    pid, _, _ = ramping(clock, duration=2, ramp_rate=30.0)
+    assert pid.parameters["ramp_rate"] == 30.0
+    asyncio.run(run(pid))
+    assert pid.parameters["ramped_setpoint"] == pid.ramped_setpoint
+    plain, _ = make(clock, duration=2)
+    asyncio.run(run(plain))
+    assert "ramp_rate" not in plain.parameters and "ramped_setpoint" not in plain.parameters

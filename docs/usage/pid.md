@@ -76,13 +76,13 @@ Every second, the `PID` reads `resistance`, and writes `heater`: the functions, 
 
 ## Change the setpoint and gains from the interface
 
-```python title="hold.py" hl_lines="2-6 57 87-110"
+```python title="hold.py" hl_lines="2-7 57-58 79"
 --8<-- "examples/usage/pid/hold_5.py"
 ```
 
-A PID made in code isn't in the interface, so a small [software instrument](software_instrument.md) puts it there. `Controls` has a query for the setpoint, and commands to set it and the gains, which change the PID's attributes. The PID reads them on every cycle, so a change takes effect at once, which is what tuning needs. It is added as the instrument `pid`.
+A PID made in code isn't in the interface, so `PIDController`, a software instrument that comes with PyAcquisition, puts it there, as the instrument `pid`. Its commands change the setpoint, the gains (`set_p`, `set_i`, `set_d`, or all three with `set_pid`), the output limits and the period, on the PID's next cycle, which is what tuning needs. `set_ramp_rate` takes the loop to a new setpoint gradually, in ohms per minute. Its queries work as measurements: `get_setpoint` records the setpoint.
 
-**More:** [changing settings while it runs](../reference/tasks/pid.md#changing-settings-while-it-runs).
+**More:** [`PIDController`](../reference/instruments/pid_controller.md), and [the setpoint ramp](../reference/tasks/pid.md#settings).
 { .gs-more }
 
 </section>
@@ -95,7 +95,7 @@ A PID made in code isn't in the interface, so a small [software instrument](soft
 uv run hold.py
 ```
 
-Plot `R`, `setpoint` and `heater`. How fast `R` settles, and at what heater output, depends on your cryostat. To tune, send `pid`'s `set_gains` from the **Instruments** tab while it runs: set `ki` to 0, and raise `kp` until `R` starts to swing around the setpoint, then halve it. Then raise `ki` until `R` settles on the setpoint without overshooting far. Put the gains you settle on in `hold.py`.
+Plot `R`, `setpoint` and `heater`. How fast `R` settles, and at what heater output, depends on your cryostat. To tune, send `pid`'s commands from the **Instruments** tab while it runs: `set_i` with 0, then raise `set_p` until `R` starts to swing around the setpoint, and halve it. Then raise `set_i` until `R` settles on the setpoint without overshooting far. Put the gains you settle on in `hold.py`.
 
 **More:** [how the PID works](../reference/tasks/pid.md#how-it-works), and [when something goes wrong](../reference/tasks/pid.md#when-something-goes-wrong).
 { .gs-more }
@@ -113,7 +113,7 @@ Plot `R`, `setpoint` and `heater`. How fast `R` settles, and at what heater outp
 
 ??? failure "Something not working?"
     - **The heater stays at 0 %, and `R` at its cold value.** `inverted=True` is missing. Without it the PID takes a resistance above the setpoint to mean too hot, so it turns the heater off.
-    - **`R` swings around the setpoint, and the heater with it.** The gains are too high for your cryostat: halve `kp` and `ki` with `set_gains`. A noisy reading does it too: give the lock-in a longer time constant, and the PID a period of a few of them.
+    - **`R` swings around the setpoint, and the heater with it.** The gains are too high for your cryostat: halve them with `pid`'s `set_pid`. A noisy reading does it too: give the lock-in a longer time constant, and the PID a period of a few of them.
     - **`heater` stays at 0 % while the PID's output isn't.** The Lakeshore's output isn't in open loop mode, or its range is off. Check `get_control_mode` and `get_heater_range` in the **Instruments** tab.
     - **The experiment stops as it starts, with `Task group terminated due to an error: read and write must be functions.`** The PID was given a value, `resistance()`, instead of the function. Leave out the brackets.
     - **A task queued on `control` never starts.** The PID never finishes, so nothing queued behind it runs. Queue other tasks on **Main**.
@@ -123,6 +123,6 @@ Plot `R`, `setpoint` and `heater`. How fast `R` settles, and at what heater outp
 - `PID` holds a value at a setpoint, reading with `read` and writing with `write`, within `output_min` and `output_max`. `inverted=True` is for a value that falls as the output rises, as a RuOx's resistance does.
 - Any reading can be the value: here a resistance, worked out from the lock-in's X. The setpoint is in its units.
 - In open loop mode, a Lakeshore's heater does what the computer sets with `set_manual_output`, and `teardown()` turns it off at the end.
-- A task that never finishes goes on a task manager of its own, and a small software instrument can change its settings, to tune it while it runs.
+- A task that never finishes goes on a task manager of its own, and `PIDController` puts a PID in the interface, to tune it while it runs.
 
 Next: [Set the experiment's options](options.md), such as where the data goes and how much the terminal says.

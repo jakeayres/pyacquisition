@@ -7,7 +7,7 @@ from .field_sweep import RampMagnet as RampMagnet
 from .field_sweep import RampMagnetToZero as RampMagnetToZero
 from .field_sweep import SweepMagneticField as SweepMagneticField
 from .pid import PID as PID
-from .pid import PIDController as PIDController
+from .pid import PIDCalculation as PIDCalculation
 
 
 standard_tasks = [

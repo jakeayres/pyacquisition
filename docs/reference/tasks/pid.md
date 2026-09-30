@@ -49,6 +49,7 @@ For a method that needs arguments, give a `lambda`: `read=lambda: sensor.get_tem
 | `kd` | Derivative gain, in output per (error ÷ second). The default is 0. |
 | `output_min`, `output_max` | Limits on the output. By default there are none. |
 | `period` | Seconds between cycles. The default is 1. |
+| `ramp_rate` | How fast the setpoint the loop uses moves to a new `setpoint`, in its units per minute, starting from the measured value when the PID starts. The default of 0 takes a new setpoint at once. |
 | `derivative_filter` | Time constant, in seconds, of a filter on the derivative term. The default of 0 has no filter, which makes a noisy signal noisy in the output. |
 | `inverted` | `False` if raising the output raises the value (a heater and a thermometer that reads kelvin). `True` if it lowers it (a cooler, or a heater and a resistive thermometer whose resistance falls as it warms, such as a RuOx or a Cernox). |
 | `initial_output` | The output that is already applied when the PID starts, so that it takes over smoothly. By default it starts from `kp` × error. |
@@ -67,7 +68,7 @@ For a method that needs arguments, give a `lambda`: `read=lambda: sensor.get_tem
 
 ## Changing settings while it runs
 
-The settings `setpoint`, `kp`, `ki`, `kd`, `output_min`, `output_max`, `period` and `derivative_filter` are read on every cycle. Change them by assigning to them, from your own code:
+The settings `setpoint`, `kp`, `ki`, `kd`, `output_min`, `output_max`, `period`, `ramp_rate` and `derivative_filter` are read on every cycle. Change them by assigning to them, from your own code:
 
 ```python
 pid.setpoint = 1560.0
@@ -76,13 +77,19 @@ pid.kp = 0.5
 
 A task of your own can change them too, given the PID as an input. Such a task is made in code, since a form can't show a PID.
 
-The interface can't change them directly, because a PID is made in code. A small software instrument whose commands set them can, as in [Hold a temperature with PID](../../usage/pid.md#change-the-setpoint-and-gains-from-the-interface).
+From the interface, a [`PIDController`](../instruments/pid_controller.md) instrument changes them: add one, given the PID, and its commands set the setpoint, the gains, the output limits, the period and the ramp rate, as in [Hold a temperature with PID](../../usage/pid.md#change-the-setpoint-and-gains-from-the-interface).
+
+```python
+from pyacquisition.instruments import PIDController
+
+self.add_instrument(PIDController("pid", pid))
+```
 
 ## What the PID is doing
 
-In the **Queue** tab, the PID's card shows its setpoint and gains, and once it is running, the latest measured `value`, `output` and `error`, refreshed about once a second.
+In the **Queue** tab, the PID's card shows its setpoint and gains, and its `ramp_rate` if it has one. Once it is running, it shows the latest measured `value`, `output` and `error`, and with a ramp the `ramped_setpoint` it is using, refreshed about once a second.
 
-`pid.process_value`, `pid.output` and `pid.error` are the last measured value, output and error. Use them in a measurement, as in the example, to record them in the data file alongside everything else: `Measurement("power", lambda: pid.output)`. The value is `nan` until the PID has read for the first time.
+`pid.process_value`, `pid.output`, `pid.error` and `pid.ramped_setpoint` are the last measured value, output, error and setpoint in use. Record them in the data file with a measurement: a `PIDController`'s queries (`get_output` and the rest), or `Measurement("power", lambda: pid.output)`. The value is `nan` until the PID has read for the first time.
 
 ## When something goes wrong
 
@@ -97,15 +104,15 @@ In the **Queue** tab, the PID's card shows its setpoint and gains, and once it i
 !!! note "The PID shares one thread with everything else"
     It takes turns with the rest of the experiment, so a very slow `read` or `write` delays its cycles. The PID uses the real elapsed time, so the control stays correct, just slower. It is well suited to the slow loops of a lab (a period of about a second), and not to control that needs precise timing.
 
-## Using the controller without a task
+## Using the calculation without a task
 
-`PIDController` is the calculation on its own: give it the setpoint, the measured value and the time since the last call, and it returns the output. Use it if you want a PID somewhere other than a task, for example in a [calculation](../../usage/calculations.md).
+`PIDCalculation` is the calculation on its own: give it the setpoint, the measured value and the time since the last call, and it returns the output. Use it if you want a PID somewhere other than a task, for example in a [calculation](../../usage/calculations.md).
 
 ```python
-from pyacquisition.tasks import PIDController
+from pyacquisition.tasks import PIDCalculation
 
-controller = PIDController(kp=5.0, ki=0.5, output_min=0.0, output_max=100.0)
-output = controller.update(setpoint=60.0, process_value=42.0, dt=1.0)  # (1)
+calculation = PIDCalculation(kp=5.0, ki=0.5, output_min=0.0, output_max=100.0)
+output = calculation.update(setpoint=60.0, process_value=42.0, dt=1.0)  # (1)
 ```
 
 <div class="gs-legend pa-notes" markdown>
@@ -118,4 +125,4 @@ output = controller.update(setpoint=60.0, process_value=42.0, dt=1.0)  # (1)
 
 ::: pyacquisition.tasks.PID
 
-::: pyacquisition.tasks.PIDController
+::: pyacquisition.tasks.PIDCalculation

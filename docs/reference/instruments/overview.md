@@ -54,6 +54,8 @@ The name on each card is the driver's: the class to import from `pyacquisition.i
     Arithmetic and trigonometry, for trying queries and commands.
 -   [**Clock**](clock.md)  
     Software clock.
+-   [**PIDController**](pid_controller.md)  
+    The controls of a running `PID` task, in the interface. Made in code, given the PID, so not in a config file.
 -   [**RandomNumberGenerator**](random_number_generator.md)  
     Random numbers from common probability distributions.
 -   [**SignalGenerator**](signal_generator.md)  

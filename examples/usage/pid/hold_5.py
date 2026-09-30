@@ -1,10 +1,10 @@
 from pyacquisition import Experiment, Measurement
-from pyacquisition.core.instrument import (
-    SoftwareInstrument,
-    mark_command,
-    mark_query,
+from pyacquisition.instruments import (
+    SR_830,
+    Clock,
+    Lakeshore_350,
+    PIDController,
 )
-from pyacquisition.instruments import SR_830, Clock, Lakeshore_350
 from pyacquisition.tasks import PID
 
 # The thermometer's current, in amps: here the lock-in's 1 V sine output,
@@ -54,7 +54,8 @@ class Hold(Experiment):
             label="sample",
         )
         self.add_task_manager("control").add_task(pid)
-        self.add_instrument(Controls("pid", pid))
+        controller = PIDController("pid", pid)
+        self.add_instrument(controller)
 
         self.add_measurement(Measurement("time", clock.time, unit="s"))
         self.add_measurement(Measurement("R", resistance, unit="Ω"))
@@ -75,39 +76,13 @@ class Hold(Experiment):
             )
         )
         self.add_measurement(
-            Measurement("setpoint", lambda: pid.setpoint, unit="Ω")
+            Measurement("setpoint", controller.get_setpoint, unit="Ω")
         )
 
     def teardown(self):
         lakeshore = self.instruments["lakeshore"]
         lakeshore.set_heater_range(HEATER, Lakeshore_350.HeaterRange.OFF)
         print("The heater is off.")
-
-
-class Controls(SoftwareInstrument):
-    """The PID's setpoint and gains, to change from the Instruments tab."""
-
-    name = "PID Controls"
-
-    def __init__(self, uid, pid):
-        super().__init__(uid)
-        self._pid = pid
-
-    @mark_query
-    def get_setpoint(self) -> float:
-        """The thermometer's resistance the PID holds, in ohms."""
-        return self._pid.setpoint
-
-    @mark_command
-    def set_setpoint(self, ohms: float) -> None:
-        """Sets the thermometer's resistance to hold, in ohms."""
-        self._pid.setpoint = ohms
-
-    @mark_command
-    def set_gains(self, kp: float, ki: float) -> None:
-        """Sets the proportional and integral gains."""
-        self._pid.kp = kp
-        self._pid.ki = ki
 
 
 if __name__ == "__main__":

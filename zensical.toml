@@ -62,6 +62,7 @@ nav = [
       { "Overview" = "reference/instruments/overview.md" },
       { "Calculator" = "reference/instruments/calculator.md" },
       { "Clock" = "reference/instruments/clock.md" },
+      { "PID Controller" = "reference/instruments/pid_controller.md" },
       { "Random Number Generator" = "reference/instruments/random_number_generator.md" },
       { "Signal Generator" = "reference/instruments/signal_generator.md" },
       { "Trace Generator" = "reference/instruments/trace_generator.md" },
