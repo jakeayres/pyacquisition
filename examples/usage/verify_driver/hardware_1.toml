@@ -1,0 +1,6 @@
+# The instruments connected to this PC, to check their drivers against.
+
+[instruments.lockin]
+instrument = "SR_830"
+adapter = "pyvisa"
+resource = "GPIB0::8::INSTR"

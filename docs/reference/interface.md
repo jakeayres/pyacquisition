@@ -18,6 +18,8 @@ The window is a page served by the experiment itself, so you can also open it in
 | **Connected** | Whether the experiment is answering. If it stops, the page reconnects by itself when it can. |
 | Keyboard, moon and power buttons | The keyboard shortcuts, the light or dark theme (it follows Windows until you choose), and stopping the experiment. |
 
+The power button and closing the window both ask **Stop the experiment?** first, and then stop it cleanly, running its `teardown()`. Closing a browser tab that shows the interface doesn't stop the experiment: it is only one client of it.
+
 ## The plots
 
 Each plot shows one or more columns against another. The chips along its top are the columns plotted, each in its own colour (the same colour as its tile in the **Values** tab): click one to hide or show it, click its **×** to take it off, and use **+ Add** to add another. **against** chooses the horizontal axis. The line-and-dots button chooses how it is drawn: **Lines**, **Points** or **Both**. The axis button sets fixed limits or a log scale for either axis, the download button saves the plot as a picture, the data in view as a CSV file, or a Python script that draws it, as it looks or as a figure for a paper, and the last buttons copy or remove the plot.

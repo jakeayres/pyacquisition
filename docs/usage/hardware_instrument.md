@@ -73,7 +73,7 @@ The comment says what the reply holds, as the manual does, for whoever reads the
 
 `self.command()` sends a message, and waits for no reply. `set_voltage` sends `:SOUR:VOLT` with the number, such as `:SOUR:VOLT 1.5`. `get_voltage` asks for the setting back, with the same header and a `?`, as instruments that speak SCPI, like the 2400, do.
 
-A command with a query to read it back lets you check that a setting took. [Verifying a driver](../dev/verifying_hardware.md) tries such pairs on the device.
+A command with a query to read it back lets you check that a setting took. [Verify a driver on real hardware](verify_driver.md) tries such pairs on the device.
 
 **More:** [`mark_command`](../reference/python_api/instrument.md#pyacquisition.core.instrument.mark_command).
 { .gs-more }
@@ -195,4 +195,4 @@ Your driver, in the interface, on `mock`:
 - `mock` runs a driver with no device. `responses` gives the replies it needs, and it gives back what was last set.
 - A driver of your own is added in Python: a config file knows only the ones that come with PyAcquisition.
 
-Next: [verifying a driver on real hardware](../dev/verifying_hardware.md) checks it against the device, before you trust it with a measurement.
+Next: [Verify a driver on real hardware](verify_driver.md), to check it against the device before you trust it with a measurement.

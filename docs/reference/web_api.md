@@ -1,6 +1,6 @@
 # Web API
 
-The endpoints a script or notebook uses to read, command and queue a running experiment. The interface uses the same ones. [Queue, pause and save tasks](../usage/queue.md) shows the queue they control.
+The endpoints a script or notebook uses to read, command and queue a running experiment. The interface uses the same ones. [Drive an experiment from a script](../usage/api_script.md) uses them, and [Queue, pause and save tasks](../usage/queue.md) shows the queue they control.
 
 The experiment serves them at its own address, `http://localhost:8000` unless [`api_server_port`](experiment_options.md) says otherwise. Every endpoint is a `GET`, with its inputs as query parameters:
 
@@ -15,6 +15,14 @@ requests.get(f"{base}/tasks/waitfor", params={"seconds": 2}).json()
 ```
 
 Most answer `{"status": 200, "data": ...}`. The rack's, and a few others, answer `{"status": "success", ...}`. A running experiment lists every endpoint, with its inputs, at `/docs`, where each can be tried.
+
+An endpoint that can't do what it was asked answers with an error status, and a `detail` that says why. `requests`' `raise_for_status()` turns each into an exception.
+
+| Status | When | Answer |
+|---|---|---|
+| 404 | There is no such endpoint: a name mistyped, say. | `{"detail": "Not Found"}` |
+| 422 | An input is missing, misnamed, or can't be read as its type. | `{"detail": [{"type": "missing", "loc": ["query", "frequency"], "msg": "Field required", ...}]}` |
+| 500 | The query or command itself raised an error. | `{"detail": "There is no folder called 'nowhere'."}`: the error's message, or its kind if it has none |
 
 ## Instruments
 

@@ -167,4 +167,4 @@ And the experiment that **Run** starts from it:
 - Measurements' order is the data file's columns' order, and only the options you set are written.
 - **Run** starts the experiment from the file, in the same window.
 
-Next: [Drive an experiment from a script](running.md), to run and control an experiment from your own code.
+Next: [Drive an experiment from a script](api_script.md), to run and control an experiment from your own code.

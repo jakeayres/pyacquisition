@@ -128,7 +128,7 @@ Or build the file in a window, from forms, with `uv run pyacquisition new rig.to
 
     A control panel generated from your code: live plots and values, every instrument query and command, a task queue with pause and abort, and the log. There is no GUI code to write, and it opens in a browser too.
 
-    [The interface](usage/running.md)
+    [The interface](reference/interface.md)
 
 -   :material-format-list-checks:{ .middle } **Tasks that compose**
 
@@ -144,9 +144,9 @@ Or build the file in a window, from forms, with `uv run pyacquisition new rig.to
 
 -   :material-check-decagram-outline:{ .middle } **Verify against hardware**
 
-    A built-in tool runs each supported instrument's queries and commands against the real device and checks the replies. It is read-only by default, with opt-in checks that change settings, and a dry run that contacts nothing.
+    A built-in tool checks a driver against the real device, your own drivers included: every query, and, if you allow it, each setting set, read back and put back. It is read-only by default, and a dry run contacts nothing.
 
-    [Verifying hardware](dev/verifying_hardware.md)
+    [Verify a driver on real hardware](usage/verify_driver.md)
 
 </div>
 

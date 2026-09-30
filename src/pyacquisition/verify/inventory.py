@@ -44,7 +44,19 @@ class Unreachable(Exception):
 
 @dataclass
 class Entry:
-    """One instrument in the inventory."""
+    """One instrument in the inventory, or one to check from Python.
+
+    Args:
+        name (str): What the report calls it.
+        cls (type): The driver: any `Instrument` subclass, your own included.
+        adapter (str | None): The adapter to open it with, such as `"pyvisa"`.
+        resource (str | None): Its address, such as `"GPIB0::24::INSTR"`.
+        args (dict): The adapter's options.
+        capabilities (tuple): What is attached, for checks that need it.
+        max_hazard (Hazard | None): The most it is ever asked, whatever the run allows.
+        skip (tuple): Methods to leave alone.
+        record (str | None): A file to record every message to and from it.
+    """
 
     name: str
     cls: type

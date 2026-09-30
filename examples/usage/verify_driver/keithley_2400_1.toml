@@ -1,0 +1,12 @@
+# What the checks may do to a Keithley 2400, beside keithley_2400.py
+
+[identity]
+contains = ["KEITHLEY", "2400"]
+
+[safe_state]
+steps = [{ call = "set_output", args = { on = false } }]
+
+[roundtrip.voltage]
+hazard = "reversible"
+values = [0.0, 0.5]
+abs = 1e-6

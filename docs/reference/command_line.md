@@ -52,6 +52,8 @@ pyacquisition build (--toml TOML | --py PY) [--name NAME] [--onedir] [--console]
 
 It needs PyInstaller, which comes with the build extra: `uv add "pyacquisition[build]"`. The app is written to `dist/`. On the PC it runs on, the window needs the Microsoft Edge WebView2 Runtime, which Windows 11 has.
 
+See [Build a standalone app](../usage/standalone_app.md).
+
 ## `python -m pyacquisition.verify`
 
 ```text
@@ -69,4 +71,6 @@ python -m pyacquisition.verify [--reversible] [--hazardous] [--dry-run] [--list]
 | `--json PATH` | Also write the report as JSON. |
 | `-v`, `--verbose` | Show the commands sent. |
 
-Without `--reversible` or `--hazardous`, only read-only checks run. Each driver's checks come from its [verification spec](verification_specs.md).
+Without `--reversible` or `--hazardous`, only read-only checks run. Each driver's checks come from its [verification spec](verification_specs.md). It ends with `0` if no check failed, `1` if one did, and `2` if the inventory can't be read.
+
+See [Verify a driver on real hardware](../usage/verify_driver.md).

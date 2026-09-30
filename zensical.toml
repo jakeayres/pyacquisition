@@ -26,7 +26,7 @@ nav = [
       { "Connect a Real Instrument" = "usage/connect_instrument.md" },
       { "Write a Software Instrument" = "usage/software_instrument.md" },
       { "Write a Hardware Instrument" = "usage/hardware_instrument.md" },
-      { "Verifying Hardware" = "dev/verifying_hardware.md" },
+      { "Verify a Driver on Real Hardware" = "usage/verify_driver.md" },
     ] },
     { "Data" = [
       { "Tune Your Measurements" = "usage/measurements.md" },
@@ -43,7 +43,8 @@ nav = [
     { "The Experiment" = [
       { "Set the Experiment's Options" = "usage/options.md" },
       { "Build a Config in the Interface" = "usage/setup_page.md" },
-      { "The Interface and the API" = "usage/running.md" },
+      { "Drive an Experiment from a Script" = "usage/api_script.md" },
+      { "Build a Standalone App" = "usage/standalone_app.md" },
     ] },
   ] },
   { "Reference" = [
@@ -152,7 +153,9 @@ show_source = false
 "usage/advanced.md" = "usage/index.md"
 "usage/toml_config.md" = "reference/config_file.md"
 "dev/contributing.md" = "index.md"
-"dev/overview.md" = "dev/verifying_hardware.md"
+"dev/overview.md" = "usage/verify_driver.md"
+"dev/verifying_hardware.md" = "usage/verify_driver.md"
+"usage/running.md" = "reference/interface.md"
 "instruments/clock.md" = "reference/instruments/clock.md"
 "instruments/keithley_2000.md" = "reference/instruments/keithley_2000.md"
 "instruments/keithley_6221.md" = "reference/instruments/keithley_6221.md"

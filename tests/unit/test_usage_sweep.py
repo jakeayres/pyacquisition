@@ -119,7 +119,7 @@ async def test_the_interlock_stops_the_sweep_above_25_k_and_the_cryostat_is_held
     assert sweep.outcome == "failed"
     assert isinstance(sweep.failure, RuntimeError)
     found = re.fullmatch(r"The sample is at (\d+\.\d\d) K: too warm", str(sweep.failure))
-    assert found and 25.0 < float(found.group(1)) < 26.2  # checked every second, at 1 K a second
+    assert found and 25.0 <= float(found.group(1)) < 26.2  # checked every second, at 1 K a second (and rounded)
     assert cryostat._target == pytest.approx(cryostat.get_setpoint(OutputChannel.OUTPUT_1))  # held there
 
 
