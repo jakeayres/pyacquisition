@@ -4,88 +4,27 @@
 
 It is not tied to any instrument: you give it two functions, one that **reads** the value and one that **writes** the output. That makes it work for a temperature, a pressure, a field, or anything else that you can read and set.
 
+[Hold a temperature with PID](../../usage/pid.md) shows it in use: a furnace held at a temperature, on a queue of its own, with its setpoint changed from the interface.
+
 ## Example
 
-This holds a simulated furnace at 60 °C for the whole experiment. Save the furnace in a file called `furnace.py`:
-
-```python title="furnace.py" linenums="1"
-import time
-
-from pyacquisition.core.instrument import SoftwareInstrument, mark_command, mark_query
-
-
-class Furnace(SoftwareInstrument):
-    """A simulated furnace: power in, temperature out."""
-
-    name = "Furnace"
-
-    def __init__(self, uid):
-        super().__init__(uid)
-        self._temperature = 20.0
-        self._power = 0.0
-        self._last = time.monotonic()
-
-    def _advance(self):
-        now = time.monotonic()
-        dt, self._last = now - self._last, now
-        target = 20.0 + 0.8 * self._power  # 100 % power settles at 100 degrees
-        self._temperature += dt * (target - self._temperature) / 20.0
-
-    @mark_query
-    def temperature(self) -> float:
-        self._advance()
-        return self._temperature
-
-    @mark_command
-    def set_power(self, percent: float) -> float:
-        self._advance()
-        self._power = percent
-        return percent
-```
-
-Then the experiment:
-
-```python title="my_experiment.py" linenums="1"
-from pyacquisition import Experiment, Measurement
+```python
 from pyacquisition.tasks import PID
 
-from furnace import Furnace
-
-
-class MyExperiment(Experiment):
-    def setup(self):
-        furnace = Furnace("furnace")
-        self.add_instrument(furnace)
-
-        pid = PID(
-            read=furnace.temperature, # (1)!
-            write=furnace.set_power, # (2)!
-            setpoint=60.0,
-            kp=5.0,
-            ki=0.5,
-            output_min=0.0, # (3)!
-            output_max=100.0,
-            label="furnace",
-        )
-
-        self.add_task_manager("pid").add_task(pid) # (4)!
-
-        self.add_measurement(Measurement("temperature", furnace.temperature))
-        self.add_measurement(Measurement("power", lambda: pid.output)) # (5)!
-        self.add_measurement(Measurement("error", lambda: pid.error))
-
-
-if __name__ == "__main__":
-    MyExperiment().run()
+pid = PID(
+    read=furnace.temperature,
+    write=furnace.set_power,
+    setpoint=60.0,
+    kp=5.0,
+    ki=0.5,
+    output_min=0.0,
+    output_max=100.0,
+    label="furnace",
+)
+self.add_task_manager("control").add_task(pid)
 ```
 
-1. `read` is any function that takes no arguments and returns the measured value. Pass the method, not its result: no brackets. For a method that needs arguments, use a `lambda` or `functools.partial`, for example `lambda: sensor.get_temperature(Channel.A)`.
-2. `write` is any function that takes the output. It is called on every cycle, and once more when the PID ends.
-3. Always set limits that suit your hardware. Here the output is a heater power between 0 and 100 %.
-4. Give the PID a [task manager of its own](../../usage/running_tasks.md#several-task-managers), so that it runs for the whole experiment while the main queue is free for everything else. Queueing it there starts it when the experiment starts. Nothing else queued on that task manager would run, because the PID never finishes, so name it for what it holds, such as `"pid"`, and keep it for the PID.
-5. The PID's output and error are ordinary attributes, so record them like any other measurement. See [What the PID is doing](#what-the-pid-is-doing).
-
-Run it, and plot `temperature` and `power`. The temperature rises with the heater at full power, and settles at 60 °C with the power at about 50 %.
+`read` takes no arguments and returns the measured value, and `write` takes the output: give the functions, not their results. For a method that needs arguments, use a `lambda`: `lambda: sensor.get_temperature(Channel.A)`. A PID never finishes, so it has a task manager of its own, and starts with the experiment.
 
 ## Settings
 
@@ -123,32 +62,9 @@ pid.setpoint = 80.0
 pid.kp = 8.0
 ```
 
-For example, a task can step the setpoint through a series of values, holding each one for a while:
+A task of your own can change them too, given the PID as an input. Such a task is made in code, since a form can't show a PID.
 
-```python
-from dataclasses import dataclass
-
-from pyacquisition import Task
-from pyacquisition.tasks import PID, WaitFor
-
-
-@dataclass
-class Staircase(Task):
-    """Step the PID's setpoint up through a series of values."""
-
-    pid: PID # (1)!
-    hold_seconds: int = 300
-
-    async def run(self, experiment):
-        for setpoint in [40.0, 60.0, 80.0]:
-            self.pid.setpoint = setpoint
-            self.log(f"Setpoint {setpoint}")
-            await self.run_subtask(WaitFor(seconds=self.hold_seconds))
-```
-
-1. A task receives the PID as an input, like any other object. Queue it in `setup()` with `self.task_managers["main"].add_task(Staircase(pid))`, next to the PID on its own task manager. Because its input is an object, it is created in code and is not registered for the interface.
-
-The interface cannot change these while it runs, because a PID is created in code. To be able to change the setpoint from the interface, put it in a small [software instrument](../../usage/software_instrument.md) whose command sets `pid.setpoint`, and give the instrument the PID.
+The interface can't change them directly, because a PID is made in code. A small software instrument whose commands set them can, as in [Hold a temperature with PID](../../usage/pid.md#change-the-setpoint-from-the-interface).
 
 ## What the PID is doing
 

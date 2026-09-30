@@ -37,7 +37,7 @@ Each plot shows one or more columns against another. The chips along its top are
 | Tab | Shows |
 |---|---|
 | **Values** | A tile for each column: its latest value, its unit, where it comes from, and a small graph of its recent values. |
-| **Queue** | Each task manager's queue: the task running, with how far along it is and **Abort**, and the tasks waiting, which can be dragged into a new order, moved, copied or removed. **Add task** queues a task from a form, **Pause** and **Resume** hold the queue, and **Save…** and **Load…** keep a queue as a sequence to use again. |
+| **Queue** | Each task manager's queue: the task running, with how far along it is and **Abort**, and the tasks waiting, which can be dragged into a new order, moved, copied or removed. **Add task** queues a task from a form, **Pause** and **Resume** hold the queue, and **Save…** and **Load…** keep a queue as a sequence to use again. The running task's card is green while it runs, amber while its queue is paused, and red while it is being aborted. With several task managers, each has a section of its own, and the top bar names the first task running, with a count of the others (**+1**). |
 | **Instruments** | Every instrument, with its queries and commands. Pick one, fill in its form, and press **Read** or **Send**. The answers are kept beside the form, with how long each call took, and a button to copy it. |
 | **Logs** | What the experiment is doing, as it does it, one line per message. Choose which levels to show, and search. Click a message to see all of it. |
 

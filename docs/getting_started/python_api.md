@@ -138,7 +138,7 @@ In `data` they are numbered on from this run's first file: `03.01 run 1.data` af
 
 When they are done, close the window and choose **Stop experiment**. `teardown()` runs, and the terminal says `The lock-in's output is turned down.`
 
-**More:** [the queue](../usage/running_tasks.md), and [pausing, resuming and aborting a task](../usage/running_tasks.md#pause-resume-and-abort).
+**More:** [the queue](../usage/queue.md), and [pausing, resuming and aborting a task](../usage/queue.md#pause-resume-and-abort).
 { .gs-more }
 
 </section>

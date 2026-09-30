@@ -1,6 +1,6 @@
 # Web API
 
-The endpoints a script or notebook uses to read, command and queue a running experiment. The interface uses the same ones. [Running tasks from a script](../usage/running_tasks.md#running-tasks-from-a-script) shows them in use.
+The endpoints a script or notebook uses to read, command and queue a running experiment. The interface uses the same ones. [Queue, pause and save tasks](../usage/queue.md) shows the queue they control.
 
 The experiment serves them at its own address, `http://localhost:8000` unless [`api_server_port`](experiment_options.md) says otherwise. Every endpoint is a `GET`, with its inputs as query parameters:
 

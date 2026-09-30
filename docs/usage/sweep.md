@@ -152,4 +152,4 @@ A sweep from 10 K to 16 K, on its way to 16 K:
 - `alongside` runs a task in the background for as long as a block runs, and an error in it stops the block. `run_subtasks` runs several at once.
 - A `try` around a subtask catches an error you expect, and carries on.
 
-Next: [Queue, pause and save tasks](running_tasks.md), to run sweeps one after another, and save the queue to run again.
+Next: [Queue, pause and save tasks](queue.md), to run sweeps one after another, and save the queue to run again.
