@@ -27,7 +27,7 @@ Each page here is a short tutorial for one thing you may want to do after [Getti
 | [Write a task](write_task.md) | `SetTemperature`: go to a temperature and wait until it's there, with progress, a check of what was asked, and the cryostat held when paused. About 20 minutes. |
 | [Sweep a temperature](sweep.md) | A sweep made of tasks, with a file for each temperature, a safety interlock alongside, and a temperature it can't reach skipped. About 20 minutes. |
 | [Queue, pause and save tasks](queue.md) | A night's work queued, paused, rearranged, and saved as a sequence to run again. About 15 minutes. |
-| [Hold a temperature with PID](pid.md) | A furnace held by the `PID` task on a queue of its own, recorded, and tuned from the interface while it runs. About 15 minutes. |
+| [Hold a temperature with PID](pid.md) | A sample held at a temperature by the `PID` task, through its thermometer's resistance on an SR830 and a Lakeshore's heater in open loop, on a queue of its own, and tuned from the interface while it runs. About 20 minutes. |
 
 ## The experiment
 

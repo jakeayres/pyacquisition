@@ -4,7 +4,7 @@
 
 It is not tied to any instrument: you give it two functions, one that **reads** the value and one that **writes** the output. That makes it work for a temperature, a pressure, a field, or anything else that you can read and set.
 
-[Hold a temperature with PID](../../usage/pid.md) shows it in use: a furnace held at a temperature, on a queue of its own, with its setpoint changed from the interface.
+[Hold a temperature with PID](../../usage/pid.md) shows it in use: a sample held at a temperature through a thermometer read by a lock-in and a Lakeshore's heater, on a queue of its own, with its setpoint changed from the interface.
 
 ## Example
 
@@ -12,25 +12,27 @@ It is not tied to any instrument: you give it two functions, one that **reads** 
 from pyacquisition.tasks import PID
 
 pid = PID(
-    read=furnace.temperature,  # (1)
-    write=furnace.set_power,
-    setpoint=60.0,
-    kp=5.0,  # (2)
-    ki=0.5,
+    read=resistance,  # (1)
+    write=heater,
+    setpoint=1650.0,
+    kp=1.0,  # (2)
+    ki=0.2,
     output_min=0.0,  # (3)
     output_max=100.0,
-    label="furnace",  # (4)
+    inverted=True,  # (4)
+    label="sample",  # (5)
 )
-self.add_task_manager("control").add_task(pid)  # (5)
+self.add_task_manager("control").add_task(pid)  # (6)
 ```
 
 <div class="gs-legend pa-notes" markdown>
 
-1. The functions themselves, with no brackets: the PID calls `read()` for the value, and `write(output)` with the output, every cycle.
-2. Gains, in output per unit of error: 5 % of the heater's power per degree off, and 0.5 % per degree-second.
+1. The functions themselves, with no brackets: the PID calls `read()` for the value, here a thermometer's resistance, and `write(output)` with the output, here a heater's, every cycle.
+2. Gains, in output per unit of error: 1 % of the heater's range per ohm off, and 0.2 % per ohm-second.
 3. The heater's own range: the output never goes outside it.
-4. The name in the **Logs** window. Give each PID its own.
-5. A queue of its own, since a PID never finishes: the main queue stays free for the rest of the experiment.
+4. More heat lowers the value, as it does a RuOx thermometer's resistance.
+5. The name in the **Logs** window. Give each PID its own.
+6. A queue of its own, since a PID never finishes: the main queue stays free for the rest of the experiment.
 
 </div>
 
@@ -48,7 +50,7 @@ For a method that needs arguments, give a `lambda`: `read=lambda: sensor.get_tem
 | `output_min`, `output_max` | Limits on the output. By default there are none. |
 | `period` | Seconds between cycles. The default is 1. |
 | `derivative_filter` | Time constant, in seconds, of a filter on the derivative term. The default of 0 has no filter, which makes a noisy signal noisy in the output. |
-| `inverted` | `False` if raising the output raises the value (a heater). `True` if it lowers it (a cooler). |
+| `inverted` | `False` if raising the output raises the value (a heater and a thermometer that reads kelvin). `True` if it lowers it (a cooler, or a heater and a resistive thermometer whose resistance falls as it warms, such as a RuOx or a Cernox). |
 | `initial_output` | The output that is already applied when the PID starts, so that it takes over smoothly. By default it starts from `kp` × error. |
 | `final_output` | Written when the PID ends, however it ends. The default is 0. **Set it to something safe for your hardware.** |
 | `duration` | Stop after this many seconds. The default of 0 runs until it is stopped. |
@@ -68,8 +70,8 @@ For a method that needs arguments, give a `lambda`: `read=lambda: sensor.get_tem
 The settings `setpoint`, `kp`, `ki`, `kd`, `output_min`, `output_max`, `period` and `derivative_filter` are read on every cycle. Change them by assigning to them, from your own code:
 
 ```python
-pid.setpoint = 80.0
-pid.kp = 8.0
+pid.setpoint = 1560.0
+pid.kp = 0.5
 ```
 
 A task of your own can change them too, given the PID as an input. Such a task is made in code, since a form can't show a PID.

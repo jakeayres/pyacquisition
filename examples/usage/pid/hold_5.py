@@ -1,4 +1,9 @@
 from pyacquisition import Experiment, Measurement
+from pyacquisition.core.instrument import (
+    SoftwareInstrument,
+    mark_command,
+    mark_query,
+)
 from pyacquisition.instruments import SR_830, Clock, Lakeshore_350
 from pyacquisition.tasks import PID
 from stage import SimulatedStage
@@ -48,6 +53,7 @@ class Hold(Experiment):
             label="sample",
         )
         self.add_task_manager("control").add_task(pid)
+        self.add_instrument(Controls("pid", pid))
 
         self.add_measurement(Measurement("time", clock.time, unit="s"))
         self.add_measurement(Measurement("R", resistance, unit="Ω"))
@@ -75,6 +81,32 @@ class Hold(Experiment):
         lakeshore = self.instruments["lakeshore"]
         lakeshore.set_heater_range(HEATER, Lakeshore_350.HeaterRange.OFF)
         print("The heater is off.")
+
+
+class Controls(SoftwareInstrument):
+    """The PID's setpoint and gains, to change from the Instruments tab."""
+
+    name = "PID Controls"
+
+    def __init__(self, uid, pid):
+        super().__init__(uid)
+        self._pid = pid
+
+    @mark_query
+    def get_setpoint(self) -> float:
+        """The thermometer's resistance the PID holds, in ohms."""
+        return self._pid.setpoint
+
+    @mark_command
+    def set_setpoint(self, ohms: float) -> None:
+        """Sets the thermometer's resistance to hold, in ohms."""
+        self._pid.setpoint = ohms
+
+    @mark_command
+    def set_gains(self, kp: float, ki: float) -> None:
+        """Sets the proportional and integral gains."""
+        self._pid.kp = kp
+        self._pid.ki = ki
 
 
 if __name__ == "__main__":
