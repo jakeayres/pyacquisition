@@ -207,4 +207,4 @@ Everything in the window comes from the file:
 Next: [2. The Python API](python_api.md) keeps this file as it is, and builds on it in Python: setting up the lock-in as the experiment starts and leaving it safe as it ends, a calculated column, and a task of your own.
 
 !!! tip "Every option the file can take"
-    [TOML Configuration](../reference/config_file.md) lists them all, section by section. To write the file from forms instead, run `uv run pyacquisition new rig.toml` (see [Setting Up in the Interface](../usage/setup_page.md)).
+    [Config file](../reference/config_file.md) lists them all, section by section. To write the file from forms instead, run `uv run pyacquisition new rig.toml` (see [Build a config in the interface](../usage/setup_page.md)).

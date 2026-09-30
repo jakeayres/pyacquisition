@@ -7,8 +7,8 @@
 | When you have done | Go further with |
 |---|---|
 | [0. Installation](../getting_started/installation.md) | [Connect a real instrument](connect_instrument.md), when you connect real hardware |
-| [1. The Config File](../getting_started/config_file.md) | [Tune your measurements](measurements.md), [Read your data](read_data.md), [Setting up in the interface](setup_page.md), and [the interface and the API](running.md) |
-| [2. The Python API](../getting_started/python_api.md) | [Experiment options](setting_up.md), [Calculate new columns](calculations.md), [Write a task](write_task.md), [Sweep a temperature](sweep.md), [Queue, pause and save tasks](queue.md) and [Hold a temperature with PID](pid.md) |
+| [1. The Config File](../getting_started/config_file.md) | [Tune your measurements](measurements.md), [Read your data](read_data.md), [Build a config in the interface](setup_page.md), and [the interface and the API](running.md) |
+| [2. The Python API](../getting_started/python_api.md) | [Set the experiment's options](options.md), [Calculate new columns](calculations.md), [Write a task](write_task.md), [Sweep a temperature](sweep.md), [Queue, pause and save tasks](queue.md) and [Hold a temperature with PID](pid.md) |
 
 ## Instruments
 
@@ -41,6 +41,6 @@
 
 | Page | Covers |
 |---|---|
-| [Experiment options](setting_up.md) | Setting an experiment's options in Python, and the `setup()` and `teardown()` hooks. |
-| [Setting up in the interface](setup_page.md) | Building or changing a config file from forms, with `pyacquisition new`, and running it from there. |
+| [Set the experiment's options](options.md) | A data folder for each sample and day, a quieter terminal, a port of its own, and which wins, the class or the file. About 10 minutes. |
+| [Build a config in the interface](setup_page.md) | A rig's config file written from forms with `pyacquisition new`, checked as you go, and run from the same window. About 10 minutes. |
 | [The interface and the API](running.md) | Starting and stopping, running without a window, the web API, and a standalone application. |

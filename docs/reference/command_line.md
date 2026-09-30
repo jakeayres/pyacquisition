@@ -33,7 +33,7 @@ pyacquisition new [--port PORT] config
 | `config` | The config file to build or change. A file that doesn't exist yet is made when it is first saved. It must end `.toml`, and its folder must exist. |
 | `--port PORT` | The port for the setup page, and for the experiment it runs. By default, the file's own, or 8000. |
 
-See [Setting up in the interface](../usage/setup_page.md).
+See [Build a config in the interface](../usage/setup_page.md).
 
 ## `pyacquisition build`
 

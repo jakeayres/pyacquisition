@@ -143,4 +143,4 @@ The furnace held at 60 °C, then at 80 °C:
 - Its `output`, `setpoint` and `error` are attributes, which a `lambda` measurement records.
 - A small software instrument can change its settings from the interface while it runs.
 
-Next: [Set the experiment's options](setting_up.md), such as where the data goes and how much the terminal says.
+Next: [Set the experiment's options](options.md), such as where the data goes and how much the terminal says.

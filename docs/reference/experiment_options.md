@@ -1,6 +1,6 @@
 # Experiment options
 
-Every option of an experiment, as a class attribute of your `Experiment` subclass, with its key in a [config file](config_file.md). [Experiment options](../usage/setting_up.md) shows them in use.
+Every option of an experiment, as a class attribute of your `Experiment` subclass, with its key in a [config file](config_file.md). [Set the experiment's options](../usage/options.md) shows them in use.
 
 ```python
 class Lab(Experiment):
@@ -8,6 +8,8 @@ class Lab(Experiment):
     measurement_period = 0.5
     console_log_level = "INFO"
 ```
+
+Set them in the class body: there is no `__init__` to write. If you write one, call `super().__init__()` first.
 
 | Option | Meaning | Default | In a config file |
 |---|---|---|---|

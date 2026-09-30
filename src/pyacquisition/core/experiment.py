@@ -819,19 +819,23 @@ class Experiment:
 
     def setup(self) -> None:
         """
-        Sets up the experiment environment.
+        Override to put the instruments into a known state, and to add
+        instruments, measurements, calculations, traces and tasks.
 
-        Override this method to implement custom setup logic for the experiment. It
-        is called before the main experiment event loop starts
+        Called once, just before the experiment starts running. Anything added
+        after that raises a `RuntimeError`, since the interface is built from what
+        is there when the experiment starts.
         """
         pass
 
     def teardown(self) -> None:
         """
-        Cleans up the experiment environment.
+        Override to leave the instruments safe when the experiment ends: an output
+        turned down, a heater off.
 
-        Override this method to implement custom teardown logic for the experiment.
-        It is called after the main experiment event loop ends.
+        Called once, after the experiment has stopped measuring, however it ended,
+        and before the instruments' connections are closed, so it can still talk
+        to them.
         """
         pass
 

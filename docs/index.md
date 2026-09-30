@@ -97,7 +97,7 @@ The interface, the recording and the data files are generated either way.
 
 <div class="pa-flow" markdown="0"><span class="cmd"><b>$</b> uv run pyacquisition --toml rig.toml</span></div>
 
-Or build the file in a window, from forms, with `uv run pyacquisition new rig.toml`: see [Setting Up in the Interface](usage/setup_page.md).
+Or build the file in a window, from forms, with `uv run pyacquisition new rig.toml`: see [Build a config in the interface](usage/setup_page.md).
 
 ///
 

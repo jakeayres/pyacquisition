@@ -1,0 +1,32 @@
+# An experiment's config, made with `pyacquisition new`. Run it with
+# `pyacquisition run --toml <this file>`. See pyacquisition.readthedocs.io
+# for what each part does.
+
+[instruments.clock]
+instrument = "Clock"
+
+[instruments.lockin]
+instrument = "SR_830"
+adapter = "mock"
+resource = "GPIB0::8::INSTR"
+
+[instruments.cryostat]
+instrument = "Lakeshore_350"
+adapter = "mock"
+resource = "GPIB0::12::INSTR"
+
+[measurements.time]
+instrument = "clock"
+method = "time"
+unit = "s"
+
+[measurements.x]
+instrument = "lockin"
+method = "get_x"
+unit = "V"
+
+[measurements.T]
+instrument = "cryostat"
+method = "get_temperature"
+args = {input_channel = "INPUT_A"}
+unit = "K"

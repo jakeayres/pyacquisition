@@ -47,7 +47,7 @@ The window is the same, but titled `Lab`, after the class. Keep `.run()` under `
 
 An instrument's queries and commands are methods you can call. The file says there is a lock-in, but not what state to put it in, so this `setup()` sets its reference frequency to 137 Hz, and every run starts from the same settings. Once it runs, the lock-in's `get_frequency` in the **Instruments** tab answers `137`, since the `mock` adapter answers with the value last set.
 
-**More:** [`setup()`](../usage/setting_up.md#setup-and-teardown), and [the SR 830's commands](../reference/instruments/sr_830.md).
+**More:** [`setup()`](../reference/python_api/experiment.md#pyacquisition.core.experiment.Experiment.setup), and [the SR 830's commands](../reference/instruments/sr_830.md).
 { .gs-more }
 
 </section>
@@ -64,7 +64,7 @@ An instrument's queries and commands are methods you can call. The file says the
 
 The lock-in's sine output drives whatever it is wired to, and would go on doing so after the experiment. So this `teardown()` turns it down to 4 mV, the least an SR830 gives, and says so. When you stop the experiment, the line is among the last in the terminal.
 
-**More:** [`teardown()`](../usage/setting_up.md#setup-and-teardown), and [the SR 830's commands](../reference/instruments/sr_830.md).
+**More:** [`teardown()`](../reference/python_api/experiment.md#pyacquisition.core.experiment.Experiment.teardown), and [the SR 830's commands](../reference/instruments/sr_830.md).
 { .gs-more }
 
 </section>

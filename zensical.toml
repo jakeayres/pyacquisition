@@ -41,8 +41,8 @@ nav = [
       { "Hold a Temperature with PID" = "usage/pid.md" },
     ] },
     { "The Experiment" = [
-      { "Experiment Options" = "usage/setting_up.md" },
-      { "Setting Up in the Interface" = "usage/setup_page.md" },
+      { "Set the Experiment's Options" = "usage/options.md" },
+      { "Build a Config in the Interface" = "usage/setup_page.md" },
       { "The Interface and the API" = "usage/running.md" },
     ] },
   ] },
@@ -146,6 +146,7 @@ show_source = false
 "usage/instruments.md" = "usage/connect_instrument.md"
 "usage/custom_instruments.md" = "usage/software_instrument.md"
 "usage/tasks.md" = "usage/write_task.md"
+"usage/setting_up.md" = "usage/options.md"
 "usage/running_tasks.md" = "usage/queue.md"
 "usage/composing_tasks.md" = "usage/sweep.md"
 "usage/advanced.md" = "usage/index.md"
