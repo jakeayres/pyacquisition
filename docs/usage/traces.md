@@ -20,7 +20,7 @@ You write `sample.py` in your `my-lab` project, beside `simulated.py`: a cryosta
 --8<-- "examples/usage/traces/sample_1.py"
 ```
 
-Copy this into `sample.py`. It is the sample from [Tune your measurements](measurements.md), at its third step: a clock, the cryostat, and the lock-in on the sample in it, measuring the time, the lock-in's `x` and `y`, and the temperature, `T`, each with its unit.
+Copy this into `sample.py`. It measures what [Tune your measurements](measurements.md) does at its third step: the time, the lock-in's `x` and `y`, and the temperature, `T`, each with its unit. Here the cryostat and the lock-in are `simulated.py`'s stand-ins, since the spectrometer is simulated too.
 
 ??? abstract "simulated.py: a cryostat, a lock-in and a spectrometer, simulated"
     Save this beside `sample.py`. It stands in for real hardware, and you don't need to read it.

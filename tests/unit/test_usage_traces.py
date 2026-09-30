@@ -57,8 +57,16 @@ def sample(version: int, folder: Path, **options):
     return experiment
 
 
-def test_it_starts_from_tune_your_measurements_third_step():
-    assert text(HERE / "sample_1.py") == text(ROOT / "examples" / "usage" / "measurements" / "sample_3.py")
+def test_it_measures_what_tune_your_measurements_third_step_does_on_the_stand_ins():
+    """The same measurements, on simulated.py's cryostat and lock-in, since the
+    spectrometer is simulated too."""
+
+    def measurements(path):
+        source = text(path)
+        return source[source.index("        self.add_measurement(") : source.index('if __name__')]
+
+    real = measurements(ROOT / "examples" / "usage" / "measurements" / "sample_3.py")
+    assert measurements(HERE / "sample_1.py") == real.replace("Lakeshore_350.InputChannel", "InputChannel")
 
 
 def test_each_version_adds_the_trace_the_page_says(tmp_path, simulated):
