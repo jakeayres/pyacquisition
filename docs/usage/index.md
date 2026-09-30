@@ -8,7 +8,7 @@
 |---|---|
 | [0. Installation](../getting_started/installation.md) | [Connect a real instrument](connect_instrument.md), when you connect real hardware |
 | [1. The Config File](../getting_started/config_file.md) | [Tune your measurements](measurements.md), [Read your data](read_data.md), [Setting up in the interface](setup_page.md), and [the interface and the API](running.md) |
-| [2. The Python API](../getting_started/python_api.md) | [Experiment options](setting_up.md), [Calculations](calculations.md), [Writing tasks](tasks.md), [Composing tasks](composing_tasks.md) and [Running tasks](running_tasks.md) |
+| [2. The Python API](../getting_started/python_api.md) | [Experiment options](setting_up.md), [Calculate new columns](calculations.md), [Writing tasks](tasks.md), [Composing tasks](composing_tasks.md) and [Running tasks](running_tasks.md) |
 
 ## Instruments
 
@@ -17,7 +17,6 @@
 | [Connect a real instrument](connect_instrument.md) | Your lock-in on GPIB, USB or serial instead of `mock`: its address, the adapter, and a second instrument from Python. About 10 minutes. |
 | [Write a software instrument](software_instrument.md) | A disk-space monitor: a query, a command, and a choice, in the Instruments tab and the data file. About 15 minutes. |
 | [Write a hardware instrument](hardware_instrument.md) | A driver for a Keithley 2400 SourceMeter: messages sent, replies taken apart, and the device's codes as a choice, tried on `mock`. About 20 minutes. |
-| [A trace method](custom_instruments.md) | A driver method that gives a whole spectrum at once. |
 | [Verifying instruments on real hardware](../dev/verifying_hardware.md) | Checking a driver against the device it drives. |
 
 ## Data
@@ -26,8 +25,8 @@
 |---|---|
 | [Tune your measurements](measurements.md) | A sample in a cryostat: units, a choice as an argument, a slow value read less often, and what a failed reading leaves in the file. About 10 minutes. |
 | [Read your data](read_data.md) | Your data files in pandas: find them, read one, plot it, read every file of a run, and let the interface write the script. About 10 minutes. |
-| [Calculations](calculations.md) | New columns worked out as you record: sums, rolling means, and your own. |
-| [Traces and spectra](traces.md) | Whole arrays, such as spectra, taken beside the rows, reduced to columns, shown live, and saved beside the data file. |
+| [Calculate new columns](calculations.md) | Columns worked out as you record: a noisy signal smoothed, its size, and how fast the sample is cooling. About 15 minutes. |
+| [Record spectra and traces](traces.md) | A spectrum taken when you ask and with every row, reduced to a column, mapped against temperature, and read back. About 15 minutes. |
 
 ## Tasks
 

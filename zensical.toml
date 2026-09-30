@@ -26,14 +26,13 @@ nav = [
       { "Connect a Real Instrument" = "usage/connect_instrument.md" },
       { "Write a Software Instrument" = "usage/software_instrument.md" },
       { "Write a Hardware Instrument" = "usage/hardware_instrument.md" },
-      { "A Trace Method" = "usage/custom_instruments.md" },
       { "Verifying Hardware" = "dev/verifying_hardware.md" },
     ] },
     { "Data" = [
       { "Tune Your Measurements" = "usage/measurements.md" },
       { "Read Your Data" = "usage/read_data.md" },
-      { "Calculations" = "usage/calculations.md" },
-      { "Traces and Spectra" = "usage/traces.md" },
+      { "Calculate New Columns" = "usage/calculations.md" },
+      { "Record Spectra and Traces" = "usage/traces.md" },
     ] },
     { "Tasks" = [
       { "Writing Tasks" = "usage/tasks.md" },
@@ -144,6 +143,7 @@ show_source = false
 "usage/queueing_tasks.md" = "usage/running_tasks.md"
 "usage/real_instruments.md" = "usage/connect_instrument.md"
 "usage/instruments.md" = "usage/connect_instrument.md"
+"usage/custom_instruments.md" = "usage/software_instrument.md"
 "usage/advanced.md" = "usage/index.md"
 "usage/toml_config.md" = "reference/config_file.md"
 "dev/contributing.md" = "index.md"

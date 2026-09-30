@@ -140,7 +140,7 @@ Or build the file in a window, from forms, with `uv run pyacquisition new rig.to
 
     Add columns as data is recorded: sums, rolling means, or any function of a row, saved next to the raw values. A calculation that needs a memory is a short class.
 
-    [Calculations](usage/calculations.md)
+    [Calculate new columns](usage/calculations.md)
 
 -   :material-check-decagram-outline:{ .middle } **Verify against hardware**
 

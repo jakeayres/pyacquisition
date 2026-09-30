@@ -1,6 +1,6 @@
 # Calculations
 
-The calculations that come with PyAcquisition, and the base class for your own. [Calculations](../usage/calculations.md) shows them in use.
+The calculations that come with PyAcquisition, and the base class for your own. [Calculate new columns](../usage/calculations.md) shows them in use.
 
 ```python
 from pyacquisition import Calculation, RollingMean, Sum
@@ -14,6 +14,8 @@ A calculation is added in `setup()` with `self.add_calculation(...)`, or, for `S
 | [`RollingMean`](#rollingmean) | The mean of a column's last few values. | `a_mean10`, or `name` |
 | A function of the row | Whatever it returns. | The keys it returns |
 | A [`Calculation`](#calculation) subclass | Whatever it returns, keeping state between rows if it needs to. | Its `columns` |
+
+A `NaN` is written to the data file as an empty cell, which pandas reads as `NaN` again.
 
 ## `Sum`
 

@@ -161,6 +161,7 @@ class SimulatedLockin(SoftwareInstrument):
         return 0
 
 
+# --8<-- [start:spectrometer]
 class SimulatedSpectrometer(SoftwareInstrument):
     """A simulated spectrometer, measuring the sample's spectrum.
 
@@ -211,3 +212,4 @@ class SimulatedSpectrometer(SoftwareInstrument):
             x_unit="GHz",
             unit="V",
         )
+        # --8<-- [end:spectrometer]
