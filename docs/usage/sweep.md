@@ -1,10 +1,10 @@
 # Sweep a temperature
 
-<p class="pa-meta" markdown="span">About 20 minutes · Needs [Getting Started](../getting_started/python_api.md), and [Write a task](write_task.md) helps</p>
+<p class="pa-meta" markdown="span">About 20 minutes · Needs [Getting Started](../getting_started/python_api.md), and [Write a task](write_task.md) helps, and a lock-in and a Lakeshore 350 on your cryostat</p>
 
 Most measurements are made at a series of settings: temperatures, fields, gate voltages. A **sweep** steps through them, and records at each. In this tutorial you write one for temperature, `Sweep`, built from tasks you have already: `SetTemperature` goes to each temperature, `NewFile` starts a file for it, and `WaitFor` records there. A safety check runs alongside, and stops everything if the sample gets too warm. A temperature that can't be reached is skipped, and the sweep carries on.
 
-You carry on with `sample.py` from [Write a task](write_task.md), beside `simulated.py`: a cryostat, and a lock-in on a sample in it, which stand in for a Lakeshore 350 and an SR830. The sample's signal falls away as it warms through 14 K.
+You carry on with `sample.py` from [Write a task](write_task.md): a sample measured with an SR830, in a cryostat with a Lakeshore 350, at your instruments' addresses.
 
 <div class="gs" data-files="sample.py:versions" data-lines="26" data-term-lines="3" markdown>
 
@@ -20,14 +20,7 @@ You carry on with `sample.py` from [Write a task](write_task.md), beside `simula
 --8<-- "examples/usage/sweep/sample_1.py"
 ```
 
-This is `sample.py` as [Write a task](write_task.md) left it: the sample in the cryostat, and `SetTemperature`, which takes it to a temperature and waits until it is there. If you haven't done that tutorial, copy it.
-
-??? abstract "simulated.py: a cryostat, and a lock-in on a sample in it, simulated"
-    Save this beside `sample.py`. It stands in for real hardware, and you don't need to read it.
-
-    ```python title="simulated.py"
-    --8<-- "examples/simulated_rig/simulated.py"
-    ```
+This is `sample.py` as [Write a task](write_task.md) left it: the lock-in and the Lakeshore, and `SetTemperature`, which takes the sample to a temperature and waits until it is there. If you haven't done that tutorial, copy it, with your addresses.
 
 **More:** [Write a task](write_task.md), which builds it.
 { .gs-more }
@@ -38,7 +31,7 @@ This is `sample.py` as [Write a task](write_task.md) left it: the sample in the 
 
 ## Run tasks from a task: the sweep
 
-```python title="sample.py" hl_lines="1 11 67-89"
+```python title="sample.py" hl_lines="1 6 65-87"
 --8<-- "examples/usage/sweep/sample_2.py"
 ```
 
@@ -55,11 +48,11 @@ This is `sample.py` as [Write a task](write_task.md) left it: the sample in the 
 
 ## Keep watch in the background
 
-```python title="sample.py" hl_lines="83-89 93-105"
+```python title="sample.py" hl_lines="81-87 91-103"
 --8<-- "examples/usage/sweep/sample_3.py"
 ```
 
-`alongside` runs a task in the background while the block under it runs, and stops it when the block ends. `Interlock` checks the sample every second, and raises an error if it is above 25 K. An error in a background task stops the block, so the sweep stops, `SetTemperature`'s `teardown` holds the cryostat where it is, and the queue pauses.
+`alongside` runs a task in the background while the block under it runs, and stops it when the block ends. `Interlock` checks the sample every second, and raises an error if it is above 25 K: set the `limit` your sample can take. An error in a background task stops the block, so the sweep stops, `SetTemperature`'s `teardown` holds the cryostat where it is, and the queue pauses.
 
 Every loop in a task needs a wait, here `self.sleep(1)`, or nothing else can run. `run_subtasks` runs several tasks at once, and waits for them all.
 
@@ -72,7 +65,7 @@ Every loop in a task needs a wait, here `self.sleep(1)`, or nothing else can run
 
 ## Carry on after an error
 
-```python title="sample.py" hl_lines="87-91"
+```python title="sample.py" hl_lines="85-89"
 --8<-- "examples/usage/sweep/sample_4.py"
 ```
 
@@ -89,7 +82,7 @@ Catch the errors you expect, never everything (`except:`). Aborting a task raise
 
 ## Register it, and run the experiment
 
-```python title="sample.py" hl_lines="136"
+```python title="sample.py" hl_lines="135"
 --8<-- "examples/usage/sweep/sample_5.py"
 ```
 
@@ -97,9 +90,9 @@ Catch the errors you expect, never everything (`except:`). Aborting a task raise
 uv run sample.py
 ```
 
-In the **Queue** tab, choose **Add task**, then **Sweep**, and give **Start Kelvin** 10, **Stop Kelvin** 16, **Step** 2 and **Dwell** 30. Its bar counts the temperatures, with the subtask running under it. Plot `x` against `T`: the signal falls as the sample warms through 14 K. In `data`, a file for each temperature: `10 K`, `12 K`, `14 K` and `16 K`.
+In the **Queue** tab, choose **Add task**, then **Sweep**, and give temperatures your cryostat can reach, such as **Start Kelvin** 10, **Stop Kelvin** 16, **Step** 2 and **Dwell** 30. Its bar counts the temperatures, with the subtask running under it. Plot `x` against `T`. In `data`, each temperature has a file of its own: `10 K`, `12 K`, `14 K` and `16 K`.
 
-Then try the interlock: a sweep from 22 to 30 K stops at about 25 K, since it checks once a second.
+To see the interlock act, without taking the sample anywhere it shouldn't go, set its `limit` a little above the sweep's start: the sweep stops soon after the sample passes it, since it checks once a second.
 
 **More:** [the Queue tab](../reference/interface.md#the-dock), and [Read your data](read_data.md), to read a sweep's files together.
 { .gs-more }
@@ -112,35 +105,11 @@ Then try the interlock: a sweep from 22 to 30 K stops at about 25 K, since it ch
 
 </div>
 
-## What you built
-
-A sweep from 10 K to 16 K, on its way to 16 K:
-
-<div class="gs-shot" markdown>
-
-![The interface running sample.py: x against T from 12 to 15.4 K, falling through 14 K, from the files 00.02 12 K.data and 00.03 14 K.data, and the Queue tab, where Sweep from 10.0 to 16.0 K is at 3 of 4, going to 16 K, with Interlock and SetTemperature, at 62% and 15.24 K, running under it](../images/usage/sweep/sweep.png){ .pa-shot }
-
-<span class="gs-pin" style="--x: 9.8%; --y: 70.3%">1</span>
-<span class="gs-pin" style="--x: 24.8%; --y: 76.4%">2</span>
-<span class="gs-pin" style="--x: 72.8%; --y: 9.2%">3</span>
-<span class="gs-pin" style="--x: 59.8%; --y: 27.7%">4</span>
-
-</div>
-
-<div class="gs-legend" markdown>
-
-1. **The sweep.** Its description, and its progress in temperatures: 3 of 4, going to 16 K.
-2. **Its subtasks.** `Interlock` in the background, and `SetTemperature`, with its own progress.
-3. **A file for each temperature.** Now `14 K`, with `12 K` before it, fainter on the plot.
-4. **The transition.** The signal falls away as the sample warms through 14 K.
-
-</div>
-
 !!! success "Checkpoint"
-    Queued from 10 to 16 K in steps of 2, the sweep writes `10 K.data`, `12 K.data`, `14 K.data` and `16 K.data`, each numbered on from the file before, and logs `[Sweep] Task completed.` Plotted against `T`, `x` falls from about 2.3 mV at 10 K through 14 K. Queued from 22 to 30 K, it stops at about 25 K, with the alert `Sweep failed` and `RuntimeError: The sample is at 25.05 K: too warm`, say, and the queue paused.
+    Queued from 10 to 16 K in steps of 2, the sweep writes `10 K.data`, `12 K.data`, `14 K.data` and `16 K.data`, each numbered on from the file before, and logs `[Sweep] Task completed.` With the interlock's `limit` below where the sweep goes, it stops soon after the sample passes it, with the alert `Sweep failed` and `RuntimeError: The sample is at … K: too warm`, and the queue paused.
 
 ??? failure "Something not working?"
-    - **The sweep stops with `RuntimeError: The sample is at 25.05 K: too warm`, and the queue pauses.** That is the interlock, doing its job: the sweep went above 25 K. Set `limit` to what your sample can take.
+    - **The sweep stops with `RuntimeError: The sample is at … K: too warm`, and the queue pauses.** That is the interlock, doing its job: the sample went above `limit`. Set it to what your sample can take.
     - **The sweep fails at once with `float division by zero`.** **Step** was 0.
     - **The experiment freezes when the sweep starts.** A loop has no wait in it: every loop in a task needs one, such as `await self.sleep(1)`.
     - **The sweep can't be aborted.** A bare `except:` catches the abort. Catch the error you expect, such as `TimeoutError`.

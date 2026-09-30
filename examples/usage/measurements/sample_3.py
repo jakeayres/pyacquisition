@@ -1,7 +1,5 @@
 from pyacquisition import Experiment, Measurement
-from pyacquisition.instruments import Clock
-from pyacquisition.instruments.lakeshore.lakeshore_350 import InputChannel
-from simulated import SimulatedCryostat, SimulatedLockin
+from pyacquisition.instruments import SR_830, Clock, Lakeshore_350
 
 
 class Sample(Experiment):
@@ -9,8 +7,9 @@ class Sample(Experiment):
 
     def setup(self):
         clock = Clock("clock")
-        cryostat = SimulatedCryostat("cryostat")
-        lockin = SimulatedLockin("lockin", cryostat)
+        # Your instruments' addresses
+        cryostat = Lakeshore_350("cryostat", "GPIB0::12::INSTR")
+        lockin = SR_830("lockin", "GPIB0::8::INSTR")
         self.add_instrument(clock)
         self.add_instrument(cryostat)
         self.add_instrument(lockin)
@@ -22,7 +21,7 @@ class Sample(Experiment):
             Measurement(
                 "T",
                 cryostat.get_temperature,
-                input_channel=InputChannel.INPUT_A,
+                input_channel=Lakeshore_350.InputChannel.INPUT_A,
                 unit="K",
             )
         )

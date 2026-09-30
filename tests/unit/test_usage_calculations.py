@@ -4,17 +4,16 @@ values the page says, and fail as it says."""
 
 import importlib.util
 import math
-import sys
 from pathlib import Path
 
 import pytest
+from fake_rig import REPLIES, open_fakes
 from loguru import logger
 
 from pyacquisition.core.calculations import Calculations
 
 ROOT = Path(__file__).resolve().parents[2]
 HERE = ROOT / "examples" / "usage" / "calculations"
-SIMULATED = ROOT / "examples" / "simulated_rig"
 
 
 def text(path: Path) -> str:
@@ -22,9 +21,9 @@ def text(path: Path) -> str:
 
 
 @pytest.fixture
-def simulated(monkeypatch):
-    monkeypatch.syspath_prepend(str(SIMULATED))
-    sys.modules.pop("simulated", None)
+def rig(monkeypatch):
+    """The lock-in and the Lakeshore, over a fake connection."""
+    return open_fakes(monkeypatch, REPLIES)
 
 
 def module(version: int):
@@ -54,7 +53,7 @@ def test_it_starts_from_tune_your_measurements_third_step():
 
 
 @pytest.mark.parametrize("version", [1, 2, 3, 4])
-def test_each_version_sets_up(version, tmp_path, simulated):
+def test_each_version_sets_up(version, tmp_path, rig):
     experiment = sample(version, tmp_path)
     assert list(experiment.measurements) == ["time", "x", "y", "T"]
 
@@ -70,29 +69,29 @@ def a_row(i):
     return {"time": lambda i: 0.25 * i, "x": lambda i: 1e-3 * (i % 2), "y": lambda i: 0.0, "T": lambda i: 20.0 - 0.25 * i}
 
 
-def test_the_columns_are_the_measurements_then_the_calculations(tmp_path, simulated):
+def test_the_columns_are_the_measurements_then_the_calculations(tmp_path, rig):
     made = rows(sample(4, tmp_path), 1, **a_row(0))
     assert list(made[0]) == ["time", "x", "y", "T", "x_mean10", "r", "T_rate"]
 
 
-def test_the_units_are_volts_and_kelvin_per_minute(tmp_path, simulated):
+def test_the_units_are_volts_and_kelvin_per_minute(tmp_path, rig):
     units = sample(4, tmp_path)._calculations.units
     assert units == {"x_mean10": "V", "r": "V", "T_rate": "K/min"}
 
 
-def test_the_rolling_mean_is_empty_until_it_has_ten_values_then_smooths(tmp_path, simulated):
+def test_the_rolling_mean_is_empty_until_it_has_ten_values_then_smooths(tmp_path, rig):
     made = rows(sample(2, tmp_path), 12, **a_row(0))
     assert all(math.isnan(row["x_mean10"]) for row in made[:9])
     assert made[9]["x_mean10"] == pytest.approx(0.5e-3)  # x alternates 0 and 1 mV
 
 
-def test_r_is_the_size_of_the_signal(tmp_path, simulated):
+def test_r_is_the_size_of_the_signal(tmp_path, rig):
     experiment = sample(3, tmp_path)
     (row,) = rows(experiment, 1, time=lambda i: 0.0, x=lambda i: 3e-3, y=lambda i: -4e-3, T=lambda i: 20.0)
     assert row["r"] == pytest.approx(5e-3)
 
 
-def test_t_rate_is_how_fast_t_changes_per_minute_over_its_last_20_rows(tmp_path, simulated):
+def test_t_rate_is_how_fast_t_changes_per_minute_over_its_last_20_rows(tmp_path, rig):
     made = rows(sample(4, tmp_path), 40, **a_row(0))  # T falls 1 K every second
     assert math.isnan(made[0]["T_rate"])  # one row: no rate yet
     assert made[1]["T_rate"] == pytest.approx(-60.0)
@@ -104,7 +103,7 @@ def test_t_rate_is_how_fast_t_changes_per_minute_over_its_last_20_rows(tmp_path,
     assert rate({"time": 31, "T": 5.0}) == {"T_rate": 0.0}  # settled
 
 
-def test_a_calculation_that_fails_is_logged_and_its_cells_are_empty(tmp_path, simulated, logged):
+def test_a_calculation_that_fails_is_logged_and_its_cells_are_empty(tmp_path, rig, logged):
     experiment = sample(4, tmp_path)
     (row,) = rows(experiment, 1, time=lambda i: 0.0, x=lambda i: 1.0, Y=lambda i: 0.0, T=lambda i: 20.0)
     assert "[Calculations] Error in calculation magnitude: 'y'" in logged

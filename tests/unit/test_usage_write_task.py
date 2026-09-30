@@ -11,6 +11,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from fake_rig import REPLIES, open_fakes
 from fastapi.testclient import TestClient
 
 from pyacquisition.instruments.lakeshore.lakeshore_350 import InputChannel, OutputChannel
@@ -27,6 +28,9 @@ def text(path: Path) -> str:
 
 @pytest.fixture
 def simulated(monkeypatch):
+    """The stand-in cryostat, for the task's logic to run against in these tests
+    only, and the lock-in and Lakeshore over a fake connection, for sample.py."""
+    open_fakes(monkeypatch, REPLIES)
     monkeypatch.syspath_prepend(str(SIMULATED))
     sys.modules.pop("simulated", None)
     import simulated
@@ -47,7 +51,18 @@ def a_lab(simulated, kelvin=20.0):
 
 
 def test_it_starts_from_tune_your_measurements_third_step():
-    assert text(HERE / "sample_1.py") == text(ROOT / "examples" / "usage" / "measurements" / "sample_3.py")
+    """With the Lakeshore's input and loop named once, for the task to use."""
+    names = (
+        "\n# The Lakeshore's input for the sample's thermometer, and its heater's loop\n"
+        "SENSOR = Lakeshore_350.InputChannel.INPUT_A\n"
+        "LOOP = Lakeshore_350.OutputChannel.OUTPUT_1\n\n"
+    )
+    given = text(HERE / "sample_1.py")
+    assert names in given
+    given = given.replace(names, "\n").replace(
+        "input_channel=SENSOR", "input_channel=Lakeshore_350.InputChannel.INPUT_A"
+    )
+    assert given == text(ROOT / "examples" / "usage" / "measurements" / "sample_3.py")
 
 
 @pytest.mark.parametrize("version", [1, 2, 3, 4, 5, 6, 7])

@@ -1,10 +1,10 @@
 # Write a task
 
-<p class="pa-meta" markdown="span">About 20 minutes · Needs [Getting Started](../getting_started/python_api.md)</p>
+<p class="pa-meta" markdown="span">About 20 minutes · Needs [Getting Started](../getting_started/python_api.md), and a lock-in and a Lakeshore 350 on your cryostat</p>
 
 A **task** is a procedure the experiment runs from a queue, while it goes on measuring: go to a temperature, wait an hour, start a new file. [2. The Python API](../getting_started/python_api.md) builds one out of two that come with PyAcquisition. In this tutorial you write one that drives hardware: `SetTemperature` takes a sample to a temperature and waits until it is there, shows how far along it is, refuses a temperature it shouldn't go to, and holds the cryostat where it is if you pause it. You will use it in most experiments with a cryostat.
 
-You write `sample.py` in your `my-lab` project, beside `simulated.py`: a cryostat, and a lock-in on a sample in it, which stand in for a Lakeshore 350 and an SR830. The cryostat has a Lakeshore 350's commands, so the task works unchanged with a real one.
+You write `sample.py` in your `my-lab` project, for a sample measured with an SR830 in a cryostat with a Lakeshore 350. Change the addresses, the input and the loop to your own. With a Lakeshore 340, use `Lakeshore_340`: the task's commands are the same.
 
 <div class="gs" data-files="sample.py:versions" data-lines="26" data-term-lines="3" markdown>
 
@@ -14,20 +14,13 @@ You write `sample.py` in your `my-lab` project, beside `simulated.py`: a cryosta
 
 <section class="gs-step" data-given markdown>
 
-## Start from the simulated cryostat
+## Start from your measurements
 
 ```python title="sample.py"
 --8<-- "examples/usage/write_task/sample_1.py"
 ```
 
-Copy this into `sample.py`. It is the sample from [Tune your measurements](measurements.md), at its third step: a clock, the cryostat, and the lock-in on the sample in it, measuring the time, the lock-in's `x` and `y`, and the temperature, `T`.
-
-??? abstract "simulated.py: a cryostat, and a lock-in on a sample in it, simulated"
-    Save this beside `sample.py`. It stands in for real hardware, and you don't need to read it.
-
-    ```python title="simulated.py"
-    --8<-- "examples/simulated_rig/simulated.py"
-    ```
+Copy this into `sample.py`. It is the sample from [Tune your measurements](measurements.md), at its third step: a clock, the Lakeshore and the lock-in at their addresses, measuring the time, the lock-in's `x` and `y`, and the temperature, `T`. `SENSOR` and `LOOP` name the Lakeshore's input for the sample's thermometer and its heater's loop, once, for the task to use.
 
 **More:** [Tune your measurements](measurements.md), which builds it.
 { .gs-more }
@@ -38,7 +31,7 @@ Copy this into `sample.py`. It is the sample from [Tune your measurements](measu
 
 ## Write a task with inputs
 
-```python title="sample.py" hl_lines="1 3 5-9 13-24"
+```python title="sample.py" hl_lines="1 3 11-22"
 --8<-- "examples/usage/write_task/sample_2.py"
 ```
 
@@ -55,7 +48,7 @@ A task is a class based on `Task`, marked `@dataclass`. Its **inputs** are the f
 
 ## Wait until it gets there
 
-```python title="sample.py" hl_lines="19 27-32"
+```python title="sample.py" hl_lines="17 25-30"
 --8<-- "examples/usage/write_task/sample_3.py"
 ```
 
@@ -72,7 +65,7 @@ A task's waits are where it can be paused and aborted. Wait with them, never `ti
 
 ## Show its progress
 
-```python title="sample.py" hl_lines="21-23 27 34-35"
+```python title="sample.py" hl_lines="19-21 25 32-33"
 --8<-- "examples/usage/write_task/sample_4.py"
 ```
 
@@ -89,11 +82,11 @@ A task's waits are where it can be paused and aborted. Wait with them, never `ti
 
 ## Check what was asked
 
-```python title="sample.py" hl_lines="21-24"
+```python title="sample.py" hl_lines="19-22"
 --8<-- "examples/usage/write_task/sample_5.py"
 ```
 
-A task is made when it is queued, and `__post_init__` runs then, so a check there refuses a mistake before anything happens. Here a temperature outside what the cryostat can do: the form shows `500.0 K is out of range: 1.5 to 300 K.`, and nothing is queued.
+A task is made when it is queued, and `__post_init__` runs then, so a check there refuses a mistake before anything happens. Here a temperature outside what the cryostat can do, 1.5 to 300 K: set your own. The form shows `500.0 K is out of range: 1.5 to 300 K.`, and nothing is queued.
 
 `super().__post_init__()` must come first. It sets up what the task needs to run.
 
@@ -106,7 +99,7 @@ A task is made when it is queued, and `__post_init__` runs then, so a check ther
 
 ## Hold the hardware when paused
 
-```python title="sample.py" hl_lines="46-62"
+```python title="sample.py" hl_lines="44-60"
 --8<-- "examples/usage/write_task/sample_6.py"
 ```
 
@@ -123,7 +116,7 @@ Pausing a task stops its code, not your hardware: the cryostat would ramp on. `o
 
 ## Register it, and run the experiment
 
-```python title="sample.py" hl_lines="88"
+```python title="sample.py" hl_lines="87"
 --8<-- "examples/usage/write_task/sample_7.py"
 ```
 
@@ -131,7 +124,7 @@ Pausing a task stops its code, not your hardware: the cryostat would ramp on. `o
 uv run sample.py
 ```
 
-`register_task` offers the task in the interface, as **Set Temperature**. In the **Queue** tab, choose **Add task**, then **Set Temperature**, give **Kelvin** 10, and **Add to queue**. It starts at once, and its bar fills as `T` falls. **Pause** holds the cryostat, and the log says `Holding at 15.49 K`, say. **Resume** ramps on, and the task ends with `At 10.0 K`.
+`register_task` offers the task in the interface, as **Set Temperature**. In the **Queue** tab, choose **Add task**, then **Set Temperature**, give **Kelvin** a temperature your cryostat can reach, and **Add to queue**. It starts at once, and its bar fills as `T` gets closer. **Pause** holds the setpoint where the ramp has got to, and the log says `Holding at …` with it. **Resume** ramps on, and the task ends with `At …` once the sample is within `tolerance`.
 
 **More:** [`register_task`](../reference/python_api/experiment.md#pyacquisition.core.experiment.Experiment.register_task), and [the Queue tab](../reference/interface.md#the-dock).
 { .gs-more }
@@ -144,32 +137,8 @@ uv run sample.py
 
 </div>
 
-## What you built
-
-Set Temperature, part of the way to 10 K:
-
-<div class="gs-shot" markdown>
-
-![The interface running sample.py: T falling from 20 K on the plot, SetTemperature in the top bar at 31% with about 20 s left, and the Queue tab, where SetTemperature is running, described as Go to 10.0 K, with inputs kelvin 10, rate 30 and tolerance 0.05, and a bar at 31% with the note 16.86 K](../images/usage/write_task/queue.png){ .pa-shot }
-
-<span class="gs-pin" style="--x: 53.0%; --y: 3.0%">1</span>
-<span class="gs-pin" style="--x: 9.8%; --y: 90.7%">2</span>
-<span class="gs-pin" style="--x: 23.5%; --y: 96.4%">3</span>
-<span class="gs-pin" style="--x: 69.8%; --y: 80.9%">4</span>
-
-</div>
-
-<div class="gs-legend" markdown>
-
-1. **In the top bar.** The running task, how far along it is, and the time left, whichever tab is open.
-2. **Its description.** `Go to 10.0 K`, from `description`, with its inputs under it.
-3. **Its progress.** The fraction from `set_progress`, and its note: the temperature now.
-4. **Pause.** Calls `on_pause`, which holds the cryostat where it is.
-
-</div>
-
 !!! success "Checkpoint"
-    **Set Temperature** is in **Add task**. Queued at 10 K, the **Queue** tab shows `Go to 10.0 K` with a bar that fills as `T` falls, and the task ends with `At 10.0 K` in the log once the sample is within 0.05 K. Paused, the log says `Holding at …`, and `T` settles there. Aborted, once you confirm, it logs `Holding at …` and `Task aborted.` Queued at 500 K, the form says `500.0 K is out of range: 1.5 to 300 K.`, and nothing is queued.
+    **Set Temperature** is in **Add task**. Queued at 10 K, the **Queue** tab shows `Go to 10.0 K` with a bar that fills as `T` gets closer, and the task ends with `At 10.0 K` in the log once the sample is within 0.05 K. Paused, the log says `Holding at …`, and `T` settles there. Aborted, once you confirm, it logs `Holding at …` and `Task aborted.` Queued at 500 K, the form says `500.0 K is out of range: 1.5 to 300 K.`, and nothing is queued.
 
 ??? failure "Something not working?"
     - **The experiment stops as soon as the task starts, with `'SetTemperature' object has no attribute '_abort_event'`.** `__post_init__` doesn't call `super().__post_init__()`. Put it first.

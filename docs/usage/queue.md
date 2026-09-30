@@ -1,10 +1,10 @@
 # Queue, pause and save tasks
 
-<p class="pa-meta" markdown="span">About 15 minutes · Needs [Getting Started](../getting_started/python_api.md), and [Sweep a temperature](sweep.md) helps</p>
+<p class="pa-meta" markdown="span">About 15 minutes · Needs [Getting Started](../getting_started/python_api.md), and [Sweep a temperature](sweep.md) helps, and a lock-in and a Lakeshore 350 on your cryostat</p>
 
 The **queue** is how an experiment runs a night's work: the tasks in it run one after another, while you do something else. In this tutorial you plan one: a sweep as the sample warms, and another as it cools, to see whether it behaves the same both ways. You start every run with a task queued in code, pause and abort what is running, rearrange what is waiting, and save the queue as a **sequence** to run again another night.
 
-You carry on with `sample.py` from [Sweep a temperature](sweep.md), beside `simulated.py`: the sample in the cryostat, with `SetTemperature` and `Sweep`.
+You carry on with `sample.py` from [Sweep a temperature](sweep.md): the lock-in and the Lakeshore at your addresses, with `SetTemperature` and `Sweep`.
 
 <div class="gs" data-files="sample.py:versions" data-lines="24" data-term-lines="3" markdown>
 
@@ -20,14 +20,7 @@ You carry on with `sample.py` from [Sweep a temperature](sweep.md), beside `simu
 --8<-- "examples/usage/queue/sample_1.py"
 ```
 
-This is `sample.py` as [Sweep a temperature](sweep.md) left it: the sample in the cryostat, `SetTemperature`, and `Sweep`, which steps the temperature with a file at each step. If you haven't done that tutorial, copy it.
-
-??? abstract "simulated.py: a cryostat, and a lock-in on a sample in it, simulated"
-    Save this beside `sample.py`. It stands in for real hardware, and you don't need to read it.
-
-    ```python title="simulated.py"
-    --8<-- "examples/simulated_rig/simulated.py"
-    ```
+This is `sample.py` as [Sweep a temperature](sweep.md) left it: the lock-in and the Lakeshore, `SetTemperature`, and `Sweep`, which steps the temperature with a file at each step. If you haven't done that tutorial, copy it, with your addresses.
 
 **More:** [Sweep a temperature](sweep.md), which builds it.
 { .gs-more }
@@ -38,11 +31,11 @@ This is `sample.py` as [Sweep a temperature](sweep.md) left it: the sample in th
 
 ## Queue a task as the experiment starts
 
-```python title="sample.py" hl_lines="138-139"
+```python title="sample.py" hl_lines="137-138"
 --8<-- "examples/usage/queue/sample_2.py"
 ```
 
-`task_managers["main"]` is the queue the interface shows, and `add_task` puts a task in it from code. Queued in `setup()`, it runs as soon as the experiment starts: here every run begins by taking the sample to 10 K.
+`task_managers["main"]` is the queue the interface shows, and `add_task` puts a task in it from code. Queued in `setup()`, it runs as soon as the experiment starts: here every run begins by taking the sample to 10 K. Choose where your runs should start.
 
 A task queued in code takes any inputs, since no form has to show them.
 
@@ -59,7 +52,7 @@ A task queued in code takes any inputs, since no form has to show them.
 uv run sample.py
 ```
 
-`SetTemperature` is running, from `setup()`. In the **Queue** tab, choose **Add task**, then **Sweep**: **Start Kelvin** 10, **Stop Kelvin** 20, **Step** 2 and **Dwell** 60, and **Add to queue**. Then another, from 20 back to 10. The window stays open, so you can add them in turn, and **Done** closes it.
+`SetTemperature` is running, from `setup()`. In the **Queue** tab, choose **Add task**, then **Sweep**: **Start Kelvin** 10, **Stop Kelvin** 20, **Step** 2 and **Dwell** 60, say, and **Add to queue**. Then another, from 20 back to 10. The window stays open, so you can add them in turn, and **Done** closes it.
 
 They wait under **2 queued**, numbered, and each starts when the one before has finished. You can leave them to run.
 
@@ -121,30 +114,6 @@ Another night, choose **Load…**: `hysteresis` is listed with its tasks, and **
 </div>
 
 </div>
-
-</div>
-
-## What you built
-
-A night's work, waiting behind the task from `setup()`:
-
-<div class="gs-shot" markdown>
-
-![The Queue tab: SetTemperature running at 27% on its way to 10 K, and two Sweeps queued behind it, from 10 to 20 K and from 20 to 10 K, each with buttons to move it up or down, copy it and remove it, and Save, Load and Clear queue above them](../images/usage/queue/queue.png){ .pa-shot }
-
-<span class="gs-pin" style="--x: 16.5%; --y: 51.8%">1</span>
-<span class="gs-pin" style="--x: 33.3%; --y: 73.2%">2</span>
-<span class="gs-pin" style="--x: 59.5%; --y: 73.3%">3</span>
-<span class="gs-pin" style="--x: 55.4%; --y: 68.7%">4</span>
-
-</div>
-
-<div class="gs-legend" markdown>
-
-1. **The task from `setup()`.** Running as the experiment starts.
-2. **The night's work.** A sweep as the sample warms, then one as it cools, run in turn.
-3. **Rearrange.** Move a task up or down, copy it, or remove it.
-4. **Save and load.** The queue as a sequence, to run again.
 
 </div>
 

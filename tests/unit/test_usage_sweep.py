@@ -13,6 +13,7 @@ from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import pytest
+from fake_rig import REPLIES, open_fakes
 
 from pyacquisition.instruments.lakeshore.lakeshore_350 import InputChannel, OutputChannel
 
@@ -28,6 +29,9 @@ def text(path: Path) -> str:
 
 @pytest.fixture
 def simulated(monkeypatch):
+    """The stand-in cryostat, for the task's logic to run against in these tests
+    only, and the lock-in and Lakeshore over a fake connection, for sample.py."""
+    open_fakes(monkeypatch, REPLIES)
     monkeypatch.syspath_prepend(str(SIMULATED))
     sys.modules.pop("simulated", None)
     import simulated

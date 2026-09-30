@@ -16,6 +16,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytest
+from fake_rig import REPLIES, open_fakes
 import requests
 
 from pyacquisition import Trace, read_traces
@@ -38,6 +39,7 @@ def free_port() -> int:
 
 @pytest.fixture
 def simulated(monkeypatch):
+    open_fakes(monkeypatch, REPLIES)  # the lock-in and Lakeshore, for the first version
     monkeypatch.syspath_prepend(str(SIMULATED))
     sys.modules.pop("simulated", None)
 

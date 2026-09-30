@@ -2,14 +2,12 @@ import math
 from dataclasses import dataclass
 
 from pyacquisition import Experiment, Measurement, Task
-from pyacquisition.instruments import Clock
-from pyacquisition.instruments.lakeshore.lakeshore_350 import (
-    InputChannel,
-    OutputChannel,
-    State,
-)
+from pyacquisition.instruments import SR_830, Clock, Lakeshore_350
 from pyacquisition.tasks import NewFile, WaitFor
-from simulated import SimulatedCryostat, SimulatedLockin
+
+# The Lakeshore's input for the sample's thermometer, and its heater's loop
+SENSOR = Lakeshore_350.InputChannel.INPUT_A
+LOOP = Lakeshore_350.OutputChannel.OUTPUT_1
 
 
 @dataclass
@@ -31,13 +29,13 @@ class SetTemperature(Task):
 
     async def run(self, experiment):
         cryostat = experiment.instruments["cryostat"]
-        start = cryostat.get_temperature(InputChannel.INPUT_A)
-        cryostat.set_ramp(OutputChannel.OUTPUT_1, State.ON, self.rate)
-        cryostat.set_setpoint(OutputChannel.OUTPUT_1, self.kelvin)
+        start = cryostat.get_temperature(SENSOR)
+        cryostat.set_ramp(LOOP, Lakeshore_350.State.ON, self.rate)
+        cryostat.set_setpoint(LOOP, self.kelvin)
         self.log(f"Ramping to {self.kelvin} K at {self.rate} K/min")
 
         def arrived():
-            kelvin = cryostat.get_temperature(InputChannel.INPUT_A)
+            kelvin = cryostat.get_temperature(SENSOR)
             done = (kelvin - start) / (self.kelvin - start or 1)
             self.set_progress(done, note=f"{kelvin:.2f} K")
             return abs(kelvin - self.kelvin) <= self.tolerance
@@ -50,7 +48,7 @@ class SetTemperature(Task):
 
     def on_resume(self, experiment):
         cryostat = experiment.instruments["cryostat"]
-        cryostat.set_setpoint(OutputChannel.OUTPUT_1, self.kelvin)
+        cryostat.set_setpoint(LOOP, self.kelvin)
         self.log(f"Ramping to {self.kelvin} K again")
 
     async def teardown(self, experiment):
@@ -59,8 +57,8 @@ class SetTemperature(Task):
     def hold(self, experiment):
         """Stops the ramp where it has got to."""
         cryostat = experiment.instruments["cryostat"]
-        here = cryostat.get_setpoint(OutputChannel.OUTPUT_1)
-        cryostat.set_setpoint(OutputChannel.OUTPUT_1, here)
+        here = cryostat.get_setpoint(LOOP)
+        cryostat.set_setpoint(LOOP, here)
         self.log(f"Holding at {here:.2f} K")
 
 
@@ -99,7 +97,7 @@ class Interlock(Task):
     async def run(self, experiment):
         cryostat = experiment.instruments["cryostat"]
         while True:
-            kelvin = cryostat.get_temperature(InputChannel.INPUT_A)
+            kelvin = cryostat.get_temperature(SENSOR)
             if kelvin > self.limit:
                 raise RuntimeError(f"The sample is at {kelvin:.2f} K: too warm")
             await self.sleep(1)
@@ -110,8 +108,9 @@ class Sample(Experiment):
 
     def setup(self):
         clock = Clock("clock")
-        cryostat = SimulatedCryostat("cryostat")
-        lockin = SimulatedLockin("lockin", cryostat)
+        # Your instruments' addresses
+        cryostat = Lakeshore_350("cryostat", "GPIB0::12::INSTR")
+        lockin = SR_830("lockin", "GPIB0::8::INSTR")
         self.add_instrument(clock)
         self.add_instrument(cryostat)
         self.add_instrument(lockin)
@@ -123,7 +122,7 @@ class Sample(Experiment):
             Measurement(
                 "T",
                 cryostat.get_temperature,
-                input_channel=InputChannel.INPUT_A,
+                input_channel=SENSOR,
                 unit="K",
             )
         )

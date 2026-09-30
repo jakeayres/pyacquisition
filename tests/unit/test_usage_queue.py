@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from fake_rig import REPLIES, open_fakes
 from fastapi.testclient import TestClient
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -21,6 +22,7 @@ def text(path: Path) -> str:
 
 @pytest.fixture
 def lab(tmp_path, monkeypatch):
+    open_fakes(monkeypatch, REPLIES)  # the lock-in and Lakeshore, over a fake connection
     monkeypatch.syspath_prepend(str(SIMULATED))
     sys.modules.pop("simulated", None)
     spec = importlib.util.spec_from_file_location("queue_sample_2", HERE / "sample_2.py")
