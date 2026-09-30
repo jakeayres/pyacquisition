@@ -43,6 +43,14 @@ note = "with no data card, logging's settings are zeros"
 [read.get_log_record]
 skip = "needs a data card with records on it"
 
+[read.get_heater_range]
+args = [{ output_channel = "OUTPUT_1" }]
+note = "only loop 1 has a heater"
+
+[read.get_heater_status]
+args = [{ output_channel = "OUTPUT_1" }]
+note = "only loop 1 has a heater"
+
 [read.get_max_user_current]
 note = "needs firmware 01.03.08 or later"
 
@@ -65,6 +73,7 @@ values = [50, 60]
 # [roundtrip.heater_range]
 # hazard = "hazardous"
 # values = ["OFF"]
+# select = { output_channel = ["OUTPUT_1"] }
 #
 # [roundtrip.manual_output]
 # hazard = "hazardous"

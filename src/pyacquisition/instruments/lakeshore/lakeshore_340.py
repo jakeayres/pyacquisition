@@ -62,9 +62,10 @@ class AutotuneMode(BaseEnum):
 
 
 class ControlMode(BaseEnum):
-    """How a control loop works out its output."""
+    """How a control loop works out its output. `PID`, `ZONE` and `OPEN_LOOP` are
+    named as the Lakeshore 350's are."""
 
-    MANUAL_PID = (1, "Manual PID")
+    PID = (1, "Manual PID")
     ZONE = (2, "Zone")
     OPEN_LOOP = (3, "Open loop")
     AUTOTUNE_PID = (4, "AutoTune PID")
@@ -387,6 +388,11 @@ class Lakeshore_340(Instrument):
 
     It has two control loops, `OutputChannel.OUTPUT_1` (the heater output) and
     `OUTPUT_2` (analog output 2), and inputs A and B, with C and D on an option card.
+
+    Where it does what the Lakeshore 350 does, its methods, their arguments and
+    their choices are named as the 350's are, so that code written for one works
+    with the other: `set_control_mode(output, ControlMode.OPEN_LOOP)`,
+    `set_heater_range`, `set_manual_output`, `get_temperature` and the rest.
     """
 
     # The enums that the queries and commands take, so that they can be reached
@@ -621,21 +627,22 @@ class Lakeshore_340(Instrument):
         self,
         input_channel: InputChannel,
         state: State,
-        source: InputData,
         high_value: float,
         low_value: float,
         latch: State,
-        relay: State,
+        source: InputData = InputData.KELVIN,
+        relay: State = State.OFF,
     ) -> int:
-        """Configures an input's alarm (`ALARM`).
+        """Configures an input's alarm (`ALARM`). The first five arguments are the
+        Lakeshore 350's, in its order.
 
         Args:
             input_channel (InputChannel): The input to configure.
             state (State): Whether the alarm is checked.
-            source (InputData): The input's data that is checked.
             high_value (float): The value above which the high alarm is active.
             low_value (float): The value below which the low alarm is active.
             latch (State): Whether the alarm stays active after the condition ends.
+            source (InputData): The input's data that is checked.
             relay (State): Whether the alarm may drive the relays (see `set_relay`).
 
         Returns:
@@ -1048,13 +1055,43 @@ class Lakeshore_340(Instrument):
         }
 
     @mark_command
+    def set_control_input(
+        self, output_channel: OutputChannel, input_channel: InputChannel
+    ) -> int:
+        """Sets the input a control loop controls from, leaving the rest of its
+        configuration as it is (`CSET`, with the rest left out).
+
+        Args:
+            output_channel (OutputChannel): The loop to configure.
+            input_channel (InputChannel): The input: A or B.
+
+        Returns:
+            int: Status code indicating the success of the operation.
+        """
+        return self.command(
+            f"CSET {output_channel.raw_value},{input_channel.raw_value}"
+        )
+
+    @mark_query
+    def get_control_input(self, output_channel: OutputChannel) -> InputChannel:
+        """Queries the input a control loop controls from (`CSET?`).
+
+        Args:
+            output_channel (OutputChannel): The loop to query.
+
+        Returns:
+            InputChannel: The input.
+        """
+        return self.get_control_loop(output_channel)["input_channel"]
+
+    @mark_command
     def set_control_mode(self, output_channel: OutputChannel, mode: ControlMode) -> int:
         """Sets how a control loop works out its output (`CMODE`).
 
         Args:
             output_channel (OutputChannel): The loop to configure.
-            mode (ControlMode): Manual PID, zone, open loop (the manual output
-                alone), or an autotuning mode.
+            mode (ControlMode): PID, zone, open loop (the manual output alone), or
+                an autotuning mode.
 
         Returns:
             int: Status code indicating the success of the operation.
@@ -1235,44 +1272,81 @@ class Lakeshore_340(Instrument):
         """
         return float(self.query(f"MOUT? {output_channel.raw_value}"))
 
+    def _heater(self, output_channel: OutputChannel) -> None:
+        """Refuses a loop with no heater: only loop 1 drives the heater."""
+        if output_channel is not OutputChannel.OUTPUT_1:
+            raise ValueError(
+                f"The 340's heater is on {OutputChannel.OUTPUT_1.name}: "
+                f"{output_channel.name} drives analog output 2"
+            )
+
     @mark_command
-    def set_heater_range(self, heater_range: HeaterRange) -> int:
+    def set_heater_range(
+        self, output_channel: OutputChannel, heater_range: HeaterRange
+    ) -> int:
         """Sets the heater's range (`RANGE`). `HeaterRange.OFF` turns it off.
 
         Args:
+            output_channel (OutputChannel): The loop whose heater it is:
+                `OUTPUT_1`, the only one with a heater. The 350 takes the output
+                in the same place.
             heater_range (HeaterRange): The range.
 
         Returns:
             int: Status code indicating the success of the operation.
+
+        Raises:
+            ValueError: For loop 2, which has no heater.
         """
+        self._heater(output_channel)
         return self.command(f"RANGE {heater_range.raw_value}")
 
     @mark_query
-    def get_heater_range(self) -> HeaterRange:
+    def get_heater_range(self, output_channel: OutputChannel) -> HeaterRange:
         """Queries the heater's range (`RANGE?`).
+
+        Args:
+            output_channel (OutputChannel): `OUTPUT_1`, the only loop with a heater.
 
         Returns:
             HeaterRange: The range. `HeaterRange.OFF` if the heater is off.
+
+        Raises:
+            ValueError: For loop 2, which has no heater.
         """
+        self._heater(output_channel)
         return HeaterRange.from_raw_value(_int(self.query("RANGE?")))
 
     @mark_query
-    def get_heater_output(self) -> float:
-        """Queries the heater's output (`HTR?`).
+    def get_heater_output(self, output_channel: OutputChannel) -> float:
+        """Queries a loop's output, in percent: the heater's for loop 1 (`HTR?`),
+        and analog output 2's for loop 2 (`AOUT? 2`).
+
+        Args:
+            output_channel (OutputChannel): The loop to query.
 
         Returns:
-            float: The output, in percent of the range.
+            float: The output, in percent.
         """
+        if output_channel is OutputChannel.OUTPUT_2:
+            return float(self.query("AOUT? 2"))
         return float(self.query("HTR?"))
 
     @mark_query
-    def get_heater_status(self) -> int:
+    def get_heater_status(self, output_channel: OutputChannel) -> int:
         """Queries the heater's error code (`HTRST?`).
+
+        Args:
+            output_channel (OutputChannel): `OUTPUT_1`, the only loop with a heater.
 
         Returns:
             int: 0 if there is no error. Otherwise the code, which the manual's
                 paragraph 11.8 explains.
+
+        Raises:
+            ValueError: For loop 2, which has no heater.
         """
+        self._heater(output_channel)
         return _int(self.query("HTRST?"))
 
     @mark_command
@@ -1513,26 +1587,27 @@ class Lakeshore_340(Instrument):
     def set_analog_output_setup(
         self,
         output: AnalogOutput,
-        bipolar: State,
-        mode: AnalogMode,
         input_channel: InputChannel,
         source: InputData,
         high_value: float,
         low_value: float,
-        manual_value: float,
+        bipolar: State,
+        mode: AnalogMode = AnalogMode.INPUT,
+        manual_value: float = 0.0,
     ) -> int:
-        """Configures an analog output (`ANALOG`).
+        """Configures an analog output (`ANALOG`). The first six arguments are the
+        Lakeshore 350's, in its order.
 
         Args:
             output (AnalogOutput): The output to configure.
-            bipolar (State): Whether it is bipolar, or positive only.
-            mode (AnalogMode): What it follows. `AnalogMode.LOOP` is for analog
-                output 2 only.
             input_channel (InputChannel): The input it follows, in input mode.
             source (InputData): The input's data it follows, in input mode.
             high_value (float): The data at +100 % output, in input mode.
             low_value (float): The data at -100 % output (bipolar) or 0 %, in input
                 mode.
+            bipolar (State): Whether it is bipolar, or positive only.
+            mode (AnalogMode): What it follows. `AnalogMode.LOOP` is for analog
+                output 2 only.
             manual_value (float): The output, in percent, in manual mode.
 
         Returns:
@@ -1880,15 +1955,19 @@ class Lakeshore_340(Instrument):
 
     @mark_command
     def set_ieee_interface(
-        self, terminator: IeeeTerminator, eoi: State, address: int
+        self,
+        address: int,
+        terminator: IeeeTerminator = IeeeTerminator.CR_LF,
+        eoi: State = State.ON,
     ) -> int:
         """Configures the IEEE-488 interface (`IEEE`). It takes effect after the next
-        terminator, so a connection over it must change to match.
+        terminator, so a connection over it must change to match. The address comes
+        first, as the Lakeshore 350 takes it alone.
 
         Args:
+            address (int): The GPIB address.
             terminator (IeeeTerminator): What ends a message.
             eoi (State): Whether EOI is asserted.
-            address (int): The GPIB address.
 
         Returns:
             int: Status code indicating the success of the operation.

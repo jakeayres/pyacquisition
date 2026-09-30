@@ -162,7 +162,7 @@ def test_the_340_has_two_control_loops():
         (lambda ls: ls.operation_complete(), "*OPC"),
         (lambda ls: ls.set_service_request_enable(89), "*SRE 89"),
         (
-            lambda ls: ls.set_alarm(B, ON, InputData.KELVIN, 270.0, 0.0, ON, OFF),
+            lambda ls: ls.set_alarm(B, ON, 270.0, 0.0, ON, InputData.KELVIN, OFF),
             "ALARM B,1,1,270,0,1,0",
         ),
         (lambda ls: ls.reset_alarms(), "ALMRST"),
@@ -172,21 +172,34 @@ def test_the_340_has_two_control_loops():
         (lambda ls: ls.set_input_type(A, SensorType.GAALAS_DIODE), "INTYPE A,2"),
         (
             lambda ls: ls.set_input_type_special(
-                B, SensorUnits.OHMS, Coefficient.NEGATIVE, Excitation.CURRENT_30_UA,
+                B,
+                SensorUnits.OHMS,
+                Coefficient.NEGATIVE,
+                Excitation.CURRENT_30_UA,
                 InputRange.RANGE_100_MV,
             ),
             "INTYPE B,0,2,1,7,7",
         ),
         (
             lambda ls: ls.set_linear_equation(
-                A, LinearEquation.MX_PLUS_B, 1.0, Units.KELVIN,
-                LinearOffset.MINUS_SETPOINT_1, 0.0,
+                A,
+                LinearEquation.MX_PLUS_B,
+                1.0,
+                Units.KELVIN,
+                LinearOffset.MINUS_SETPOINT_1,
+                0.0,
             ),
             "LINEAR A,1,1,1,3,0",
         ),
-        (lambda ls: ls.set_min_max(B, MinMaxMode.ON, InputData.SENSOR_UNITS), "MNMX B,1,3"),
+        (
+            lambda ls: ls.set_min_max(B, MinMaxMode.ON, InputData.SENSOR_UNITS),
+            "MNMX B,1,3",
+        ),
         (lambda ls: ls.reset_min_max(), "MNMXRST"),
-        (lambda ls: ls.set_control_loop(LOOP_1, A, Units.KELVIN, ON, OFF), "CSET 1,A,1,1,0"),
+        (
+            lambda ls: ls.set_control_loop(LOOP_1, A, Units.KELVIN, ON, OFF),
+            "CSET 1,A,1,1,0",
+        ),
         (lambda ls: ls.set_control_mode(LOOP_1, ControlMode.OPEN_LOOP), "CMODE 1,3"),
         (lambda ls: ls.set_autotune_pid(LOOP_1, AutotuneMode.PID), "CMODE 1,4"),
         (lambda ls: ls.set_autotune_pid(LOOP_2, AutotuneMode.P), "CMODE 2,6"),
@@ -195,8 +208,9 @@ def test_the_340_has_two_control_loops():
         (lambda ls: ls.set_setpoint(LOOP_1, 1.2345), "SETP 1,1.2345"),
         (lambda ls: ls.set_ramp(LOOP_1, ON, 10.5), "RAMP 1,1,10.500"),
         (lambda ls: ls.set_manual_output(LOOP_1, 22.45), "MOUT 1,22.45"),
-        (lambda ls: ls.set_heater_range(HeaterRange.OFF), "RANGE 0"),
-        (lambda ls: ls.set_heater_range(HeaterRange.RANGE_3), "RANGE 3"),
+        (lambda ls: ls.set_heater_range(LOOP_1, HeaterRange.OFF), "RANGE 0"),
+        (lambda ls: ls.set_heater_range(LOOP_1, HeaterRange.RANGE_3), "RANGE 3"),
+        (lambda ls: ls.set_control_input(LOOP_1, B), "CSET 1,B"),
         (
             lambda ls: ls.set_control_limits(
                 LOOP_1, 325.0, 10, 0, MaxCurrent.CURRENT_1, HeaterRange.RANGE_5
@@ -218,8 +232,14 @@ def test_the_340_has_two_control_loops():
         ),
         (
             lambda ls: ls.set_analog_output_setup(
-                AnalogOutput.ANALOG_2, OFF, AnalogMode.INPUT, A, InputData.KELVIN,
-                100.0, 0.0, 0.0,
+                AnalogOutput.ANALOG_2,
+                A,
+                InputData.KELVIN,
+                100.0,
+                0.0,
+                OFF,
+                AnalogMode.INPUT,
+                0.0,
             ),
             "ANALOG 2,0,1,A,1,100,0,0.0",
         ),
@@ -238,9 +258,12 @@ def test_the_340_has_two_control_loops():
             ),
             "COMM 1,6,3",
         ),
-        (lambda ls: ls.set_ieee_interface(IeeeTerminator.CR_LF, ON, 4), "IEEE 1,1,4"),
+        (lambda ls: ls.set_ieee_interface(4, IeeeTerminator.CR_LF, ON), "IEEE 1,1,4"),
         (lambda ls: ls.set_scanner(ScanMode.AUTOSCAN, 1, 5), "XSCAN 2,1,5"),
-        (lambda ls: ls.set_date_time(1996, 2, 3, 15, 30, 0), "DATETIME 2,3,1996,15,30,0,0"),
+        (
+            lambda ls: ls.set_date_time(1996, 2, 3, 15, 30, 0),
+            "DATETIME 2,3,1996,15,30,0,0",
+        ),
         (lambda ls: ls.reset_to_factory_defaults(), "DFLT 99"),
         (
             lambda ls: ls.set_curve_header(
@@ -248,11 +271,16 @@ def test_the_340_has_two_control_loops():
             ),
             "CRVHDR 21,DT-470,00011134,2,325,1",
         ),
-        (lambda ls: ls.set_curve_point(21, 2, 0.10191, 470.0), "CRVPT 21,2,0.10191,470"),
+        (
+            lambda ls: ls.set_curve_point(21, 2, 0.10191, 470.0),
+            "CRVPT 21,2,0.10191,470",
+        ),
         (lambda ls: ls.delete_curve(21), "CRVDEL 21"),
         (lambda ls: ls.save_curves(), "CRVSAV"),
         (
-            lambda ls: ls.generate_softcal(1, 21, "340000", 4.2, 1.626, 77.32, 1.0205, 300.0, 0.5189),
+            lambda ls: ls.generate_softcal(
+                1, 21, "340000", 4.2, 1.626, 77.32, 1.0205, 300.0, 0.5189
+            ),
             "SCAL 1,21,340000,4.2,1.626,77.32,1.0205,300,0.5189",
         ),
         (
@@ -266,7 +294,9 @@ def test_the_340_has_two_control_loops():
         (lambda ls: ls.stop_program(), "PGMRUN 0"),
         (lambda ls: ls.set_logging(ON), "LOG 1"),
         (
-            lambda ls: ls.set_log_setup(LogType.SECONDS, 10, OFF, LogStartMode.CONTINUE),
+            lambda ls: ls.set_log_setup(
+                LogType.SECONDS, 10, OFF, LogStartMode.CONTINUE
+            ),
             "LOGSET 2,10,0,1",
         ),
         (
@@ -274,7 +304,9 @@ def test_the_340_has_two_control_loops():
             "LOGPNT 1,1,A,1",
         ),
         (
-            lambda ls: ls.set_log_point(2, LogPointType.OUTPUT_1, A, DisplayData.KELVIN),
+            lambda ls: ls.set_log_point(
+                2, LogPointType.OUTPUT_1, A, DisplayData.KELVIN
+            ),
             "LOGPNT 2,4",
         ),
     ],
@@ -294,7 +326,12 @@ def test_clearing_the_event_register_reads_it(visa, ls):
 @pytest.mark.parametrize(
     "call, query, reply, result",
     [
-        (lambda ls: ls.identify(), "*IDN?", "LSCI,MODEL340,123456,040102", "LSCI,MODEL340,123456,040102"),
+        (
+            lambda ls: ls.identify(),
+            "*IDN?",
+            "LSCI,MODEL340,123456,040102",
+            "LSCI,MODEL340,123456,040102",
+        ),
         (lambda ls: ls.get_event_enable(), "*ESE?", "143", 143),
         (lambda ls: ls.get_event_status(), "*ESR?", "128", 128),
         (lambda ls: ls.get_operation_complete(), "*OPC?", "1", 1),
@@ -309,11 +346,27 @@ def test_clearing_the_event_register_reads_it(visa, ls):
             lambda ls: ls.get_alarm(B),
             "ALARM? B",
             "1,1,+270.000E+0,+000.000E+0,1,0",
-            {"state": ON, "source": InputData.KELVIN, "high_value": 270.0, "low_value": 0.0,
-             "latch": ON, "relay": OFF},
+            {
+                "state": ON,
+                "source": InputData.KELVIN,
+                "high_value": 270.0,
+                "low_value": 0.0,
+                "latch": ON,
+                "relay": OFF,
+            },
         ),
-        (lambda ls: ls.get_alarm_status(A), "ALARMST? A", "1,0", {"high": ON, "low": OFF}),
-        (lambda ls: ls.get_filter(B), "FILTER? B", "1,10,2", {"state": ON, "points": 10, "window": 2}),
+        (
+            lambda ls: ls.get_alarm_status(A),
+            "ALARMST? A",
+            "1,0",
+            {"high": ON, "low": OFF},
+        ),
+        (
+            lambda ls: ls.get_filter(B),
+            "FILTER? B",
+            "1,10,2",
+            {"state": ON, "points": 10, "window": 2},
+        ),
         (lambda ls: ls.get_input_curve(A), "INCRV? A", "23", 23),
         (
             lambda ls: ls.get_input_setup(A),
@@ -325,16 +378,25 @@ def test_clearing_the_event_register_reads_it(visa, ls):
             lambda ls: ls.get_input_type(A),
             "INTYPE? A",
             "2,1,1,06,11",
-            {"sensor_type": SensorType.GAALAS_DIODE, "units": SensorUnits.VOLTS,
-             "coefficient": Coefficient.NEGATIVE, "excitation": Excitation.CURRENT_10_UA,
-             "input_range": InputRange.RANGE_2_5_V},
+            {
+                "sensor_type": SensorType.GAALAS_DIODE,
+                "units": SensorUnits.VOLTS,
+                "coefficient": Coefficient.NEGATIVE,
+                "excitation": Excitation.CURRENT_10_UA,
+                "input_range": InputRange.RANGE_2_5_V,
+            },
         ),
         (
             lambda ls: ls.get_linear_equation(A),
             "LINEAR? A",
             "1,+001.000,1,3,+000.000",
-            {"equation": LinearEquation.MX_PLUS_B, "m": 1.0, "x_source": Units.KELVIN,
-             "b_source": LinearOffset.MINUS_SETPOINT_1, "b": 0.0},
+            {
+                "equation": LinearEquation.MX_PLUS_B,
+                "m": 1.0,
+                "x_source": Units.KELVIN,
+                "b_source": LinearOffset.MINUS_SETPOINT_1,
+                "b": 0.0,
+            },
         ),
         (lambda ls: ls.get_linear_data(A), "LDAT? A", "-1.00000E+1", -10.0),
         (lambda ls: ls.get_linear_data_status(A), "LDATST? A", "000", 0),
@@ -344,59 +406,117 @@ def test_clearing_the_event_register_reads_it(visa, ls):
             "2,4",
             {"mode": MinMaxMode.PAUSED, "source": InputData.LINEAR},
         ),
-        (lambda ls: ls.get_min_max_data(A), "MDAT? A", "+4.2000E+0,+3.0000E+2", {"min": 4.2, "max": 300.0}),
-        (lambda ls: ls.get_min_max_data_status(A), "MDATST? A", "000,032", {"min": 0, "max": 32}),
+        (
+            lambda ls: ls.get_min_max_data(A),
+            "MDAT? A",
+            "+4.2000E+0,+3.0000E+2",
+            {"min": 4.2, "max": 300.0},
+        ),
+        (
+            lambda ls: ls.get_min_max_data_status(A),
+            "MDATST? A",
+            "000,032",
+            {"min": 0, "max": 32},
+        ),
         (
             lambda ls: ls.get_control_loop(LOOP_1),
             "CSET? 1",
             "A,1,1,0",
             {"input_channel": A, "units": Units.KELVIN, "state": ON, "powerup": OFF},
         ),
-        (lambda ls: ls.get_control_mode(LOOP_1), "CMODE? 1", "3", ControlMode.OPEN_LOOP),
+        (
+            lambda ls: ls.get_control_mode(LOOP_1),
+            "CMODE? 1",
+            "3",
+            ControlMode.OPEN_LOOP,
+        ),
         (lambda ls: ls.get_tuning(), "TUNEST?", "1", True),
-        (lambda ls: ls.get_pid(LOOP_1), "PID? 1", "0025.0,0015.0,0006", {"p": 25.0, "i": 15.0, "d": 6.0}),
+        (
+            lambda ls: ls.get_pid(LOOP_1),
+            "PID? 1",
+            "0025.0,0015.0,0006",
+            {"p": 25.0, "i": 15.0, "d": 6.0},
+        ),
         (lambda ls: ls.get_setpoint(LOOP_1), "SETP? 1", "+122.500E+0", 122.5),
         (lambda ls: ls.get_ramp(LOOP_1), "RAMP? 1", "1,010.5", 10.5),
         (lambda ls: ls.get_ramp_state(LOOP_1), "RAMP? 1", "1,010.5", ON),
         (lambda ls: ls.get_ramping(LOOP_2), "RAMPST? 2", "0", False),
         (lambda ls: ls.get_manual_output(LOOP_1), "MOUT? 1", "+022.45", 22.45),
-        (lambda ls: ls.get_heater_range(), "RANGE?", "3", HeaterRange.RANGE_3),
-        (lambda ls: ls.get_heater_output(), "HTR?", "045.2", 45.2),
-        (lambda ls: ls.get_heater_status(), "HTRST?", "00", 0),
+        (lambda ls: ls.get_heater_range(LOOP_1), "RANGE?", "3", HeaterRange.RANGE_3),
+        (lambda ls: ls.get_heater_output(LOOP_1), "HTR?", "045.2", 45.2),
+        (lambda ls: ls.get_heater_output(LOOP_2), "AOUT? 2", "-012.5", -12.5),
+        (lambda ls: ls.get_control_input(LOOP_1), "CSET? 1", "B,1,1,0", B),
+        (lambda ls: ls.get_heater_status(LOOP_1), "HTRST?", "00", 0),
         (
             lambda ls: ls.get_control_limits(LOOP_1),
             "CLIMIT? 1",
             "+325.000E+0,010.0,000.0,3,5",
-            {"setpoint_limit": 325.0, "positive_slope": 10.0, "negative_slope": 0.0,
-             "max_current": MaxCurrent.CURRENT_1, "max_range": HeaterRange.RANGE_5},
+            {
+                "setpoint_limit": 325.0,
+                "positive_slope": 10.0,
+                "negative_slope": 0.0,
+                "max_current": MaxCurrent.CURRENT_1,
+                "max_range": HeaterRange.RANGE_5,
+            },
         ),
         (lambda ls: ls.get_max_user_current(), "CLIMI?", "1.500", 1.5),
         (lambda ls: ls.get_control_filter(LOOP_1), "CFILT? 1", "1", ON),
-        (lambda ls: ls.get_settle(), "SETTLE?", "010.00,00010", {"threshold": 10.0, "seconds": 10}),
+        (
+            lambda ls: ls.get_settle(),
+            "SETTLE?",
+            "010.00,00010",
+            {"threshold": 10.0, "seconds": 10},
+        ),
         (
             lambda ls: ls.get_zone(LOOP_1, 1),
             "ZONE? 1,1",
             "025.000,0010.0,0020.0,0000,+000.00,2",
-            {"top": 25.0, "p": 10.0, "i": 20.0, "d": 0.0, "manual_output": 0.0,
-             "heater_range": HeaterRange.RANGE_2},
+            {
+                "top": 25.0,
+                "p": 10.0,
+                "i": 20.0,
+                "d": 0.0,
+                "manual_output": 0.0,
+                "heater_range": HeaterRange.RANGE_2,
+            },
         ),
         (
             lambda ls: ls.get_control_display(LOOP_1),
             "CDISP? 1",
             "1,0025,1,1",
-            {"loops_shown": LoopDisplay.LOOP_1, "resistance": 25,
-             "heater_display": HeaterDisplay.CURRENT, "large_output": ON},
+            {
+                "loops_shown": LoopDisplay.LOOP_1,
+                "resistance": 25,
+                "heater_display": HeaterDisplay.CURRENT,
+                "large_output": ON,
+            },
         ),
         (
             lambda ls: ls.get_analog_output_setup(AnalogOutput.ANALOG_2),
             "ANALOG? 2",
             "0,1,A,1,+100.000E+0,+000.000E+0,+000.0",
-            {"bipolar": OFF, "mode": AnalogMode.INPUT, "input_channel": A,
-             "source": InputData.KELVIN, "high_value": 100.0, "low_value": 0.0,
-             "manual_value": 0.0},
+            {
+                "bipolar": OFF,
+                "mode": AnalogMode.INPUT,
+                "input_channel": A,
+                "source": InputData.KELVIN,
+                "high_value": 100.0,
+                "low_value": 0.0,
+                "manual_value": 0.0,
+            },
         ),
-        (lambda ls: ls.get_analog_output(AnalogOutput.ANALOG_1), "AOUT? 1", "-025.5", -25.5),
-        (lambda ls: ls.get_relay(Relay.LOW), "RELAY? 2", "2,1", {"mode": RelayMode.MANUAL, "state": ON}),
+        (
+            lambda ls: ls.get_analog_output(AnalogOutput.ANALOG_1),
+            "AOUT? 1",
+            "-025.5",
+            -25.5,
+        ),
+        (
+            lambda ls: ls.get_relay(Relay.LOW),
+            "RELAY? 2",
+            "2,1",
+            {"mode": RelayMode.MANUAL, "state": ON},
+        ),
         (lambda ls: ls.get_relay_status(Relay.HIGH), "RELAYST? 1", "0", OFF),
         (
             lambda ls: ls.get_digital_output(),
@@ -404,8 +524,18 @@ def test_clearing_the_event_register_reads_it(visa, ls):
             "3,021",
             {"mode": DigitalOutputMode.MANUAL, "bits": 21},
         ),
-        (lambda ls: ls.get_digital_io_status(), "DIOST?", "000,021", {"inputs": 0, "outputs": 21}),
-        (lambda ls: ls.get_display(), "DISPLAY?", "3,060,1", {"fields": 3, "contrast": 60, "backlight": ON}),
+        (
+            lambda ls: ls.get_digital_io_status(),
+            "DIOST?",
+            "000,021",
+            {"inputs": 0, "outputs": 21},
+        ),
+        (
+            lambda ls: ls.get_display(),
+            "DISPLAY?",
+            "3,060,1",
+            {"fields": 3, "contrast": 60, "backlight": ON},
+        ),
         (lambda ls: ls.get_display_contrast(), "DISPLAY?", "3,060,1", 60),
         (
             lambda ls: ls.get_display_field(2),
@@ -422,8 +552,11 @@ def test_clearing_the_event_register_reads_it(visa, ls):
             lambda ls: ls.get_serial_interface(),
             "COMM?",
             "1,6,3",
-            {"terminator": SerialTerminator.CR_LF, "baud_rate": BaudRate.BPS_19200,
-             "parity": Parity.EIGHT_NONE},
+            {
+                "terminator": SerialTerminator.CR_LF,
+                "baud_rate": BaudRate.BPS_19200,
+                "parity": Parity.EIGHT_NONE,
+            },
         ),
         (
             lambda ls: ls.get_ieee_interface(),
@@ -448,8 +581,13 @@ def test_clearing_the_event_register_reads_it(visa, ls):
             lambda ls: ls.get_curve_header(1),
             "CRVHDR? 1",
             "DT-470         ,Standard C ,2,+475.000,1",
-            {"name": "DT-470", "serial_no": "Standard C", "curve_format": CurveFormat.V_K,
-             "upper_limit": 475.0, "coefficient": Coefficient.NEGATIVE},
+            {
+                "name": "DT-470",
+                "serial_no": "Standard C",
+                "curve_format": CurveFormat.V_K,
+                "upper_limit": 475.0,
+                "coefficient": Coefficient.NEGATIVE,
+            },
         ),
         (
             lambda ls: ls.get_curve_point(21, 2),
@@ -459,39 +597,79 @@ def test_clearing_the_event_register_reads_it(visa, ls):
         ),
         (lambda ls: ls.get_program_line(1, 1), "PGM? 1,1", "5,2", "5,2"),
         (lambda ls: ls.get_program_memory(), "PGMMEM?", "640", 640),
-        (lambda ls: ls.get_program_status(), "PGMRUN?", "01,0", {"program": 1, "status": 0}),
+        (
+            lambda ls: ls.get_program_status(),
+            "PGMRUN?",
+            "01,0",
+            {"program": 1, "status": 0},
+        ),
         (lambda ls: ls.get_logging(), "LOG?", "0", OFF),
         (lambda ls: ls.get_log_count(), "LOGCNT?", "12", 12),
         (
             lambda ls: ls.get_log_setup(),
             "LOGSET?",
             "2,10,0,1",
-            {"log_type": LogType.SECONDS, "interval": 10, "overwrite": OFF,
-             "start_mode": LogStartMode.CONTINUE},
+            {
+                "log_type": LogType.SECONDS,
+                "interval": 10,
+                "overwrite": OFF,
+                "start_mode": LogStartMode.CONTINUE,
+            },
         ),
         (
             lambda ls: ls.get_log_point(1),
             "LOGPNT? 1",
             "1,A,1",
-            {"point_type": LogPointType.INPUT, "input_channel": A, "source": DisplayData.KELVIN},
+            {
+                "point_type": LogPointType.INPUT,
+                "input_channel": A,
+                "source": DisplayData.KELVIN,
+            },
         ),
         (
             lambda ls: ls.get_log_point(2),
             "LOGPNT? 2",
             "4",
-            {"point_type": LogPointType.OUTPUT_1, "input_channel": None, "source": None},
+            {
+                "point_type": LogPointType.OUTPUT_1,
+                "input_channel": None,
+                "source": None,
+            },
         ),
-        (lambda ls: ls.get_log_record(1, 1), "LOGVIEW? 1,1", "02,03,1996,15,30,00,000,+4.2E+0,0", "02,03,1996,15,30,00,000,+4.2E+0,0"),
+        (
+            lambda ls: ls.get_log_record(1, 1),
+            "LOGVIEW? 1,1",
+            "02,03,1996,15,30,00,000,+4.2E+0,0",
+            "02,03,1996,15,30,00,000,+4.2E+0,0",
+        ),
     ],
 )
-def test_each_query_asks_the_manuals_question_and_reads_the_reply(visa, ls, call, query, reply, result):
+def test_each_query_asks_the_manuals_question_and_reads_the_reply(
+    visa, ls, call, query, reply, result
+):
     visa.replies[query] = reply
     assert call(ls) == result
     assert visa.queried[-1] == query
 
 
+@pytest.mark.parametrize(
+    "call",
+    [
+        lambda ls: ls.set_heater_range(LOOP_2, HeaterRange.OFF),
+        lambda ls: ls.get_heater_range(LOOP_2),
+        lambda ls: ls.get_heater_status(LOOP_2),
+    ],
+)
+def test_loop_2_has_no_heater(visa, ls, call):
+    with pytest.raises(ValueError, match="340's heater is on OUTPUT_1"):
+        call(ls)
+    assert visa.written == ["*CLS"] and visa.queried == []
+
+
 def test_revision_is_every_field_by_name(visa, ls):
-    visa.replies["REV?"] = "040102,01.03.08,123456,000,040102,01.00.02,3462,040102,01.00.00"
+    visa.replies["REV?"] = (
+        "040102,01.03.08,123456,000,040102,01.00.02,3462,040102,01.00.00"
+    )
     rev = ls.get_revision()
     assert rev["master_revision"] == "01.03.08"
     assert rev["option_id"] == "3462"
@@ -516,15 +694,29 @@ def test_the_interface_can_call_its_queries_and_commands(tmp_path):
     experiment._rack._register_endpoints(experiment._api_server)
     client = TestClient(experiment._api_server.app)
 
-    assert client.get("/lakeshore/get_heater_output").json()["data"] == 45.2
-    assert client.get("/lakeshore/get_date_time").json()["data"] == "1996-02-03T15:30:00.250000"
     answer = client.get(
-        "/lakeshore/set_heater_range", params={"heater_range": "Range 3"}
+        "/lakeshore/get_heater_output", params={"output_channel": "Output 1"}
+    )
+    assert answer.json()["data"] == 45.2
+    assert (
+        client.get("/lakeshore/get_date_time").json()["data"]
+        == "1996-02-03T15:30:00.250000"
+    )
+    answer = client.get(
+        "/lakeshore/set_heater_range",
+        params={"output_channel": "Output 1", "heater_range": "Range 3"},
     )
     assert answer.status_code == 200, answer.text
     answer = client.get(
         "/lakeshore/generate_softcal",
-        params={"standard_curve": 1, "user_curve": 21, "serial_no": "X1",
-                "t1": 4.2, "u1": 1.6, "t2": 77.3, "u2": 1.0},
+        params={
+            "standard_curve": 1,
+            "user_curve": 21,
+            "serial_no": "X1",
+            "t1": 4.2,
+            "u1": 1.6,
+            "t2": 77.3,
+            "u2": 1.0,
+        },
     )
     assert answer.status_code == 200, answer.text

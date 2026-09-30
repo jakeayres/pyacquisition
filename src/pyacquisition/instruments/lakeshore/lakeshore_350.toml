@@ -1,16 +1,22 @@
 # Verification spec for Lakeshore_350. See pyacquisition/verify/spec.py for the format.
 #
-# Written from the class, and not yet run against a real 350.
+# Written from the class and the manual (section 6.6), and not yet run against a
+# real 350. Expect to adjust values the first time it is on the bench.
 #
 # The safe state is "nothing to do": the heater outputs are never touched by an
-# active check. Anything that changes what a heater does is hazardous, and the
-# examples below are left commented out until you choose values for your cryostat.
+# active check. Anything that changes what an output does (its mode, input,
+# setpoint, PID, manual output, range, zones, heater setup, temperature limits) is
+# hazardous, and the examples below are left commented out until you choose values
+# for your cryostat.
 
 [identity]
 contains = ["LSCI", "MODEL350"]
 
 [safe_state]
 steps = []
+
+# Getters that take an input, an output or a relay are expanded over every choice
+# automatically.
 
 [read.get_curve_header]
 args = [{ curve_index = 1 }]
@@ -19,8 +25,31 @@ note = "curve 1 is always present"
 [read.get_curve_point]
 args = [{ curve_index = 1, point_index = 1 }]
 
-# get_temperature, get_setpoint and get_ramp take an input or output channel and
-# are expanded over every channel automatically.
+[read.get_zone]
+args = [
+  { output_channel = "OUTPUT_1", zone = 1 },
+  { output_channel = "OUTPUT_2", zone = 1 },
+  { output_channel = "OUTPUT_3", zone = 1 },
+  { output_channel = "OUTPUT_4", zone = 1 },
+]
+
+[read.get_display_field]
+args = [{ field = 1 }]
+
+[read.get_heater_status]
+args = [{ output_channel = "OUTPUT_1" }, { output_channel = "OUTPUT_2" }]
+note = "outputs 1 and 2 are the heaters; reading clears a latched heater error, and its front panel message"
+
+[read.get_heater_setup]
+args = [{ output_channel = "OUTPUT_1" }, { output_channel = "OUTPUT_2" }]
+note = "outputs 1 and 2 are the heaters"
+
+[read.get_junction_temperature]
+requires = ["thermocouple"]
+note = "the 3060 thermocouple card's junction block"
+
+[read.get_web_login]
+skip = "answers with the website's password, which a report shouldn't keep"
 
 [roundtrip.display_contrast]
 hazard = "reversible"
@@ -35,3 +64,16 @@ values = [8, 16]
 # values = [10.0]
 # abs = 0.01
 # select = { output_channel = ["OUTPUT_1"] }
+#
+# The range and the manual output drive a heater directly:
+#
+# [roundtrip.heater_range]
+# hazard = "hazardous"
+# values = ["OFF"]
+# select = { output_channel = ["OUTPUT_1", "OUTPUT_2"] }
+#
+# [roundtrip.manual_output]
+# hazard = "hazardous"
+# values = [0.0]
+# abs = 0.01
+# select = { output_channel = ["OUTPUT_1", "OUTPUT_2"] }
