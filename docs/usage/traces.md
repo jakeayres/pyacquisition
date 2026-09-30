@@ -196,4 +196,4 @@ The spectrum through a cooldown from 20 K to 10 K:
 - The trace panel shows the latest, the map shows them all, and `read_traces` reads them back.
 - A driver's trace method is marked `@mark_trace`, and returns a `TraceData`.
 
-Next: [Writing tasks](tasks.md), to take a spectrum at each step of a sweep.
+Next: [Write a task](write_task.md), to automate a procedure such as taking the sample to a temperature.

@@ -8,7 +8,7 @@
 |---|---|
 | [0. Installation](../getting_started/installation.md) | [Connect a real instrument](connect_instrument.md), when you connect real hardware |
 | [1. The Config File](../getting_started/config_file.md) | [Tune your measurements](measurements.md), [Read your data](read_data.md), [Setting up in the interface](setup_page.md), and [the interface and the API](running.md) |
-| [2. The Python API](../getting_started/python_api.md) | [Experiment options](setting_up.md), [Calculate new columns](calculations.md), [Writing tasks](tasks.md), [Composing tasks](composing_tasks.md) and [Running tasks](running_tasks.md) |
+| [2. The Python API](../getting_started/python_api.md) | [Experiment options](setting_up.md), [Calculate new columns](calculations.md), [Write a task](write_task.md), [Sweep a temperature](sweep.md) and [Running tasks](running_tasks.md) |
 
 ## Instruments
 
@@ -32,8 +32,8 @@
 
 | Page | Covers |
 |---|---|
-| [Writing tasks](tasks.md) | How a task runs, its hooks, and registering it. |
-| [Composing tasks](composing_tasks.md) | Tasks built from tasks, and tasks run at the same time. |
+| [Write a task](write_task.md) | `SetTemperature`: go to a temperature and wait until it's there, with progress, a check of what was asked, and the cryostat held when paused. About 20 minutes. |
+| [Sweep a temperature](sweep.md) | A sweep made of tasks, with a file for each temperature, a safety interlock alongside, and a temperature it can't reach skipped. About 20 minutes. |
 | [Running tasks](running_tasks.md) | The queue, pause and abort, several task managers, and tasks queued from a script. |
 
 ## The experiment

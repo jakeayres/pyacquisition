@@ -1,4 +1,4 @@
-Every task that comes with PyAcquisition, imported from `pyacquisition.tasks`: those every experiment has, those an instrument brings with it, and those to register yourself. [Writing tasks](../../usage/tasks.md) shows how to use and write them.
+Every task that comes with PyAcquisition, imported from `pyacquisition.tasks`: those every experiment has, those an instrument brings with it, and those to register yourself. [Write a task](../../usage/write_task.md) shows how to write one of your own.
 
 ## Default
 
@@ -30,7 +30,7 @@ The following tasks are registered to your experiment by default.
 
 ## With an instrument
 
-The following tasks are registered to your experiment **when the instrument they are for is in it**. They are listed in **Add task**, and their instrument's id is filled in for you if there is only one. Set `auto_tasks = False` to turn this off, and register the ones you want yourself. See [tasks that are already included](../../usage/tasks.md#tasks-that-are-already-included).
+The following tasks are registered to your experiment **when the instrument they are for is in it**. They are listed in **Add task**, and their instrument's id is filled in for you if there is only one. Set `auto_tasks = False` to turn this off, and register the ones you want yourself. See [`auto_tasks`](../experiment_options.md).
 
 #### Lakeshore 340 and 350
 

@@ -134,7 +134,7 @@ Or build the file in a window, from forms, with `uv run pyacquisition new rig.to
 
     Write a procedure as a small task, then build bigger ones from it, in sequence or at the same time. Pause, resume or abort at any point, and `teardown()` leaves the instruments safe. Ready-made: waits, PID control, temperature ramps and magnet sweeps.
 
-    [Composing tasks](usage/composing_tasks.md)
+    [Sweep a temperature](usage/sweep.md)
 
 -   :material-function-variant:{ .middle } **Calculations**
 

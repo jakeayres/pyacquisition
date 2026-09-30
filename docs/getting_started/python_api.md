@@ -100,7 +100,7 @@ A task is a `dataclass` of `Task`. Its fields, with their types and defaults, ar
 
 `run()` is `async`, so that while it waits at each `await`, the experiment goes on measuring. The imports grow, for `dataclass`, `Task` and the two tasks.
 
-**More:** [writing tasks](../usage/tasks.md), [what `run_subtask()` does](../usage/composing_tasks.md#what-run_subtask-does), and [every ready-made task](../reference/tasks/overview.md), such as [NewFile](../reference/tasks/new_file.md) and [WaitFor](../reference/tasks/wait_for.md).
+**More:** [Write a task](../usage/write_task.md), [what `run_subtask()` does](../reference/python_api/task.md#pyacquisition.core.task_manager.task.Task.run_subtask), and [every ready-made task](../reference/tasks/overview.md), such as [NewFile](../reference/tasks/new_file.md) and [WaitFor](../reference/tasks/wait_for.md).
 { .gs-more }
 
 </section>
@@ -117,7 +117,7 @@ A task you write isn't offered anywhere until it is registered. `register_task`,
 
 `label` is the name it is listed under. Without one, it is the class's name.
 
-**More:** [registering tasks](../usage/tasks.md#registering-tasks), and [what the queue shows of a task](../usage/tasks.md#what-the-queue-shows).
+**More:** [registering tasks](../reference/python_api/experiment.md#pyacquisition.core.experiment.Experiment.register_task), and [Write a task](../usage/write_task.md), for one of your own that drives hardware.
 { .gs-more }
 
 </section>

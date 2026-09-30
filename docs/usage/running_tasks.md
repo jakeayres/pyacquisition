@@ -1,6 +1,6 @@
 # Running Tasks
 
-Once tasks are [registered](tasks.md#registering-tasks), you run them by adding them to the **queue**. The task manager takes tasks from the queue one at a time, in the order they were added, and runs each to completion before starting the next.
+Once tasks are [registered](write_task.md#register-it-and-run-the-experiment), you run them by adding them to the **queue**. The task manager takes tasks from the queue one at a time, in the order they were added, and runs each to completion before starting the next.
 
 ## Queueing a task
 
@@ -18,7 +18,7 @@ The task joins the queue, and starts as soon as the task manager is free. An ins
 The **Queue** tab shows, for each task manager:
 
 - **The header**: its state (**Running**, **Paused**, **Aborting…** or **Idle**), **Add task**, and **Pause** (which becomes **Resume** while it is paused).
-- **The running task**, in a card: its `description` and `parameters` (if you [wrote them](tasks.md#your-first-task)), how long it has been running, how far along it is and how long is left, if it [says](tasks.md#showing-progress), the subtasks it is running, and **Abort**. The card is green while the task runs, amber while the task manager is paused, and red while the task is being aborted. Its copy button queues the same task again. The name of the running task is in the top bar too, whichever tab is open.
+- **The running task**, in a card: its `description` and `parameters` (if you [wrote them](write_task.md#show-its-progress)), how long it has been running, how far along it is and how long is left, if it [says](write_task.md#show-its-progress), the subtasks it is running, and **Abort**. The card is green while the task runs, amber while the task manager is paused, and red while the task is being aborted. Its copy button queues the same task again. The name of the running task is in the top bar too, whichever tab is open.
 - **The queue**: the tasks waiting behind it, in order, with their inputs. The running task is not repeated here. Each waiting task has buttons to move it one place **up** (so that it runs sooner) or **down**, to copy it, and to remove it (**×**). You can also drag it by the handle at its left to any place. It is always the task you clicked that is moved or removed, even if the queue has moved on since you last looked, for example because the task in front of it has just started. The first task cannot move up, because the place in front of it belongs to the task that is running, and the last cannot move down, so those arrows are greyed out.
 - **Save…**, **Load…** and **Clear queue**: [sequences](#saving-a-queue-as-a-sequence), and emptying the queue (after asking). Clearing does not stop the task that is running.
 
@@ -30,11 +30,11 @@ The buttons in the **Queue** tab control what is running:
 
 | Button | What it does |
 |---|---|
-| **Pause** | The running task stops at its next wait and holds there. If it has an [`on_pause()`](tasks.md#pausing-hardware-on_pause-and-on_resume), that is called at once, so a task that controls a magnet can put it on hold. Otherwise the instruments are left as they are. No new task is started. |
+| **Pause** | The running task stops at its next wait and holds there. If it has an [`on_pause()`](write_task.md#hold-the-hardware-when-paused), that is called at once, so a task that controls a magnet can put it on hold. Otherwise the instruments are left as they are. No new task is started. |
 | **Resume** | The task's `on_resume()` is called if it has one, and then the task carries on from where it stopped, and the queue continues. |
 | **Abort** | After asking you to confirm, the running task stops at once, wherever it is waiting, and its `teardown()` runs, leaving the instruments in the safe state you defined. The task manager then **pauses**, so the next task does not start until you press **Resume**. |
 
-A task pauses at its waits (`self.sleep()`, `self.wait_until()` and so on: see [How `run()` works](tasks.md#how-run-works)), so a pause takes effect when the task next reaches one. An abort does not wait for one.
+A task pauses at its waits (`self.sleep()`, `self.wait_until()` and so on: see [`Task`](../reference/python_api/task.md)), so a pause takes effect when the task next reaches one. An abort does not wait for one.
 
 !!! note "Abort pauses the whole queue"
     Aborting deliberately does not go straight on to the next task. Nothing else runs until you decide, by pressing **Resume**, or by clearing the queue first with **Clear queue**.
@@ -66,9 +66,9 @@ A task that never finishes holds up only the queue it is in, and it is stopped, 
 
 !!! warning "Anything queued behind a task that never finishes waits for ever"
     A queue runs one task at a time. If an endless task, such as a [PID](../reference/tasks/pid.md), is running on a task manager, the tasks you queue on that same task manager wait behind it until it is stopped. Give an endless task a task manager of its own (`self.add_task_manager("pid")`), and use the others for tasks that finish.
- The task managers share one thread, so [the same rules apply as when tasks run together](composing_tasks.md#running-tasks-at-the-same-time): every loop needs an `await`, and a task that blocks holds up all the others. Nothing stops two task managers from changing the same instrument setting, so decide which one owns each.
+ The task managers share one thread, so [the same rules apply as when tasks run together](sweep.md#keep-watch-in-the-background): every loop needs an `await`, and a task that blocks holds up all the others. Nothing stops two task managers from changing the same instrument setting, so decide which one owns each.
 
-Use one task manager for a set of tasks that must run *one after another*. To run things at the same time *within* one task, see [Running tasks at the same time](composing_tasks.md#running-tasks-at-the-same-time).
+Use one task manager for a set of tasks that must run *one after another*. To run things at the same time *within* one task, see [Keep watch in the background](sweep.md#keep-watch-in-the-background).
 
 | Address | Does |
 |---|---|

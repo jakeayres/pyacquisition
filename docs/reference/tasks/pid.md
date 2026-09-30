@@ -161,7 +161,7 @@ In the **Queue** tab, the PID's card shows its setpoint and gains, and once it i
 - **A failed cycle is logged and skipped.** If `read` or `write` raises an error (an instrument times out, say), or the reading is not a number, the output stays where it was and the PID tries again on the next cycle.
 - **Too many in a row stops it.** After `max_failures` failed cycles in a row, the PID stops with an error. It never carries on blind.
 - **It always writes `final_output`.** That happens when it is aborted, when it reaches its `duration`, when the experiment shuts down, and when it stops with an error.
-- **The error reaches the parent.** If the PID is running as a subtask, or [alongside](../../usage/composing_tasks.md#in-the-background-alongside) another block of work, the error interrupts that work and is raised there. See [Composing tasks](../../usage/composing_tasks.md).
+- **The error reaches the parent.** If the PID is running as a subtask, or [alongside](../python_api/task.md#pyacquisition.core.task_manager.task.Task.alongside) another block of work, the error interrupts that work and is raised there. See [Sweep a temperature](../../usage/sweep.md#keep-watch-in-the-background).
 
 !!! warning "The software cannot protect the hardware if it stops"
     If the Python process dies, nothing writes `final_output`, and the instrument keeps whatever output it was last given. For anything that can be damaged or is dangerous, such as a heater, set limits on the instrument itself, and use its own over-temperature protection, as a second line of defence.

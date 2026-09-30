@@ -35,8 +35,8 @@ nav = [
       { "Record Spectra and Traces" = "usage/traces.md" },
     ] },
     { "Tasks" = [
-      { "Writing Tasks" = "usage/tasks.md" },
-      { "Composing Tasks" = "usage/composing_tasks.md" },
+      { "Write a Task" = "usage/write_task.md" },
+      { "Sweep a Temperature" = "usage/sweep.md" },
       { "Running Tasks" = "usage/running_tasks.md" },
     ] },
     { "The Experiment" = [
@@ -139,11 +139,13 @@ show_source = false
 "usage/simulated_rig.md" = "getting_started/config_file.md"
 "usage/recording_data.md" = "getting_started/python_api.md"
 "usage/first_task.md" = "getting_started/python_api.md"
-"usage/building_a_sweep.md" = "usage/composing_tasks.md"
+"usage/building_a_sweep.md" = "usage/sweep.md"
 "usage/queueing_tasks.md" = "usage/running_tasks.md"
 "usage/real_instruments.md" = "usage/connect_instrument.md"
 "usage/instruments.md" = "usage/connect_instrument.md"
 "usage/custom_instruments.md" = "usage/software_instrument.md"
+"usage/tasks.md" = "usage/write_task.md"
+"usage/composing_tasks.md" = "usage/sweep.md"
 "usage/advanced.md" = "usage/index.md"
 "usage/toml_config.md" = "reference/config_file.md"
 "dev/contributing.md" = "index.md"

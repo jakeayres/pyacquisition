@@ -59,6 +59,25 @@ class Task:
     Override `setup()`, `run()` and `teardown()`, and, if pausing should do
     something to your hardware, `on_pause()` and `on_resume()`.
 
+    A task is a `@dataclass`, whose fields are its inputs, which the interface's
+    forms ask for: give each the type `int`, `float`, `str` or `bool`, and a
+    default if it has one. Don't give an input the name of something a task has
+    (`start`, `name`, `run`, `setup`, `teardown`, `pause`, `resume`, `abort`,
+    `log`, `sleep`, `description`, `parameters` or the rest here), which it would
+    hide. A task that checks its inputs does so in `__post_init__`, which must
+    call `super().__post_init__()` first: an error there refuses the task as it
+    is queued.
+
+    Wait with the task's own waits, never `time.sleep()`, which stops the whole
+    experiment, or `asyncio.sleep()`, which can't be paused. Catch the errors
+    you expect, never everything: aborting raises `asyncio.CancelledError` in
+    the task, which a bare `except:` would catch.
+
+    A task ends `completed`, `aborted` or `failed` (see `outcome`), and
+    `teardown()` runs in each case. A failure is logged and shown as an alert,
+    and pauses its task manager, so the tasks queued behind it wait to be
+    resumed.
+
     Example:
         @dataclass
         class RampMagnet(Task):

@@ -11,7 +11,7 @@ class MyExperiment(Experiment):
         self.add_instrument(Mercury_IPS("magnet_psu", "GPIB0::25::INSTR"))
 ```
 
-The task takes the `setpoint` in tesla and the `ramp_rate` in tesla per minute. The id of the power supply is filled in for you when there is one Mercury IPS. With two, the form asks which. To register it yourself instead, for example to choose the label, set `auto_tasks = False` and use `self.register_task(SweepMagneticField, label="Sweep Field")`. See [tasks that are already included](../../usage/tasks.md#tasks-that-are-already-included).
+The task takes the `setpoint` in tesla and the `ramp_rate` in tesla per minute. The id of the power supply is filled in for you when there is one Mercury IPS. With two, the form asks which. To register it yourself instead, for example to choose the label, set `auto_tasks = False` and use `self.register_task(SweepMagneticField, label="Sweep Field")`. See [tasks that come with an instrument](overview.md#with-an-instrument).
 
 ## What it does, and what it checks
 
@@ -44,7 +44,7 @@ The sweep is built from two smaller tasks, which you can use on their own or in 
 - `RampMagnet(magnet_psu, setpoint)` sweeps to a field.
 - `RampMagnetToZero(magnet_psu)` sweeps to zero.
 
-Each one knows what pausing it means. Pausing holds the magnet, and resuming sends it on its way. A larger task made of them needs no `on_pause()` or `on_resume()` of its own, which is why `SweepMagneticField` has none. They are also a worked example of [writing a task that controls hardware](../../usage/tasks.md#pausing-hardware-on_pause-and-on_resume), with every value read back and checked with [`self.expect()`](../../usage/tasks.md#checking-what-you-set). Read the source, and write your own for your requirements.
+Each one knows what pausing it means. Pausing holds the magnet, and resuming sends it on its way. A larger task made of them needs no `on_pause()` or `on_resume()` of its own, which is why `SweepMagneticField` has none. They are also a worked example of [writing a task that controls hardware](../../usage/write_task.md#hold-the-hardware-when-paused), with every value read back and checked with [`self.expect()`](../python_api/task.md#pyacquisition.core.task_manager.task.Task.expect). Read the source, and write your own for your requirements.
 
 ## Reference
 
