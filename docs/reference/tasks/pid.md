@@ -76,7 +76,7 @@ pid.kp = 0.5
 
 A task of your own can change them too, given the PID as an input. Such a task is made in code, since a form can't show a PID.
 
-The interface can't change them directly, because a PID is made in code. A small software instrument whose commands set them can, as in [Hold a temperature with PID](../../usage/pid.md#change-the-setpoint-from-the-interface).
+The interface can't change them directly, because a PID is made in code. A small software instrument whose commands set them can, as in [Hold a temperature with PID](../../usage/pid.md#change-the-setpoint-and-gains-from-the-interface).
 
 ## What the PID is doing
 
