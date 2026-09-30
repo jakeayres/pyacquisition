@@ -8,11 +8,18 @@ The experiment serves them at its own address, `http://localhost:8000` unless [`
 import requests
 
 base = "http://localhost:8000"
-requests.get(f"{base}/clock/time").json()
+requests.get(f"{base}/clock/time").json()  # (1)
 # {'status': 200, 'data': 0.523862361907959}
-requests.get(f"{base}/tasks/waitfor", params={"seconds": 2}).json()
+requests.get(f"{base}/tasks/waitfor", params={"seconds": 2}).json()  # (2)
 # {'status': 200, 'message': 'WaitFor added'}
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. An instrument's query, at `/<instrument>/<method>`. The value is in `data`.
+2. A task is queued with its inputs as query parameters: `/tasks/waitfor?seconds=2`.
+
+</div>
 
 Most answer `{"status": 200, "data": ...}`. The rack's, and a few others, answer `{"status": "success", ...}`. A running experiment lists every endpoint, with its inputs, at `/docs`, where each can be tried.
 

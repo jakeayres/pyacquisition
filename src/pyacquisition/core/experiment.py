@@ -577,7 +577,9 @@ class Experiment:
         The mapping is read-only. Use `add_trace` to add one.
 
         Example:
+            ```python
             await experiment.traces["spectrum"].acquire()
+            ```
         """
         return MappingProxyType(self._traces)
 
@@ -626,11 +628,13 @@ class Experiment:
             RuntimeError: If the experiment has already started running.
 
         Example:
+            ```python
             clock = Clock("clock")
             experiment.add_instrument(clock)
 
             lockin = SR_830("lockin", "GPIB0::7::INSTR")
             experiment.add_instrument(lockin)
+            ```
         """
         self._check_not_started("add an instrument")
         self._rack.add_instrument(instrument)
@@ -674,9 +678,11 @@ class Experiment:
                 a calculated column or another trace.
 
         Example:
+            ```python
             generator = TraceGenerator("generator")
             self.add_instrument(generator)
             self.add_trace(Trace("spectrum", generator.get_spectrum))
+            ```
         """
         self._check_not_started("add a trace")
         if not isinstance(trace, Trace):
@@ -715,7 +721,9 @@ class Experiment:
             RuntimeError: If the experiment has already started running.
 
         Example:
+            ```python
             experiment.add_measurement(Measurement("time", clock.timestamp_ms))
+            ```
         """
         self._check_not_started("add a measurement")
         self._rack.add_measurement(measurement)
@@ -758,10 +766,12 @@ class Experiment:
             TypeError: If the calculation is not callable, or a unit is not text.
 
         Example:
+            ```python
             experiment.add_calculation(
                 lambda row: {"power": row["v"] * row["i"]}, units={"power": "W"}
             )
             experiment.add_calculation(RollingMean("power", window=10, unit="W"))
+            ```
         """
         self._check_not_started("add a calculation")
         self._calculations.add_calculation(calculation, units=units)
@@ -795,8 +805,10 @@ class Experiment:
             ValueError: If the name is not valid, or is already used.
 
         Example:
+            ```python
             control = self.add_task_manager("control")
             control.add_task(HoldTemperature(kelvin=4.2))
+            ```
         """
         self._check_not_started("add a task manager")
         if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_-]+", name):
@@ -1024,8 +1036,10 @@ class Experiment:
         Run the experiment. The main entry point for executing the experiment.
 
         Example:
+            ```python
             experiment = Experiment.from_config("experiment_config.toml")
             experiment.run()
+            ```
         """
         logger.info("Experiment started")
 
@@ -1115,8 +1129,10 @@ class Experiment:
             ValueError: If there is no task manager with one of the names.
 
         Example:
+            ```python
             experiment.register_task(MyCustomTask())
             experiment.register_task(HoldTemperature, manager="control")
+            ```
 
         """
         self._registered_tasks.add(task)

@@ -79,6 +79,7 @@ class Task:
     resumed.
 
     Example:
+        ```python
         @dataclass
         class RampMagnet(Task):
             \"\"\"Sweep the magnet to a field.\"\"\"
@@ -100,6 +101,7 @@ class Task:
 
             async def teardown(self, experiment):
                 experiment.instruments[self.magnet].hold()
+        ```
     """
 
     # The instruments that a task that comes with pyacquisition is for, so that it
@@ -275,7 +277,9 @@ class Task:
             TimeoutError: If the condition is still false after `timeout`.
 
         Example:
+            ```python
             await self.wait_until(lambda: psu.get_sweep_status() == ModeStatusN.REST)
+            ```
         """
         waited = 0.0
         while True:
@@ -315,9 +319,11 @@ class Task:
             note (str | None): What it is doing now, such as "Sweeping to 2 T".
 
         Example:
+            ```python
             for i, kelvin in enumerate(points):
                 self.set_progress(i, of=len(points), note=f"Going to {kelvin} K")
                 ...
+            ```
         """
         fraction = done / of if of else done
         self._progress = {
@@ -380,13 +386,15 @@ class Task:
                 the values must be equal.
 
         Returns:
-            actual (object): The value that was found.
+            object: `actual`, the value that was found.
 
         Raises:
             ValueError: If the value is not the one that was wanted.
 
         Example:
+            ```python
             self.expect(psu.get_activity_status(), ActivityStatus.HOLD, "Activity")
+            ```
         """
 
         def shown(value):
@@ -548,9 +556,11 @@ class Task:
                 Defaults to the experiment this task was started with.
 
         Example:
+            ```python
             async def run(self, experiment):
                 await self.run_subtask(WaitFor(minutes=5))
                 await self.run_subtask(NewFile(file_name="after wait"))
+            ```
         """
         if experiment is None:
             experiment = self._experiment
@@ -588,8 +598,10 @@ class Task:
                 Defaults to the experiment this task was started with.
 
         Example:
+            ```python
             async def run(self, experiment):
                 await self.run_subtasks(RampMagnet(field=5), RampTemperature(kelvin=2))
+            ```
         """
         if experiment is None:
             experiment = self._experiment
@@ -662,10 +674,12 @@ class Task:
                 Defaults to the experiment this task was started with.
 
         Example:
+            ```python
             async def run(self, experiment):
                 async with self.alongside(HoldTemperature(kelvin=4.2)):
                     await self.run_subtask(SweepField(target=5))
                 self.log("The temperature control has stopped")
+            ```
         """
         if experiment is None:
             experiment = self._experiment

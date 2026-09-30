@@ -7,16 +7,37 @@ An adapter is named in a [config file](config_file.md#instruments) with `adapter
 ```toml
 [instruments.lockin]
 instrument = "SR_830"
-adapter = "pyvisa"
-resource = "GPIB0::8::INSTR"
-args = { timeout = 10000 }
+adapter = "pyvisa" # (1)
+resource = "GPIB0::8::INSTR" # (2)
+args = { timeout = 10000 } # (3)
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. How the device is reached: one of the four in the table below.
+2. Its address, in the adapter's own form: here a VISA resource, GPIB address 8.
+3. The adapter's options, from its section below: here, wait up to 10 s (10000 ms) for a reply.
+
+</div>
 
 In Python, the address comes after the instrument's name, and the adapter and options are keyword arguments:
 
 ```python
-lockin = SR_830("lockin", "GPIB0::8::INSTR", adapter="pyvisa", timeout=10000)
+lockin = SR_830(
+    "lockin",  # (1)
+    "GPIB0::8::INSTR",  # (2)
+    adapter="pyvisa",
+    timeout=10000,  # (3)
+)
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. Its name, as a config file's table name is.
+2. Its address.
+3. Every other keyword is an option of the adapter's.
+
+</div>
 
 | Adapter | For | Address |
 |---|---|---|
@@ -67,8 +88,14 @@ Runs a driver with no device connected, to try a config, develop a task, or test
 instrument = "Lakeshore_350"
 adapter = "mock"
 resource = "mock"
-args = { responses = { "KRDG? A" = ["4.20", "4.21", "4.19"] } }
+args = { responses = { "KRDG? A" = ["4.20", "4.21", "4.19"] } } # (1)
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. `KRDG? A` answers `4.20`, then `4.21`, then `4.19` from then on. Any other query answers what was last set, or `0`.
+
+</div>
 
 ## `record`
 
@@ -86,5 +113,11 @@ Any other option goes to the inner adapter.
 instrument = "Keithley_6221"
 adapter = "record"
 resource = "GPIB0::12::INSTR"
-args = { inner = "pyvisa", transcript = "recordings/k6221.jsonl" }
+args = { inner = "pyvisa", transcript = "recordings/k6221.jsonl" } # (1)
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. `pyvisa` talks to the instrument, and every message both ways is added to the file, for `mock`'s `transcript` to replay.
+
+</div>

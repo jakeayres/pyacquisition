@@ -330,8 +330,10 @@ def read_traces(path: str | Path, name: str | None = None) -> Traces:
         KeyError: If there is no trace of that name.
 
     Example:
+        ```python
         traces = read_traces("my_data/00.01 sweep.data", "spectrum")
         plt.pcolormesh(traces.x, traces.info["row.T"], traces.channels["S21"])
+        ```
     """
     parts = trace_parts(path)
     if not parts:

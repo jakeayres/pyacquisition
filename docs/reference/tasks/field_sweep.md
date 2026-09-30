@@ -8,8 +8,14 @@ from pyacquisition.instruments import Mercury_IPS
 
 class MyExperiment(Experiment):
     def setup(self):
-        self.add_instrument(Mercury_IPS("magnet_psu", "GPIB0::25::INSTR"))
+        self.add_instrument(Mercury_IPS("magnet_psu", "GPIB0::25::INSTR"))  # (1)
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. Adding the power supply registers `SweepMagneticField`: there is no `register_task` to write.
+
+</div>
 
 The task takes the `setpoint` in tesla and the `ramp_rate` in tesla per minute. The id of the power supply is filled in for you when there is one Mercury IPS. With two, the form asks which. To register it yourself instead, for example to choose the label, set `auto_tasks = False` and use `self.register_task(SweepMagneticField, label="Sweep Field")`. See [tasks that come with an instrument](overview.md#with-an-instrument).
 

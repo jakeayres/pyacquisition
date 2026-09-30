@@ -2,24 +2,33 @@
 
 Every table and key a TOML config file can hold. [1. The Config File](../getting_started/config_file.md) builds one step by step, and [`pyacquisition new`](../usage/setup_page.md) writes one from forms.
 
-A file is run with `pyacquisition run --toml rig.toml`, or read in Python with `Experiment.from_config("rig.toml")`. Every table is optional, and an empty file is a valid experiment. The file is [TOML](https://toml.io/en/).
+A file is run with `pyacquisition --toml rig.toml`, or read in Python with `Experiment.from_config("rig.toml")`. Every table is optional, and an empty file is a valid experiment. The file is [TOML](https://toml.io/en/).
 
 ```toml
 [instruments]
-clock = { instrument = "Clock" }
+clock = { instrument = "Clock" } # (1)
 
-[instruments.lockin]
+[instruments.lockin] # (2)
 instrument = "SR_830"
 adapter = "pyvisa"
 resource = "GPIB0::8::INSTR"
 
 [measurements]
 time = { instrument = "clock", method = "time" }
-x = { instrument = "lockin", method = "get_x", unit = "V" }
+x = { instrument = "lockin", method = "get_x", unit = "V" } # (3)
 
 [rack]
-period = 0.5
+period = 0.5 # (4)
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. An instrument on one line: its name, `clock`, is how measurements and code refer to it.
+2. The same, as a table of its own, which reads better with several keys. The two forms can be mixed.
+3. `method` is one of the instrument's queries, by name. `unit` is shown in the interface, and doesn't change the data.
+4. Seconds between measurements. Every table is optional: leave one out for its defaults.
+
+</div>
 
 ## `[experiment]`
 

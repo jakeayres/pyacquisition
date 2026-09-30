@@ -1,0 +1,34 @@
+{#- The attributes listed at the top of a class, each with the first sentence of its
+    docstring, however its lines wrap: as summary/functions.html.jinja. -#}
+
+{% if not obj.docstring.parsed | selectattr("kind.value", "eq", "attributes") | list %}
+  {% with section = obj.attributes
+      |filter_objects(
+        filters=config.filters,
+        members_list=members_list,
+        inherited_members=config.inherited_members,
+        keep_no_docstrings=config.show_if_no_docstring,
+      )
+      |order_members(config.members_order, members_list)
+      |as_attributes_section(check_public=not members_list)
+    %}
+    {% if section %}
+      <p><span class="doc-section-title">{{ section.title or lang.t("Attributes:") }}</span></p>
+      <ul>
+        {% for attribute in section.value %}
+          {% set member = obj[attribute.name] %}
+          {% set paragraph = (member.docstring.value if member.docstring else "").split("\n\n")[0].split() | join(" ") %}
+          {% set sentence = paragraph.split(". ")[0] %}
+          {% if sentence != paragraph %}{% set sentence = sentence ~ "." %}{% endif %}
+          <li class="doc-section-item field-body">
+            <b><code><autoref identifier="{{ obj.path }}.{{ attribute.name }}" optional hover>{{ attribute.name }}</autoref></code></b>
+            –
+            <div class="doc-md-description">
+              {{ sentence|convert_markdown(heading_level, html_id, autoref_hook=autoref_hook|default(AutorefsHook(member, config))) }}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  {% endwith %}
+{% endif %}

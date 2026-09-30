@@ -109,7 +109,9 @@ class Trace:
             isn't above 0; or if a reduction isn't one there is.
 
     Example:
+        ```python
         Trace("spectrum", generator.get_spectrum, every_rows=1, reduce=["mean", "peak_x"])
+        ```
     """
 
     def __init__(self, name: str, method: Callable[..., TraceData], every: float | None = None,

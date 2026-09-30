@@ -8,8 +8,14 @@ from pyacquisition.instruments import Lakeshore_350
 
 class MyExperiment(Experiment):
     def setup(self):
-        self.add_instrument(Lakeshore_350("lakeshore", "GPIB0::12::INSTR"))
+        self.add_instrument(Lakeshore_350("lakeshore", "GPIB0::12::INSTR"))  # (1)
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. Adding the controller registers `RampTemperature`: there is no `register_task` to write.
+
+</div>
 
 It asks for:
 
@@ -25,10 +31,17 @@ Used as a subtask of a task of your own, it takes the id first, and the channel 
 
 ```python
 await self.run_subtask(
-    RampTemperature("lakeshore", Lakeshore_350.OutputChannel.OUTPUT_1, 4.2, 2.0)
+    RampTemperature("lakeshore", Lakeshore_350.OutputChannel.OUTPUT_1, 4.2, 2.0)  # (1)
 )
-await self.run_subtask(RampTemperature("lakeshore", "OUTPUT_1", 4.2, 2.0))
+await self.run_subtask(RampTemperature("lakeshore", "OUTPUT_1", 4.2, 2.0))  # (2)
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. The controller's id, the output as a member of its `OutputChannel`, then the setpoint, 4.2 K, and the rate, 2.0 K a minute.
+2. The same, with the output as text.
+
+</div>
 
 It does not stop the ramp if it is paused or aborted, so add a `teardown()` of your own to a task that needs the setpoint held. To turn the automatic registration off, see [tasks that come with an instrument](overview.md#with-an-instrument).
 

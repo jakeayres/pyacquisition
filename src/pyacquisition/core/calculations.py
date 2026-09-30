@@ -65,7 +65,9 @@ class Sum(Calculation):
     The sum of two or more columns.
 
     Example:
+        ```python
         experiment.add_calculation(Sum("a", "b", name="total"))
+        ```
 
     In a TOML config:
 
@@ -111,7 +113,9 @@ class RollingMean(Calculation):
     input stays in the average until it has left the window.
 
     Example:
+        ```python
         experiment.add_calculation(RollingMean("voltage", window=10))
+        ```
 
     In a TOML config:
 

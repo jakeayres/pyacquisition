@@ -12,19 +12,29 @@ It is not tied to any instrument: you give it two functions, one that **reads** 
 from pyacquisition.tasks import PID
 
 pid = PID(
-    read=furnace.temperature,
+    read=furnace.temperature,  # (1)
     write=furnace.set_power,
     setpoint=60.0,
-    kp=5.0,
+    kp=5.0,  # (2)
     ki=0.5,
-    output_min=0.0,
+    output_min=0.0,  # (3)
     output_max=100.0,
-    label="furnace",
+    label="furnace",  # (4)
 )
-self.add_task_manager("control").add_task(pid)
+self.add_task_manager("control").add_task(pid)  # (5)
 ```
 
-`read` takes no arguments and returns the measured value, and `write` takes the output: give the functions, not their results. For a method that needs arguments, use a `lambda`: `lambda: sensor.get_temperature(Channel.A)`. A PID never finishes, so it has a task manager of its own, and starts with the experiment.
+<div class="gs-legend pa-notes" markdown>
+
+1. The functions themselves, with no brackets: the PID calls `read()` for the value, and `write(output)` with the output, every cycle.
+2. Gains, in output per unit of error: 5 % of the heater's power per degree off, and 0.5 % per degree-second.
+3. The heater's own range: the output never goes outside it.
+4. The name in the **Logs** window. Give each PID its own.
+5. A queue of its own, since a PID never finishes: the main queue stays free for the rest of the experiment.
+
+</div>
+
+For a method that needs arguments, give a `lambda`: `read=lambda: sensor.get_temperature(Channel.A)`. A task on a task manager of its own starts with the experiment.
 
 ## Settings
 
@@ -93,8 +103,14 @@ In the **Queue** tab, the PID's card shows its setpoint and gains, and once it i
 from pyacquisition.tasks import PIDController
 
 controller = PIDController(kp=5.0, ki=0.5, output_min=0.0, output_max=100.0)
-output = controller.update(setpoint=60.0, process_value=42.0, dt=1.0)
+output = controller.update(setpoint=60.0, process_value=42.0, dt=1.0)  # (1)
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. One step: the output for a value of 42 against a setpoint of 60, one second after the last. Call it each time there is a new value.
+
+</div>
 
 ## Reference
 

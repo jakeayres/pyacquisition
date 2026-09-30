@@ -33,17 +33,25 @@ A driver's decorators aren't trusted to say what a method does: `Mercury_IPS` on
 A TOML file, such as `hardware.toml`, in the form of a config file's [`[instruments]`](config_file.md#instruments), with a `verify` table for each instrument. `tests/hardware/hardware.example.toml` is one to copy.
 
 ```toml
-[instruments.k6221]
+[instruments.k6221] # (1)
 instrument = "Keithley_6221"
 adapter = "pyvisa"
 resource = "GPIB0::12::INSTR"
 args = { read_termination = "\n" }
 
-[instruments.k6221.verify]
+[instruments.k6221.verify] # (2)
 capabilities = []
-max_hazard = "reversible"
+max_hazard = "reversible" # (3)
 record = "recordings/k6221.jsonl"
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. The instrument, as a config file's `[instruments]` gives it, so it is opened as in a run.
+2. What the tool may do with it. Every key is optional.
+3. Never more than reversible checks on this instrument, even with `--hazardous`.
+
+</div>
 
 | Key of `verify` | Meaning |
 |---|---|
@@ -60,26 +68,37 @@ The specs that come with PyAcquisition were written from the drivers and the man
 
 ```toml
 [identity]
-contains = ["KEITHLEY", "6221"]
+contains = ["KEITHLEY", "6221"] # (1)
 
 [guard]
-read = ['^R\d+$']
+read = ['^R\d+$'] # (2)
 
 [safe_state]
-steps = [{ call = "set_output_state", args = { state = "OFF" } }]
+steps = [{ call = "set_output_state", args = { state = "OFF" } }] # (3)
 verify = [{ call = "get_output_state", equals = "OFF" }]
 
 [read.get_buffer_selected]
-args = [{ start = 1, count = 1 }]
+args = [{ start = 1, count = 1 }] # (4)
 requires = ["nanovoltmeter"]
 
 [roundtrip.current]
-hazard = "reversible"
+hazard = "reversible" # (5)
 values = [1e-9, -1e-9]
 rel = 1e-3
 abs = 1e-12
-preconditions = [{ call = "get_output_state", equals = "OFF" }]
+preconditions = [{ call = "get_output_state", equals = "OFF" }] # (6)
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. `*IDN?`'s answer must contain both words, or nothing more is sent to the device.
+2. Messages such as `R1` are reads, though they have no `?`, so the guard lets them through.
+3. The output off, and confirmed off, before and after each check that writes.
+4. A getter that needs arguments is called with these, and only when the inventory lists a nanovoltmeter among its `capabilities`.
+5. Set 1 nA, then −1 nA, reading each back, then put the current back as it was. It runs with `--reversible`.
+6. Skipped, not risked, if the output isn't off.
+
+</div>
 
 ### `[identity]`
 
@@ -143,10 +162,17 @@ The inventory takes only the drivers that come with PyAcquisition. Any driver, y
 from keithley_2400 import Keithley_2400
 from pyacquisition.verify import Entry, Hazard, Policy, verify
 
-smu = Entry(name="smu", cls=Keithley_2400, adapter="pyvisa", resource="GPIB0::24::INSTR")
-report = verify([smu], Policy(Hazard.REVERSIBLE))
+smu = Entry(name="smu", cls=Keithley_2400, adapter="pyvisa", resource="GPIB0::24::INSTR")  # (1)
+report = verify([smu], Policy(Hazard.REVERSIBLE))  # (2)
 print(report.text())
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. One instrument, as a table of the inventory gives it, with the class itself in place of its name, so it can be your own. Its spec, `keithley_2400.toml`, is looked for beside `keithley_2400.py`.
+2. As `--reversible`. `Policy()` alone runs only the read-only checks.
+
+</div>
 
 | Name | Meaning |
 |---|---|

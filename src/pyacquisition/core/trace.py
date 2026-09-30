@@ -58,8 +58,10 @@ class TraceData:
             or if a channel's name is one the trace file keeps for itself.
 
     Example:
+        ```python
         TraceData({"S21": values}, x=(1e9, 2e9), x_name="frequency",
                   x_unit="Hz", unit="dB")
+        ```
     """
 
     channels: dict

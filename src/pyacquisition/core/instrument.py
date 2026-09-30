@@ -246,8 +246,10 @@ class Instrument(metaclass=QueryCommandProvider):
             already open.
 
     Example:
+        ```python
         lockin = SR_830("lockin", "GPIB0::7::INSTR")
         cryostat = Lakeshore_350("cryostat", "COM3::12", adapter="prologix")
+        ```
     """
 
     name = "Base Instrument"

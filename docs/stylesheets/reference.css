@@ -1,0 +1,232 @@
+/* Code, tables and the API docs, in the tutorials' style.
+
+   - Every code block outside the front page's showcase is the walkthroughs' dark code
+     panel (.gs-panel in walkthrough.css): the same colours, the file name as its header,
+     and the same small type.
+   - Code annotations, the numbers in a block that open a note, are the orange pins of
+     a tutorial's "What you built".
+   - Tables are compact, to scan: small type, tight rows, and a tinted header.
+   - The API docs (mkdocstrings, on the Reference pages) are compact: a short heading
+     for each class and method, its signature in a code panel under it, and its
+     sections as small labelled lists. */
+
+/* Code blocks ---------------------------------------------------------- */
+.md-typeset .highlight:not(:is(.pa-ide, .pa-hero) .highlight) {
+  --md-code-bg-color: #0e131d;
+  --md-code-fg-color: #d6deeb;
+  --md-code-hl-keyword-color: #ff9f43;
+  --md-code-hl-string-color: #4ade80;
+  --md-code-hl-number-color: #f78c6c;
+  --md-code-hl-function-color: #8fd3ff;
+  --md-code-hl-name-color: #d6deeb;
+  --md-code-hl-variable-color: #d6deeb;
+  --md-code-hl-constant-color: #ff9f43;
+  --md-code-hl-special-color: #ffcb6b;
+  --md-code-hl-operator-color: #89ddff;
+  --md-code-hl-punctuation-color: #9fb0c8;
+  --md-code-hl-comment-color: #5f6f89;
+  --md-code-hl-generic-color: #d6deeb;
+  --md-code-hl-color: rgba(255, 159, 67, 0.13);
+  --md-code-hl-color--light: rgba(255, 159, 67, 0.13);
+
+  overflow: hidden;
+  margin: 0.8em 0;
+  color: #d6deeb;
+  background: #0e131d;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.6rem;
+  box-shadow: 0 18px 36px -24px rgba(10, 15, 26, 0.6);
+}
+.md-typeset .highlight:not(:is(.pa-ide, .pa-hero) .highlight) pre { margin: 0; }
+.md-typeset .highlight:not(:is(.pa-ide, .pa-hero) .highlight) pre > code {
+  padding: 0.75rem 1rem;
+  font-size: 0.58rem;
+  line-height: 0.928rem;
+  background: #0e131d;
+  scrollbar-color: #3d4a61 transparent;
+  scrollbar-width: thin;
+}
+/* The file name, as the walkthroughs' panel header */
+.md-typeset .highlight:not(:is(.pa-ide, .pa-hero) .highlight) > span.filename {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  height: 1.9rem;
+  margin: 0;
+  padding: 0 1rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #8a97ad;
+  background: #0a0e16;
+  border: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0;
+}
+.md-typeset .highlight:not(:is(.pa-ide, .pa-hero) .highlight) > span.filename::before { display: none; }
+.md-typeset .highlight:not(:is(.pa-ide, .pa-hero) .highlight) .hll {
+  box-shadow: inset 2px 0 var(--pa-orange);
+}
+/* The copy button, dim on the dark panel, with no box of its own */
+.md-typeset .highlight:not(:is(.pa-ide, .pa-hero) .highlight) .md-code__nav { background: transparent; }
+.md-typeset .highlight:not(:is(.pa-ide, .pa-hero) .highlight) .md-code__button { color: #5f6f89; }
+.md-typeset .highlight:not(:is(.pa-ide, .pa-hero) .highlight) .md-code__button:hover { color: var(--pa-orange); }
+
+/* Numbered pins in code, and their notes ------------------------------ */
+/* docs/javascripts/pins.js turns a comment such as `# (1)` into a pin: the orange
+   pins of a tutorial's "What you built", keyed to a legend of notes under the block. */
+.md-typeset .highlight .pa-pin {
+  display: inline-grid;
+  place-items: center;
+  width: 0.95rem;
+  height: 0.95rem;
+  margin-left: 0.3rem;
+  vertical-align: -0.12rem;
+  font-family: var(--md-text-font-family);
+  font-size: 0.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #2a1400;
+  background: var(--pa-orange);
+  border-radius: 50%;
+  box-shadow: 0 0 0 0.15rem rgba(255, 159, 67, 0.25);
+  user-select: none;
+}
+.md-typeset .highlight .pa-pin::before { content: attr(data-n); }
+/* The notes: the tutorials' legend (walkthrough.css), one to a line, close under the code */
+.md-typeset .gs-legend.pa-notes ol { grid-template-columns: minmax(0, 1fr); gap: 0.3rem; margin-top: -0.2rem; }
+[dir] .md-typeset .gs-legend.pa-notes ol li { font-size: 0.64rem; line-height: 1.5; }
+
+/* Tables --------------------------------------------------------------- */
+.md-typeset table:not([class]) {
+  font-size: 0.64rem;
+  line-height: 1.45;
+  border-radius: 0.4rem;
+}
+.md-typeset table:not([class]) th {
+  padding: 0.4rem 0.75rem;
+  font-weight: 700;
+  background: var(--pa-surface);
+}
+.md-typeset table:not([class]) td {
+  padding: 0.32rem 0.75rem;
+  vertical-align: top;
+}
+.md-typeset table:not([class]) td > p { margin: 0; }
+.md-typeset table:not([class]) code { font-size: 0.9em; }
+.md-typeset table:not([class]) tbody tr:hover { background: rgba(255, 159, 67, 0.06); box-shadow: none; }
+
+/* The API docs --------------------------------------------------------- */
+/* A class: its name, a little larger than a tutorial's step title */
+.md-typeset h2.doc-heading {
+  margin: 1.6rem 0 0.4rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+/* A method, attribute or function: a rule above, and its name as code */
+.md-typeset :is(h3, h4, h5).doc-heading {
+  margin: 0.9rem 0 0.25rem;
+  padding-top: 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  border-top: 1px solid var(--pa-border);
+}
+.md-typeset .doc-heading .doc-object-name {
+  font-family: var(--md-code-font-family);
+  font-weight: 700;
+}
+.md-typeset .doc-heading code.doc-symbol-heading { font-size: 0.72em; vertical-align: 0.1em; }
+/* The signature, in a slim panel. A long one (a class with many options) scrolls
+   rather than filling the screen: its options are listed below it anyway. */
+.md-typeset .doc-object .highlight.doc-signature { margin: 0.25rem 0 0.4rem; box-shadow: none; }
+.md-typeset .doc-object .highlight.doc-signature .md-code__nav { display: none; }
+.md-typeset .doc-object .highlight.doc-signature pre > code {
+  max-height: 9.5rem;
+  padding: 0.35rem 0.9rem;
+  overflow-y: auto;
+}
+.md-typeset .doc-object .highlight.doc-signature a { color: inherit; text-decoration: underline dotted #5f6f89; }
+
+/* A docstring's Example: a small label over the code, as the sections are, not a box */
+.md-typeset .doc-contents details.example {
+  margin: 0.7rem 0 0.6rem;
+  padding: 0;
+  font-size: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.md-typeset .doc-contents details.example > summary {
+  margin: 0 0 0.25rem;
+  padding: 0;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--md-default-fg-color--light);
+  background: none;
+  border: 0;
+  pointer-events: none;
+}
+.md-typeset .doc-contents details.example > summary::before,
+.md-typeset .doc-contents details.example > summary::after { display: none; }
+.md-typeset .doc-contents details.example > .highlight { margin: 0; }
+
+/* What it says: the size of a tutorial's text, tight */
+.md-typeset .doc-contents { font-size: 0.72rem; line-height: 1.55; }
+.md-typeset .doc-contents > p { margin: 0.3rem 0 0.4rem; }
+/* Each section's label in a narrow column, beside its items: RETURNS | float – ... */
+.md-typeset .doc-contents > p:has(> .doc-section-title) {
+  float: left;
+  clear: left;
+  width: 5.4rem;
+  margin: 0.2rem 0 0;
+  line-height: 1.5;
+}
+.md-typeset .doc-contents > p:has(> .doc-section-title) + ul {
+  display: flow-root;
+  margin: 0.15rem 0 0.35rem;
+}
+.md-typeset .doc-contents::after { content: ""; display: block; clear: both; }
+@media (max-width: 40em) {
+  .md-typeset .doc-contents > p:has(> .doc-section-title) { float: none; width: auto; margin: 0.5rem 0 0.1rem; }
+}
+/* "Parameters:", "Returns:" and the rest: small labels, as a tutorial's "More:" */
+.md-typeset .doc-section-title {
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--md-default-fg-color--light);
+}
+.md-typeset .doc-contents ul:has(> .doc-section-item) {
+  margin: 0 0 0.6rem;
+  padding-left: 0;
+  list-style: none;
+}
+[dir] .md-typeset .doc-contents li.doc-section-item {
+  margin: 0;
+  padding: 0.1rem 0 0.1rem 0.7rem;
+  font-size: 0.68rem;
+  line-height: 1.5;
+  border-left: 2px solid var(--pa-border);
+}
+.md-typeset li.doc-section-item > b > code { font-weight: 700; color: var(--md-default-fg-color); }
+.md-typeset li.doc-section-item .doc-md-description,
+.md-typeset li.doc-section-item .doc-md-description > p { display: inline; margin: 0; }
+.md-typeset li.doc-section-item .doc-md-description > p + p { display: block; margin-top: 0.2rem; }
+/* The members listed at a class's top: a compact index to the methods below */
+.md-typeset .doc-contents > p:has(> .doc-section-title) + ul li.doc-section-item a { font-weight: 700; }
+
+/* "Bases: Instrument" */
+.md-typeset .doc-class-bases { font-size: 0.64rem; color: var(--md-default-fg-color--light); }
+
+/* A heading that is a name in code, such as a config file's [experiment]: the name,
+   not a grey box around it */
+.md-typeset :is(h2, h3):not(.doc-heading) > code:first-child {
+  padding: 0;
+  font-size: 0.92em;
+  background: none;
+}

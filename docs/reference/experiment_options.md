@@ -4,10 +4,17 @@ Every option of an experiment, as a class attribute of your `Experiment` subclas
 
 ```python
 class Lab(Experiment):
-    data_path = "cooldown_1"
-    measurement_period = 0.5
+    data_path = "cooldown_1"  # (1)
+    measurement_period = 0.5  # (2)
     console_log_level = "INFO"
 ```
+
+<div class="gs-legend pa-notes" markdown>
+
+1. Each option is a class attribute, named as in the table below.
+2. A config file's value, or an argument to `Lab(...)` or `Lab.from_config(...)`, wins over the class's: see [where a value comes from](#where-a-value-comes-from).
+
+</div>
 
 Set them in the class body: there is no `__init__` to write. If you write one, call `super().__init__()` first.
 

@@ -4,8 +4,8 @@ site_url = "https://pyacquisition.readthedocs.io"
 repo_url = "https://github.com/jakeayres/pyacquisition"
 repo_name = "pyacquisition"
 
-extra_css = ["stylesheets/home.css", "stylesheets/showcase.css", "stylesheets/tutorial.css", "stylesheets/instruments.css", "stylesheets/walkthrough.css"]
-extra_javascript = ["javascripts/walkthrough.js"] # only acts on a page with a walkthrough (.gs)
+extra_css = ["stylesheets/home.css", "stylesheets/showcase.css", "stylesheets/tutorial.css", "stylesheets/instruments.css", "stylesheets/walkthrough.css", "stylesheets/reference.css"]
+extra_javascript = ["javascripts/walkthrough.js", "javascripts/pins.js"] # walkthroughs (.gs), and numbered pins in code
 
 nav = [
   { "Overview" = [
@@ -101,7 +101,6 @@ nav = [
 [project.theme]
 variant = "classic" # the Material look. Remove this line for Zensical's newer default design.
 features = [
-  "content.code.annotate",
   "content.code.copy",
   "navigation.footer",
   "navigation.sections",
@@ -115,6 +114,9 @@ palette.accent = "custom" # green and orange are defined in docs/stylesheets/hom
 
 [project.theme.icon]
 repo = "fontawesome/brands/git-alt"
+
+[project.plugins.mkdocstrings]
+custom_templates = "templates" # templates/python/material: a class's member list, by sentence
 
 [project.plugins.mkdocstrings.handlers.python]
 paths = ["src"]
@@ -130,6 +132,16 @@ show_symbol_type_toc = true
 show_docstring_examples = true
 modernize_annotations = true
 show_source = false
+# Compact, to scan: a short heading with the signature in a code block under it,
+# Parameters and Returns as lists rather than tables, and a class's members listed
+# at its top (docs/stylesheets/reference.css styles them as the tutorials are).
+separate_signature = true
+show_signature_annotations = true
+signature_crossrefs = true
+line_length = 72
+docstring_section_style = "list"
+docstring_options = { returns_named_value = false }
+summary = true
 
 # Pages that moved or went send their readers to the page that covers the same ground
 # now, so links and bookmarks to them still work: Basic Usage's lessons, which Getting

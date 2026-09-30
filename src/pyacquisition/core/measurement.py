@@ -50,7 +50,9 @@ class Measurement:
             TypeError: If `unit` is not text.
 
         Example:
+            ```python
             Measurement("T", cryo.get_temperature, unit="K", input_channel="INPUT_A")
+            ```
         """
         self._name = name
         self._function = function
