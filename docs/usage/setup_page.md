@@ -110,7 +110,7 @@ Put 0.5 back, and the problem goes. Every field is checked this way, without con
 
 ## Run it from the page
 
-**Run** saves the file if there is anything unsaved, and starts the experiment from it, in the same window, as `uv run pyacquisition run --toml cryostat.toml` would. The top bar says `cryostat` and **Every 0.5 s**, and the tiles are `time`, `x`, `T` and `x_mean10`, with their units.
+**Run** saves the file if there is anything unsaved, and starts the experiment from it, in the same window, as `uv run pyacquisition --toml cryostat.toml` would. The top bar says `cryostat` and **Every 0.5 s**, and the tiles are `time`, `x`, `T` and `x_mean10`, with their units.
 
 To change the file afterwards, close the experiment and open the setup page again: a running experiment can't take on new instruments.
 

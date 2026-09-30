@@ -140,6 +140,8 @@ This guide needs nothing more, since its instruments are software ones, or stand
 - For **GPIB** instruments, install one. [PyVISA recommends the National Instruments implementation](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html), and it is what PyAcquisition has been tested against.
 - `pyvisa-py`, a pure Python backend installed alongside it, talks to many serial, USB and Ethernet instruments without a separate VISA installation.
 
+Once you have finished Getting Started, [Connect a real instrument](../usage/connect_instrument.md) puts one in place of a stand-in.
+
 ## What you learned
 
 - A **project** is a folder with an environment of its own, so its packages can't clash with anything else's.

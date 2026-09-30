@@ -241,4 +241,4 @@ summary: 5 passed
 - `--json` keeps the report, and `record` the traffic, for `mock` to replay.
 - A driver of your own is checked from Python with `Entry` and `verify`. A spec beside it, with an `[identity]` and a `[safe_state]`, lets its round trips run.
 
-Next: [the Usage tutorials](index.md), for what else PyAcquisition can do.
+Next: [Verification specs](../reference/verification_specs.md), for every key of a spec, and what keeps a run safe.

@@ -51,7 +51,7 @@ The file is checked first, so a mistake stops the build at once. Then PyInstalle
 
 ## Try the app on this PC
 
-Double-click `dist/rig.exe`. After a few seconds its window opens, with the clock, the signal and the lock-in, as `uv run pyacquisition run --toml rig.toml` would, and it makes its `data` and `logs` folders beside itself.
+Double-click `dist/rig.exe`. After a few seconds its window opens, with the clock, the signal and the lock-in, as `uv run pyacquisition --toml rig.toml` would, and it makes its `data` and `logs` folders beside itself.
 
 `config.toml` can be changed without building again: an instrument's address on the lab PC, say, or the period. The app reads it as it starts.
 
@@ -123,4 +123,4 @@ Copy the app to the lab PC, with `config.toml` for a config file's app, or `rig.
 - `--name`, `--icon` and `--onedir` name the app, give it an icon, and make it a folder that starts faster. `--console` shows its errors.
 - The window needs the WebView2 Runtime, and the interface is in a browser regardless.
 
-Next: [Verify a driver on real hardware](verify_driver.md), before you trust an instrument with a measurement.
+Next: [Connect a real instrument](connect_instrument.md), to find the lab's instruments' addresses for the app's `config.toml`.

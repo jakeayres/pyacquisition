@@ -1,14 +1,6 @@
 # Usage
 
-[Getting Started](../getting_started/installation.md) takes you from nothing to a working, automated experiment. Each page here takes one thing you may want to do next, and shows how. Read them in any order, when you need them. For the full list of an option, driver or task, see [Reference](../reference/index.md).
-
-## After Getting Started
-
-| When you have done | Go further with |
-|---|---|
-| [0. Installation](../getting_started/installation.md) | [Connect a real instrument](connect_instrument.md), when you connect real hardware |
-| [1. The Config File](../getting_started/config_file.md) | [Tune your measurements](measurements.md), [Read your data](read_data.md) and [Build a config in the interface](setup_page.md) |
-| [2. The Python API](../getting_started/python_api.md) | [Set the experiment's options](options.md), [Calculate new columns](calculations.md), [Write a task](write_task.md), [Sweep a temperature](sweep.md), [Queue, pause and save tasks](queue.md) and [Hold a temperature with PID](pid.md) |
+Each page here is a short tutorial for one thing you may want to do after [Getting Started](../getting_started/installation.md), in the same format: a file built up a step at a time, beside the terminal. Read them in any order, when you need them. For every option, driver or task, see [Reference](../reference/index.md).
 
 ## Instruments
 
@@ -45,3 +37,14 @@
 | [Build a config in the interface](setup_page.md) | A rig's config file written from forms with `pyacquisition new`, checked as you go, and run from the same window. About 10 minutes. |
 | [Drive an experiment from a script](api_script.md) | The lab run with no window, and driven by a script over the web API: a value read, a command sent, two files recorded, and the experiment stopped. About 15 minutes. |
 | [Build a standalone app](standalone_app.md) | An experiment frozen into an app for a lab PC with no Python, from a config file or a script. About 15 minutes. |
+
+## After Getting Started
+
+| In Getting Started, you | Go further with |
+|---|---|
+| [Installed PyAcquisition](../getting_started/installation.md) | [Connect a real instrument](connect_instrument.md), with a VISA library, and [Build a standalone app](standalone_app.md), for a lab PC with no Python |
+| [Described a rig in a config file](../getting_started/config_file.md) | [Tune your measurements](measurements.md), [Read your data](read_data.md) and [Build a config in the interface](setup_page.md) |
+| [Added an instrument with `mock`](../getting_started/config_file.md#add-a-hardware-instrument) | [Connect a real instrument](connect_instrument.md), [Write a hardware instrument](hardware_instrument.md) and [Verify a driver on real hardware](verify_driver.md) |
+| [Ran it from Python](../getting_started/python_api.md) | [Set the experiment's options](options.md), [Write a software instrument](software_instrument.md) and [Drive an experiment from a script](api_script.md) |
+| [Added a calculated column](../getting_started/python_api.md#add-calculations) | [Calculate new columns](calculations.md) and [Record spectra and traces](traces.md) |
+| [Wrote and queued a task](../getting_started/python_api.md#tasks-custom-automation) | [Write a task](write_task.md), [Sweep a temperature](sweep.md), [Queue, pause and save tasks](queue.md) and [Hold a temperature with PID](pid.md) |

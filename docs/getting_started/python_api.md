@@ -30,7 +30,7 @@ uv run lab.py
 
 The window is the same, but titled `Lab`, after the class. Keep `.run()` under `if __name__ == "__main__":`. The interface starts by importing this file again, and without that line it would start a second experiment.
 
-**More:** [combining a config file with Python](../reference/experiment_options.md#where-a-value-comes-from).
+**More:** [combining a config file with Python](../reference/experiment_options.md#where-a-value-comes-from), and [setting the experiment's options](../usage/options.md) in the class.
 { .gs-more }
 
 </section>
