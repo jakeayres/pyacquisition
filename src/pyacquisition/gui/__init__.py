@@ -116,9 +116,8 @@ class Gui:
 
     def start_handover(self) -> None:
         """Tells the window that its server is going away on purpose, and that
-        another will take over at `end_handover`. Until then the window doesn't
-        close when the server stops answering, but only if the process that
-        started it ends."""
+        another will take over at `end_handover`. Until then the window waits,
+        and doesn't read the address, which is only written while this is set."""
         if self._handing_over is not None:
             self._handing_over.value = True
 
@@ -138,9 +137,12 @@ class Gui:
     def close(self) -> None:
         """Tells the window to close now, as the experiment is shutting down.
 
-        It never waits, even if the window has already gone. Without it, the
-        window only notices the experiment has gone when it stops answering,
-        which on Windows can take several seconds.
+        It never waits, even if the window has already gone. While this process
+        lives, nothing else closes the window: it stays open while the
+        experiment doesn't answer (see `window._Window.watch`). So every way the
+        experiment ends must call it. The window's process isn't a daemon, and
+        one left open would hold up this process's exit until it was closed by
+        hand.
         """
         if self._closing is not None:
             self._closing.value = True

@@ -356,7 +356,7 @@ def main(
     import webview  # imported here, so that importing pyacquisition does not load it
 
     # Ctrl+C in the console reaches this process too. It is for the experiment,
-    # which shuts down, and then this window closes because the experiment has gone.
+    # which shuts down and tells this window to close.
     signal.signal(signal.SIGINT, signal.SIG_IGN)
 
     app = _Window(server, address)
