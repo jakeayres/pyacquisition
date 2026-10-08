@@ -12,7 +12,6 @@ from fastapi.testclient import TestClient
 
 from pyacquisition import Experiment
 from pyacquisition.gui import Gui
-from pyacquisition.gui.window import Lifeline
 
 
 def free_port() -> int:
@@ -178,48 +177,6 @@ def test_a_subclass_from_toml_keeps_its_class_name(tmp_path):
 
 
 # -------------------------------------------------------------- the window closing itself
-class Clock:
-    def __init__(self):
-        self.now = 0.0
-
-    def __call__(self):
-        return self.now
-
-
-def test_the_window_stays_while_the_experiment_answers():
-    lifeline = Lifeline(missed=3)
-
-    assert not any(lifeline.record(True) for _ in range(10))
-
-
-def test_the_window_closes_after_missed_checks_in_a_row():
-    lifeline = Lifeline(missed=3)
-    lifeline.record(True)
-
-    assert [lifeline.record(False) for _ in range(3)] == [False, False, True]
-
-
-def test_an_answer_resets_the_missed_checks():
-    lifeline = Lifeline(missed=3)
-    lifeline.record(True)
-    lifeline.record(False)
-    lifeline.record(False)
-    lifeline.record(True)
-
-    assert [lifeline.record(False) for _ in range(3)] == [False, False, True]
-
-
-def test_the_window_waits_for_the_experiment_to_start():
-    clock = Clock()
-    lifeline = Lifeline(missed=3, startup_timeout=60, clock=clock)
-
-    clock.now = 59
-    assert not any(lifeline.record(False) for _ in range(10))
-
-    clock.now = 61
-    assert lifeline.record(False)
-
-
 def test_the_window_can_be_told_to_close():
     gui = Gui(port=8123)
     process = gui.run_in_new_process()
@@ -283,11 +240,32 @@ def test_the_window_closes_at_once_when_told(monkeypatch):
     assert len(pings) <= 1  # it did not wait for the experiment to stop answering
 
 
-def test_the_window_closes_when_the_experiment_stops_answering(monkeypatch):
+def test_the_window_stays_while_the_experiment_does_not_answer(monkeypatch):
+    # An experiment waiting on an instrument (a GPIB read that times out blocks
+    # it for seconds) answers nothing, but is still running. Its window used to
+    # close after a few seconds of that, which stopped it.
     from pyacquisition.gui import window
 
-    answers = iter([True, False, False, False])
-    monkeypatch.setattr(window, "ping", lambda server: next(answers))
+    monkeypatch.setattr(window, "ping", lambda server: False)
+    monkeypatch.setattr(window, "parent_alive", lambda: True)
+    monkeypatch.setattr(window, "PING_PERIOD", 0.01)
+    app = window._Window("http://localhost:1")
+    app.window = FakeWebviewWindow()
+
+    thread = watch_in_thread(app)
+    time.sleep(0.2)  # many periods
+
+    assert not app.window.destroyed
+    app.close()
+    thread.join(timeout=2)
+
+
+def test_the_window_closes_when_the_experiment_process_ends(monkeypatch):
+    from pyacquisition.gui import window
+
+    alive = iter([True, True, False])
+    monkeypatch.setattr(window, "parent_alive", lambda: next(alive))
+    monkeypatch.setattr(window, "ping", lambda server: False)
     monkeypatch.setattr(window, "PING_PERIOD", 0.01)
     app = window._Window("http://localhost:1")
     app.window = FakeWebviewWindow()
@@ -298,20 +276,6 @@ def test_the_window_closes_when_the_experiment_stops_answering(monkeypatch):
 
 
 # -------------------------------------------------------------- handing the window over
-def test_a_restarted_lifeline_waits_again_as_at_the_start():
-    clock = Clock()
-    lifeline = Lifeline(missed=3, startup_timeout=60, clock=clock)
-    lifeline.record(True)
-
-    clock.now = 100
-    lifeline.restart()
-
-    clock.now = 159
-    assert not any(lifeline.record(False) for _ in range(10))
-    clock.now = 161
-    assert lifeline.record(False)
-
-
 def test_the_window_can_be_handed_over():
     gui = Gui(port=8123, page="/ui/setup/")
     process = gui.run_in_new_process()
@@ -382,7 +346,7 @@ def test_failed_pings_are_ignored_while_handing_over(monkeypatch):
     app.window = FakeWebviewWindow()
 
     thread = watch_in_thread(app, None, SimpleNamespace(value=True))
-    time.sleep(0.2)  # many more periods than MISSED_PINGS
+    time.sleep(0.2)  # many periods
 
     assert not app.window.destroyed
     assert pings == []  # nothing to check while its server goes away on purpose
@@ -417,22 +381,25 @@ def test_the_window_follows_the_shared_address(monkeypatch):
         pinged.append(server)
         return server in up
 
+    checks = []
     monkeypatch.setattr(window, "ping", ping)
+    monkeypatch.setattr(window, "parent_alive", lambda: checks.append(1) or True)
     monkeypatch.setattr(window, "PING_PERIOD", 0.01)
     address = SharedAddress("http://localhost:8123")
     handing_over = SimpleNamespace(value=False)
     app = window._Window("http://localhost:8123", address)
     app.window = LoadingWindow()
     thread = watch_in_thread(app, None, handing_over)
-    assert wait_until(lambda: pinged)
+    assert wait_until(lambda: checks)  # watching the first address
+    assert pinged == []  # which it has no need to ping
 
     # Handed over to a server on another port, which takes a while to answer.
     handing_over.value = True
     up.clear()
     address.value = b"http://localhost:8124"
     handing_over.value = False
-    assert wait_until(lambda: pinged[-1] == "http://localhost:8124")
-    time.sleep(0.1)  # more than MISSED_PINGS: it waits, as for a new server
+    assert wait_until(lambda: pinged and pinged[-1] == "http://localhost:8124")
+    time.sleep(0.1)  # many periods: it waits for the new server, and stays open
     assert not app.window.destroyed
     assert app.window.loaded == []
 

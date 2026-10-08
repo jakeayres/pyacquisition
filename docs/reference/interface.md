@@ -15,7 +15,7 @@ The window is a page served by the experiment itself, so you can also open it in
 | **Measurements** | How often everything is measured, such as **Every 0.25 s**. Click it to change the period. It also says how long the loops really take, which is longer than the period if measuring takes longer, and then a **slow** marker appears on it. The button beside it pauses and resumes measuring. |
 | **Running task** | The task that is running, and how far along it is, if it says. Click it to open the **Queue** tab. |
 | **Bell** | Alerts: an error logged, a task that failed, data that stopped arriving, or the connection to the experiment lost. Each shows for a few seconds, and the bell keeps a list. |
-| **Connected** | Whether the experiment is answering. If it stops, the page reconnects by itself when it can. |
+| **Connected** | Whether the experiment is answering. It doesn't while it waits for an instrument that hasn't replied, such as a read that times out, and the window stays open meanwhile. The page reconnects by itself when it answers again. |
 | Keyboard, moon and power buttons | The keyboard shortcuts, the light or dark theme (it follows Windows until you choose), and stopping the experiment. |
 
 The power button and closing the window both ask **Stop the experiment?** first, and then stop it cleanly, running its `teardown()`. Closing a browser tab that shows the interface doesn't stop the experiment: it is only one client of it.
