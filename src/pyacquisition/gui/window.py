@@ -4,8 +4,13 @@ The window and the experiment live and die together:
 
 - Closing the window asks first, in the page, and stops the experiment if you
   confirm. Cancelling leaves both running.
-- If the experiment goes away, however it stopped, the window closes by itself,
-  so that it is never left open with nothing behind it.
+- If the experiment stops, it tells the window to close. If its process ends
+  without saying (a crash), the window closes by itself once it notices, so that
+  it is never left open with nothing behind it.
+- An experiment that is running but not answering keeps its window. One waiting
+  on an instrument that doesn't reply (a GPIB read that times out blocks it for
+  seconds) carries on afterwards, and closing the window would stop it. The page
+  says that it isn't answering, and catches up when it does.
 - If this process ends any other way, the experiment notices and shuts down (see
   `Experiment._watch_gui`).
 
@@ -22,13 +27,10 @@ import signal
 import subprocess
 import sys
 import threading
-import time
 import urllib.request
 
 TITLE = "PyAcquisition"
 PING_PERIOD = 0.5  # seconds between checks that the experiment is still there
-MISSED_PINGS = 3  # checks in a row that fail before the window closes
-STARTUP_TIMEOUT = 60.0  # seconds to wait for the experiment to answer at first
 TOLD_CHECK_PERIOD = 0.1  # seconds between checks that the experiment said to close
 
 # Set to show the browser's developer tools in the window.
@@ -121,44 +123,6 @@ def shutdown(server: str) -> None:
         urllib.request.urlopen(f"{server}/experiment/shutdown", timeout=5).close()
     except OSError:
         pass  # it has gone already, which is what was asked for
-
-
-class Lifeline:
-    """Decides, from checks that the experiment answers, when the window closes.
-
-    The experiment may take a moment to answer at first, while its server starts,
-    so the window waits up to `startup_timeout` for that. Once it has answered, a
-    few failed checks in a row mean that it has gone.
-    """
-
-    def __init__(
-        self,
-        missed: int = MISSED_PINGS,
-        startup_timeout: float = STARTUP_TIMEOUT,
-        clock=time.monotonic,
-    ):
-        self._allowed_misses = missed
-        self._startup_timeout = startup_timeout
-        self._clock = clock
-        self.restart()
-
-    def restart(self) -> None:
-        """Waits again, as at the start, for a server to answer: one that is
-        taking over from the last (see `_Window.watch`)."""
-        self._started = self._clock()
-        self._misses = 0
-        self.connected = False
-
-    def record(self, answered: bool) -> bool:
-        """Records one check, and returns whether the window should close now."""
-        if answered:
-            self.connected = True
-            self._misses = 0
-            return False
-        if not self.connected:
-            return self._clock() - self._started > self._startup_timeout
-        self._misses += 1
-        return self._misses >= self._allowed_misses
 
 
 class _Api:
@@ -324,20 +288,24 @@ class _Window:
 
     def watch(self, told_to_close=None, handing_over=None) -> None:
         """Closes the window when the experiment says it is shutting down, or,
-        if it goes without saying (a crash), once it stops answering.
+        if it goes without saying (a crash), once the process that started the
+        window has ended. The experiment always runs in that process, whether
+        it opened the window or took it over from the setup page.
 
-        Being told is watched for on a thread of its own, since a check that the
-        experiment answers can take a couple of seconds to fail once it has gone.
-        `told_to_close` is a shared flag with a `value`, checked every so often
-        rather than waited on (see Gui.run_in_new_process).
+        The window stays open while the experiment doesn't answer. It used to
+        close after a few seconds of that, and so stopped experiments that were
+        only waiting on an instrument that hadn't replied.
+
+        Being told is watched for on a thread of its own, since a check that a
+        new address answers can take a second to fail. `told_to_close` is a
+        shared flag with a `value`, checked every so often rather than waited
+        on (see Gui.run_in_new_process).
 
         While `handing_over` (a shared flag too) is set, the server is going
-        away on purpose and another will take over, so nothing is checked, and
-        the window closes only if the process that started it ends. When the
-        address changes, the window waits for the new one to answer, as at the
-        start, and then shows its page. (When the port stays the same, the
-        address doesn't change, and the setup page moves to the experiment's page
-        itself.)
+        away on purpose and another will take over. When the address changes,
+        the window waits for the new one to answer, and then shows its page.
+        (When the port stays the same, the address doesn't change, and the
+        setup page moves to the experiment's page itself.)
         """
         if told_to_close is not None:
 
@@ -349,25 +317,17 @@ class _Window:
                     self._closing.wait(TOLD_CHECK_PERIOD)
 
             threading.Thread(target=close_when_told, daemon=True).start()
-        lifeline = Lifeline()
         watched = self.server
         moved = False  # to show the new address's page once it answers
         while not self._closing.is_set():
-            if handing_over is not None and handing_over.value:
-                if not parent_alive():
-                    self.close()
-                    return
-                lifeline.restart()
-            else:
+            if not parent_alive():
+                self.close()
+                return
+            if handing_over is None or not handing_over.value:
                 if self.server != watched:
                     watched = self.server
-                    lifeline.restart()
                     moved = True
-                answered = ping(watched)
-                if lifeline.record(answered):
-                    self.close()
-                    return
-                if answered and moved:
+                if moved and ping(watched):
                     moved = False
                     self.window.load_url(f"{watched}/")  # sent on to its own page
             self._closing.wait(PING_PERIOD)
