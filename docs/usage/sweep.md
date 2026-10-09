@@ -39,7 +39,7 @@ This is `sample.py` as [Write a task](write_task.md) left it: the lock-in and th
 
 `set_progress(i, of=count)` counts the steps. The inputs are `start_kelvin` and `stop_kelvin`, since a task has a `start` of its own.
 
-**More:** [`run_subtask`](../reference/python_api/task.md#pyacquisition.core.task_manager.task.Task.run_subtask), [`NewFile`](../reference/tasks/new_file.md), and [`WaitFor`](../reference/tasks/wait_for.md).
+**More:** [`run_subtask`](../reference/python_api/task.md#pyacquisition.core.task_manager.task.Task.run_subtask), [`NewFile`](../reference/tasks/new_file.md), [`WaitFor`](../reference/tasks/wait_for.md), and [`WaitForStable`](../reference/tasks/wait_for_stable.md), to start each file only once the temperature has settled, not just reached.
 { .gs-more }
 
 </section>

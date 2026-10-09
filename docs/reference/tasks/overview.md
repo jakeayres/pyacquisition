@@ -15,6 +15,10 @@ The following tasks are registered to your experiment by default.
 
 `STANDARD` [`Task` **WaitUntil**](wait_until.md) - Wait until a specified time (24 hr clock).
 
+`STANDARD` [`Task` **WaitForValue**](wait_for_value.md) - Wait until a measurement goes below or above a value. Registered when the experiment has measurements.
+
+`STANDARD` [`Task` **WaitForStable**](wait_for_stable.md) - Wait until a measurement has stayed in a band, without drifting, for a set time. Registered when the experiment has measurements.
+
 #### Measurements
 
 `STANDARD` [`Task` **PauseMeasurements**](measurements.md) - Pause the measurements.

@@ -96,6 +96,8 @@ def test_every_task_is_offered_and_the_search_is_ready(context, rig):
         "NewFile",
         "WaitFor",
         "WaitUntil",
+        "WaitForValue",
+        "WaitForStable",
         "Ramp Temperature",
         "Sweep Magnetic Field",
         "Set Temperature",
@@ -125,10 +127,10 @@ def test_the_keyboard_moves_through_the_list_and_into_the_form(context, rig):
     expect(dialog.locator(".task-form-title")).to_have_text("WaitFor")
 
     search.press("ArrowDown")
-    expect(dialog.locator(".task-form-title")).to_have_text("WaitUntil")
+    expect(dialog.locator(".task-form-title")).to_have_text("WaitForStable")
     search.press("Enter")
 
-    expect(field(dialog, "hour").locator("input")).to_be_focused()
+    expect(field(dialog, "measurement").locator("select")).to_be_focused()
 
 
 # -------------------------------------------------------------- queueing
@@ -208,6 +210,28 @@ def test_enums_and_instruments_are_lists_to_choose_from(context, rig):
     (task,) = queue_of(rig)
     assert task["parameters"]["lakeshore"] == "cryo_b"
     assert "OUTPUT_2" in str(task["parameters"]["output_channel"])
+
+
+def test_a_measurement_is_picked_from_the_columns_and_a_blank_number_left_out(context, rig):
+    page, dialog = open_dialog(context, rig)
+    pick(dialog, "WaitForStable")
+    measurement = field(dialog, "measurement").locator("select")
+
+    # The rig's measurements. Its calculation, a plain function without units,
+    # doesn't name its column, so it can't be offered.
+    expect(measurement.locator("option")).to_have_text(["Choose…", "time", "T", "x", "y"])
+
+    measurement.select_option("T")
+    field(dialog, "tolerance").locator("input").fill("0.005")
+    field(dialog, "hold").locator("input").fill("5")
+    expect(field(dialog, "target").locator("input")).to_have_value("")
+    dialog.get_by_role("button", name="Add to queue").click()
+
+    expect(dialog.get_by_role("status")).to_contain_text("added")
+    (task,) = queue_of(rig)
+    assert task["parameters"]["measurement"] == "T"
+    assert task["parameters"]["target"] is None
+    assert page.errors == []
 
 
 def test_a_task_goes_to_the_task_manager_it_was_added_to(context, rig):

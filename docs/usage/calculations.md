@@ -84,7 +84,7 @@ A function sees one row. A calculation that remembers earlier rows is a class ba
 
 `columns` names what it makes, so that if it fails on a row, that row's cell is left empty, and the column is never lost.
 
-**More:** [`Calculation`](../reference/calculations.md#calculation).
+**More:** [`Calculation`](../reference/calculations.md#calculation), and [`WaitForStable`](../reference/tasks/wait_for_stable.md), a task that waits until a column such as `T` has settled.
 { .gs-more }
 
 </section>
