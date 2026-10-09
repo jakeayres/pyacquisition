@@ -205,7 +205,7 @@ def test_the_arrow_keys_pick_another_match_for_the_arguments(page, rig):
 
     search.press("ArrowDown")
 
-    expect(dialog.locator(".task-form-title")).to_have_text("WaitUntil")
+    expect(dialog.locator(".task-form-title")).to_have_text("WaitForStable")
 
 
 # -------------------------------------------------------------- queueing a call

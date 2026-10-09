@@ -1,4 +1,6 @@
 from .wait import WaitFor, WaitUntil
+from .wait import WaitForValue as WaitForValue
+from .wait import WaitForStable as WaitForStable
 from .files import NewFile
 from .measurements import PauseMeasurements, ResumeMeasurements, SetMeasurementPeriod
 from .traces import AcquireTrace as AcquireTrace
@@ -22,3 +24,6 @@ standard_tasks = [
 # Registered by themselves when an instrument they are for is in the experiment.
 # What a task is for is its `applies_to`.
 instrument_tasks = [RampTemperature, SweepMagneticField]
+
+# Registered once `setup()` has added the measurements, which their forms offer.
+reading_tasks = [WaitForValue, WaitForStable]

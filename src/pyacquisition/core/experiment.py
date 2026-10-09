@@ -32,7 +32,7 @@ from .plot_script import PlotRequest, PlotScriptError, figure_scales, plot_scrip
 from ..gui import Gui
 from ..gui import mount as serve_gui
 from ..instruments import instrument_map
-from ..tasks import instrument_tasks, standard_tasks
+from ..tasks import instrument_tasks, reading_tasks, standard_tasks
 from ..tasks.traces import AcquireTrace
 from .measurement import Measurement
 from .instrument import Instrument, SoftwareInstrument, resolve_enum_kwargs
@@ -865,6 +865,7 @@ class Experiment:
             self._register_instrument_tasks()
             self._register_instrument_calls()
             self._register_trace_tasks()
+            self._register_reading_tasks()
             self._started = True
             try:
                 if self._adopted_ui_process is not None:
@@ -1041,6 +1042,19 @@ class Experiment:
             return
         fixed = {"trace": next(iter(self._traces))} if len(self._traces) == 1 else {}
         self.register_task(AcquireTrace, **fixed)
+
+    def _register_reading_tasks(self) -> None:
+        """
+        Registers the tasks that wait on a measurement (`WaitForValue` and
+        `WaitForStable`), once `setup()` has added the measurements, so that
+        their forms can offer them. An experiment with no columns has nothing
+        for them to wait on. A registration of the user's own is left as it is.
+        """
+        if not self._column_info():
+            return
+        for task in reading_tasks:
+            if task not in self._registered_tasks:
+                self.register_task(task)
 
     def _register_instrument_calls(self) -> None:
         """
