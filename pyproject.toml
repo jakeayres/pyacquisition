@@ -3,6 +3,8 @@ name = "pyacquisition"
 dynamic = ["version"] # taken from the git tag, see [tool.hatch.version]
 description = "Python-based data acquisition"
 readme = "README.md"
+license = "GPL-3.0-only"
+license-files = ["LICENSE"]
 authors = [
     { name = "jakeayres", email = "jake_ayres@hotmail.co.uk" }
 ]

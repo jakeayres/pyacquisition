@@ -27,3 +27,12 @@ pip install pyacquisition
 **Everything lives at [pyacquisition.readthedocs.io](https://pyacquisition.readthedocs.io)**:
 installation, a step-by-step tutorial, the supported instruments, and the full
 API reference.
+
+## ⚖️ License
+
+PyAcquisition is free software, under the [GNU General Public License,
+version 3](LICENSE) only (GPL-3.0-only). Use it, change it and share it: anything
+you distribute that is built on it is under the GPL too. Versions up to 0.3.4
+were released under the MIT License, and stay under it.
+
+Copyright © 2025–2026 Jake Ayres.

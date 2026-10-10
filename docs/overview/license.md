@@ -1,21 +1,15 @@
-# MIT License
+# License
 
-Copyright (c) 2025 Jake Ayres
+From version 0.4.0, PyAcquisition is free software under the **GNU General Public License, version 3** only (GPL-3.0-only). Copyright © 2025–2026 Jake Ayres.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+- **You may** use it for any purpose, change it, and share it.
+- **Running it** in your own lab, without giving copies of it to others, asks nothing more of you.
+- **If you give others** something that includes it, such as a changed copy, a package built on it, or an app made with [`pyacquisition build`](../usage/standalone_app.md), it must be under the GPL too, with its source code.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Versions up to 0.3.4 were released under the MIT License, and stay under it.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+The license in full:
+
+```text
+--8<-- "LICENSE"
+```

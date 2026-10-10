@@ -20,6 +20,10 @@ shows a version's **Highlights** once, after you upgrade to it.
 
 ### Breaking changes
 
+- PyAcquisition's license is now the GNU General Public License, version 3
+  (GPL-3.0-only). Anything you give others that includes it, such as an app
+  made with `pyacquisition build`, must be under the GPL too. Versions up to
+  0.3.4 stay under the MIT License.
 - `pyacquisition.tasks.PIDController` is now `PIDCalculation`. The name
   `PIDController` is the new instrument. `PID` has a new input, `ramp_rate`,
   after `period`, so inputs given by position after it move along.
