@@ -28,6 +28,7 @@ import { ShortcutHelp, useShortcuts } from "./shortcuts.js";
 import { Palette } from "./palette.js";
 import { ConfirmDialog } from "./confirm.js";
 import { PlotArea } from "./plot/area.js";
+import { News } from "./news.js";
 
 const CONNECTION_LABELS = {
   connecting: "Connecting…",
@@ -202,6 +203,7 @@ export function App() {
       />
       <${PlotArea} store=${store} columns=${columns} theme=${theme} traces=${traces} />
       <${Dock} tabs=${dockTabs({ store, logs, columns, managers })} />
+      <${News} />
     </div>
     <${AlertToasts} alerts=${alerts} />
     ${palette &&

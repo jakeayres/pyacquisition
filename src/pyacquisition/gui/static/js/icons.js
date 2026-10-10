@@ -161,3 +161,28 @@ export const ChartIcon = () =>
     <path d="M3 3v18h18" />
     <path d="M7 15l4-4 3 3 5-6" />
   `);
+
+// The kinds of news (news.js): what's new, an update, a fix, and the maker's news.
+export const SparkleIcon = () =>
+  stroke(html`
+    <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />
+    <path d="M19 3v4M17 5h4" />
+  `);
+
+export const ArrowUpCircleIcon = () =>
+  stroke(html`
+    <circle cx="12" cy="12" r="9" />
+    <path d="M12 16V8M8 12l4-4 4 4" />
+  `);
+
+export const WarningIcon = () =>
+  stroke(html`
+    <path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z" />
+    <path d="M12 9v4M12 17h.01" />
+  `);
+
+export const MegaphoneIcon = () =>
+  stroke(html`
+    <path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z" />
+    <path d="M16 8.5a5 5 0 0 1 0 7M19 5.5a9 9 0 0 1 0 13" />
+  `);

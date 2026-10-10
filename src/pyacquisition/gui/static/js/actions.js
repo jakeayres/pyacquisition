@@ -26,6 +26,7 @@
 import { get, loadSequence, managerAction } from "./api.js";
 import { showLog } from "./dock/logs.js";
 import { TAB_KEYS } from "./shortcuts.js";
+import { OPEN_WHATS_NEW } from "./news.js";
 
 const registered = new Map(); // by name, in the order registered
 
@@ -333,6 +334,15 @@ registerAction({
   keywords: "files directory explorer",
   when: () => !!window.pywebview?.api?.open_data_folder,
   run: () => window.pywebview.api.open_data_folder(),
+});
+
+registerAction({
+  name: "whats-new",
+  label: "What's new",
+  tag: "View",
+  description: "What's new in this version, a newer version, and news from the maker.",
+  keywords: "whats news changelog update release notes version",
+  run: () => send(OPEN_WHATS_NEW),
 });
 
 registerAction({

@@ -62,6 +62,9 @@ def pytest_addoption(parser):
 
 
 def pytest_configure(config):
+    # No test fetches news, or writes the user's news file (core/news.py). The
+    # tests of the news set it back for themselves.
+    os.environ["PYACQUISITION_NEWS"] = "off"
     config.addinivalue_line(
         "markers",
         "hardware: talks to a physical instrument; skipped unless --hardware is given",

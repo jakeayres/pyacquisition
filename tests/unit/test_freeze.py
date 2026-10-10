@@ -2,6 +2,8 @@
 run without PyInstaller installed. `test_a_real_toml_build` (skipped unless it is)
 runs a real build, end to end."""
 
+import json
+import os
 import pathlib
 import shutil
 import socket
@@ -183,6 +185,17 @@ def test_the_gui_page_is_always_collected(fake_pyinstaller, config, tmp_path):
     assert collected == ["pyacquisition.gui"]
 
 
+def test_the_changelog_is_always_packed(fake_pyinstaller, config, tmp_path):
+    # What's new is read from it (core/news.py).
+    freeze.build_app(toml_file=str(config), out_dir=tmp_path)
+
+    (command,) = fake_pyinstaller
+    added = [command[i + 1] for i, arg in enumerate(command) if arg == "--add-data"]
+    source, destination = added[0].rsplit(os.pathsep, 1)
+    assert pathlib.Path(source).name == "changelog.md" and pathlib.Path(source).is_file()
+    assert destination == "pyacquisition"
+
+
 def test_onefile_by_default(fake_pyinstaller, config, tmp_path):
     freeze.build_app(toml_file=str(config), out_dir=tmp_path)
     assert "--onefile" in fake_pyinstaller[0]
@@ -281,6 +294,7 @@ def test_a_real_toml_build(tmp_path):
         "pyacquisition/gui/static/index.html",
         "pyacquisition/gui/static/js/main.js",
         "pyacquisition/gui/static/vendor/preact/preact.module.js",
+        "pyacquisition/changelog.md",
     ):
         assert name in bundled, f"{name} is missing from the build"
 
@@ -292,8 +306,14 @@ def test_a_real_toml_build(tmp_path):
     # child, including its shutdown, so it goes to a file instead (as in the console
     # log it would write to a terminal, were one attached).
     with open(app_dir / "console.log", "w", encoding="utf-8") as log:
+        # News on, with its own folder: a frozen app still fetches nothing.
+        env = {
+            **os.environ,
+            "PYACQUISITION_NEWS": "all",
+            "PYACQUISITION_NEWS_DIR": str(tmp_path / "news"),
+        }
         proc = subprocess.Popen(
-            [str(exe)], stdout=log, stderr=subprocess.STDOUT, cwd=app_dir
+            [str(exe)], stdout=log, stderr=subprocess.STDOUT, cwd=app_dir, env=env
         )
         try:
             for _ in range(200):
@@ -312,6 +332,10 @@ def test_a_real_toml_build(tmp_path):
             # The page, as the window loads it: its scripts as modules.
             page = requests.get(f"{base}/", timeout=5)
             assert page.status_code == 200 and 'type="module"' in page.text
+            # The news answers, and nothing is fetched (the changelog is packed, above).
+            news = requests.get(f"{base}/news", timeout=5).json()["data"]
+            assert news["mode"] == "all" and news["pending"] is False
+            assert "fetched" not in json.loads((tmp_path / "news" / "news.json").read_text())
             for path in ("/ui/js/main.js", "/ui/vendor/uplot/uPlot.esm.js"):
                 script = requests.get(f"{base}{path}", timeout=5)
                 assert script.status_code == 200

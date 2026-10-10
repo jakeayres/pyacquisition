@@ -27,6 +27,7 @@ from .history import History
 from .log_history import LogHistory
 from .sequences import Sequences
 from .layout import Layout
+from .news import News
 from .plot_script import PlotRequest, PlotScriptError, figure_scales, plot_script
 # The module's names, since `gui` is also an option here.
 from ..gui import Gui
@@ -264,6 +265,11 @@ class Experiment:
         self._name = type(self).__name__
         # The GUI's layout, kept by name (from_config renames it afterwards).
         self._layout = Layout(self._root_path, lambda: self._name)
+        # What's new, updates and the maker's news, for the page (core/news.py).
+        # The maker's news waits while a task runs.
+        self._news = News(
+            busy=lambda: any(m.current_task() for m in self._task_managers.values())
+        )
 
         logger.info("[Experiment] Fully initialized")
 
@@ -1206,6 +1212,7 @@ class Experiment:
         """
         self._sequences._register_endpoints(api_server)
         self._layout._register_endpoints(api_server)
+        self._news.register_endpoints(api_server.app)
         self._trace_history._register_endpoints(api_server, lambda: self._traces)
 
         @api_server.app.get("/experiment/info", tags=["experiment"])

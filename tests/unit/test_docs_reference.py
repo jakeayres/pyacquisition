@@ -147,7 +147,7 @@ def test_every_endpoint_on_the_page_is_served(tmp_path):
     listed = set(re.findall(r"`(/[^`\s]*)`", page("web_api.md")))
     assert len(listed) > 30
     # The page's placeholders, as this experiment has them
-    examples = {"<instrument>": "clock", "<method>": "time", "<task>": "waitfor", "<trace>": "spectrum"}
+    examples = {"<instrument>": "clock", "<method>": "time", "<task>": "waitfor", "<trace>": "spectrum", "<message>": "x100"}
     for path in listed:
         if path.startswith("/managers/<name>/") or path.endswith("/..."):
             continue  # another task manager's, which this experiment hasn't, or a family

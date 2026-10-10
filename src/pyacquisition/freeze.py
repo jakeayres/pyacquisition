@@ -19,6 +19,7 @@ has with a current Edge. Without it the window says what to install,
 and the page can still be opened in a browser.
 """
 
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -32,6 +33,10 @@ _COLLECT_ALL = ("pyvisa", "pyvisa_py")
 # Files that are read rather than imported, so the analysis does not see them: the
 # GUI's page, which the API server always serves.
 _COLLECT_DATA = ("pyacquisition.gui",)
+
+# The changelog, which the news card's What's new is read from (core/news.py), in
+# its place beside the package's modules.
+_CHANGELOG = Path(__file__).resolve().parent / "changelog.md"
 
 # The entry point for a --toml build. It is the same every time: it looks for its
 # configuration beside the executable, under a fixed name, whatever the original
@@ -158,6 +163,7 @@ def build_app(
         command += ["--collect-all", package]
     for package in _COLLECT_DATA:
         command += ["--collect-data", package]
+    command += ["--add-data", f"{_CHANGELOG}{os.pathsep}pyacquisition"]
 
     result = subprocess.run(command, check=False)  # returncode is handled below
     if result.returncode != 0:

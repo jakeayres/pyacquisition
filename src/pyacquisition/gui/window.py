@@ -141,6 +141,16 @@ class _Api:
         it could."""
         return open_folder(data_folder(self._owner.server))
 
+    def open_link(self, url: str) -> bool:
+        """Opens an https link in the system's browser, since following it in the
+        window would take the window away from the experiment. Returns whether it
+        could."""
+        if not isinstance(url, str) or not url.startswith("https://"):
+            return False
+        import webbrowser
+
+        return webbrowser.open(url)
+
     def save_file(self, name: str, text: str | None = None, base64: str | None = None):
         """Asks where to save a file (starting in the data folder, as `name`),
         and saves it: `text`, or the bytes that `base64` holds (an image). The

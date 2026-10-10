@@ -2,7 +2,7 @@
 
 The endpoints a script or notebook uses to read, command and queue a running experiment. The interface uses the same ones. [Drive an experiment from a script](../usage/api_script.md) uses them, and [Queue, pause and save tasks](../usage/queue.md) shows the queue they control.
 
-The experiment serves them at its own address, `http://localhost:8000` unless [`api_server_port`](experiment_options.md) says otherwise. Every endpoint is a `GET`, with its inputs as query parameters:
+The experiment serves them at its own address, `http://localhost:8000` unless [`api_server_port`](experiment_options.md) says otherwise. Every endpoint here is a `GET`, with its inputs as query parameters, unless it says otherwise:
 
 ```python
 import requests
@@ -101,6 +101,18 @@ The main queue is at `/task_manager/...` and its tasks at `/tasks/...`. Another 
 | `/traces/<trace>/acquire` | Takes a trace now, and answers once it is taken, with its number. |
 | `/traces/<trace>/latest` | The latest trace. |
 | `/traces/<trace>/history` | The recent traces, kept for the trace and map panels. |
+
+## News
+
+The [news card](news.md)'s. `/news/close`, `/news/seen` and `/news/choices` are a `POST`, with a JSON body.
+
+| Endpoint | Does |
+|---|---|
+| `/news` | What the card shows now (`show`, most important first), and everything for What's new (`all`). |
+| `/news/close` | A card was closed: `{"id": "update-0.4.1"}`. A fix or an update comes back next run. Anything else isn't shown again on this PC. |
+| `/news/seen` | Don't show a message again on this PC, whatever its kind: `{"id": "update-0.4.1"}`. |
+| `/news/choices` | Whether this PC's user wants the maker's news: `{"maker_news": false}`. |
+| `/news/image/<message>` | A message's image, kept on this PC. |
 
 ## The experiment
 

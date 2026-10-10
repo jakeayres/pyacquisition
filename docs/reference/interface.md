@@ -18,6 +18,8 @@ The window is a page served by the experiment itself, so you can also open it in
 | **Connected** | Whether the experiment is answering. It doesn't while it waits for an instrument that hasn't replied, such as a read that times out, and the window stays open meanwhile. The page reconnects by itself when it answers again. |
 | Keyboard, moon and power buttons | The keyboard shortcuts, the light or dark theme (it follows Windows until you choose), and stopping the experiment. |
 
+A card in the plot area's corner can tell you what's new after an upgrade, that a newer version is out, or about a fix your version needs. A fix or an update comes back at each start until you choose **Don't show again**. Anything else, once closed, isn't shown again. **What's new** in the command palette shows them all again. See [News and updates](news.md).
+
 The power button and closing the window both ask **Stop the experiment?** first, and then stop it cleanly, running its `teardown()`. Closing a browser tab that shows the interface doesn't stop the experiment: it is only one client of it.
 
 ## The plots
@@ -59,7 +61,7 @@ Drag the top edge of the dock to make it taller or shorter, and click the open t
 
 ++ctrl+k++ opens one search over everything you can do from the keyboard: every task, on every task manager, every instrument's queries and commands, and the interface's actions. Type a few letters of what you want. The best match is picked, with its form beside the list, and the arrow keys pick another. Each is tagged with what it is: a task, a query or command, or an action on the Experiment, a Queue, a Plot or the View.
 
-- **Actions** are what the interface's buttons and keys do, and they run at once: **New data file**, **Pause measurements**, **Set measurement period**, **Pause queue**, **Clear queue**, **Load saved sequence**, **Open the Logs tab**, **Add a column to a plot**, **Switch to the dark theme**, **Go to the last error**, **Shut down the experiment** and others. Those that can't be undone, such as aborting a task, ask first.
+- **Actions** are what the interface's buttons and keys do, and they run at once: **New data file**, **Pause measurements**, **Set measurement period**, **Pause queue**, **Clear queue**, **Load saved sequence**, **Open the Logs tab**, **Add a column to a plot**, **Switch to the dark theme**, **Go to the last error**, **What's new**, **Shut down the experiment** and others. Those that can't be undone, such as aborting a task, ask first.
 - **Tasks** are queued, as from **Add task**. **Queries and commands** are sent to the instrument, and the reply is shown under the form.
 
 *Type the inputs on the same line*, after the search, and the form fills in as you type:

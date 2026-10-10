@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import { html } from "../html.js";
 import { useTheme } from "../theme.js";
 import { ConfirmDialog } from "../confirm.js";
+import { News } from "../news.js";
 import { LogoMark, MoonIcon, PlayIcon, SunIcon } from "../icons.js";
 import * as api from "./api.js";
 import { CalculationsSection } from "./calculations.js";
@@ -312,6 +313,7 @@ export function App() {
         <${Preview} checked=${checked} stale=${stale} />
       </div>
     </div>
+    <${News} fixed />
     ${asking &&
     html`
       <${ConfirmDialog}

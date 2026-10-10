@@ -36,6 +36,7 @@ from .api_server import APIServer
 from .instrument import SoftwareInstrument, _allows_text, enum_classes, resolve_enum_kwargs
 from .task_manager.inputs import _enum_choices
 from .logging import logger
+from .news import News
 
 # The setup page's path. `/` is sent here.
 SETUP_PAGE = f"{UI_PATH}/setup/"
@@ -83,6 +84,8 @@ class SetupServer:
         GET /setup/shutdown: stops the server, when the window closes.
         GET /setup/drivers/<driver>/<query>: a query's arguments, checked and
             as a config holds them. Its schema gives the page its form.
+        /news and its endpoints: the news card, as on the experiment's page
+            (core/news.py).
     """
 
     def __init__(
@@ -116,6 +119,7 @@ class SetupServer:
         serve_gui(self.app, start=SETUP_PAGE)
         self._api_server._register_endpoints(self._api_server)  # /ping
         self._register_endpoints()
+        News().register_endpoints(self.app)
 
     @property
     def app(self):
