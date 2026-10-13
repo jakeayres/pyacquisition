@@ -256,7 +256,9 @@ async def test_it_waits_until_the_reading_is_below(experiment, clock, fast):
     feed(experiment, clock, 5.0, 4.0, 3.0)
     await until(lambda: note(task) == "1 K to go")
     assert task.progress["fraction"] == pytest.approx(2 / 3)
-    assert task.progress["remaining"] == pytest.approx(1.0)  # 1 K a second
+    # 1 K a second. The time remaining counts down from when it was said, and the
+    # clock may tick (15.6 ms on Windows) before it is read here.
+    assert task.progress["remaining"] == pytest.approx(1.0, abs=0.1)
     assert not runner.done()
     feed(experiment, clock, 1.9)
     await asyncio.wait_for(runner, 2)
@@ -291,7 +293,7 @@ async def test_with_a_hold_one_noisy_reading_does_not_end_it(experiment, clock, 
     runner = await started(task, experiment)
     feed(experiment, clock, 1.9, 2.1, 1.9, 1.9, 1.9)  # past from the third, 2 s
     await until(lambda: note(task) == "Past 2 K for 2 of 3 s")
-    assert task.progress["remaining"] == pytest.approx(1)
+    assert task.progress["remaining"] == pytest.approx(1, abs=0.1)
     assert not runner.done()
     feed(experiment, clock, 1.9)
     await asyncio.wait_for(runner, 2)
@@ -408,7 +410,7 @@ async def test_it_waits_until_stable_at_the_target(experiment, clock, fast):
     feed(experiment, clock, 10.0, 10.05, 9.95, 10.0)
     await until(lambda: (note(task) or "").startswith("In the band for 0:03 of 0:06"))
     assert task.progress["fraction"] == pytest.approx(0.5)
-    assert task.progress["remaining"] == pytest.approx(3)
+    assert task.progress["remaining"] == pytest.approx(3, abs=0.1)
     feed(experiment, clock, 10.0, 10.0)
     await asyncio.sleep(0.05)
     assert not runner.done()
