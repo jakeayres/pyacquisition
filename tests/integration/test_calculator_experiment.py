@@ -1,16 +1,22 @@
 import pytest
 import asyncio
+import json
 from pyacquisition import Experiment
 import threading
 import requests
-from aiohttp import ClientSession
+from websockets.asyncio.client import connect
 import tomllib
+
+
+async def receive_json(websocket):
+    """The next message on a stream, decoded."""
+    return json.loads(await websocket.recv())
 
 
 async def next_row(websocket, timeout=5.0):
     """The values of the next row on `/stream/data`, past any other event."""
     while True:
-        event = await asyncio.wait_for(websocket.receive_json(), timeout=timeout)
+        event = await asyncio.wait_for(receive_json(websocket), timeout=timeout)
         if event["type"] == "row":
             return event["values"]
 
@@ -107,55 +113,50 @@ def test_float_endpoint_with_enum_args(running_experiment):
 
 @pytest.mark.asyncio
 async def test_length_of_data(running_experiment, toml_config):
-    async with ClientSession() as session:
-        async with session.ws_connect("ws://localhost:8006/stream/data") as websocket:
-            message = await next_row(websocket)
-            assert len(message) == len(toml_config["measurements"])
+    async with connect("ws://localhost:8006/stream/data", proxy=None) as websocket:
+        message = await next_row(websocket)
+        assert len(message) == len(toml_config["measurements"])
 
 
 @pytest.mark.asyncio
 async def test_float_measurement(running_experiment):
-    async with ClientSession() as session:
-        async with session.ws_connect("ws://localhost:8006/stream/data") as websocket:
-            message = await next_row(websocket)
-            assert message["one"] == 1.0, "Response should contain the key 'one'"
-            assert "random_key" not in message, (
-                "Response should not contain the key 'random_key'"
-            )
+    async with connect("ws://localhost:8006/stream/data", proxy=None) as websocket:
+        message = await next_row(websocket)
+        assert message["one"] == 1.0, "Response should contain the key 'one'"
+        assert "random_key" not in message, (
+            "Response should not contain the key 'random_key'"
+        )
 
 
 @pytest.mark.asyncio
 async def test_float_measurement_with_float_args(running_experiment):
-    async with ClientSession() as session:
-        async with session.ws_connect("ws://localhost:8006/stream/data") as websocket:
-            message = await next_row(websocket)
-            assert message["add"] == 3.0, "Response should contain the key 'add'"
-            assert "random_key" not in message, (
-                "Response should not contain the key 'random_key'"
-            )
+    async with connect("ws://localhost:8006/stream/data", proxy=None) as websocket:
+        message = await next_row(websocket)
+        assert message["add"] == 3.0, "Response should contain the key 'add'"
+        assert "random_key" not in message, (
+            "Response should not contain the key 'random_key'"
+        )
 
 
 @pytest.mark.asyncio
 async def test_float_measurement_with_enum_args(running_experiment):
-    async with ClientSession() as session:
-        async with session.ws_connect("ws://localhost:8006/stream/data") as websocket:
-            message = await next_row(websocket)
-            assert message["sine_one"] == pytest.approx(0.8415, rel=1e-4), (
-                "Response should contain the key 'trig'"
-            )
-            assert "random_key" not in message, (
-                "Response should not contain the key 'random_key'"
-            )
+    async with connect("ws://localhost:8006/stream/data", proxy=None) as websocket:
+        message = await next_row(websocket)
+        assert message["sine_one"] == pytest.approx(0.8415, rel=1e-4), (
+            "Response should contain the key 'trig'"
+        )
+        assert "random_key" not in message, (
+            "Response should not contain the key 'random_key'"
+        )
 
 
 @pytest.mark.asyncio
 async def test_temperature_measurement(running_experiment):
-    async with ClientSession() as session:
-        async with session.ws_connect("ws://localhost:8006/stream/data") as websocket:
-            message = await next_row(websocket)
-            assert message["temperature"] == 25.0, (
-                "Response should contain the key 'temperature'"
-            )
-            assert "random_key" not in message, (
-                "Response should not contain the key 'random_key'"
-            )
+    async with connect("ws://localhost:8006/stream/data", proxy=None) as websocket:
+        message = await next_row(websocket)
+        assert message["temperature"] == 25.0, (
+            "Response should contain the key 'temperature'"
+        )
+        assert "random_key" not in message, (
+            "Response should not contain the key 'random_key'"
+        )

@@ -3,6 +3,7 @@ streamed with a number for each, so a client can merge a snapshot with the
 stream (milestone 7)."""
 
 import asyncio
+import json
 import socket
 
 import pytest
@@ -203,7 +204,8 @@ def test_the_logger_keeps_its_recent_messages_numbered():
 async def test_an_experiment_keeps_its_logs_from_the_start_and_streams_new_ones(
     tmp_path,
 ):
-    from aiohttp import ClientSession
+    import requests
+    from websockets.asyncio.client import connect
 
     from pyacquisition import Experiment
 
@@ -215,22 +217,23 @@ async def test_an_experiment_keeps_its_logs_from_the_start_and_streams_new_ones(
     running = asyncio.create_task(experiment._run())
     base = f"http://localhost:{port}"
     try:
-        async with ClientSession() as session:
-            for _ in range(100):
-                try:
-                    async with session.get(f"{base}/ping"):
-                        break
-                except OSError:
-                    await asyncio.sleep(0.05)
+        for _ in range(100):
+            try:
+                await asyncio.to_thread(requests.get, f"{base}/ping", timeout=5)
+                break
+            except OSError:
+                await asyncio.sleep(0.05)
 
-            async with session.ws_connect(f"ws://localhost:{port}/stream/logs") as ws:
-                async with session.get(f"{base}/logs/history") as response:
-                    snapshot = (await response.json())["data"]
-                logger.warning("a message for the test")
-                while (entry := await asyncio.wait_for(ws.receive_json(), 5))[
-                    "message"
-                ] != "a message for the test":
-                    pass
+        async with connect(f"ws://localhost:{port}/stream/logs", proxy=None) as ws:
+            response = await asyncio.to_thread(
+                requests.get, f"{base}/logs/history", timeout=5
+            )
+            snapshot = response.json()["data"]
+            logger.warning("a message for the test")
+            while (entry := json.loads(await asyncio.wait_for(ws.recv(), 5)))[
+                "message"
+            ] != "a message for the test":
+                pass
 
         # Logged while the experiment was being made, before anything connected.
         messages = [e["message"] for e in snapshot["entries"]]

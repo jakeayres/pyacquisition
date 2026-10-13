@@ -63,7 +63,6 @@ dev = [
     {include-group = "build"},
 ]
 test = [
-    "aiohttp>=3.14.3",
     "h5netcdf>=1.8.1",
     "matplotlib>=3.11.2",
     "playwright>=1.63.0",

@@ -1,11 +1,12 @@
 """Websocket streams: every client receives every message (milestone 2)."""
 
 import asyncio
+import json
 import socket
 
 import pytest
 import pytest_asyncio
-from aiohttp import ClientSession
+from websockets.asyncio.client import connect
 
 from pyacquisition.core.api_server import APIServer
 from pyacquisition.core.broadcaster import Broadcaster
@@ -47,9 +48,8 @@ async def stream():
 async def test_every_client_receives_every_message(stream):
     url, endpoint, source = stream
     async with (
-        ClientSession() as session,
-        session.ws_connect(url) as first,
-        session.ws_connect(url) as second,
+        connect(url, proxy=None) as first,
+        connect(url, proxy=None) as second,
     ):
         await eventually(lambda: endpoint.connections == 2)
 
@@ -58,7 +58,7 @@ async def test_every_client_receives_every_message(stream):
 
         for client in (first, second):
             received = [
-                (await asyncio.wait_for(client.receive_json(), timeout=3))["n"]
+                json.loads(await asyncio.wait_for(client.recv(), timeout=3))["n"]
                 for _ in range(20)
             ]
             assert received == list(range(20))
@@ -67,15 +67,14 @@ async def test_every_client_receives_every_message(stream):
 @pytest.mark.asyncio
 async def test_a_client_that_leaves_stops_being_sent_to(stream):
     url, endpoint, source = stream
-    async with ClientSession() as session:
-        client = await session.ws_connect(url)
-        await eventually(lambda: endpoint.connections == 1)
-        assert len(source._subscribers) == 1
+    client = await connect(url, proxy=None)
+    await eventually(lambda: endpoint.connections == 1)
+    assert len(source._subscribers) == 1
 
-        await client.close()  # while nothing is being sent
+    await client.close()  # while nothing is being sent
 
-        await eventually(lambda: endpoint.connections == 0)
-        assert source._subscribers == []
+    await eventually(lambda: endpoint.connections == 0)
+    assert source._subscribers == []
 
 
 @pytest.mark.asyncio
@@ -92,9 +91,9 @@ async def test_nothing_is_queued_while_no_client_is_connected(stream):
 async def test_a_client_that_joins_late_gets_what_is_sent_from_then_on(stream):
     url, endpoint, source = stream
     await source.broadcast({"n": "before"})
-    async with ClientSession() as session, session.ws_connect(url) as client:
+    async with connect(url, proxy=None) as client:
         await eventually(lambda: endpoint.connections == 1)
         await source.broadcast({"n": "after"})
 
-        received = await asyncio.wait_for(client.receive_json(), timeout=3)
+        received = json.loads(await asyncio.wait_for(client.recv(), timeout=3))
         assert received == {"n": "after"}

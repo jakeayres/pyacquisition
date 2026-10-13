@@ -3,6 +3,7 @@ demand or on its own clock, written to the data file's `.h5`, and linked to the
 first row after it by the `<name>_index` column."""
 
 import asyncio
+import json
 import math
 import socket
 import time
@@ -388,21 +389,20 @@ async def test_the_trace_endpoints(tmp_path):
 
 @pytest.mark.asyncio
 async def test_the_trace_stream_and_the_latest_on_a_running_experiment(tmp_path):
-    from aiohttp import ClientSession
+    from websockets.asyncio.client import connect
 
     experiment = rig(tmp_path)
     port = experiment._api_server.port
+    base = f"http://localhost:{port}"
 
     async def script(experiment):
-        async with ClientSession() as session:
-            async with session.ws_connect(f"ws://localhost:{port}/stream/traces") as ws:
-                await experiment.traces["spectrum"].acquire()
-                event = await asyncio.wait_for(ws.receive_json(), timeout=5)
-                async with session.get(f"http://localhost:{port}/scribe/next_file?title=sweep"):
-                    pass
-                new_file = await asyncio.wait_for(ws.receive_json(), timeout=5)
-            async with session.get(f"http://localhost:{port}/traces/spectrum/latest?format=json") as response:
-                latest = (await response.json())["data"]
+        get = lambda path: asyncio.to_thread(requests.get, base + path, timeout=10)  # noqa: E731
+        async with connect(f"ws://localhost:{port}/stream/traces", proxy=None) as ws:
+            await experiment.traces["spectrum"].acquire()
+            event = json.loads(await asyncio.wait_for(ws.recv(), timeout=5))
+            await get("/scribe/next_file?title=sweep")
+            new_file = json.loads(await asyncio.wait_for(ws.recv(), timeout=5))
+        latest = (await get("/traces/spectrum/latest?format=json")).json()["data"]
         return event, new_file, latest
 
     event, new_file, latest = await running(experiment, script)

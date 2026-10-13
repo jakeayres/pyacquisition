@@ -6,7 +6,7 @@ import socket
 from contextlib import contextmanager
 
 import pytest
-from aiohttp import ClientSession
+import requests
 
 from pyacquisition import Experiment
 from pyacquisition.core import settings
@@ -172,9 +172,10 @@ async def test_the_server_answers_on_the_fallback_port():
         try:
             while not getattr(server, "server", None) or not server.server.started:
                 await asyncio.sleep(0.02)
-            async with ClientSession() as session:
-                async with session.get(f"http://localhost:{fallback}/ping") as response:
-                    assert await response.json() == "pong"
+            response = await asyncio.to_thread(
+                requests.get, f"http://localhost:{fallback}/ping", timeout=5
+            )
+            assert response.json() == "pong"
         finally:
             await server.shutdown()
             await asyncio.wait_for(serving, timeout=10)
@@ -193,16 +194,17 @@ async def test_an_experiment_runs_on_the_fallback_and_tells_its_gui(tmp_path):
     with taken(port):
         running = asyncio.create_task(experiment._run())
         try:
-            async with ClientSession() as session:
-                for _ in range(100):
-                    try:
-                        async with session.get(f"http://localhost:{fallback}/ping") as r:
-                            assert await r.json() == "pong"
-                            break
-                    except OSError:
-                        await asyncio.sleep(0.05)
-                else:
-                    pytest.fail("the experiment never answered on the fallback port")
+            for _ in range(100):
+                try:
+                    r = await asyncio.to_thread(
+                        requests.get, f"http://localhost:{fallback}/ping", timeout=5
+                    )
+                    assert r.json() == "pong"
+                    break
+                except OSError:
+                    await asyncio.sleep(0.05)
+            else:
+                pytest.fail("the experiment never answered on the fallback port")
             assert experiment._api_server.port == fallback
             assert experiment._gui.port == fallback  # the GUI goes where the server is
         finally:

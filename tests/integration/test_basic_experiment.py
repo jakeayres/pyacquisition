@@ -1,16 +1,22 @@
 import pytest
 import asyncio
+import json
 from pyacquisition import Experiment
 import threading
 import requests
-from aiohttp import ClientSession
+from websockets.asyncio.client import connect
 import tomllib
+
+
+async def receive_json(websocket):
+    """The next message on a stream, decoded."""
+    return json.loads(await websocket.recv())
 
 
 async def next_row(websocket, timeout=5.0):
     """The values of the next row on `/stream/data`, past any other event."""
     while True:
-        event = await asyncio.wait_for(websocket.receive_json(), timeout=timeout)
+        event = await asyncio.wait_for(receive_json(websocket), timeout=timeout)
         if event["type"] == "row":
             return event["values"]
 
@@ -53,22 +59,20 @@ async def test_fastapi_service(running_experiment):
 
 @pytest.mark.asyncio
 async def test_websockets_streaming_data(running_experiment):
-    async with ClientSession() as session:
-        async with session.ws_connect("ws://localhost:8005/stream/data") as websocket:
-            for _ in range(3):
-                message = await next_row(websocket)
-                assert "time" in message, "Response should contain the key 'time'"
-                assert isinstance(message["time"], float), (
-                    "The 'time' field should be of type float"
-                )
+    async with connect("ws://localhost:8005/stream/data", proxy=None) as websocket:
+        for _ in range(3):
+            message = await next_row(websocket)
+            assert "time" in message, "Response should contain the key 'time'"
+            assert isinstance(message["time"], float), (
+                "The 'time' field should be of type float"
+            )
 
 
 @pytest.mark.asyncio
 async def test_websockets_streaming_logs(running_experiment):
-    async with ClientSession() as session:
-        async with session.ws_connect("ws://localhost:8005/stream/logs") as websocket:
-            message = await websocket.receive_json()
-            assert message is not None, "WebSocket should receive a message"
+    async with connect("ws://localhost:8005/stream/logs", proxy=None) as websocket:
+        message = await receive_json(websocket)
+        assert message is not None, "WebSocket should receive a message"
 
 
 @pytest.mark.asyncio
@@ -87,78 +91,76 @@ def test_instruments_exists(running_experiment, toml_config, basic_experiment):
 async def test_rack_period(running_experiment, toml_config):
     config_period = toml_config["rack"]["period"]
     tolerance = 0.025
-    async with ClientSession() as session:
-        async with session.ws_connect("ws://localhost:8005/stream/data") as websocket:
-            # Drain the queue by fetching all data points until a timeout occurs
-            loop_counter = 0
-            max_loops = 50
-            while True:
-                if loop_counter >= max_loops:
-                    pytest.fail(f"Exceeded maximum loop count of {max_loops}")
-                try:
-                    await asyncio.wait_for(websocket.receive_json(), timeout=0.1)
-                except asyncio.TimeoutError:
-                    break
-                loop_counter += 1
+    async with connect("ws://localhost:8005/stream/data", proxy=None) as websocket:
+        # Drain the queue by fetching all data points until a timeout occurs
+        loop_counter = 0
+        max_loops = 50
+        while True:
+            if loop_counter >= max_loops:
+                pytest.fail(f"Exceeded maximum loop count of {max_loops}")
+            try:
+                await asyncio.wait_for(receive_json(websocket), timeout=0.1)
+            except asyncio.TimeoutError:
+                break
+            loop_counter += 1
 
-            previous_time = None  # Initialize previous_time
-            for _ in range(3):
-                message = await next_row(websocket)
-                if (
-                    previous_time is not None
-                ):  # Skip the first message as there's no previous timestamp to compare
-                    assert (
-                        abs(message["time"] - previous_time - config_period) < tolerance
-                    ), (
-                        f"Timestamps should be approximately {config_period} seconds apart"
-                    )
-                previous_time = message["time"]
+        previous_time = None  # Initialize previous_time
+        for _ in range(3):
+            message = await next_row(websocket)
+            if (
+                previous_time is not None
+            ):  # Skip the first message as there's no previous timestamp to compare
+                assert (
+                    abs(message["time"] - previous_time - config_period) < tolerance
+                ), (
+                    f"Timestamps should be approximately {config_period} seconds apart"
+                )
+            previous_time = message["time"]
 
 
 @pytest.mark.asyncio
 async def test_rack_pause_resume(running_experiment, toml_config):
     config_period = toml_config["rack"]["period"]
     tolerance = 0.500
-    async with ClientSession() as session:
-        async with session.ws_connect("ws://localhost:8005/stream/data") as websocket:
-            # Drain the queue by fetching all data points until a timeout occurs
-            loop_counter = 0
-            max_loops = 50
-            while True:
-                if loop_counter >= max_loops:
-                    pytest.fail(f"Exceeded maximum loop count of {max_loops}")
-                try:
-                    await asyncio.wait_for(websocket.receive_json(), timeout=0.1)
-                except asyncio.TimeoutError:
-                    break
-                loop_counter += 1
-
+    async with connect("ws://localhost:8005/stream/data", proxy=None) as websocket:
+        # Drain the queue by fetching all data points until a timeout occurs
+        loop_counter = 0
+        max_loops = 50
+        while True:
+            if loop_counter >= max_loops:
+                pytest.fail(f"Exceeded maximum loop count of {max_loops}")
             try:
-                await asyncio.wait_for(
-                    websocket.receive_json(), timeout=config_period + tolerance
-                )
+                await asyncio.wait_for(receive_json(websocket), timeout=0.1)
             except asyncio.TimeoutError:
-                pytest.fail(
-                    "Message not received during the initial wait, but one was expected"
-                )
+                break
+            loop_counter += 1
 
-            response = requests.get("http://localhost:8005/rack/pause")
-            assert response.status_code == 200, "Pause endpoint should return 200 OK"
+        try:
+            await asyncio.wait_for(
+                receive_json(websocket), timeout=config_period + tolerance
+            )
+        except asyncio.TimeoutError:
+            pytest.fail(
+                "Message not received during the initial wait, but one was expected"
+            )
 
-            try:
-                await asyncio.wait_for(
-                    websocket.receive_json(), timeout=config_period * 2.5
-                )
-                pytest.fail("Message received during pause, but none was expected")
-            except asyncio.TimeoutError:
-                pass
+        response = requests.get("http://localhost:8005/rack/pause")
+        assert response.status_code == 200, "Pause endpoint should return 200 OK"
 
-            response = requests.get("http://localhost:8005/rack/resume")
-            assert response.status_code == 200, "Pause endpoint should return 200 OK"
+        try:
+            await asyncio.wait_for(
+                receive_json(websocket), timeout=config_period * 2.5
+            )
+            pytest.fail("Message received during pause, but none was expected")
+        except asyncio.TimeoutError:
+            pass
 
-            try:
-                await asyncio.wait_for(
-                    websocket.receive_json(), timeout=config_period + tolerance
-                )
-            except asyncio.TimeoutError:
-                pytest.fail("Message not received after resuming, but one was expected")
+        response = requests.get("http://localhost:8005/rack/resume")
+        assert response.status_code == 200, "Pause endpoint should return 200 OK"
+
+        try:
+            await asyncio.wait_for(
+                receive_json(websocket), timeout=config_period + tolerance
+            )
+        except asyncio.TimeoutError:
+            pytest.fail("Message not received after resuming, but one was expected")

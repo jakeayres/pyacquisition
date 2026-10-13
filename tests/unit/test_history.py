@@ -472,7 +472,8 @@ def test_the_limit_is_the_history_points_option(tmp_path):
 async def test_an_experiment_keeps_and_streams_its_rows_and_files(tmp_path):
     import socket
 
-    from aiohttp import ClientSession
+    import requests
+    from websockets.asyncio.client import connect
 
     from pyacquisition import Experiment, Measurement
     from pyacquisition.instruments import Clock
@@ -497,30 +498,30 @@ async def test_an_experiment_keeps_and_streams_its_rows_and_files(tmp_path):
     running = asyncio.create_task(experiment._run())
     base = f"http://localhost:{port}"
     try:
-        async with ClientSession() as session:
-            for _ in range(100):
-                try:
-                    async with session.get(f"{base}/ping"):
-                        break
-                except OSError:
-                    await asyncio.sleep(0.05)
+        for _ in range(100):
+            try:
+                await asyncio.to_thread(requests.get, f"{base}/ping", timeout=5)
+                break
+            except OSError:
+                await asyncio.sleep(0.05)
 
-            async with session.ws_connect(f"ws://localhost:{port}/stream/data") as ws:
-                row = await asyncio.wait_for(ws.receive_json(), timeout=5)
-                assert row["type"] == "row"
-                assert set(row["values"]) == {"time", "double"}  # calculated too
+        async with connect(f"ws://localhost:{port}/stream/data", proxy=None) as ws:
+            row = json.loads(await asyncio.wait_for(ws.recv(), timeout=5))
+            assert row["type"] == "row"
+            assert set(row["values"]) == {"time", "double"}  # calculated too
 
-                async with session.get(f"{base}/scribe/next_file?title=sweep"):
-                    pass
-                while (event := await asyncio.wait_for(ws.receive_json(), 5))[
-                    "type"
-                ] != "new_file":
-                    pass
-                assert event["file"] == "00.01 sweep.data"
+            await asyncio.to_thread(
+                requests.get, f"{base}/scribe/next_file?title=sweep", timeout=5
+            )
+            while (event := json.loads(await asyncio.wait_for(ws.recv(), 5)))[
+                "type"
+            ] != "new_file":
+                pass
+            assert event["file"] == "00.01 sweep.data"
 
-            await asyncio.sleep(0.3)
-            async with session.get(f"{base}/history") as response:
-                snapshot = (await response.json())["data"]
+        await asyncio.sleep(0.3)
+        response = await asyncio.to_thread(requests.get, f"{base}/history", timeout=5)
+        snapshot = response.json()["data"]
 
         old, new = snapshot["segments"]
         assert old["file"] == "00.00 start.data" and old["rows"] > 0
