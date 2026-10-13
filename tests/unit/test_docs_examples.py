@@ -36,8 +36,22 @@ def examples(monkeypatch, tmp_path):
     monkeypatch.chdir(tmp_path)
     before = set(sys.modules)
     yield
+    forget_examples(before)
+
+
+def forget_examples(before):
+    """Forgets the examples' modules imported since `before` (a set of names), so
+    the next test imports them afresh.
+
+    Only theirs. A library that an example happened to import first stays: a
+    compiled one isn't imported again. (httptools, which uvicorn loads with the
+    first server, kept raising its first exception classes, which a newly
+    imported uvicorn didn't catch, so every later server's websockets failed.)
+    """
     for name in set(sys.modules) - before:
-        sys.modules.pop(name, None)
+        path = getattr(sys.modules.get(name), "__file__", None)
+        if path and Path(path).resolve().is_relative_to(EXAMPLES):
+            sys.modules.pop(name, None)
 
 
 @pytest.fixture
@@ -469,3 +483,16 @@ async def test_record_starts_a_file_for_each_run(examples):
     await Record(files=2, seconds=0).start(experiment)
     calls = experiment._scribe.next_file.call_args_list
     assert [call.kwargs["title"] for call in calls] == ["run 1", "run 2"]
+
+
+# -- The examples fixture ----------------------------------------------------------
+
+
+def test_only_the_examples_own_modules_are_forgotten(examples):
+    importlib.import_module("colorsys")  # a library's module
+    importlib.import_module("simulated")  # an example's
+
+    forget_examples(set(sys.modules) - {"colorsys", "simulated"})  # as if both were new
+
+    assert "simulated" not in sys.modules
+    assert "colorsys" in sys.modules
