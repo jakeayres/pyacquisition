@@ -247,11 +247,12 @@ def test_a_call_is_queued_from_its_form_and_its_value_shown_in_the_queue(context
         assert task["name"] == "lakeshore.get_temperature"
         assert task["parameters"] == {"input_channel": "INPUT_A"}
 
-        # Run, it reads the temperature, and the Queue tab says what it read.
+        # Run, it reads the temperature, and the Queue tab says what it read: to 6
+        # significant figures, so a reading of 20.00004 K is shown as 20.
         rig.get("/task_manager/resume")
         page.page.get_by_role("tab", name="Queue").click()
         expect(page.page.locator(".queue-last").first).to_contain_text(
-            re.compile(r"lakeshore\.get_temperature completed → \d+\.\d+")
+            re.compile(r"lakeshore\.get_temperature completed → \d+(\.\d+)?")
         )
         assert page.errors == []
     finally:
