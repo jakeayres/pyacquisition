@@ -225,9 +225,11 @@ def test_a_development_build_shows_its_coming_release_once():
     assert make("0.5.0").whats_new("0.5.0.dev9") is None
 
 
-def test_nothing_is_new_without_a_section_or_a_version():
+def test_nothing_is_new_without_a_section_or_a_version(monkeypatch):
     assert make("0.4.0").whats_new("0.4.0") is None
     assert make("0.9.0").whats_new(None) is None  # not in the changelog
+    # No version given means the installed one, so that is made unknown too.
+    monkeypatch.setattr(news_module, "installed_version", lambda: None)
     assert News(version=None, changelog=CHANGELOG).whats_new(None) is None
 
 
