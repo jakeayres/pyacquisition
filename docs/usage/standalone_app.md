@@ -40,7 +40,7 @@ Building a standalone application from TOML file: rig.toml
 Built dist
 ```
 
-The file is checked first, so a mistake stops the build at once. Then PyInstaller gathers everything the experiment needs, and prints about 160 lines of its own while it works, which take a minute or two. The app is `dist/rig.exe`, named after the file, with `config.toml` beside it: a copy of `rig.toml`, which the app reads each time it starts.
+The file is checked first, so a mistake stops the build at once. Then PyInstaller gathers everything the experiment needs, and prints about 160 lines of its own while it works, which take a minute or two. The app is `dist/rig.exe`, named after the file, with `config.toml` beside it: a copy of `rig.toml`, which the app reads each time it starts. `NOTICE.txt` beside it says what the app contains, and under which licenses.
 
 **More:** [`pyacquisition build`'s options](../reference/command_line.md#pyacquisition-build).
 { .gs-more }
@@ -94,9 +94,9 @@ uv run pyacquisition build --py lab.py --name "My Lab" --onedir
 
 ## Take it to the lab PC
 
-Copy the app to the lab PC, with `config.toml` for a config file's app, or `rig.toml` for `lab.exe`, or the whole folder for `--onedir`. It needs no Python there. Its window needs the Microsoft Edge WebView2 Runtime, which Windows 11 has, and Windows 10 with a current Edge. Without it, the window says so, with where to get it, and the experiment runs regardless: its interface is at `http://localhost:8000` in a browser.
+Copy the app to the lab PC, with `config.toml` for a config file's app, or `rig.toml` for `lab.exe`, or the whole folder for `--onedir`, and `NOTICE.txt` with it. Your config, script and modules are yours, under any license you like. It needs no Python there. Its window needs the Microsoft Edge WebView2 Runtime, which Windows 11 has, and Windows 10 with a current Edge. Without it, the window says so, with where to get it, and the experiment runs regardless: its interface is at `http://localhost:8000` in a browser.
 
-**More:** [the interface in a browser](../reference/interface.md).
+**More:** [the interface in a browser](../reference/interface.md), and [an app's licenses](../overview/license.md#apps-made-with-pyacquisition-build).
 { .gs-more }
 
 </section>
@@ -108,7 +108,7 @@ Copy the app to the lab PC, with `config.toml` for a config file's app, or `rig.
 </div>
 
 !!! success "Checkpoint"
-    `dist` has `rig.exe` and `config.toml`. Double-clicked, `rig.exe` opens the interface's window with the clock, the signal and the lock-in, and makes `data` and `logs` beside itself. `dist/My Lab` is a folder with `My Lab.exe` in it.
+    `dist` has `rig.exe`, `config.toml` and `NOTICE.txt`. Double-clicked, `rig.exe` opens the interface's window with the clock, the signal and the lock-in, and makes `data` and `logs` beside itself. `dist/My Lab` is a folder with `My Lab.exe` in it.
 
 ??? failure "Something not working?"
     - **`pyacquisition build: PyInstaller is not installed. Add it with ``uv add pyacquisition[build]`` (or ``uv pip install pyinstaller``), then try again.`** Install the build tools first.

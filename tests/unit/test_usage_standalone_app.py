@@ -4,6 +4,7 @@ with PyInstaller faked (a real build is `test_freeze.py`'s, with --slow)."""
 
 import re
 import shlex
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -50,6 +51,24 @@ def test_without_pyinstaller_the_build_says_what_to_do(monkeypatch, tmp_path):
     (tmp_path / "rig.toml").write_text((GETTING_STARTED / "rig.toml").read_text(encoding="utf-8"), encoding="utf-8")
     with pytest.raises(FileNotFoundError, match=r"^PyInstaller is not installed\. Add it with `uv add pyacquisition\[build\]`"):
         freeze.build_app(toml_file=str(tmp_path / "rig.toml"), out_dir=tmp_path)
+
+
+def test_the_checkpoints_files_are_the_ones_a_build_writes(monkeypatch, tmp_path):
+    def run(command, **kwargs):  # PyInstaller, making only the app
+        dist = Path(command[command.index("--distpath") + 1])
+        dist.mkdir(parents=True, exist_ok=True)
+        (dist / f"{command[command.index('--name') + 1]}.exe").write_text("fake exe")
+        return subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(freeze.subprocess, "run", run)
+    monkeypatch.setattr(freeze, "pyinstaller_available", lambda: True)
+    rig = tmp_path / "rig.toml"
+    rig.write_text((GETTING_STARTED / "rig.toml").read_text(encoding="utf-8"), encoding="utf-8")
+
+    app_dir = freeze.build_app(toml_file=str(rig), out_dir=tmp_path)
+
+    assert sorted(path.name for path in app_dir.iterdir()) == ["NOTICE.txt", "config.toml", "rig.exe"]
+    assert "`dist` has `rig.exe`, `config.toml` and `NOTICE.txt`." in PAGE.read_text(encoding="utf-8")
 
 
 def test_a_config_with_a_mistake_is_refused_before_building(monkeypatch, tmp_path):

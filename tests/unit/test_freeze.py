@@ -12,7 +12,9 @@ import subprocess
 import pytest
 
 from pyacquisition import freeze
+from pyacquisition.core import about
 from pyacquisition.core.config_check import ConfigError
+from pyacquisition.core.news import installed_version
 
 
 @pytest.fixture
@@ -196,6 +198,23 @@ def test_the_changelog_is_always_packed(fake_pyinstaller, config, tmp_path):
     assert destination == "pyacquisition"
 
 
+@pytest.mark.parametrize("onefile", [True, False])
+def test_a_notice_is_written_beside_a_toml_build(fake_pyinstaller, config, tmp_path, onefile):
+    app_dir = freeze.build_app(toml_file=str(config), onefile=onefile, out_dir=tmp_path)
+
+    notice = (app_dir / "NOTICE.txt").read_text(encoding="utf-8")
+    assert notice == about.notice(installed_version())
+
+
+def test_a_notice_is_written_beside_a_py_build(fake_pyinstaller, tmp_path):
+    script = tmp_path / "my_experiment.py"
+    script.write_text("")
+
+    app_dir = freeze.build_app(py_file=str(script), out_dir=tmp_path)
+
+    assert (app_dir / "NOTICE.txt").read_text(encoding="utf-8") == about.notice(installed_version())
+
+
 def test_onefile_by_default(fake_pyinstaller, config, tmp_path):
     freeze.build_app(toml_file=str(config), out_dir=tmp_path)
     assert "--onefile" in fake_pyinstaller[0]
@@ -278,6 +297,7 @@ def test_a_real_toml_build(tmp_path):
     exe = app_dir / "RigSmoke.exe"
     assert exe.exists()
     assert (app_dir / "config.toml").exists()
+    assert (app_dir / "NOTICE.txt").read_text(encoding="utf-8") == about.notice(installed_version())
 
     # What the GUI's window needs, which is found at runtime rather than
     # imported: pywebview's WebView2 libraries, pythonnet's .NET runtime and its
@@ -297,6 +317,12 @@ def test_a_real_toml_build(tmp_path):
         "pyacquisition/changelog.md",
     ):
         assert name in bundled, f"{name} is missing from the build"
+    # PyAcquisition's metadata, which PyInstaller bundles by itself: the app's
+    # version (checked below, from /about) and its LICENSE.
+    assert any(
+        name.startswith("pyacquisition-") and name.endswith(".dist-info/licenses/LICENSE")
+        for name in bundled
+    ), "PyAcquisition's metadata is missing from the build"
 
     import time
 
@@ -332,6 +358,8 @@ def test_a_real_toml_build(tmp_path):
             # The page, as the window loads it: its scripts as modules.
             page = requests.get(f"{base}/", timeout=5)
             assert page.status_code == 200 and 'type="module"' in page.text
+            # It knows its version, from the metadata bundled: About shows it.
+            assert requests.get(f"{base}/about", timeout=5).json()["data"]["version"] == installed_version()
             # The news answers, and nothing is fetched (the changelog is packed, above).
             news = requests.get(f"{base}/news", timeout=5).json()["data"]
             assert news["mode"] == "all" and news["pending"] is False

@@ -13,6 +13,8 @@ shows a version's **Highlights** once, after you upgrade to it.
   examples in the documentation are public domain (CC0).
 - **About PyAcquisition**, in the command palette or on the name in the top
   bar, shows the version you are running, its license and where its source is.
+- An app made with `pyacquisition build` has a `NOTICE.txt` beside it, which
+  says what the app contains and under which licenses.
 - `TextFile` reads numbers from a file that other software writes, such as a
   magnet's field: the first or last number, the number after a label, a JSON
   value, a CSV column, or a regular expression's match. A software instrument

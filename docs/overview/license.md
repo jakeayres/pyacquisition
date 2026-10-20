@@ -25,6 +25,15 @@ The interface uses three libraries, which are shipped with the package, each wit
 | [uPlot](https://github.com/leeoniya/uPlot) | MIT |
 | [htm](https://github.com/developit/htm) | Apache-2.0 |
 
+## Apps made with pyacquisition build
+
+An app made with [`pyacquisition build`](../usage/standalone_app.md) holds PyAcquisition, the libraries of its interface, Python, and the other packages that PyAcquisition and the experiment use.
+
+- **`NOTICE.txt`**, beside the app, gives the version of PyAcquisition it was made with, its license and where its source is, and the full licenses of the interface's libraries. Keep it with the app when you give it to anyone.
+- **The experiment's own files**, its config file, script and modules, can be under any license you choose.
+- **If you changed PyAcquisition's own files**, whoever you give the app to must be able to get those files' source.
+- **Python and the other packages** are each under their own license, which may ask for a notice when the app goes outside your lab.
+
 ## The license in full
 
 ```text

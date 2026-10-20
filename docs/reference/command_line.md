@@ -50,7 +50,7 @@ pyacquisition build (--toml TOML | --py PY) [--name NAME] [--onedir] [--console]
 | `--console` | Keep the console window, to see the errors of an app that misbehaves. |
 | `--icon ICON` | An `.ico` file for the application's icon. |
 
-It needs PyInstaller, which comes with the build extra: `uv add "pyacquisition[build]"`. The app is written to `dist/`. On the PC it runs on, the window needs the Microsoft Edge WebView2 Runtime, which Windows 11 has.
+It needs PyInstaller, which comes with the build extra: `uv add "pyacquisition[build]"`. The app is written to `dist/`, with `NOTICE.txt` beside it, which says what it contains and under which [licenses](../overview/license.md#apps-made-with-pyacquisition-build). On the PC it runs on, the window needs the Microsoft Edge WebView2 Runtime, which Windows 11 has.
 
 See [Build a standalone app](../usage/standalone_app.md).
 

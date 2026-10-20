@@ -31,7 +31,8 @@ import shutil
 import subprocess
 from pathlib import Path
 
-from .core import config_check
+from .core import about, config_check
+from .core.news import installed_version
 
 # The instrument backends that PyInstaller's static analysis cannot see, because
 # they are found at runtime rather than imported directly: pyvisa's VISA backends.
@@ -112,8 +113,9 @@ def build_app(
 
     Returns:
         Path: The folder holding the built application: with `onefile` (the
-            default), the single executable and, for a `--toml` build, its
-            `config.toml`, both directly in `out_dir`. This is what to hand
+            default), the single executable, its `NOTICE.txt` (what it holds,
+            and under which licenses) and, for a `--toml` build, its
+            `config.toml`, all directly in `out_dir`. This is what to hand
             over, or copy to a lab PC.
 
     Raises:
@@ -182,4 +184,7 @@ def build_app(
     app_dir = dist_dir if onefile else dist_dir / app_name
     if toml_file:
         shutil.copyfile(toml_file, app_dir / "config.toml")
+    # What the app holds and under which licenses, beside it, where anyone it is
+    # given to sees it without running it.
+    (app_dir / "NOTICE.txt").write_text(about.notice(installed_version()), encoding="utf-8")
     return app_dir
