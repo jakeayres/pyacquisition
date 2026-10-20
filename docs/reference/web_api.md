@@ -119,6 +119,7 @@ The [news card](news.md)'s. `/news/close`, `/news/seen` and `/news/choices` are 
 | Endpoint | Does | Answers, for example |
 |---|---|---|
 | `/experiment/info` | The experiment's name. | `{"status": 200, "data": {"name": "Lab"}}` |
+| `/about` | What the interface's **About PyAcquisition** shows: the version running (null if it isn't known), the license, the copyright, where the source is, and the interface's libraries with their licenses. | `{"status": 200, "data": {"name": "PyAcquisition", "version": "0.5.0", "license": "MPL-2.0", ...}}` |
 | `/experiment/shutdown` | Stops the experiment, as closing the window does. | `{"status": "success", "message": "Experiment shutdown initiated."}` |
 | `/ping` | Answers while the experiment is running. | `"pong"` |
 | `/docs` | Every endpoint, with its inputs, to read and try. | |

@@ -11,6 +11,7 @@ The window is a page served by the experiment itself, so you can also open it in
 
 | Part | What it does |
 |---|---|
+| **Name** | The experiment's name. Click it for **About PyAcquisition**: the version running, its license, the copyright and where its source is. |
 | **Data file** | The file being written. Click it for its folder (with buttons to copy the path and to open it), and to start a new file: type a title, tick **Start a new block** if you want one, and it shows the name the file will get. |
 | **Measurements** | How often everything is measured, such as **Every 0.25 s**. Click it to change the period. It also says how long the loops really take, which is longer than the period if measuring takes longer, and then a **slow** marker appears on it. The button beside it pauses and resumes measuring. |
 | **Running task** | The task that is running, and how far along it is, if it says. Click it to open the **Queue** tab. |
@@ -61,7 +62,7 @@ Drag the top edge of the dock to make it taller or shorter, and click the open t
 
 ++ctrl+k++ opens one search over everything you can do from the keyboard: every task, on every task manager, every instrument's queries and commands, and the interface's actions. Type a few letters of what you want. The best match is picked, with its form beside the list, and the arrow keys pick another. Each is tagged with what it is: a task, a query or command, or an action on the Experiment, a Queue, a Plot or the View.
 
-- **Actions** are what the interface's buttons and keys do, and they run at once: **New data file**, **Pause measurements**, **Set measurement period**, **Pause queue**, **Clear queue**, **Load saved sequence**, **Open the Logs tab**, **Add a column to a plot**, **Switch to the dark theme**, **Go to the last error**, **What's new**, **Shut down the experiment** and others. Those that can't be undone, such as aborting a task, ask first.
+- **Actions** are what the interface's buttons and keys do, and they run at once: **New data file**, **Pause measurements**, **Set measurement period**, **Pause queue**, **Clear queue**, **Load saved sequence**, **Open the Logs tab**, **Add a column to a plot**, **Switch to the dark theme**, **Go to the last error**, **What's new**, **About PyAcquisition**, **Shut down the experiment** and others. Those that can't be undone, such as aborting a task, ask first.
 - **Tasks** are queued, as from **Add task**. **Queries and commands** are sent to the instrument, and the reply is shown under the form.
 
 *Type the inputs on the same line*, after the search, and the form fills in as you type:

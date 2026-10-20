@@ -11,6 +11,8 @@ shows a version's **Highlights** once, after you upgrade to it.
   of the GPL. Your own experiments, scripts and drivers can be under any
   license you choose, and changes to PyAcquisition's own files stay open. The
   examples in the documentation are public domain (CC0).
+- **About PyAcquisition**, in the command palette or on the name in the top
+  bar, shows the version you are running, its license and where its source is.
 - `TextFile` reads numbers from a file that other software writes, such as a
   magnet's field: the first or last number, the number after a label, a JSON
   value, a CSV column, or a regular expression's match. A software instrument

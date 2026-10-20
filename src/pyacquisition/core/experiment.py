@@ -45,7 +45,7 @@ from ..tasks.traces import AcquireTrace
 from .measurement import Measurement
 from .instrument import Instrument, SoftwareInstrument, resolve_enum_kwargs
 from .config_parser import InvalidTraceError
-from . import config_check, settings
+from . import about, config_check, settings
 
 # Seconds that the GUI's window is given to close by itself, once the
 # experiment has stopped, before its process is terminated.
@@ -1232,6 +1232,19 @@ class Experiment:
             `Experiment.from_config`.
             """
             return {"status": 200, "data": {"name": self._name}}
+
+        @api_server.app.get("/about", tags=["experiment"])
+        async def about_pyacquisition():
+            """
+            Endpoint for what the interface's About shows (core/about.py):
+            `name`; `version`, the version of PyAcquisition running, or null
+            when it isn't known; `license`, its SPDX identifier (MPL-2.0), and
+            `license_name`; `copyright`, the copyright line; `source_url`, where
+            its source code is; `license_url`, the documentation's page on the
+            license; and `libraries`, the libraries the interface uses, each with
+            its `name` and `license`.
+            """
+            return {"status": 200, "data": about.about()}
 
         @api_server.app.get("/experiment/columns", tags=["experiment"])
         async def experiment_columns():

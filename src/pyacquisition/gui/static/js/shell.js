@@ -36,6 +36,7 @@ import { Palette } from "./palette.js";
 import { ConfirmDialog } from "./confirm.js";
 import { PlotArea } from "./plot/area.js";
 import { News } from "./news.js";
+import { About, OPEN_ABOUT } from "./about.js";
 
 const CONNECTION_LABELS = {
   connecting: "Connecting…",
@@ -131,10 +132,16 @@ function TopBar({ name, connection, theme, onToggleTheme, onHelp, store, manager
   const next = theme === "dark" ? "light" : "dark";
   return html`
     <header class="topbar">
-      <div class="brand" title="PyAcquisition">
+      <button
+        type="button"
+        class="brand"
+        title="About PyAcquisition"
+        aria-label="About PyAcquisition"
+        onClick=${() => window.dispatchEvent(new CustomEvent(OPEN_ABOUT))}
+      >
         <${LogoMark} />
         <span class="brand-name">${name ?? "PyAcquisition"}</span>
-      </div>
+      </button>
       <div class="topbar-middle">
         <${FileControl} scribe=${scribe} file=${file} />
         <${RackControl} rack=${rack.state} onChanged=${rack.refresh} />
@@ -242,6 +249,7 @@ export function App() {
       <p>${asking.message}</p>
     <//>`}
     ${help && html`<${ShortcutHelp} onClose=${() => setHelp(false)} />`}
+    <${About} />
     <${CloseDialog} />
   `;
 }

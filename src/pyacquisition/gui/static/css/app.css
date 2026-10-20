@@ -58,11 +58,31 @@ button {
   background: var(--surface);
 }
 
+/* The experiment's name, a button that opens About PyAcquisition (about.js).
+   Its padding is taken back by its margin, so it sits where the name always
+   has, with room for its hover. */
 .brand {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
+  margin: 0 calc(-1 * var(--space-2));
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing);
+}
+
+.brand:hover {
+  background: var(--surface-hover);
+}
+
+.brand:active {
+  background: var(--surface-active);
 }
 
 .brand-mark {
@@ -2658,6 +2678,12 @@ kbd {
   width: min(520px, 100%);
 }
 
+/* About PyAcquisition (about.js): the version, then the license and source. */
+.about-dialog .about-version {
+  color: var(--text);
+  font-weight: var(--weight-medium);
+}
+
 .shortcut-list {
   display: flex;
   flex-direction: column;
@@ -3397,13 +3423,15 @@ kbd {
 }
 
 .news-card a,
-.news-dialog a {
+.news-dialog a,
+.about-dialog a {
   color: var(--accent);
   text-underline-offset: 2px;
 }
 
 .news-card a:hover,
-.news-dialog a:hover {
+.news-dialog a:hover,
+.about-dialog a:hover {
   color: var(--accent-hover);
 }
 

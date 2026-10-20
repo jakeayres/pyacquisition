@@ -34,6 +34,7 @@ import { get, loadSequence, managerAction } from "./api.js";
 import { showLog } from "./dock/logs.js";
 import { TAB_KEYS } from "./shortcuts.js";
 import { OPEN_WHATS_NEW } from "./news.js";
+import { OPEN_ABOUT } from "./about.js";
 
 const registered = new Map(); // by name, in the order registered
 
@@ -350,6 +351,15 @@ registerAction({
   description: "What's new in this version, a newer version, and news from the maker.",
   keywords: "whats news changelog update release notes version",
   run: () => send(OPEN_WHATS_NEW),
+});
+
+registerAction({
+  name: "about",
+  label: "About PyAcquisition",
+  tag: "View",
+  description: "The version, its license and where its source is.",
+  keywords: "version license licence copyright source credits",
+  run: () => send(OPEN_ABOUT),
 });
 
 registerAction({
