@@ -1,5 +1,6 @@
 import asyncio
 import socket
+from pathlib import Path
 
 import pytest
 from pyacquisition import Experiment, Measurement
@@ -50,6 +51,33 @@ def test_views_are_read_only(experiment):
         experiment.instruments["clock"] = Clock("clock")
     with pytest.raises(TypeError):
         experiment.measurements["time"] = None
+
+
+def from_toml(tmp_path, text):
+    path = tmp_path / "rig.toml"
+    path.write_text(text, encoding="utf-8")
+    return Experiment.from_config(str(path), root_path=str(tmp_path), gui=False)
+
+
+def test_a_config_gives_a_software_instrument_its_options(tmp_path):
+    experiment = from_toml(
+        tmp_path,
+        '[instruments.f]\n'
+        'instrument = "TextFile"\n'
+        "args = { path = 'C:\\magnet\\field.txt', encoding = \"cp1252\" }\n",
+    )
+
+    text_file = experiment.instruments["f"]
+    assert (text_file.path, text_file.encoding) == (Path(r"C:\magnet\field.txt"), "cp1252")
+
+
+def test_a_configs_seed_is_used(tmp_path):
+    config = '[instruments.r]\ninstrument = "RandomNumberGenerator"\nargs = { seed = 7 }\n'
+    (tmp_path / "a").mkdir()
+    (tmp_path / "b").mkdir()
+    first, second = from_toml(tmp_path / "a", config), from_toml(tmp_path / "b", config)
+
+    assert first.instruments["r"].uniform() == second.instruments["r"].uniform()
 
 
 def test_programmatic_setup_hook(tmp_path):

@@ -8,6 +8,7 @@ so that one with problems is refused with all of them listed.
 """
 
 import inspect
+import types
 import typing
 from dataclasses import dataclass
 from enum import Enum
@@ -188,7 +189,9 @@ def _connection_problems(name: str, entry: dict, cls) -> list[Problem]:
     where = ("instruments", name)
     found = []
     if issubclass(cls, SoftwareInstrument):
-        for key in ("adapter", "resource", "args"):
+        # A software instrument's `args` are its own options (see `driver_options`).
+        known = driver_options(cls)
+        for key in ("adapter", "resource") if known else ("adapter", "resource", "args"):
             if key in entry:
                 found.append(
                     Problem(
@@ -197,6 +200,8 @@ def _connection_problems(name: str, entry: dict, cls) -> list[Problem]:
                         f"instrument, which takes no `{key}`.",
                     )
                 )
+        if known:
+            found += _driver_option_problems(name, cls, known, entry.get("args", {}))
         return found
     adapter = entry.get("adapter")
     if adapter is None:
@@ -309,6 +314,71 @@ def queries(cls) -> dict:
     return {query.__name__: query for query in cls._queries}
 
 
+def driver_options(cls) -> dict[str, inspect.Parameter]:
+    """A software driver's options, which a config gives in its `args`: the
+    parameters of its constructor after `uid` that a config can hold, by name.
+    Those are the ones annotated `str`, `int`, `float`, `bool` or an enum, or
+    one of these or None, with the annotation resolved. Not `*args` or
+    `**kwargs`, nor any other parameter, which only Python can give. A hardware
+    driver has none: its `args` are its connection's."""
+    if not issubclass(cls, SoftwareInstrument):
+        return {}
+    parameters = list(inspect.signature(cls.__init__).parameters.values())[1:]  # not self
+    if parameters and parameters[0].kind not in (
+        inspect.Parameter.VAR_POSITIONAL,
+        inspect.Parameter.VAR_KEYWORD,
+    ):
+        parameters = parameters[1:]  # nor uid
+    try:
+        hints = typing.get_type_hints(cls.__init__)
+    except Exception:  # noqa: BLE001 - a hint that can't be resolved: not an option
+        hints = {}
+    found = {}
+    for parameter in parameters:
+        if parameter.kind not in (
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            inspect.Parameter.KEYWORD_ONLY,
+        ):
+            continue
+        hint = hints.get(parameter.name)
+        kind = _without_none(hint)
+        if kind in (str, int, float, bool) or enum_classes(kind):
+            found[parameter.name] = parameter.replace(annotation=hint)
+    return found
+
+
+def _driver_option_problems(name: str, cls, known: dict, args) -> list[Problem]:
+    """Whether a software instrument's `args` are its options, each of the kind
+    it takes, with every option that has no default given."""
+    where = ("instruments", name, "args")
+    if not isinstance(args, dict):
+        return [Problem(where, f"Instrument '{name}': `args` must be a table.")]
+    found = []
+    for key in args:
+        if key not in known:
+            found.append(
+                Problem(
+                    (*where, key),
+                    f"Instrument '{name}': {cls.__name__} takes no `{key}`. "
+                    f"It takes {', '.join(sorted(known))}.",
+                )
+            )
+    for option in known.values():
+        if option.name not in args:
+            if option.default is inspect.Parameter.empty:
+                found.append(
+                    Problem(
+                        (*where, option.name),
+                        f"Instrument '{name}': {cls.__name__} needs `{option.name}`.",
+                    )
+                )
+            continue
+        problem = _value_problem(cls.__init__, option.name, option.annotation, args[option.name])
+        if problem:
+            found.append(Problem((*where, option.name), f"Instrument '{name}': {problem}"))
+    return found
+
+
 def _method_problems(name: str, entry: dict, cls) -> list[Problem]:
     where = ("measurements", name)
     method = entry.get("method")
@@ -409,7 +479,18 @@ def _trace_problems(traces, instruments) -> list[Problem]:
     return found
 
 
+def _without_none(annotation):
+    """`X` for an annotation `X | None`, which TOML, having no null, can only
+    give an `X`. Any other annotation as it is."""
+    if typing.get_origin(annotation) in (typing.Union, types.UnionType):
+        rest = [a for a in typing.get_args(annotation) if a is not type(None)]
+        if len(rest) == 1:
+            return rest[0]
+    return annotation
+
+
 def _value_problem(function, key: str, annotation, value) -> str | None:
+    annotation = _without_none(annotation)
     try:
         value = resolve_enum_kwargs(function, {key: value})[key]
     except ValueError as e:

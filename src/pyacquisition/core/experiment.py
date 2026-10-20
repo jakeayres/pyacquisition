@@ -397,7 +397,9 @@ class Experiment:
 
                 if instrument.get("adapter", None) is None:
                     logger.debug(f"Creating instrument '{name}' without adapter")
-                    inst = instrument_class(name)
+                    # A software instrument's args are its own options, such as
+                    # a TextFile's path (config_check.driver_options).
+                    inst = instrument_class(name, **instrument.get("args", {}))
                     experiment.add_instrument(inst)
                 else:
                     logger.debug(

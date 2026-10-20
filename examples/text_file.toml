@@ -1,0 +1,13 @@
+[instruments.magnet_file]
+instrument = "TextFile"
+args = { path = '\\lab-server\magnet\field.txt' }
+
+[measurements.B]
+instrument = "magnet_file"
+method = "get_first_number"
+unit = "T"
+
+[measurements.magnet_file_age]
+instrument = "magnet_file"
+method = "get_age"
+unit = "s"

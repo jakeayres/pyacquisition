@@ -313,6 +313,20 @@ def test_the_simulated_spectrum_moves_up_as_the_sample_warms(examples):
     assert peak(20.0) == pytest.approx(230.0, abs=2.0)
 
 
+def test_the_text_file_config_example_loads_with_no_problems(examples):
+    import tomllib
+
+    from pyacquisition.core.config_check import problems
+
+    shutil.copy(EXAMPLES / "text_file.toml", "rig.toml")
+    experiment = Experiment.from_config("rig.toml", gui=False)
+
+    # Its path isn't read: it is a share's, which could take a while to fail.
+    assert experiment.instruments["magnet_file"].path == Path(r"\\lab-server\magnet\field.txt")
+    assert list(experiment.measurements) == ["B", "magnet_file_age"]
+    assert problems(tomllib.loads((EXAMPLES / "text_file.toml").read_text(encoding="utf-8"))) == []
+
+
 def test_the_traces_config_example_loads_with_no_problems(examples):
     import tomllib
 

@@ -54,9 +54,17 @@ Each instrument needs a name of its own: a second with the same name replaces th
 | `instrument` | The driver: a name from the [instruments](instruments/overview.md). Required. | `"SR_830"` |
 | `adapter` | How the computer reaches a hardware instrument: `pyvisa`, `prologix`, `mock` or `record`. See [Adapters](adapters.md). Hardware instruments only. | `"pyvisa"` |
 | `resource` | The instrument's address, in the adapter's form. Hardware instruments only. | `"GPIB0::8::INSTR"` |
-| `args` | Options for the connection, such as `timeout`, `read_termination` and `responses`. See [Adapters](adapters.md). Hardware instruments only. | `{ timeout = 10000 }` |
+| `args` | For a hardware instrument, options for the connection, such as `timeout`, `read_termination` and `responses`: see [Adapters](adapters.md). For a software instrument, its own options, such as a `TextFile`'s `path`: its page lists them. | `{ timeout = 10000 }` |
 
-A software instrument, such as `Clock`, takes `instrument` alone. An instrument that can't be opened, at a wrong address say, is left out with a warning in the log, and the rest of the experiment still starts.
+A software instrument, such as `Clock`, takes `instrument` alone, or with `args` if it has options. A [`TextFile`](instruments/text_file.md) reads a number from a file that other software writes, and needs the file's `path`:
+
+```toml
+--8<-- "examples/text_file.toml"
+```
+
+A Windows path is written in single quotes, as here, where `\` is just a `\`. In double quotes it starts an escape.
+
+An instrument that can't be opened, at a wrong address say, is left out with a warning in the log, and the rest of the experiment still starts.
 
 ## `[measurements]`
 

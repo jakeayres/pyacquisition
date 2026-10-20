@@ -45,7 +45,7 @@ def test_a_file_that_is_refused_has_a_problem_and_one_that_loads_has_none(
         assert all(isinstance(p, Problem) and p.where for p in found)
 
 
-@pytest.mark.parametrize("name", ["front_page.toml", "calculations.toml"])
+@pytest.mark.parametrize("name", ["front_page.toml", "calculations.toml", "text_file.toml"])
 def test_the_examples_have_no_problems(name):
     assert problems(tomllib.loads((EXAMPLES / name).read_text(encoding="utf-8"))) == []
 
@@ -101,6 +101,72 @@ def test_a_software_instrument_takes_no_adapter():
     config = {"instruments": {"clock": {"instrument": "Clock", "adapter": "mock"}}}
 
     assert where(config) == [("instruments", "clock", "adapter")]
+
+
+TEXT_FILE = {"instrument": "TextFile", "args": {"path": "field.txt"}}
+
+
+def test_a_software_instrument_with_options_still_takes_no_adapter():
+    config = {"instruments": {"f": {**TEXT_FILE, "adapter": "mock", "resource": "x"}}}
+
+    assert where(config) == [("instruments", "f", "adapter"), ("instruments", "f", "resource")]
+
+
+def test_a_text_file_with_its_path_has_no_problems():
+    assert problems({"instruments": {"f": TEXT_FILE}}) == []
+    assert problems({"instruments": {"f": {**TEXT_FILE, "args": {"path": "x", "encoding": "cp1252"}}}}) == []
+
+
+def test_a_text_file_needs_its_path():
+    (problem,) = problems({"instruments": {"f": {"instrument": "TextFile"}}})
+
+    assert problem.where == ("instruments", "f", "args", "path")
+    assert problem.message == "Instrument 'f': TextFile needs `path`."
+
+
+def test_an_option_it_doesnt_take_is_named_with_those_it_does():
+    (problem,) = problems({"instruments": {"f": {**TEXT_FILE, "args": {"path": "x", "colour": 1}}}})
+
+    assert problem.where == ("instruments", "f", "args", "colour")
+    assert problem.message == "Instrument 'f': TextFile takes no `colour`. It takes encoding, path."
+
+
+def test_an_option_must_be_its_kind():
+    config = {"instruments": {"f": {**TEXT_FILE, "args": {"path": 3}}}}
+
+    assert where(config) == [("instruments", "f", "args", "path")]
+
+
+def test_a_software_instruments_args_must_be_a_table():
+    assert where({"instruments": {"f": {**TEXT_FILE, "args": "field.txt"}}}) == [("instruments", "f", "args")]
+
+
+@pytest.mark.parametrize("driver, args", [("Clock", {}), ("SignalGenerator", {"time_source": "time"})])
+def test_a_software_instrument_without_options_takes_no_args(driver, args):
+    (problem,) = problems({"instruments": {"x": {"instrument": driver, "args": args}}})
+
+    assert problem.where == ("instruments", "x", "args")
+    assert problem.message == f"Instrument 'x': {driver} is a software instrument, which takes no `args`."
+
+
+@pytest.mark.parametrize("seed, fits", [(3, True), ("abc", False), (2.5, False)])
+def test_an_option_that_may_be_none_is_checked_as_its_kind(seed, fits):
+    config = {"instruments": {"r": {"instrument": "RandomNumberGenerator", "args": {"seed": seed}}}}
+
+    assert where(config) == ([] if fits else [("instruments", "r", "args", "seed")])
+
+
+def test_the_options_of_each_software_driver():
+    from pyacquisition.core.config_check import driver_options
+    from pyacquisition.instruments import instrument_map
+
+    found = {name: list(driver_options(cls)) for name, cls in instrument_map.items() if driver_options(cls)}
+
+    assert found == {
+        "RandomNumberGenerator": ["seed"],
+        "TextFile": ["path", "encoding"],
+        "TraceGenerator": ["centre", "width", "points", "start", "stop", "noise", "sweep_time"],
+    }
 
 
 def test_an_unknown_adapter_or_key_is_a_problem():
