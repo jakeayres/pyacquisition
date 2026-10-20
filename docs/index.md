@@ -165,6 +165,7 @@ Or build the file in a window, from forms, with `uv run pyacquisition new rig.to
 [SR 830](reference/instruments/sr_830.md)
 [SR 860](reference/instruments/sr_860.md)
 [Signal generator](reference/instruments/signal_generator.md)
+[Text file](reference/instruments/text_file.md)
 [Clock](reference/instruments/clock.md)
 [Random number generator](reference/instruments/random_number_generator.md)
 </div>

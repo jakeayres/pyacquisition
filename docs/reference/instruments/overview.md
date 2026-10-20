@@ -1,6 +1,6 @@
 Every instrument driver that comes with PyAcquisition. [Connect a real instrument](../../usage/connect_instrument.md) shows them in use, and [Write a hardware instrument](../../usage/hardware_instrument.md) shows how to write another.
 
-The name on each card is the driver's: the class to import from `pyacquisition.instruments`, and what a config file's `instrument` takes. A **hardware** instrument takes a name and an address, and a **software** instrument only a name. Each page lists the driver's queries and commands, from its code.
+The name on each card is the driver's: the class to import from `pyacquisition.instruments`, and what a config file's `instrument` takes. A **hardware** instrument takes a name and an address, and a **software** instrument a name, and some take options too, such as a `TextFile`'s path. Each page lists the driver's queries and commands, from its code.
 
 <div class="pa-makers" markdown>
 
@@ -60,6 +60,8 @@ The name on each card is the driver's: the class to import from `pyacquisition.i
     Random numbers from common probability distributions.
 -   [**SignalGenerator**](signal_generator.md)  
     Software waveform generator.
+-   [**TextFile**](text_file.md)  
+    Numbers from a text file that other software writes, such as a magnet's field.
 -   [**TraceGenerator**](trace_generator.md)  
     Simulated spectrum, to try traces without hardware.
 

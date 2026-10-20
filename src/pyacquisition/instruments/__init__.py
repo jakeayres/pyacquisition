@@ -1,4 +1,4 @@
-from .software import Clock, Calculator, RandomNumberGenerator, SignalGenerator, TraceGenerator
+from .software import Clock, Calculator, RandomNumberGenerator, SignalGenerator, TextFile, TraceGenerator
 from .software import PIDController as PIDController  # made in code, for a PID task: not in instrument_map
 from .stanford_research import SR_830, SR_860
 from .keithley import Keithley_2000, Keithley_6221
@@ -11,6 +11,7 @@ instrument_map = {
     "Clock": Clock,
     "RandomNumberGenerator": RandomNumberGenerator,
     "SignalGenerator": SignalGenerator,
+    "TextFile": TextFile,
     "TraceGenerator": TraceGenerator,
     "Keithley_2000": Keithley_2000,
     "Keithley_6221": Keithley_6221,

@@ -67,6 +67,7 @@ nav = [
       { "PID Controller" = "reference/instruments/pid_controller.md" },
       { "Random Number Generator" = "reference/instruments/random_number_generator.md" },
       { "Signal Generator" = "reference/instruments/signal_generator.md" },
+      { "Text File" = "reference/instruments/text_file.md" },
       { "Trace Generator" = "reference/instruments/trace_generator.md" },
       { "Keithley_2000" = "reference/instruments/keithley_2000.md" },
       { "Keithley_6221" = "reference/instruments/keithley_6221.md" },
