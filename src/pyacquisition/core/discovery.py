@@ -1,3 +1,10 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (C) 2023-2026 Jake Ayres
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 """Finding instruments (roadmap 11, `specs/discovery.md` in the repository).
 
 For now, only what the setup page's Test button needs: each hardware driver's

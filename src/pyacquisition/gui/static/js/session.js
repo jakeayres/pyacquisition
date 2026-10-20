@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // Small bits of interface state (the dock's height, the open tab, the theme) that
 // last for the session, so a reload keeps them. Storage can be unavailable, so a
 // failure is ignored and the default is used. The layout that lasts between runs

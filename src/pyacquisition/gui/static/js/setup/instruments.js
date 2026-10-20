@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // The Instruments section: each instrument in the config, with its driver and,
 // for hardware, its adapter, address and the three common options, and a Test
 // that asks it for *IDN?. Other `args` in the file are kept, and shown. For a

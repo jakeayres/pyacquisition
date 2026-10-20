@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // The Queue tab: each task manager, with its state, the task it is running and
 // the tasks waiting, and their controls: pause and resume, abort (after asking), and remove or move a queued task. Clearing the
 // queue is here too, after asking, and so are dragging a task to a new place and

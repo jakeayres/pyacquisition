@@ -1,3 +1,10 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (C) 2023-2026 Jake Ayres
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 """Traces: a measurement that is a whole array, such as a network analyser's
 sweep or a spectrometer's counts, taken with the rows, on a clock of its own, or
 on demand, and saved beside the data file (see `trace_scribe.py`).

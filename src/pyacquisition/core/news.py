@@ -1,3 +1,10 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (C) 2023-2026 Jake Ayres
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 """News on startup: what is new since the last version seen on this PC, a newer
 version on PyPI, and, from the maker's feed, notices of serious fixes and the
 maker's news. The page asks for it at `/news` and shows it as a card.

@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // TOML with its parts marked for colouring: comments, table headers, keys,
 // strings, numbers and true/false. A line at a time, which is all the setup page's
 // files need (it writes no multi-line strings). The text itself is unchanged.

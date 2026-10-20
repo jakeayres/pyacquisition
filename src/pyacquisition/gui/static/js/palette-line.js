@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // The palette's search line: where the search ends and the arguments begin,
 // and the arguments matched to an item's inputs, so `wait 0 5` or
 // `ramp temp 300 5 output_1` fills the form as it is typed. Pure functions, with

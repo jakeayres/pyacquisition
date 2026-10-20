@@ -1,3 +1,10 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (C) 2023-2026 Jake Ayres
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 from .software import Clock, Calculator, RandomNumberGenerator, SignalGenerator, TextFile, TraceGenerator
 from .software import PIDController as PIDController  # made in code, for a PID task: not in instrument_map
 from .stanford_research import SR_830, SR_860

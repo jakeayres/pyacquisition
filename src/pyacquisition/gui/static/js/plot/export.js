@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // Exporting a plot: as an image of what it shows (the plot and its axes, as
 // drawn, with a legend above), or as the data in view (the rows whose x is on
 // the x axis now, of the columns it plots) in a CSV file. The third export, a

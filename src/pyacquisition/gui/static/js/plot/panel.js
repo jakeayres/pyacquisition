@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // One plot panel: what to plot (one or more columns, which are also its legend),
 // what against, how to draw it, log axes, fixed limits, and the plot, with a
 // way back to autoscaling once it is zoomed. The plot area (area.js) arranges

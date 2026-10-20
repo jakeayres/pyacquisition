@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // Alerts: a toast, and a count on the bell in the top bar, when something needs
 // looking at: an error is logged, a task fails, measurements stop arriving, or
 // the connection to the experiment drops. Each happening raises one alert: errors

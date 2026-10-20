@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // The Options section: a field for each of an experiment's options, grouped by
 // the TOML section it sits in, from /setup/describe (core/settings.py). An
 // option is only in the config, and so the file, once it is set: an empty field

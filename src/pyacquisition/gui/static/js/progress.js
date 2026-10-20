@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // How far along a running task is (see Task.set_progress on the server): a
 // bar, the step or percentage, what it is doing, how long it has run and how
 // long is left. In full on the running task in the Queue tab, and compact in the

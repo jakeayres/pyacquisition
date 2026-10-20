@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // Forms built from the API schema (/openapi.json): a field for each of an
 // endpoint's query parameters, with its default, what it is for, and a list of
 // choices where the schema gives them (an enum). Used to queue tasks, and made

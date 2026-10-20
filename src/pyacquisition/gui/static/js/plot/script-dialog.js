@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // A plot's matplotlib script, shown before it is saved: its text, coloured as
 // Python, with Copy (to the clipboard) and Save… (as a file, as the other
 // exports are). The script is written by the server (/experiment/plot_script).

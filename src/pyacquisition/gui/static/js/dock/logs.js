@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // The Logs tab: every message kept, newest at the bottom, with its time, level
 // and the component that logged it. Levels can be hidden, and the messages
 // searched. The list follows new messages while it is at the bottom, and holds

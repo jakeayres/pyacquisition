@@ -3,10 +3,10 @@ name = "pyacquisition"
 dynamic = ["version"] # taken from the git tag, see [tool.hatch.version]
 description = "Python-based data acquisition"
 readme = "README.md"
-license = "GPL-3.0-only"
-license-files = ["LICENSE"]
+license = "MPL-2.0 AND MIT AND Apache-2.0"
+license-files = ["LICENSE", "src/pyacquisition/gui/static/vendor/*/LICENSE"]
 authors = [
-    { name = "jakeayres", email = "jake_ayres@hotmail.co.uk" }
+    { name = "Jake Ayres", email = "jake_ayres@hotmail.co.uk" }
 ]
 requires-python = ">=3.11"
 dependencies = [

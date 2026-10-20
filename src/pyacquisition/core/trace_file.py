@@ -1,3 +1,10 @@
+# SPDX-License-Identifier: MPL-2.0
+# Copyright (C) 2023-2026 Jake Ayres
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 """The trace file: each data file's traces, in an HDF5 file beside it.
 
 `00.01 sweep.data` has its traces in `00.01 sweep.h5`, made with its first

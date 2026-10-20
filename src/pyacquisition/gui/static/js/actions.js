@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // The palette's actions: what the interface's buttons and keys do, found and run
 // from Ctrl+K like tasks and instrument calls. An action runs when it is picked,
 // never queued. One that a task can do in its turn names it (`task`), and

@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // The setup page (`pyacquisition new`): an experiment's config, built from
 // forms, with the file it makes shown beside them and checked as it changes.
 // Sections down the left, the one picked in the middle, and the file on the right.

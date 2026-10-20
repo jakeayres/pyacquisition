@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // What was run from the palette lately, newest first, so an empty palette offers
 // it again: {id, label, values, queued, at}. `values` are the form's, as
 // `startingValues` gives them (text, and true or false for a checkbox), and

@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // The experiment's controls, in the top bar: the data file (and starting a new
 // one), the measurements (pause, resume and how often), and shutting down.
 import { useEffect, useRef, useState } from "preact/hooks";

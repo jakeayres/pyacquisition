@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // Drawing a plot of columns against another: the axis ranges, the lines, the
 // tick labels, finding the point under the pointer, and zooming and panning.
 // Plain functions of the data, so they can be tested alone.

@@ -1,3 +1,10 @@
+// SPDX-License-Identifier: MPL-2.0
+// Copyright (C) 2023-2026 Jake Ayres
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 // The dock along the bottom: a strip of tabs, and the open tab's panel above
 // the rest of the window. It can be resized by dragging its top edge (or with the
 // arrow keys on it), and collapsed to just the tab strip. Its height, the open tab
