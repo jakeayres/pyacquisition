@@ -180,6 +180,5 @@ following a worked example.
 ## Ready to record some data?
 
 [Get started](getting_started/installation.md){ .md-button .md-button--primary }
-[How it compares](overview/comparison.md){ .md-button }
 
 </div>

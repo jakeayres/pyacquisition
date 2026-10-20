@@ -12,8 +12,6 @@ nav = [
     { "Overview" = "index.md" },
     { "About" = "overview/about.md" },
     { "License" = "overview/license.md" },
-    { "Comparison" = "overview/comparison.md" },
-    { "Roadmap" = "overview/roadmap.md" },
   ] },
   { "Getting Started" = [
     { "0. Installation" = "getting_started/installation.md" },
