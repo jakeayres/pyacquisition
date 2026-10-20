@@ -84,6 +84,8 @@ class SetupServer:
         GET /setup/shutdown: stops the server, when the window closes.
         GET /setup/drivers/<driver>/<query>: a query's arguments, checked and
             as a config holds them. Its schema gives the page its form.
+        GET /setup/drivers/<driver>: a software driver's options (its `args`),
+            checked in the same way, for a driver that has any.
         /news and its endpoints: the news card, as on the experiment's page
             (core/news.py).
     """
@@ -201,8 +203,9 @@ class SetupServer:
             """
             Endpoint for what a config can hold: the `options` (each with its
             section, key, default, help and kind), the `drivers` (each with
-            whether it is `hardware` and its `queries`, which are what can be
-            measured, with the first line of each one's docstring), the
+            whether it is `hardware`, whether it has `options` of its own, which
+            /setup/drivers/<driver> describes, and its `queries`, which are what
+            can be measured, with the first line of each one's docstring), the
             `calculations` (each with the keys it takes and their kinds), and
             the `adapters`.
             """
@@ -254,6 +257,17 @@ class SetupServer:
             }
 
         for driver, cls in instrument_map.items():
+            known = config_check.driver_options(cls)
+            if known:
+                route = _driver_route(cls.__init__, list(known.values()))
+                route.__name__ = f"{driver}_options"
+                route.__doc__ = (
+                    f"A {driver}'s options, as a config's `args` holds them: those "
+                    "given, checked."
+                )
+                app.add_api_route(
+                    f"/setup/drivers/{driver}", route, methods=["GET"], tags=["setup drivers"]
+                )
             for name, query in config_check.queries(cls).items():
                 app.add_api_route(
                     f"/setup/drivers/{driver}/{name}",
@@ -343,6 +357,7 @@ def describe() -> dict:
             {
                 "name": name,
                 "hardware": not issubclass(cls, SoftwareInstrument),
+                "options": bool(config_check.driver_options(cls)),
                 "queries": [
                     {"name": query, "doc": first_line(function)}
                     for query, function in sorted(config_check.queries(cls).items())
@@ -358,10 +373,11 @@ def describe() -> dict:
     }
 
 
-def _driver_route(function):
+def _driver_route(function, parameters=None):
     """A route with a query's arguments (without `self`) as its parameters,
     which answers with them as a config holds them: those given, checked, with
-    an enum member by its name.
+    an enum member by its name. Given `parameters`, those instead: a software
+    driver's options, with `function` its constructor.
 
     As a task's inputs are (`task_manager/inputs.py`), an enum is asked for as
     text, with its members' names as the choices (`enum` in the schema) and
@@ -374,8 +390,9 @@ def _driver_route(function):
         hints = typing.get_type_hints(function)
     except Exception:  # noqa: BLE001 - left as they are, unresolved
         hints = {}
+    given = list(signature.parameters.values())[1:] if parameters is None else parameters
     parameters = []
-    for parameter in list(signature.parameters.values())[1:]:
+    for parameter in given:
         hint = hints.get(parameter.name, parameter.annotation)
         enums = enum_classes(hint)
         default = parameter.default

@@ -22,9 +22,10 @@ export function useSchema() {
   return schema;
 }
 
-// The fields of a driver's query's arguments.
-function argumentFields(schema, driver, method) {
-  const path = `/setup/drivers/${driver}/${method}`;
+// The fields of a setup route's parameters: a driver's query's arguments
+// (/setup/drivers/<driver>/<query>), or a software driver's options
+// (/setup/drivers/<driver>).
+export function routeFields(schema, path) {
   const endpoint = schema?.paths?.[path]?.get;
   if (!endpoint) return [];
   return describeEndpoint(path, endpoint, schema).fields.map((field) => ({
@@ -41,11 +42,11 @@ function argumentFields(schema, driver, method) {
 }
 
 // A value in the config as its field holds it, and back.
-function fieldValue(field, value) {
+export function fieldValue(field, value) {
   if (field.type === "boolean") return value === true;
   return value === undefined || value === null ? "" : String(value);
 }
-function configValue(field, typed) {
+export function configValue(field, typed) {
   if (field.type === "boolean") return typed;
   const t = String(typed).trim();
   if (field.type === "integer") return WHOLE.test(t) ? Number(t) : typed;
@@ -88,7 +89,7 @@ function MeasurementCard({ name, index, count, entry, instruments, drivers, sche
   const driver = drivers[driverName];
   const queries = driver?.queries ?? [];
   const query = queries.find((q) => q.name === entry.method);
-  const fields = query ? argumentFields(schema, driverName, entry.method) : [];
+  const fields = query ? routeFields(schema, `/setup/drivers/${driverName}/${entry.method}`) : [];
   const args = entry.args ?? {};
   const id = (key) => `measurement-${name}-${key}`;
   const error = (...where) => at(problems, "measurements", name, ...where).join(" ");

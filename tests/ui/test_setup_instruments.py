@@ -167,6 +167,38 @@ def test_a_software_instrument_is_added_as_it_is(context, setup):
     expect(page.page.get_by_text("No problems.")).to_be_visible()
 
 
+def test_a_text_file_is_added_with_its_path_to_fill_in(context, setup, rig_file):
+    page = open_setup(context, setup)
+
+    page.page.get_by_role("button", name="Add instrument").click()
+    page.page.get_by_label("Driver").fill("TextFile")
+    page.page.get_by_label("Name").last.fill("magnet_file")
+    page.page.get_by_role("button", name="Add", exact=True).click()
+
+    magnet_file = card(page, "magnet_file")
+    expect(magnet_file).to_contain_text("TextFile · software")
+    expect(magnet_file.locator('[data-field="path"] .form-error')).to_contain_text("needs path")
+    expect(page.page.locator("#instrument-magnet_file-arg-encoding")).to_be_visible()
+
+    page.page.locator("#instrument-magnet_file-arg-path").fill("C:/magnet/field.txt")
+
+    expect(magnet_file.locator(".form-error")).to_have_count(0)
+    expect(toml(page)).to_contain_text(
+        '[instruments.magnet_file]\ninstrument = "TextFile"\nargs = {path = "C:/magnet/field.txt"}'
+    )
+    page.page.get_by_role("button", name="Save", exact=True).click()
+    expect(page.page.get_by_role("status").filter(has_text="Saved")).to_be_visible()
+    assert 'args = {path = "C:/magnet/field.txt"}' in rig_file.read_text(encoding="utf-8")
+    assert page.errors == []
+
+
+def test_a_software_instrument_without_options_has_no_fields(context, setup):
+    page = open_setup(context, setup)
+
+    expect(card(page, "clock").locator(".setup-card-fields")).to_have_count(0)
+    expect(card(page, "clock").locator("input")).to_have_count(1)  # its name
+
+
 def test_a_driver_that_isnt_known_is_not_added(context, setup):
     page = open_setup(context, setup)
 

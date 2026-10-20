@@ -37,7 +37,7 @@ If port 8000 is taken, give another: `--port 8001`.
 --8<-- "examples/usage/setup_page/cryostat_1.toml"
 ```
 
-**Add instrument** asks for a driver (type to search) and a name: `Clock` as `clock`, `SR_830` as `lockin`, and `Lakeshore_350` as `cryostat`. A hardware one also needs an **adapter** and a **resource**: `mock` and `GPIB0::8::INSTR` for the lock-in, `mock` and `GPIB0::12::INSTR` for the controller. Then **Save**. This is the file it writes.
+**Add instrument** asks for a driver (type to search) and a name: `Clock` as `clock`, `SR_830` as `lockin`, and `Lakeshore_350` as `cryostat`. A hardware one also needs an **adapter** and a **resource**: `mock` and `GPIB0::8::INSTR` for the lock-in, `mock` and `GPIB0::12::INSTR` for the controller. A software one needs nothing more, unless it has options, such as a `TextFile`'s **path**. Then **Save**. This is the file it writes.
 
 **Test** asks an instrument who it is. On `mock`, the lock-in says `It answered MOCK,GPIB0::8::INSTR,0,0, which isn't a SR_830`: a real one's answer names it.
 

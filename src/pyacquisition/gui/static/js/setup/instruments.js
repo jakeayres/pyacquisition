@@ -1,11 +1,14 @@
 // The Instruments section: each instrument in the config, with its driver and,
 // for hardware, its adapter, address and the three common options, and a Test
-// that asks it for *IDN?. Other `args` in the file are kept, and shown.
+// that asks it for *IDN?. Other `args` in the file are kept, and shown. For a
+// software driver with options of its own (a TextFile's path), a field for
+// each, from the schema of its route (/setup/drivers/<driver>).
 import { useState } from "preact/hooks";
 import { html } from "../html.js";
 import { Field, withCode } from "../forms.js";
 import { PlusIcon } from "../icons.js";
 import * as api from "./api.js";
+import { configValue, fieldValue, routeFields, useSchema } from "./measurements.js";
 
 const WHOLE = /^\d+$/;
 // The options that have fields; any other `args` are kept as they are.
@@ -61,7 +64,7 @@ function TestResult({ result, driver }) {
   `;
 }
 
-function InstrumentCard({ name, entry, driver, adapters, names, problems, onChange, onRename, onRemove }) {
+function InstrumentCard({ name, entry, driver, adapters, schema, names, problems, onChange, onRename, onRemove }) {
   const [draftName, setDraftName] = useState(name);
   const [nameProblem, setNameProblem] = useState("");
   const [result, setResult] = useState(null);
@@ -69,6 +72,7 @@ function InstrumentCard({ name, entry, driver, adapters, names, problems, onChan
   const others = Object.entries(args).filter(([key]) => !COMMON.includes(key));
   const id = (key) => `instrument-${name}-${key}`;
   const hardware = driver?.hardware ?? true;
+  const options = !hardware && driver?.options ? routeFields(schema, `/setup/drivers/${entry.instrument}`) : [];
 
   const set = (key, value) => {
     const next = { ...entry };
@@ -81,6 +85,11 @@ function InstrumentCard({ name, entry, driver, adapters, names, problems, onChan
     if (value === undefined) delete nextArgs[key];
     else nextArgs[key] = value;
     set("args", Object.keys(nextArgs).length ? nextArgs : undefined);
+  };
+  // An option as its field gives it: left out when empty, or a checkbox at its default.
+  const setOption = (field, typed) => {
+    const empty = typed === "" || (field.type === "boolean" && typed === (field.default ?? false));
+    setArg(field.name, empty ? undefined : configValue(field, typed));
   };
 
   const rename = () => {
@@ -128,6 +137,30 @@ function InstrumentCard({ name, entry, driver, adapters, names, problems, onChan
       ${[...own, ...problemsAt(problems, "instruments", name, "instrument")].map(
         (message) => html`<p class="form-error">${withCode(message)}</p>`,
       )}
+      ${!hardware && options.length > 0 &&
+      html`
+        <div class="setup-card-fields">
+          ${options.map(
+            (field) => html`
+              <${Field}
+                key=${field.name}
+                id=${id(`arg-${field.name}`)}
+                field=${field}
+                value=${fieldValue(field, args[field.name])}
+                error=${errorAt("args", field.name)}
+                onChange=${(typed) => setOption(field, typed)}
+              />
+            `,
+          )}
+        </div>
+      `}
+      ${!hardware &&
+      [
+        ...problemsAt(problems, "instruments", name, "args"),
+        ...Object.keys(args)
+          .filter((key) => !options.some((f) => f.name === key))
+          .flatMap((key) => problemsAt(problems, "instruments", name, "args", key)),
+      ].map((message) => html`<p class="form-error">${withCode(message)}</p>`)}
       ${hardware &&
       html`
         <div class="setup-card-fields">
@@ -314,6 +347,7 @@ export function InstrumentsSection({ described, config, problems, onChange }) {
   const instruments = config.instruments ?? {};
   const names = Object.keys(instruments);
   const drivers = Object.fromEntries(described.drivers.map((d) => [d.name, d]));
+  const schema = useSchema();
 
   const withInstruments = (next) => {
     const result = { ...config };
@@ -359,6 +393,7 @@ export function InstrumentsSection({ described, config, problems, onChange }) {
               entry=${instruments[name] ?? {}}
               driver=${drivers[instruments[name]?.instrument]}
               adapters=${described.adapters}
+              schema=${schema}
               names=${names}
               problems=${problems}
               onChange=${(entry) => onChange(withInstruments({ ...instruments, [name]: entry }))}

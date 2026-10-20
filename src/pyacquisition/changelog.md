@@ -3,6 +3,16 @@
 What changed in each version of PyAcquisition, newest first. The interface
 shows a version's **Highlights** once, after you upgrade to it.
 
+## 0.5.0 (unreleased)
+
+### Highlights
+
+- `TextFile` reads numbers from a file that other software writes, such as a
+  magnet's field: the first or last number, the number after a label, a JSON
+  value, a CSV column, or a regular expression's match. A software instrument
+  can now take options in a config file, and the setup page has fields for
+  them.
+
 ## 0.4.0 (2026-10-10)
 
 ### Highlights

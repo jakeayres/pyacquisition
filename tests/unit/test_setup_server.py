@@ -457,6 +457,45 @@ def test_a_query_routes_schema_is_the_form_the_page_builds(tmp_path):
     assert "/setup/drivers/Mercury_IPS/to_zero" not in paths  # a command
 
 
+# ------------------------------------------------------------ a software driver's options
+def test_the_drivers_with_options_are_marked(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    drivers = client.get("/setup/describe").json()["data"]["drivers"]
+
+    assert {d["name"] for d in drivers if d["options"]} == {
+        "RandomNumberGenerator",
+        "TextFile",
+        "TraceGenerator",
+    }
+
+
+def test_an_options_route_answers_with_them_as_a_config_holds_them(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    response = client.get("/setup/drivers/TextFile", params={"path": "C:/magnet/field.txt"})
+
+    assert response.json()["data"] == {"path": "C:/magnet/field.txt"}
+
+
+def test_an_options_route_checks_them(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    assert client.get("/setup/drivers/TraceGenerator", params={"points": "many"}).status_code == 422
+    assert client.get("/setup/drivers/TextFile").status_code == 422  # no path
+
+
+def test_an_options_routes_schema_is_the_form_the_page_builds(tmp_path):
+    client, _ = client_for(tmp_path)
+
+    paths = client.get("/openapi.json").json()["paths"]
+    parameters = paths["/setup/drivers/TextFile"]["get"]["parameters"]
+
+    assert [(p["name"], p["required"]) for p in parameters] == [("path", True), ("encoding", False)]
+    assert "/setup/drivers/Clock" not in paths
+    assert "/setup/drivers/SignalGenerator" not in paths  # time_source isn't an option
+
+
 # ------------------------------------------------------------ testing an instrument
 def asked(client, instrument="SR_830", adapter="mock", resource="GPIB0::7::INSTR", args=None):
     return client.post(
