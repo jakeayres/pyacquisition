@@ -7,6 +7,10 @@ shows a version's **Highlights** once, after you upgrade to it.
 
 ### Highlights
 
+- PyAcquisition is now under the Mozilla Public License 2.0 (MPL-2.0), instead
+  of the GPL. Your own experiments, scripts and drivers can be under any
+  license you choose, and changes to PyAcquisition's own files stay open. The
+  examples in the documentation are public domain (CC0).
 - `TextFile` reads numbers from a file that other software writes, such as a
   magnet's field: the first or last number, the number after a label, a JSON
   value, a CSV column, or a regular expression's match. A software instrument

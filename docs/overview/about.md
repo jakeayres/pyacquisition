@@ -1,1 +1,4 @@
-`pyacquisition` was started as a personal project by Jake Ayres and is used by a number of members of the University of Bristol Quantum and Soft Matter group.
+# About
+
+PyAcquisition is written and maintained by Jake Ayres. It began in 2023 as a
+personal project and is free software under the Mozilla Public License 2.0.

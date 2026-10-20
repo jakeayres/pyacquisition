@@ -1,0 +1,17 @@
+cff-version: 1.2.0
+message: If you use PyAcquisition in your work, please cite it as below.
+type: software
+title: PyAcquisition
+abstract: >-
+  A Python package for controlling laboratory instruments and recording
+  scientific data.
+authors:
+  - given-names: Jake
+    family-names: Ayres
+license: MPL-2.0
+repository-code: https://github.com/jakeayres/pyacquisition
+url: https://pyacquisition.readthedocs.io
+keywords:
+  - data acquisition
+  - laboratory instruments
+  - experiment control

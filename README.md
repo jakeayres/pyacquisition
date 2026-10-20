@@ -30,9 +30,27 @@ API reference.
 
 ## ⚖️ License
 
-PyAcquisition is free software, under the [GNU General Public License,
-version 3](LICENSE) only (GPL-3.0-only). Use it, change it and share it: anything
-you distribute that is built on it is under the GPL too. Versions up to 0.3.4
-were released under the MIT License, and stay under it.
+PyAcquisition is free software, under the [Mozilla Public License
+2.0](LICENSE) (MPL-2.0). Use it for anything, change it and share it. Your own
+experiments, scripts and drivers can be under any license you choose. Changes
+to PyAcquisition's own files stay under the MPL, with their source available.
+The examples are in the public domain (CC0). See the
+[License](https://pyacquisition.readthedocs.io/en/latest/overview/license/)
+page.
 
-Copyright © 2025–2026 Jake Ayres.
+Version 0.4.0 was released under the GNU General Public License, version 3
+(GPL-3.0-only), and versions up to 0.3.4 under the MIT License. Each stays
+under the license it was released with.
+
+Copyright © 2023–2026 Jake Ayres.
+
+## 🤝 Contributing
+
+Contributions are welcome, under the MPL-2.0, with each commit signed off. See
+[CONTRIBUTING.md](https://github.com/jakeayres/pyacquisition/blob/main/CONTRIBUTING.md).
+
+## 📝 Citing
+
+**Cite this repository** on [the GitHub page](https://github.com/jakeayres/pyacquisition)
+gives a citation, from
+[CITATION.cff](https://github.com/jakeayres/pyacquisition/blob/main/CITATION.cff).
