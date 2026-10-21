@@ -164,18 +164,116 @@ class QueryCommandProvider(type):
             cls.name = cls.__name__
 
 
-def mark_query(func):
+OTHER_GROUP = "Other"
+"""The group of a driver's queries and commands that were given none, when
+others were."""
+
+
+def _marker(flag, func, group):
+    """Marks `func` with `flag` and its group, bare or called with a group, as
+    `mark_query` and `mark_command` are used."""
+    if group is not None and (not isinstance(group, str) or not group.strip()):
+        raise TypeError(f'A group is a name, such as "Inputs", not {group!r}.')
+    if func is not None and not callable(func):
+        raise TypeError(f"Give the group by name: group={func!r}.")
+
+    def mark(method):
+        setattr(method, flag, True)
+        method._group = group
+        return method
+
+    return mark(func) if func is not None else mark
+
+
+def mark_query(func=None, *, group=None):
     """Marks a method as a query, which reads a value: the interface lists it under
-    Queries, the API serves it, and a measurement can record it."""
-    func._is_query = True
-    return func
+    Queries, the API serves it, and a measurement can record it.
+
+    Use it bare, `@mark_query`, or with the part of the instrument the query
+    belongs to, `@mark_query(group="Inputs")`. A driver's groups are listed in
+    the order they first appear in its code, in the interface and on its page
+    in the docs, each with its queries and commands in the same order.
+
+    Args:
+        group (str): The group the query is listed in, such as `"Inputs"` or
+            `"Trigger"`. Without one, a driver whose other methods have groups
+            lists it under `"Other"`.
+
+    Example:
+        ```python
+        @mark_query(group="Inputs")
+        def get_temperature(self, input_channel: InputChannel) -> float:
+            ...
+        ```
+    """
+    return _marker("_is_query", func, group)
 
 
-def mark_command(func):
+def mark_command(func=None, *, group=None):
     """Marks a method as a command, which changes the instrument: the interface
-    lists it under Commands, and the API serves it."""
-    func._is_command = True
-    return func
+    lists it under Commands, and the API serves it.
+
+    Use it bare, `@mark_command`, or with a group, as `mark_query` takes:
+    `@mark_command(group="Inputs")`.
+
+    Args:
+        group (str): The group the command is listed in. Give a setting's
+            query and command the same group, so they are listed together.
+    """
+    return _marker("_is_command", func, group)
+
+
+def method_groups(instrument) -> dict[str, list[str]]:
+    """A driver's queries and commands, by group: each group's name, in the
+    order it first appears in the code, with its methods' names in the same
+    order. Methods without a group come last, under `"Other"`.
+
+    Args:
+        instrument (type | Instrument | SoftwareInstrument): The driver, or an
+            instrument made from it.
+
+    Returns:
+        The groups, or `{}` if none of the driver's queries and commands has a
+            group.
+    """
+    cls = instrument if isinstance(instrument, type) else type(instrument)
+    groups, seen = {}, set()
+    for klass in cls.__mro__:
+        for name, method in vars(klass).items():
+            # A subclass's method hides its base's, marked or not.
+            if name in seen:
+                continue
+            seen.add(name)
+            if isinstance(method, property):
+                method = method.fget
+            if hasattr(method, "_is_query") or hasattr(method, "_is_command"):
+                groups.setdefault(getattr(method, "_group", None), []).append(name)
+    if list(groups) in ([], [None]):
+        return {}
+    other = groups.pop(OTHER_GROUP, []) + groups.pop(None, [])
+    if other:
+        groups[OTHER_GROUP] = other
+    return groups
+
+
+GROUP_KEY = "x-pyacquisition-group"
+ORDER_KEY = "x-pyacquisition-order"
+
+
+def route_extras(instrument) -> dict[str, dict]:
+    """What each of an instrument's routes adds to the API's schema, by method:
+    its group, and its place among the driver's methods (from 0, group by
+    group), for a client to list them as the docs do. Nothing for a driver
+    with no groups."""
+    names = [
+        (group, name)
+        for group, methods in method_groups(instrument).items()
+        for name in methods
+    ]
+    return {
+        name: {GROUP_KEY: group, ORDER_KEY: order}
+        for order, (group, name) in enumerate(names)
+    }
 
 
 def mark_trace(func=None, *, start=None, ready=None, stop=None, timeout=None, channels=None):
@@ -325,6 +423,7 @@ class Instrument(metaclass=QueryCommandProvider):
         def commands() -> list[str]:
             return [name for name, _ in self.commands.items()]
 
+        extras = route_extras(self)
         for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
             if hasattr(method, "_is_query"):
                 endpoint_path = f"/{self._uid}/{name}"
@@ -334,6 +433,7 @@ class Instrument(metaclass=QueryCommandProvider):
                     endpoint_func,
                     methods=["GET"],
                     tags=["tasks"],
+                    openapi_extra=extras.get(name),
                 )
 
             if hasattr(method, "_is_command"):
@@ -344,6 +444,7 @@ class Instrument(metaclass=QueryCommandProvider):
                     endpoint_func,
                     methods=["GET"],
                     tags=["tasks"],
+                    openapi_extra=extras.get(name),
                 )
 
 
@@ -398,6 +499,7 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
                 "data": [name for name, _ in self.commands.items()],
             }
 
+        extras = route_extras(self)
         for name, method in inspect.getmembers(self, predicate=inspect.ismethod):
             if hasattr(method, "_is_query"):
                 endpoint_path = f"/{self._uid}/{name}"
@@ -407,6 +509,7 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
                     endpoint_func,
                     methods=["GET"],
                     tags=["tasks"],
+                    openapi_extra=extras.get(name),
                 )
 
             if hasattr(method, "_is_command"):
@@ -417,4 +520,5 @@ class SoftwareInstrument(metaclass=QueryCommandProvider):
                     endpoint_func,
                     methods=["GET"],
                     tags=["tasks"],
+                    openapi_extra=extras.get(name),
                 )

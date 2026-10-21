@@ -1,8 +1,41 @@
 {#- The methods listed at the top of a class, each with the first sentence of its
     docstring, however its lines wrap. mkdocstrings' own summary takes the first line
-    only, which cuts a sentence that wraps. Set as custom_templates in zensical.toml. -#}
+    only, which cuts a sentence that wraps. Set as custom_templates in zensical.toml.
+    A driver whose methods have groups lists them by group, in the order of the
+    code, as children.html.jinja does. -#}
+
+{% import "_groups.html.jinja" as groups with context %}
+
+{% macro method_list(functions) %}
+  <ul>
+    {% for function in functions %}
+      {% set member = obj[function.name] %}
+      {% set paragraph = (member.docstring.value if member.docstring else "").split("\n\n")[0].split() | join(" ") %}
+      {% set sentence = paragraph.split(". ")[0] %}
+      {% if sentence != paragraph %}{% set sentence = sentence ~ "." %}{% endif %}
+      <li class="doc-section-item field-body">
+        <b><code><autoref identifier="{{ obj.path }}.{{ function.name }}" optional hover>{{ function.name }}</autoref></code></b>
+        –
+        <div class="doc-md-description">
+          {{ sentence|convert_markdown(heading_level, html_id, autoref_hook=autoref_hook|default(AutorefsHook(member, config))) }}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
 
 {% if not obj.docstring.parsed | selectattr("kind.value", "eq", "functions") | list %}
+  {% set functions = obj.functions
+      |filter_objects(
+        filters=config.filters,
+        members_list=members_list,
+        inherited_members=config.inherited_members,
+        keep_no_docstrings=config.show_if_no_docstring,
+      )
+      |order_members("source", members_list)
+      |rejectattr("name", "eq", "__init__")
+      |list %}
+  {% set names = groups.group_names(functions) | trim if obj.is_class else "" %}
   {% with section = obj.functions
       |filter_objects(
         filters=config.filters,
@@ -10,28 +43,24 @@
         inherited_members=config.inherited_members,
         keep_no_docstrings=config.show_if_no_docstring,
       )
-      |order_members(config.members_order, members_list)
+      |order_members("source" if names else config.members_order, members_list)
       |as_functions_section(check_public=not members_list)
     %}
     {% if section %}
-      <p><span class="doc-section-title">{{ section.title or lang.t("Methods:") if obj.is_class else lang.t("Functions:") }}</span></p>
-      <ul>
-        {% for function in section.value %}
-          {% if not function.name == "__init__" or not config.merge_init_into_class %}
-            {% set member = obj[function.name] %}
-            {% set paragraph = (member.docstring.value if member.docstring else "").split("\n\n")[0].split() | join(" ") %}
-            {% set sentence = paragraph.split(". ")[0] %}
-            {% if sentence != paragraph %}{% set sentence = sentence ~ "." %}{% endif %}
-            <li class="doc-section-item field-body">
-              <b><code><autoref identifier="{{ obj.path }}.{{ function.name }}" optional hover>{{ function.name }}</autoref></code></b>
-              –
-              <div class="doc-md-description">
-                {{ sentence|convert_markdown(heading_level, html_id, autoref_hook=autoref_hook|default(AutorefsHook(member, config))) }}
-              </div>
-            </li>
-          {% endif %}
+      {% set shown = section.value | rejectattr("name", "eq", "__init__") | list if config.merge_init_into_class else section.value %}
+      {% if names %}
+        {% for group in names.split("\n") %}
+          {% set ns = namespace(items=[]) %}
+          {% for function in shown %}
+            {% if groups.in_group(obj[function.name], group) %}{% set ns.items = ns.items + [function] %}{% endif %}
+          {% endfor %}
+          <p><span class="doc-section-title">{{ group }}:</span></p>
+          {{ method_list(ns.items) }}
         {% endfor %}
-      </ul>
+      {% else %}
+        <p><span class="doc-section-title">{{ section.title or lang.t("Methods:") if obj.is_class else lang.t("Functions:") }}</span></p>
+        {{ method_list(shown) }}
+      {% endif %}
     {% endif %}
   {% endwith %}
 {% endif %}

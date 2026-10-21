@@ -205,6 +205,7 @@ admonition = {}
 attr_list = {}
 md_in_html = {}
 toc.permalink = true
+toc.toc_depth = 3 # a driver's groups are in the left menu, and not every method under them
 pymdownx.blocks.caption = {}
 pymdownx.blocks.tab.alternate_style = true
 pymdownx.details = {}

@@ -280,7 +280,7 @@ class Keithley_2000(Instrument):
 
     """ IEEE-488.2 COMMON COMMANDS """
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def identify(self) -> str:
         """Identifies the instrument.
 
@@ -289,7 +289,7 @@ class Keithley_2000(Instrument):
         """
         return self.query("*IDN?")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def reset(self) -> int:
         """Resets the instrument to its *RST default state.
 
@@ -298,7 +298,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("*RST")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def clear(self) -> int:
         """Clears the event registers and the error queue.
 
@@ -307,7 +307,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("*CLS")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_options(self) -> str:
         """Queries the installed options.
 
@@ -316,7 +316,7 @@ class Keithley_2000(Instrument):
         """
         return unquote(self.query("*OPT?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def save_setup(self) -> int:
         """Saves the present setup to memory. There is one location.
 
@@ -325,7 +325,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("*SAV 0")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def recall_setup(self) -> int:
         """Recalls the setup saved in memory.
 
@@ -334,16 +334,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("*RCL 0")
 
-    @mark_command
-    def trigger(self) -> int:
-        """Sends a bus trigger. Only acts if BUS is the trigger source.
-
-        Returns:
-            int: Status code indicating the success of the operation.
-        """
-        return self.command("*TRG")
-
-    @mark_query
+    @mark_query(group="Identity and status")
     def self_test(self) -> int:
         """Runs a checksum test of the ROM.
 
@@ -352,7 +343,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query("*TST?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def operation_complete(self) -> int:
         """Sets the operation complete bit once all pending operations finish.
 
@@ -361,7 +352,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("*OPC")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_operation_complete(self) -> int:
         """Waits for all pending operations to finish.
 
@@ -370,7 +361,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query("*OPC?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def wait_to_continue(self) -> int:
         """Holds off later commands until all pending operations are finished.
 
@@ -379,7 +370,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("*WAI")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_event_status(self) -> int:
         """Reads and clears the standard event status register.
 
@@ -388,7 +379,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query("*ESR?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_event_enable(self, value: int) -> int:
         """Sets the standard event enable register.
 
@@ -400,7 +391,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"*ESE {value}")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_event_enable(self) -> int:
         """Queries the standard event enable register.
 
@@ -409,7 +400,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query("*ESE?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_status_byte(self) -> int:
         """Reads the status byte register.
 
@@ -418,7 +409,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query("*STB?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_service_request_enable(self, value: int) -> int:
         """Sets the service request enable register.
 
@@ -430,7 +421,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"*SRE {value}")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_service_request_enable(self) -> int:
         """Queries the service request enable register.
 
@@ -441,7 +432,7 @@ class Keithley_2000(Instrument):
 
     """ STATUS STRUCTURE AND ERROR QUEUE """
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_status_event(self, register: StatusRegister) -> int:
         """Reads and clears an event register.
 
@@ -453,7 +444,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query(f"STAT:{register.raw_value}:EVEN?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_status_condition(self, register: StatusRegister) -> int:
         """Reads a condition register.
 
@@ -465,7 +456,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query(f"STAT:{register.raw_value}:COND?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_status_enable(self, register: StatusRegister, value: int) -> int:
         """Sets the event enable register.
 
@@ -478,7 +469,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"STAT:{register.raw_value}:ENAB {value}")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_status_enable(self, register: StatusRegister) -> int:
         """Queries the event enable register.
 
@@ -490,7 +481,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query(f"STAT:{register.raw_value}:ENAB?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def preset_status(self) -> int:
         """Clears the operation, measurement and questionable enable registers.
 
@@ -499,7 +490,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("STAT:PRES")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_next_error(self) -> dict:
         """Reads and removes the oldest entry in the error queue.
 
@@ -508,7 +499,7 @@ class Keithley_2000(Instrument):
         """
         return parse_error(self.query("STAT:QUE?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_error(self) -> dict:
         """Reads and removes the oldest entry in the error queue.
 
@@ -517,7 +508,7 @@ class Keithley_2000(Instrument):
         """
         return parse_error(self.query("SYST:ERR?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def clear_error_queue(self) -> int:
         """Clears all messages from the error queue.
 
@@ -526,7 +517,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("SYST:CLE")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_error_queue_enable(self, messages: str) -> int:
         """Sets which error and status messages are placed in the error queue. Others are disabled.
 
@@ -538,7 +529,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"STAT:QUE:ENAB ({messages})")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_error_queue_enable(self) -> str:
         """Queries the messages enabled for the error queue.
 
@@ -547,7 +538,7 @@ class Keithley_2000(Instrument):
         """
         return unquote(self.query("STAT:QUE:ENAB?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_error_queue_disable(self, messages: str) -> int:
         """Removes messages from the set placed in the error queue.
 
@@ -559,7 +550,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"STAT:QUE:DIS ({messages})")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_error_queue_disable(self) -> str:
         """Queries the messages disabled for the error queue.
 
@@ -570,7 +561,7 @@ class Keithley_2000(Instrument):
 
     """ READINGS """
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_reading(self) -> float:
         """Reads the latest reading, without triggering one.
 
@@ -579,7 +570,7 @@ class Keithley_2000(Instrument):
         """
         return first_number(self.query("SENS:DATA?"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def fetch(self) -> list[float]:
         """Reads the latest post-math readings, without triggering any.
 
@@ -588,7 +579,7 @@ class Keithley_2000(Instrument):
         """
         return to_floats(self.query("FETC?"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def read(self) -> list[float]:
         """Aborts, initiates a new set of readings and returns them. The number is set by the sample count.
 
@@ -597,7 +588,7 @@ class Keithley_2000(Instrument):
         """
         return to_floats(self.query("READ?"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def measure(self, function: Function) -> float:
         """Configures a function to its defaults and takes one reading. This resets that function's settings.
 
@@ -609,7 +600,7 @@ class Keithley_2000(Instrument):
         """
         return first_number(self.query(f"MEAS:{function.raw_value}?"))
 
-    @mark_command
+    @mark_command(group="Readings")
     def configure(self, function: Function) -> int:
         """Configures a function to its defaults for one-shot readings, and disables continuous initiation. Take the reading with read().
 
@@ -621,7 +612,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CONF:{function.raw_value}")
 
-    @mark_command
+    @mark_command(group="Function and range")
     def set_function(self, function: Function) -> int:
         """Sets the measurement function.
 
@@ -633,7 +624,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:FUNC '{function.raw_value}'")
 
-    @mark_query
+    @mark_query(group="Function and range")
     def get_function(self) -> Function:
         """Queries the measurement function.
 
@@ -644,7 +635,7 @@ class Keithley_2000(Instrument):
 
     """ SETTINGS THAT EVERY FUNCTION KEEPS FOR ITSELF """
 
-    @mark_command
+    @mark_command(group="Function and range")
     def set_nplc(self, function: NplcFunction, nplc: float) -> int:
         """Sets the integration time.
 
@@ -657,7 +648,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:{function.raw_value}:NPLC {format_number(nplc)}")
 
-    @mark_query
+    @mark_query(group="Function and range")
     def get_nplc(self, function: NplcFunction) -> float:
         """Queries the integration time.
 
@@ -669,7 +660,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query(f"SENS:{function.raw_value}:NPLC?"))
 
-    @mark_command
+    @mark_command(group="Function and range")
     def set_range(self, function: RangeFunction, expected: float) -> int:
         """Sets the measurement range.
 
@@ -684,7 +675,7 @@ class Keithley_2000(Instrument):
             f"SENS:{function.raw_value}:RANG:UPP {format_number(expected)}"
         )
 
-    @mark_query
+    @mark_query(group="Function and range")
     def get_range(self, function: RangeFunction) -> float:
         """Queries the full-scale value of the present range.
 
@@ -696,7 +687,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query(f"SENS:{function.raw_value}:RANG:UPP?"))
 
-    @mark_command
+    @mark_command(group="Function and range")
     def set_auto_range(self, function: RangeFunction, state: State) -> int:
         """Enables or disables the auto range.
 
@@ -709,7 +700,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:{function.raw_value}:RANG:AUTO {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Function and range")
     def get_auto_range(self, function: RangeFunction) -> State:
         """Queries whether the auto range is enabled.
 
@@ -723,7 +714,7 @@ class Keithley_2000(Instrument):
             to_int(self.query(f"SENS:{function.raw_value}:RANG:AUTO?"))
         )
 
-    @mark_command
+    @mark_command(group="Function and range")
     def set_digits(self, function: DigitsFunction, digits: int) -> int:
         """Sets the display resolution.
 
@@ -736,7 +727,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:{function.raw_value}:DIG {digits}")
 
-    @mark_query
+    @mark_query(group="Function and range")
     def get_digits(self, function: DigitsFunction) -> int:
         """Queries the display resolution.
 
@@ -748,7 +739,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query(f"SENS:{function.raw_value}:DIG?"))
 
-    @mark_command
+    @mark_command(group="Relative readings")
     def set_reference(self, function: ReferenceFunction, reference: float) -> int:
         """Sets the reference (relative) value.
 
@@ -761,7 +752,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:{function.raw_value}:REF {format_number(reference)}")
 
-    @mark_query
+    @mark_query(group="Relative readings")
     def get_reference(self, function: ReferenceFunction) -> float:
         """Queries the reference (relative) value.
 
@@ -773,7 +764,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query(f"SENS:{function.raw_value}:REF?"))
 
-    @mark_command
+    @mark_command(group="Relative readings")
     def set_reference_state(self, function: ReferenceFunction, state: State) -> int:
         """Enables or disables the reference (relative) value.
 
@@ -786,7 +777,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:{function.raw_value}:REF:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Relative readings")
     def get_reference_state(self, function: ReferenceFunction) -> State:
         """Queries whether the reference (relative) value is enabled.
 
@@ -800,7 +791,7 @@ class Keithley_2000(Instrument):
             to_int(self.query(f"SENS:{function.raw_value}:REF:STAT?"))
         )
 
-    @mark_command
+    @mark_command(group="Relative readings")
     def acquire_reference(self, function: ReferenceFunction) -> int:
         """Uses the present input as the reference value. The function must be the one selected, and have a valid reading.
 
@@ -812,7 +803,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:{function.raw_value}:REF:ACQ")
 
-    @mark_command
+    @mark_command(group="Filter")
     def set_average_filter(self, function: FilterFunction, state: State) -> int:
         """Enables or disables the averaging filter.
 
@@ -825,7 +816,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:{function.raw_value}:AVER:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Filter")
     def get_average_filter(self, function: FilterFunction) -> State:
         """Queries whether the averaging filter is enabled.
 
@@ -839,7 +830,7 @@ class Keithley_2000(Instrument):
             to_int(self.query(f"SENS:{function.raw_value}:AVER:STAT?"))
         )
 
-    @mark_command
+    @mark_command(group="Filter")
     def set_average_filter_control(
         self, function: FilterFunction, control: FilterControl
     ) -> int:
@@ -854,7 +845,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:{function.raw_value}:AVER:TCON {control.raw_value}")
 
-    @mark_query
+    @mark_query(group="Filter")
     def get_average_filter_control(self, function: FilterFunction) -> FilterControl:
         """Queries the averaging filter type.
 
@@ -868,7 +859,7 @@ class Keithley_2000(Instrument):
             FilterControl, self.query(f"SENS:{function.raw_value}:AVER:TCON?")
         )
 
-    @mark_command
+    @mark_command(group="Filter")
     def set_average_filter_count(self, function: FilterFunction, count: int) -> int:
         """Sets the averaging filter count.
 
@@ -881,7 +872,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:{function.raw_value}:AVER:COUN {count}")
 
-    @mark_query
+    @mark_query(group="Filter")
     def get_average_filter_count(self, function: FilterFunction) -> int:
         """Queries the averaging filter count.
 
@@ -893,7 +884,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query(f"SENS:{function.raw_value}:AVER:COUN?"))
 
-    @mark_command
+    @mark_command(group="Function and range")
     def set_bandwidth(self, function: BandwidthFunction, bandwidth: float) -> int:
         """Sets the AC bandwidth.
 
@@ -908,7 +899,7 @@ class Keithley_2000(Instrument):
             f"SENS:{function.raw_value}:DET:BAND {format_number(bandwidth)}"
         )
 
-    @mark_query
+    @mark_query(group="Function and range")
     def get_bandwidth(self, function: BandwidthFunction) -> float:
         """Queries the AC bandwidth.
 
@@ -920,7 +911,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query(f"SENS:{function.raw_value}:DET:BAND?"))
 
-    @mark_command
+    @mark_command(group="Function and range")
     def set_threshold_range(self, function: ThresholdFunction, level: float) -> int:
         """Sets the threshold voltage range.
 
@@ -935,7 +926,7 @@ class Keithley_2000(Instrument):
             f"SENS:{function.raw_value}:THR:VOLT:RANG {format_number(level)}"
         )
 
-    @mark_query
+    @mark_query(group="Function and range")
     def get_threshold_range(self, function: ThresholdFunction) -> float:
         """Queries the threshold voltage range.
 
@@ -949,7 +940,7 @@ class Keithley_2000(Instrument):
 
     """ TEMPERATURE, DIODE AND CONTINUITY """
 
-    @mark_command
+    @mark_command(group="Temperature")
     def set_thermocouple_type(self, thermocouple: ThermocoupleType) -> int:
         """Sets the thermocouple type.
 
@@ -961,7 +952,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:TEMP:TC:TYPE {thermocouple.raw_value}")
 
-    @mark_query
+    @mark_query(group="Temperature")
     def get_thermocouple_type(self) -> ThermocoupleType:
         """Queries the thermocouple type.
 
@@ -970,7 +961,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(ThermocoupleType, self.query("SENS:TEMP:TC:TYPE?"))
 
-    @mark_command
+    @mark_command(group="Temperature")
     def set_reference_junction(self, junction: ReferenceJunction) -> int:
         """Sets the reference junction type.
 
@@ -982,7 +973,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:TEMP:TC:RJUN:RSEL {junction.raw_value}")
 
-    @mark_query
+    @mark_query(group="Temperature")
     def get_reference_junction(self) -> ReferenceJunction:
         """Queries the reference junction type.
 
@@ -991,7 +982,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(ReferenceJunction, self.query("SENS:TEMP:TC:RJUN:RSEL?"))
 
-    @mark_command
+    @mark_command(group="Temperature")
     def set_simulated_junction_temperature(self, temperature: float) -> int:
         """Sets the simulated reference junction temperature.
 
@@ -1003,7 +994,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:TEMP:TC:RJUN:SIM {format_number(temperature)}")
 
-    @mark_query
+    @mark_query(group="Temperature")
     def get_simulated_junction_temperature(self) -> float:
         """Queries the simulated reference junction temperature.
 
@@ -1012,7 +1003,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("SENS:TEMP:TC:RJUN:SIM?"))
 
-    @mark_command
+    @mark_command(group="Temperature")
     def set_junction_temperature_coefficient(self, coefficient: float) -> int:
         """Sets the temperature coefficient of the real reference junction.
 
@@ -1024,7 +1015,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:TEMP:TC:RJUN:REAL:TCO {format_number(coefficient)}")
 
-    @mark_query
+    @mark_query(group="Temperature")
     def get_junction_temperature_coefficient(self) -> float:
         """Queries the temperature coefficient of the real reference junction.
 
@@ -1033,7 +1024,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("SENS:TEMP:TC:RJUN:REAL:TCO?"))
 
-    @mark_command
+    @mark_command(group="Temperature")
     def set_junction_voltage_offset(self, offset: float) -> int:
         """Sets the voltage offset at 0 C of the real reference junction.
 
@@ -1045,7 +1036,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:TEMP:TC:RJUN:REAL:OFFS {format_number(offset)}")
 
-    @mark_query
+    @mark_query(group="Temperature")
     def get_junction_voltage_offset(self) -> float:
         """Queries the voltage offset at 0 C of the real reference junction.
 
@@ -1054,7 +1045,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("SENS:TEMP:TC:RJUN:REAL:OFFS?"))
 
-    @mark_command
+    @mark_command(group="Diode and continuity")
     def set_diode_current_range(self, current: float) -> int:
         """Sets the diode test current range.
 
@@ -1066,7 +1057,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:DIOD:CURR:RANG:UPP {format_number(current)}")
 
-    @mark_query
+    @mark_query(group="Diode and continuity")
     def get_diode_current_range(self) -> float:
         """Queries the diode test current range.
 
@@ -1075,7 +1066,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("SENS:DIOD:CURR:RANG:UPP?"))
 
-    @mark_command
+    @mark_command(group="Diode and continuity")
     def set_continuity_threshold(self, threshold: float) -> int:
         """Sets the continuity threshold resistance.
 
@@ -1087,7 +1078,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:CONT:THR {format_number(threshold)}")
 
-    @mark_query
+    @mark_query(group="Diode and continuity")
     def get_continuity_threshold(self) -> float:
         """Queries the continuity threshold resistance.
 
@@ -1098,7 +1089,7 @@ class Keithley_2000(Instrument):
 
     """ READING HOLD """
 
-    @mark_command
+    @mark_command(group="Hold")
     def set_hold_window(self, window: float) -> int:
         """Sets the reading hold window.
 
@@ -1110,7 +1101,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:HOLD:WIND {format_number(window)}")
 
-    @mark_query
+    @mark_query(group="Hold")
     def get_hold_window(self) -> float:
         """Queries the reading hold window.
 
@@ -1119,7 +1110,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("SENS:HOLD:WIND?"))
 
-    @mark_command
+    @mark_command(group="Hold")
     def set_hold_count(self, count: int) -> int:
         """Sets the reading hold count.
 
@@ -1131,7 +1122,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:HOLD:COUN {count}")
 
-    @mark_query
+    @mark_query(group="Hold")
     def get_hold_count(self) -> int:
         """Queries the reading hold count.
 
@@ -1140,7 +1131,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query("SENS:HOLD:COUN?"))
 
-    @mark_command
+    @mark_command(group="Hold")
     def set_hold(self, state: State) -> int:
         """Enables or disables the reading hold.
 
@@ -1152,7 +1143,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SENS:HOLD:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Hold")
     def get_hold(self) -> State:
         """Queries whether the reading hold is enabled.
 
@@ -1163,7 +1154,7 @@ class Keithley_2000(Instrument):
 
     """ MATH, STATISTICS AND LIMIT TESTING """
 
-    @mark_command
+    @mark_command(group="Math")
     def set_math_format(self, math_format: MathFormat) -> int:
         """Sets the math format.
 
@@ -1175,7 +1166,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC:FORM {math_format.raw_value}")
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_format(self) -> MathFormat:
         """Queries the math format.
 
@@ -1184,7 +1175,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(MathFormat, self.query("CALC:FORM?"))
 
-    @mark_command
+    @mark_command(group="Math")
     def set_math_factor_m(self, factor: float) -> int:
         """Sets the mX+b "m" factor.
 
@@ -1196,7 +1187,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC:KMAT:MMF {format_number(factor)}")
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_factor_m(self) -> float:
         """Queries the mX+b "m" factor.
 
@@ -1205,7 +1196,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("CALC:KMAT:MMF?"))
 
-    @mark_command
+    @mark_command(group="Math")
     def set_math_factor_b(self, factor: float) -> int:
         """Sets the mX+b "b" factor.
 
@@ -1217,7 +1208,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC:KMAT:MBF {format_number(factor)}")
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_factor_b(self) -> float:
         """Queries the mX+b "b" factor.
 
@@ -1226,7 +1217,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("CALC:KMAT:MBF?"))
 
-    @mark_command
+    @mark_command(group="Math")
     def set_math_units(self, units: str) -> int:
         """Sets the units shown for an mX+b reading.
 
@@ -1238,7 +1229,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC:KMAT:MUN '{units}'")
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_units(self) -> str:
         """Queries the units shown for an mX+b reading.
 
@@ -1247,7 +1238,7 @@ class Keithley_2000(Instrument):
         """
         return unquote(self.query("CALC:KMAT:MUN?"))
 
-    @mark_command
+    @mark_command(group="Math")
     def set_math_percent_target(self, target: float) -> int:
         """Sets the percent calculation target value.
 
@@ -1259,7 +1250,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC:KMAT:PERC {format_number(target)}")
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_percent_target(self) -> float:
         """Queries the percent calculation target value.
 
@@ -1268,7 +1259,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("CALC:KMAT:PERC?"))
 
-    @mark_command
+    @mark_command(group="Math")
     def acquire_percent_target(self) -> int:
         """Uses the present input as the target value of the percent calculation.
 
@@ -1277,7 +1268,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("CALC:KMAT:PERC:ACQ")
 
-    @mark_command
+    @mark_command(group="Math")
     def set_math_state(self, state: State) -> int:
         """Enables or disables the math calculation.
 
@@ -1289,7 +1280,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_state(self) -> State:
         """Queries whether the math calculation is enabled.
 
@@ -1298,7 +1289,7 @@ class Keithley_2000(Instrument):
         """
         return State.from_raw_value(to_int(self.query("CALC:STAT?")))
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_reading(self) -> float:
         """Reads the latest post-math reading.
 
@@ -1307,7 +1298,7 @@ class Keithley_2000(Instrument):
         """
         return first_number(self.query("CALC:DATA?"))
 
-    @mark_command
+    @mark_command(group="Buffer statistics")
     def set_statistic_format(self, statistic: StatisticFormat) -> int:
         """Sets the buffer statistic.
 
@@ -1319,7 +1310,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC2:FORM {statistic.raw_value}")
 
-    @mark_query
+    @mark_query(group="Buffer statistics")
     def get_statistic_format(self) -> StatisticFormat:
         """Queries the buffer statistic.
 
@@ -1328,7 +1319,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(StatisticFormat, self.query("CALC2:FORM?"))
 
-    @mark_command
+    @mark_command(group="Buffer statistics")
     def set_statistic_state(self, state: State) -> int:
         """Enables or disables the buffer statistic calculation.
 
@@ -1340,7 +1331,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC2:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Buffer statistics")
     def get_statistic_state(self) -> State:
         """Queries whether the buffer statistic calculation is enabled.
 
@@ -1349,7 +1340,7 @@ class Keithley_2000(Instrument):
         """
         return State.from_raw_value(to_int(self.query("CALC2:STAT?")))
 
-    @mark_command
+    @mark_command(group="Buffer statistics")
     def calculate_statistic(self) -> int:
         """Performs the selected statistic on the buffer contents.
 
@@ -1358,7 +1349,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("CALC2:IMM")
 
-    @mark_query
+    @mark_query(group="Buffer statistics")
     def get_statistic(self) -> float:
         """Reads the result of the buffer statistic.
 
@@ -1367,7 +1358,7 @@ class Keithley_2000(Instrument):
         """
         return first_number(self.query("CALC2:DATA?"))
 
-    @mark_command
+    @mark_command(group="Limits")
     def set_limit_upper(self, limit: float) -> int:
         """Sets the upper limit.
 
@@ -1379,7 +1370,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC3:LIM:UPP {format_number(limit)}")
 
-    @mark_query
+    @mark_query(group="Limits")
     def get_limit_upper(self) -> float:
         """Queries the upper limit.
 
@@ -1388,7 +1379,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("CALC3:LIM:UPP?"))
 
-    @mark_command
+    @mark_command(group="Limits")
     def set_limit_lower(self, limit: float) -> int:
         """Sets the lower limit.
 
@@ -1400,7 +1391,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC3:LIM:LOW {format_number(limit)}")
 
-    @mark_query
+    @mark_query(group="Limits")
     def get_limit_lower(self) -> float:
         """Queries the lower limit.
 
@@ -1409,7 +1400,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("CALC3:LIM:LOW?"))
 
-    @mark_command
+    @mark_command(group="Limits")
     def set_limit_test(self, state: State) -> int:
         """Enables or disables the limit test.
 
@@ -1421,7 +1412,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC3:LIM:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Limits")
     def get_limit_test(self) -> State:
         """Queries whether the limit test is enabled.
 
@@ -1430,7 +1421,7 @@ class Keithley_2000(Instrument):
         """
         return State.from_raw_value(to_int(self.query("CALC3:LIM:STAT?")))
 
-    @mark_query
+    @mark_query(group="Limits")
     def get_limit_test_passed(self) -> bool:
         """Queries whether the limit test passed.
 
@@ -1439,7 +1430,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query("CALC3:LIM:FAIL?")) == 1
 
-    @mark_command
+    @mark_command(group="Limits")
     def clear_limit_failure(self) -> int:
         """Clears the limit test failure indication.
 
@@ -1448,7 +1439,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("CALC3:LIM:CLE")
 
-    @mark_command
+    @mark_command(group="Limits")
     def set_limit_auto_clear(self, state: State) -> int:
         """Enables or disables the clearing of the limit failure when the instrument goes idle.
 
@@ -1460,7 +1451,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"CALC3:LIM:CLE:AUTO {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Limits")
     def get_limit_auto_clear(self) -> State:
         """Queries whether the clearing of the limit failure when the instrument goes idle is enabled.
 
@@ -1469,7 +1460,7 @@ class Keithley_2000(Instrument):
         """
         return State.from_raw_value(to_int(self.query("CALC3:LIM:CLE:AUTO?")))
 
-    @mark_command
+    @mark_command(group="Limits")
     def recalculate_limits(self) -> int:
         """Re-runs the limit test on the present reading.
 
@@ -1480,7 +1471,7 @@ class Keithley_2000(Instrument):
 
     """ UNITS """
 
-    @mark_command
+    @mark_command(group="Units")
     def set_temperature_unit(self, unit: TemperatureUnit) -> int:
         """Sets the temperature unit.
 
@@ -1492,7 +1483,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"UNIT:TEMP {unit.raw_value}")
 
-    @mark_query
+    @mark_query(group="Units")
     def get_temperature_unit(self) -> TemperatureUnit:
         """Queries the temperature unit.
 
@@ -1501,7 +1492,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(TemperatureUnit, self.query("UNIT:TEMP?"))
 
-    @mark_command
+    @mark_command(group="Units")
     def set_ac_voltage_unit(self, unit: VoltageUnit) -> int:
         """Sets the AC voltage unit.
 
@@ -1513,7 +1504,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"UNIT:VOLT:AC {unit.raw_value}")
 
-    @mark_query
+    @mark_query(group="Units")
     def get_ac_voltage_unit(self) -> VoltageUnit:
         """Queries the AC voltage unit.
 
@@ -1522,7 +1513,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(VoltageUnit, self.query("UNIT:VOLT:AC?"))
 
-    @mark_command
+    @mark_command(group="Units")
     def set_dc_voltage_unit(self, unit: VoltageUnit) -> int:
         """Sets the DC voltage unit.
 
@@ -1534,7 +1525,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"UNIT:VOLT:DC {unit.raw_value}")
 
-    @mark_query
+    @mark_query(group="Units")
     def get_dc_voltage_unit(self) -> VoltageUnit:
         """Queries the DC voltage unit.
 
@@ -1543,7 +1534,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(VoltageUnit, self.query("UNIT:VOLT:DC?"))
 
-    @mark_command
+    @mark_command(group="Units")
     def set_ac_db_reference(self, reference: float) -> int:
         """Sets the AC dB reference.
 
@@ -1555,7 +1546,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"UNIT:VOLT:AC:DB:REF {format_number(reference)}")
 
-    @mark_query
+    @mark_query(group="Units")
     def get_ac_db_reference(self) -> float:
         """Queries the AC dB reference.
 
@@ -1564,7 +1555,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("UNIT:VOLT:AC:DB:REF?"))
 
-    @mark_command
+    @mark_command(group="Units")
     def set_ac_dbm_impedance(self, impedance: int) -> int:
         """Sets the AC dBm reference impedance.
 
@@ -1576,7 +1567,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"UNIT:VOLT:AC:DBM:IMP {impedance}")
 
-    @mark_query
+    @mark_query(group="Units")
     def get_ac_dbm_impedance(self) -> int:
         """Queries the AC dBm reference impedance.
 
@@ -1585,7 +1576,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query("UNIT:VOLT:AC:DBM:IMP?"))
 
-    @mark_command
+    @mark_command(group="Units")
     def set_dc_db_reference(self, reference: float) -> int:
         """Sets the DC dB reference.
 
@@ -1597,7 +1588,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"UNIT:VOLT:DC:DB:REF {format_number(reference)}")
 
-    @mark_query
+    @mark_query(group="Units")
     def get_dc_db_reference(self) -> float:
         """Queries the DC dB reference.
 
@@ -1606,7 +1597,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("UNIT:VOLT:DC:DB:REF?"))
 
-    @mark_command
+    @mark_command(group="Units")
     def set_dc_dbm_impedance(self, impedance: int) -> int:
         """Sets the DC dBm reference impedance.
 
@@ -1618,7 +1609,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"UNIT:VOLT:DC:DBM:IMP {impedance}")
 
-    @mark_query
+    @mark_query(group="Units")
     def get_dc_dbm_impedance(self) -> int:
         """Queries the DC dBm reference impedance.
 
@@ -1629,7 +1620,7 @@ class Keithley_2000(Instrument):
 
     """ DISPLAY """
 
-    @mark_command
+    @mark_command(group="Display")
     def set_display_enabled(self, state: State) -> int:
         """Enables or disables the front panel display and controls.
 
@@ -1641,7 +1632,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"DISP:ENAB {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Display")
     def get_display_enabled(self) -> State:
         """Queries whether the front panel display and controls is enabled.
 
@@ -1650,7 +1641,7 @@ class Keithley_2000(Instrument):
         """
         return State.from_raw_value(to_int(self.query("DISP:ENAB?")))
 
-    @mark_command
+    @mark_command(group="Display")
     def set_display_text(self, text: str) -> int:
         """Sets the display message.
 
@@ -1662,7 +1653,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"DISP:TEXT:DATA '{text}'")
 
-    @mark_query
+    @mark_query(group="Display")
     def get_display_text(self) -> str:
         """Queries the display message.
 
@@ -1671,7 +1662,7 @@ class Keithley_2000(Instrument):
         """
         return unquote(self.query("DISP:TEXT:DATA?"))
 
-    @mark_command
+    @mark_command(group="Display")
     def set_display_text_state(self, state: State) -> int:
         """Enables or disables the display message.
 
@@ -1683,7 +1674,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"DISP:TEXT:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Display")
     def get_display_text_state(self) -> State:
         """Queries whether the display message is enabled.
 
@@ -1694,7 +1685,7 @@ class Keithley_2000(Instrument):
 
     """ BUFFER """
 
-    @mark_command
+    @mark_command(group="Buffer")
     def clear_buffer(self) -> int:
         """Clears the readings from the buffer.
 
@@ -1703,7 +1694,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("TRAC:CLE")
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_free(self) -> list[int]:
         """Queries the memory available for the buffer.
 
@@ -1712,7 +1703,7 @@ class Keithley_2000(Instrument):
         """
         return to_ints(self.query("TRAC:FREE?"))
 
-    @mark_command
+    @mark_command(group="Buffer")
     def set_buffer_size(self, size: int) -> int:
         """Sets the buffer size.
 
@@ -1724,7 +1715,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"TRAC:POIN {size}")
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_size(self) -> int:
         """Queries the buffer size.
 
@@ -1733,7 +1724,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query("TRAC:POIN?"))
 
-    @mark_command
+    @mark_command(group="Buffer")
     def set_buffer_feed(self, feed: TraceFeed) -> int:
         """Sets the source of the buffer readings.
 
@@ -1745,7 +1736,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"TRAC:FEED {feed.raw_value}")
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_feed(self) -> TraceFeed:
         """Queries the source of the buffer readings.
 
@@ -1754,7 +1745,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(TraceFeed, self.query("TRAC:FEED?"))
 
-    @mark_command
+    @mark_command(group="Buffer")
     def set_buffer_control(self, control: TraceControl) -> int:
         """Sets the buffer control.
 
@@ -1766,7 +1757,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"TRAC:FEED:CONT {control.raw_value}")
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_control(self) -> TraceControl:
         """Queries the buffer control.
 
@@ -1775,7 +1766,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(TraceControl, self.query("TRAC:FEED:CONT?"))
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_data(self) -> list[float]:
         """Reads all the readings in the buffer.
 
@@ -1786,7 +1777,7 @@ class Keithley_2000(Instrument):
 
     """ TRIGGER MODEL """
 
-    @mark_command
+    @mark_command(group="Trigger")
     def initiate(self) -> int:
         """Takes the instrument out of idle.
 
@@ -1795,7 +1786,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("INIT:IMM")
 
-    @mark_command
+    @mark_command(group="Trigger")
     def abort_trigger(self) -> int:
         """Resets the trigger system and goes idle.
 
@@ -1804,7 +1795,16 @@ class Keithley_2000(Instrument):
         """
         return self.command("ABOR")
 
-    @mark_command
+    @mark_command(group="Trigger")
+    def trigger(self) -> int:
+        """Sends a bus trigger. Only acts if BUS is the trigger source.
+
+        Returns:
+            int: Status code indicating the success of the operation.
+        """
+        return self.command("*TRG")
+
+    @mark_command(group="Trigger")
     def set_continuous_initiation(self, state: State) -> int:
         """Enables or disables the continuous initiation.
 
@@ -1816,7 +1816,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"INIT:CONT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_continuous_initiation(self) -> State:
         """Queries whether the continuous initiation is enabled.
 
@@ -1825,7 +1825,7 @@ class Keithley_2000(Instrument):
         """
         return State.from_raw_value(to_int(self.query("INIT:CONT?")))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_trigger_count(self, count: float) -> int:
         """Sets the trigger count.
 
@@ -1837,7 +1837,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"TRIG:COUN {format_count(count)}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_trigger_count(self) -> float:
         """Queries the trigger count.
 
@@ -1846,7 +1846,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("TRIG:COUN?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_trigger_delay(self, delay: float) -> int:
         """Sets the trigger delay.
 
@@ -1858,7 +1858,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"TRIG:DEL {format_number(delay)}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_trigger_delay(self) -> float:
         """Queries the trigger delay.
 
@@ -1867,7 +1867,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("TRIG:DEL?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_trigger_auto_delay(self, state: State) -> int:
         """Enables or disables the automatic trigger delay.
 
@@ -1879,7 +1879,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"TRIG:DEL:AUTO {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_trigger_auto_delay(self) -> State:
         """Queries whether the automatic trigger delay is enabled.
 
@@ -1888,7 +1888,7 @@ class Keithley_2000(Instrument):
         """
         return State.from_raw_value(to_int(self.query("TRIG:DEL:AUTO?")))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_trigger_source(self, source: TriggerSource) -> int:
         """Sets the trigger source.
 
@@ -1900,7 +1900,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"TRIG:SOUR {source.raw_value}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_trigger_source(self) -> TriggerSource:
         """Queries the trigger source.
 
@@ -1909,7 +1909,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(TriggerSource, self.query("TRIG:SOUR?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_trigger_timer(self, interval: float) -> int:
         """Sets the trigger timer interval.
 
@@ -1921,7 +1921,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"TRIG:TIM {format_number(interval)}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_trigger_timer(self) -> float:
         """Queries the trigger timer interval.
 
@@ -1930,7 +1930,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("TRIG:TIM?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def bypass_trigger_control(self) -> int:
         """Bypasses the trigger control source.
 
@@ -1939,7 +1939,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("TRIG:SIGN")
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_sample_count(self, count: int) -> int:
         """Sets the sample count.
 
@@ -1951,7 +1951,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SAMP:COUN {count}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_sample_count(self) -> int:
         """Queries the sample count.
 
@@ -1962,7 +1962,7 @@ class Keithley_2000(Instrument):
 
     """ SCANNER CARD """
 
-    @mark_command
+    @mark_command(group="Scanner")
     def close_channel(self, channel: int) -> int:
         """Closes one channel, or channel pair for a 4-wire function, opening any other first.
 
@@ -1974,7 +1974,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"ROUT:CLOS (@{channel})")
 
-    @mark_query
+    @mark_query(group="Scanner")
     def get_closed_channel(self) -> list[int]:
         """Queries the closed channel.
 
@@ -1983,7 +1983,7 @@ class Keithley_2000(Instrument):
         """
         return parse_channels(self.query("ROUT:CLOS:STAT?"))
 
-    @mark_command
+    @mark_command(group="Scanner")
     def open_all_channels(self) -> int:
         """Opens all the input channels.
 
@@ -1992,7 +1992,7 @@ class Keithley_2000(Instrument):
         """
         return self.command("ROUT:OPEN:ALL")
 
-    @mark_command
+    @mark_command(group="Scanner")
     def close_channels(self, channels: list[int]) -> int:
         """Closes several channels at once. Channel 11 is the 2-pole/4-pole relay, closed for 2-pole.
 
@@ -2004,7 +2004,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"ROUT:MULT:CLOS {format_channels(channels)}")
 
-    @mark_query
+    @mark_query(group="Scanner")
     def get_closed_channels(self) -> list[int]:
         """Queries all the closed channels.
 
@@ -2013,7 +2013,7 @@ class Keithley_2000(Instrument):
         """
         return parse_channels(self.query("ROUT:MULT:CLOS:STAT?"))
 
-    @mark_command
+    @mark_command(group="Scanner")
     def open_channels(self, channels: list[int]) -> int:
         """Opens several channels.
 
@@ -2025,7 +2025,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"ROUT:MULT:OPEN {format_channels(channels)}")
 
-    @mark_command
+    @mark_command(group="Scanner")
     def set_internal_scan_list(self, channels: list[int]) -> int:
         """Sets the channels of the internal scan. They must be consecutive.
 
@@ -2037,7 +2037,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"ROUT:SCAN {format_channels(channels)}")
 
-    @mark_query
+    @mark_query(group="Scanner")
     def get_internal_scan_list(self) -> list[int]:
         """Queries the internal scan list.
 
@@ -2046,7 +2046,7 @@ class Keithley_2000(Instrument):
         """
         return parse_channels(self.query("ROUT:SCAN?"))
 
-    @mark_command
+    @mark_command(group="Scanner")
     def set_external_scan_list(self, channels: list[int]) -> int:
         """Sets the channels of the external scan, made through a switch system.
 
@@ -2058,7 +2058,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"ROUT:SCAN:EXT {format_channels(channels)}")
 
-    @mark_query
+    @mark_query(group="Scanner")
     def get_external_scan_list(self) -> list[int]:
         """Queries the external scan list.
 
@@ -2067,7 +2067,7 @@ class Keithley_2000(Instrument):
         """
         return parse_channels(self.query("ROUT:SCAN:EXT?"))
 
-    @mark_command
+    @mark_command(group="Scanner")
     def set_scan_mode(self, mode: ScanMode) -> int:
         """Sets the scan operation.
 
@@ -2079,7 +2079,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"ROUT:SCAN:LSEL {mode.raw_value}")
 
-    @mark_query
+    @mark_query(group="Scanner")
     def get_scan_mode(self) -> ScanMode:
         """Queries the scan operation.
 
@@ -2090,7 +2090,7 @@ class Keithley_2000(Instrument):
 
     """ SYSTEM """
 
-    @mark_command
+    @mark_command(group="System")
     def preset(self) -> int:
         """Returns the instrument to its preset defaults.
 
@@ -2103,7 +2103,7 @@ class Keithley_2000(Instrument):
         self.query("*OPC?")
         return result
 
-    @mark_command
+    @mark_command(group="System")
     def set_power_on_setup(self, setup: PowerOnSetup) -> int:
         """Sets the power-on setup.
 
@@ -2115,7 +2115,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SYST:POS {setup.raw_value}")
 
-    @mark_query
+    @mark_query(group="System")
     def get_power_on_setup(self) -> PowerOnSetup:
         """Queries the power-on setup.
 
@@ -2124,7 +2124,7 @@ class Keithley_2000(Instrument):
         """
         return parse_enum(PowerOnSetup, self.query("SYST:POS?"))
 
-    @mark_query
+    @mark_query(group="System")
     def get_front_inputs_selected(self) -> bool:
         """Queries whether the front panel inputs are selected.
 
@@ -2133,7 +2133,7 @@ class Keithley_2000(Instrument):
         """
         return to_int(self.query("SYST:FRSW?")) == 1
 
-    @mark_query
+    @mark_query(group="System")
     def get_scpi_version(self) -> str:
         """Queries the revision of the SCPI standard.
 
@@ -2142,7 +2142,7 @@ class Keithley_2000(Instrument):
         """
         return unquote(self.query("SYST:VERS?"))
 
-    @mark_command
+    @mark_command(group="System")
     def set_autozero(self, state: State) -> int:
         """Enables or disables the autozero.
 
@@ -2154,7 +2154,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SYST:AZER:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="System")
     def get_autozero(self) -> State:
         """Queries whether the autozero is enabled.
 
@@ -2163,7 +2163,7 @@ class Keithley_2000(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SYST:AZER:STAT?")))
 
-    @mark_query
+    @mark_query(group="System")
     def get_line_frequency(self) -> float:
         """Queries the power line frequency.
 
@@ -2172,7 +2172,7 @@ class Keithley_2000(Instrument):
         """
         return float(self.query("SYST:LFR?"))
 
-    @mark_command
+    @mark_command(group="System")
     def set_beeper(self, state: State) -> int:
         """Enables or disables the beeper.
 
@@ -2184,7 +2184,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SYST:BEEP:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="System")
     def get_beeper(self) -> State:
         """Queries whether the beeper is enabled.
 
@@ -2193,7 +2193,7 @@ class Keithley_2000(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SYST:BEEP:STAT?")))
 
-    @mark_command
+    @mark_command(group="System")
     def set_key_click(self, state: State) -> int:
         """Enables or disables the key click.
 
@@ -2205,7 +2205,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SYST:KCL {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="System")
     def get_key_click(self) -> State:
         """Queries whether the key click is enabled.
 
@@ -2214,7 +2214,7 @@ class Keithley_2000(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SYST:KCL?")))
 
-    @mark_command
+    @mark_command(group="System")
     def press_key(self, key: Key) -> int:
         """Simulates a front panel key press.
 
@@ -2226,7 +2226,7 @@ class Keithley_2000(Instrument):
         """
         return self.command(f"SYST:KEY {key.raw_value}")
 
-    @mark_query
+    @mark_query(group="System")
     def get_last_key(self) -> Key:
         """Queries the last key pressed.
 

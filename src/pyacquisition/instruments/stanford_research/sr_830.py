@@ -133,7 +133,7 @@ class SR_830(Instrument):
     SyncFilterState = SyncFilterState
     TimeConstant = TimeConstant
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def identify(self) -> str:
         """Queries the instrument identification string.
 
@@ -142,7 +142,7 @@ class SR_830(Instrument):
         """
         return self.query("*IDN?")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def reset(self) -> int:
         """Resets the instrument to its default state.
 
@@ -151,16 +151,7 @@ class SR_830(Instrument):
         """
         return self.command("*RST")
 
-    @mark_command
-    def reset_data_buffer(self) -> int:
-        """Resets the data buffer of the instrument.
-
-        Returns:
-            int: Status code indicating the success of the operation.
-        """
-        return self.command("REST")
-
-    @mark_command
+    @mark_command(group="Identity and status")
     def clear(self) -> int:
         """Clears the status and error registers of the instrument.
 
@@ -169,7 +160,7 @@ class SR_830(Instrument):
         """
         return self.command("*CLS")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_phase(self) -> float:
         """Queries the current excitation phase in degrees.
 
@@ -178,7 +169,7 @@ class SR_830(Instrument):
         """
         return float(self.query("PHAS?"))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_phase(self, phase: float) -> int:
         """Sets the excitation phase in degrees.
 
@@ -190,7 +181,7 @@ class SR_830(Instrument):
         """
         return self.command(f"PHAS {phase:.2f}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_reference_source(self) -> ReferenceSource:
         """Queries the current reference source.
 
@@ -199,7 +190,7 @@ class SR_830(Instrument):
         """
         return ReferenceSource.from_raw_value(int(self.query("FMOD?")))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_reference_source(self, source: ReferenceSource) -> int:
         """Sets the reference source.
 
@@ -211,7 +202,7 @@ class SR_830(Instrument):
         """
         return self.command(f"FMOD {source.raw_value}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_frequency(self) -> float:
         """Queries the current reference frequency.
 
@@ -220,7 +211,7 @@ class SR_830(Instrument):
         """
         return float(self.query("FREQ?"))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_frequency(self, frequency: float) -> int:
         """Sets the reference frequency.
 
@@ -232,7 +223,7 @@ class SR_830(Instrument):
         """
         return self.command(f"FREQ {frequency:.3f}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_external_reference_slope(self) -> ReferenceSlope:
         """Queries the slope of the external reference signal.
 
@@ -241,7 +232,7 @@ class SR_830(Instrument):
         """
         return ReferenceSlope.from_raw_value(int(self.query("RSLP?")))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_external_reference_slope(self, slope: ReferenceSlope) -> int:
         """Sets the slope of the external reference signal.
 
@@ -253,7 +244,7 @@ class SR_830(Instrument):
         """
         return self.command(f"RSLP {slope.raw_value}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_harmonic(self) -> int:
         """Queries the current harmonic setting.
 
@@ -262,7 +253,7 @@ class SR_830(Instrument):
         """
         return int(self.query("HARM?"))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_harmonic(self, harmonic: int) -> int:
         """Sets the harmonic.
 
@@ -274,7 +265,7 @@ class SR_830(Instrument):
         """
         return self.command(f"HARM {harmonic}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_reference_amplitude(self) -> float:
         """Queries the reference amplitude.
 
@@ -283,7 +274,7 @@ class SR_830(Instrument):
         """
         return float(self.query("SLVL?"))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_reference_amplitude(self, amplitude: float) -> int:
         """Sets the reference amplitude.
 
@@ -298,7 +289,7 @@ class SR_830(Instrument):
     """ INPUT AND FILTER
     """
 
-    @mark_query
+    @mark_query(group="Input and filter")
     def get_input_configuration(self) -> InputConfiguration:
         """Queries the input configuration.
 
@@ -307,7 +298,7 @@ class SR_830(Instrument):
         """
         return InputConfiguration.from_raw_value(int(self.query("ISRC?")))
 
-    @mark_command
+    @mark_command(group="Input and filter")
     def set_input_configuration(self, configuration: InputConfiguration) -> int:
         """Sets the input configuration.
 
@@ -319,7 +310,7 @@ class SR_830(Instrument):
         """
         return self.command(f"ISRC {configuration.raw_value}")
 
-    @mark_query
+    @mark_query(group="Input and filter")
     def get_input_grounding(self) -> InputGrounding:
         """Queries the input grounding configuration.
 
@@ -328,7 +319,7 @@ class SR_830(Instrument):
         """
         return InputGrounding.from_raw_value(int(self.query("IGND?")))
 
-    @mark_command
+    @mark_command(group="Input and filter")
     def set_input_grounding(self, configuration: InputGrounding) -> int:
         """Sets the input grounding configuration.
 
@@ -340,7 +331,7 @@ class SR_830(Instrument):
         """
         return self.command(f"IGND {configuration.raw_value}")
 
-    @mark_query
+    @mark_query(group="Input and filter")
     def get_input_coupling(self) -> InputCoupling:
         """Queries the input coupling configuration.
 
@@ -349,7 +340,7 @@ class SR_830(Instrument):
         """
         return InputCoupling.from_raw_value(int(self.query("ICPL?")))
 
-    @mark_command
+    @mark_command(group="Input and filter")
     def set_input_coupling(self, configuration: InputCoupling) -> int:
         """Sets the input coupling configuration.
 
@@ -361,7 +352,7 @@ class SR_830(Instrument):
         """
         return self.command(f"ICPL {configuration.raw_value}")
 
-    @mark_query
+    @mark_query(group="Input and filter")
     def get_notch_filters(self) -> NotchFilter:
         """Queries the notch filter configuration.
 
@@ -370,7 +361,7 @@ class SR_830(Instrument):
         """
         return NotchFilter.from_raw_value(int(self.query("ILIN?")))
 
-    @mark_command
+    @mark_command(group="Input and filter")
     def set_notch_filters(self, configuration: NotchFilter) -> int:
         """Sets the notch filter configuration.
 
@@ -385,7 +376,7 @@ class SR_830(Instrument):
     """ GAIN AND TIME CONSTANT
     """
 
-    @mark_query
+    @mark_query(group="Gain and time constant")
     def get_sensitivity(self) -> Sensitivity:
         """Queries the sensitivity setting.
 
@@ -394,7 +385,7 @@ class SR_830(Instrument):
         """
         return Sensitivity.from_raw_value(int(self.query("SENS?")))
 
-    @mark_command
+    @mark_command(group="Gain and time constant")
     def set_sensitivity(self, sensitivity: Sensitivity) -> int:
         """Sets the sensitivity.
 
@@ -406,7 +397,7 @@ class SR_830(Instrument):
         """
         return self.command(f"SENS {sensitivity.raw_value}")
 
-    @mark_query
+    @mark_query(group="Gain and time constant")
     def get_dynamic_reserve(self) -> DynamicReserve:
         """Queries the dynamic reserve setting.
 
@@ -415,7 +406,7 @@ class SR_830(Instrument):
         """
         return DynamicReserve.from_raw_value(int(self.query("RMOD?")))
 
-    @mark_command
+    @mark_command(group="Gain and time constant")
     def set_dynamic_reserve(self, reserve: DynamicReserve) -> int:
         """Sets the dynamic reserve.
 
@@ -427,7 +418,7 @@ class SR_830(Instrument):
         """
         return self.command(f"RMOD {reserve.raw_value}")
 
-    @mark_query
+    @mark_query(group="Gain and time constant")
     def get_time_constant(self) -> TimeConstant:
         """Queries the time constant setting.
 
@@ -436,7 +427,7 @@ class SR_830(Instrument):
         """
         return TimeConstant.from_raw_value(int(self.query("OFLT?")))
 
-    @mark_command
+    @mark_command(group="Gain and time constant")
     def set_time_constant(self, time_constant: TimeConstant) -> int:
         """Sets the time constant.
 
@@ -448,7 +439,7 @@ class SR_830(Instrument):
         """
         return self.command(f"OFLT {time_constant.raw_value}")
 
-    @mark_query
+    @mark_query(group="Gain and time constant")
     def get_filter_slope(self) -> FilterSlope:
         """Queries the filter slope setting.
 
@@ -457,7 +448,7 @@ class SR_830(Instrument):
         """
         return FilterSlope.from_raw_value(int(self.query("OFSL?")))
 
-    @mark_command
+    @mark_command(group="Gain and time constant")
     def set_filter_slope(self, filter_slope: FilterSlope) -> int:
         """Sets the filter slope.
 
@@ -469,7 +460,7 @@ class SR_830(Instrument):
         """
         return self.command(f"OFSL {filter_slope.raw_value}")
 
-    @mark_query
+    @mark_query(group="Gain and time constant")
     def get_sync_filter_state(self) -> SyncFilterState:
         """Queries the state of the synchronization filter.
 
@@ -478,7 +469,7 @@ class SR_830(Instrument):
         """
         return SyncFilterState.from_raw_value(int(self.query("SYNC?")))
 
-    @mark_command
+    @mark_command(group="Gain and time constant")
     def set_sync_filter_state(self, state: SyncFilterState) -> int:
         """Sets the state of the synchronization filter.
 
@@ -490,15 +481,15 @@ class SR_830(Instrument):
         """
         return self.command(f"SYNC {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_output(self, parameter: int) -> float:
         return float(self.query(f"OUTP? {parameter}"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_display_output(self, parameter: int) -> float:
         return float(self.query(f"OUTR? {parameter}"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_x(self) -> float:
         """Queries X, the part of the signal in phase with the reference.
 
@@ -507,7 +498,7 @@ class SR_830(Instrument):
         """
         return float(self.query("OUTP? 1"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_y(self) -> float:
         """Queries Y, the part of the signal 90 degrees out of phase with the reference.
 
@@ -516,7 +507,7 @@ class SR_830(Instrument):
         """
         return float(self.query("OUTP? 2"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_xy(self) -> list[float]:
         """Queries X and Y together, taken at the same moment.
 
@@ -525,6 +516,15 @@ class SR_830(Instrument):
         """
         return [float(s) for s in self.query("SNAP? 1,2").split(",")]
 
-    @mark_query
+    @mark_query(group="Data storage")
     def get_display_buffer_length(self) -> int:
         return int(self.query("SPTS?"))
+
+    @mark_command(group="Data storage")
+    def reset_data_buffer(self) -> int:
+        """Resets the data buffer of the instrument.
+
+        Returns:
+            int: Status code indicating the success of the operation.
+        """
+        return self.command("REST")

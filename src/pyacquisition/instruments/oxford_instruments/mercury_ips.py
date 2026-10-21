@@ -103,7 +103,7 @@ class Mercury_IPS(Instrument):
         else:
             return string[index]
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def identify(self) -> str:
         """Identifies the device.
 
@@ -112,7 +112,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("*IDN?")
 
-    @mark_command
+    @mark_command(group="Remote control")
     def remote_and_locked(self) -> str:
         """Sets the device to remote and locked mode.
 
@@ -121,7 +121,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("C1")
 
-    @mark_command
+    @mark_command(group="Remote control")
     def local_and_unlocked(self) -> str:
         """Sets the device to local and unlocked mode.
 
@@ -130,7 +130,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("C2")
 
-    @mark_command
+    @mark_command(group="Remote control")
     def remote_and_unlocked(self) -> str:
         """Sets the device to remote and unlocked mode.
 
@@ -139,49 +139,49 @@ class Mercury_IPS(Instrument):
         """
         return self.query("C3")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_system_status(self) -> SystemStatusM:
         response = self.query("X")
         response = self._parse_status_string(response, 1)
         return SystemStatusM.from_raw_value(int(response))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_limit_status(self) -> SystemStatusN:
         response = self.query("X")
         response = self._parse_status_string(response, 2)
         return SystemStatusN.from_raw_value(int(response))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_activity_status(self) -> ActivityStatus:
         response = self.query("X")
         response = self._parse_status_string(response, 4)
         return ActivityStatus.from_raw_value(int(response))
 
-    @mark_query
+    @mark_query(group="Remote control")
     def get_remote_status(self) -> RemoteStatus:
         response = self.query("X")
         response = self._parse_status_string(response, 6)
         return RemoteStatus.from_raw_value(int(response))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_switch_heater_status(self) -> SwitchHeaterStatus:
         response = self.query("X")
         response = self._parse_status_string(response, 8)
         return SwitchHeaterStatus.from_raw_value(int(response))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_sweep_mode_status(self) -> ModeStatusM:
         response = self.query("X")
         response = self._parse_status_string(response, 10)
         return ModeStatusM.from_raw_value(int(response))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_sweep_status(self) -> ModeStatusN:
         response = self.query("X")
         response = self._parse_status_string(response, 11)
         return ModeStatusN.from_raw_value(int(response))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_output_current(self) -> float:
         """Gets the output current.
 
@@ -190,7 +190,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R0")[1:])
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_supply_voltage(self) -> float:
         """Gets the supply voltage.
 
@@ -199,7 +199,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R1")[1:])
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_magnet_current(self) -> float:
         """Gets the magnet current.
 
@@ -208,7 +208,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R2")[1:])
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_setpoint_current(self) -> float:
         """Gets the setpoint current.
 
@@ -217,7 +217,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R5")[1:])
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_current_sweep_rate(self) -> float:
         """Gets the current sweep rate.
 
@@ -226,7 +226,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R6")[1:])
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_output_field(self) -> float:
         """Gets the output magnetic field.
 
@@ -235,7 +235,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R7")[1:])
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_setpoint_field(self) -> float:
         """Gets the setpoint magnetic field.
 
@@ -244,7 +244,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R8")[1:])
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_field_sweep_rate(self) -> float:
         """Gets the field sweep rate.
 
@@ -253,7 +253,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R9")[1:])
 
-    @mark_query
+    @mark_query(group="Limits and magnet")
     def get_software_voltage_limit(self) -> float:
         """Gets the software voltage limit.
 
@@ -262,7 +262,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R15")[1:])
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_persistent_current(self) -> float:
         """Gets the persistent current.
 
@@ -271,7 +271,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R16")[1:])
 
-    @mark_query
+    @mark_query(group="Limits and magnet")
     def get_trip_current(self) -> float:
         """Gets the trip current.
 
@@ -280,7 +280,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R17")[1:])
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_persistent_field(self) -> float:
         """Gets the persistent magnetic field.
 
@@ -289,7 +289,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R18")[1:])
 
-    @mark_query
+    @mark_query(group="Limits and magnet")
     def get_trip_field(self) -> float:
         """Gets the trip magnetic field.
 
@@ -298,7 +298,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R19")[1:])
 
-    @mark_query
+    @mark_query(group="Switch heater")
     def get_switch_heater_current(self) -> float:
         """Gets the switch heater current.
 
@@ -308,7 +308,7 @@ class Mercury_IPS(Instrument):
         response = float(self.query("R20")[1:-2])
         return response * 1e-3
 
-    @mark_query
+    @mark_query(group="Limits and magnet")
     def get_negative_current_limit(self) -> float:
         """Gets the negative current limit.
 
@@ -317,7 +317,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R21")[1:])
 
-    @mark_query
+    @mark_query(group="Limits and magnet")
     def get_positive_current_limit(self) -> float:
         """Gets the positive current limit.
 
@@ -326,7 +326,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R22")[1:])
 
-    @mark_query
+    @mark_query(group="Limits and magnet")
     def get_lead_resistance(self) -> float:
         """Gets the lead resistance.
 
@@ -335,7 +335,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R23")[1:-1])
 
-    @mark_query
+    @mark_query(group="Limits and magnet")
     def get_magnet_inductance(self) -> float:
         """Gets the magnet inductance.
 
@@ -344,7 +344,7 @@ class Mercury_IPS(Instrument):
         """
         return float(self.query("R24")[1:])
 
-    @mark_command
+    @mark_command(group="Sweep")
     def hold(self) -> int:
         """Sets the device to hold mode.
 
@@ -353,7 +353,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("A0")
 
-    @mark_command
+    @mark_command(group="Sweep")
     def to_setpoint(self) -> int:
         """Moves the device to the setpoint.
 
@@ -362,7 +362,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("A1")
 
-    @mark_command
+    @mark_command(group="Sweep")
     def to_zero(self) -> int:
         """Moves the device to zero.
 
@@ -371,7 +371,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("A2")
 
-    @mark_command
+    @mark_command(group="Sweep")
     def clamp(self) -> int:
         """Sets the device to clamp mode.
 
@@ -380,7 +380,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("A4")
 
-    @mark_command
+    @mark_command(group="Switch heater")
     def switch_heater_off(self) -> str:
         """Turns off the heater.
 
@@ -389,7 +389,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("H0")
 
-    @mark_command
+    @mark_command(group="Switch heater")
     def switch_heater_on(self) -> str:
         """Turns on the heater.
 
@@ -398,7 +398,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("H1")
 
-    @mark_command
+    @mark_command(group="Switch heater")
     def force_heater_on(self) -> int:
         """Forces the heater to turn on.
 
@@ -407,7 +407,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query("H2")
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_target_current(self, current: float) -> int:
         """Sets the target current.
 
@@ -419,7 +419,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query(f"I{current:.3f}")
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_target_field(self, field: float) -> int:
         """Sets the target magnetic field.
 
@@ -431,7 +431,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query(f"J{field:.3f}")
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_current_sweep_rate(self, rate: float) -> int:
         """Sets the current sweep rate.
 
@@ -443,7 +443,7 @@ class Mercury_IPS(Instrument):
         """
         return self.query(f"S{rate:.3f}")
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_field_sweep_rate(self, rate: float) -> int:
         """Sets the field sweep rate.
 

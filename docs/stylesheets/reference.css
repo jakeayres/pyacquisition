@@ -132,6 +132,14 @@
   letter-spacing: 0;
   border-top: 1px solid var(--pa-border);
 }
+/* A group of a driver's methods (templates/python/material/children.html.jinja):
+   a section title, with its methods under it */
+.md-typeset h3.pa-method-group {
+  margin: 2.2rem 0 0.1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
 .md-typeset .doc-heading .doc-object-name {
   font-family: var(--md-code-font-family);
   font-weight: 700;

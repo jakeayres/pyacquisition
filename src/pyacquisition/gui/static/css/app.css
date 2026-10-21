@@ -2110,6 +2110,38 @@ body.dragging-task * {
   font-size: var(--text-sm);
 }
 
+/* A grouped driver's method: its name, which wraps if it must, and a Q or C
+   at the end, for a query or a command (dock/instruments.js). */
+.method-name {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.method-kind {
+  flex: none;
+  align-self: center;
+  margin-left: var(--space-1);
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-strong);
+}
+
+.method-kind[data-group="command"] {
+  color: var(--warn);
+}
+
+/* Text for a screen reader alone. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 .call-pane {
   display: flex;
   flex-direction: column;

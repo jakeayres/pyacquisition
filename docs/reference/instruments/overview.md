@@ -1,6 +1,6 @@
 Every instrument driver that comes with PyAcquisition. [Connect a real instrument](../../usage/connect_instrument.md) shows them in use, and [Write a hardware instrument](../../usage/hardware_instrument.md) shows how to write another.
 
-The name on each card is the driver's: the class to import from `pyacquisition.instruments`, and what a config file's `instrument` takes. A **hardware** instrument takes a name and an address, and a **software** instrument a name, and some take options too, such as a `TextFile`'s path. Each page lists the driver's queries and commands, from its code.
+The name on each card is the driver's: the class to import from `pyacquisition.instruments`, and what a config file's `instrument` takes. A **hardware** instrument takes a name and an address, and a **software** instrument a name, and some take options too, such as a `TextFile`'s path. Each page lists the driver's queries and commands, from its code: in groups for the part of the instrument they belong to, such as **Inputs** and **Control loops** on a Lakeshore, with each setting's query and command together, and in one list for the smaller software instruments.
 
 <div class="pa-makers" markdown>
 

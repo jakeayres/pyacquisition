@@ -80,7 +80,15 @@ export const tookText = (ms) => (ms < 1000 ? `${Math.round(ms)} ms` : `${(ms / 1
 // (a hardware instrument gives a bare list, a software one {status, data}).
 const names = (answer) => (Array.isArray(answer) ? answer : answer?.data ?? []);
 
-// Each instrument, with its endpoints sorted into queries, commands and others.
+// A driver's method groups, as the server's schema gives them for each method
+// (core/instrument.py, route_extras): its group, and its place in the driver.
+const GROUP_KEY = "x-pyacquisition-group";
+const ORDER_KEY = "x-pyacquisition-order";
+const OTHER = "Other";
+
+// Each instrument, with its endpoints sorted into queries, commands and others,
+// by name. For a driver whose methods have groups, it is `grouped`, and each
+// endpoint has its `section` (its group) and its `order` in the driver.
 export async function loadInstruments() {
   const [root, rack] = await Promise.all([loadSchema(), get("/rack/list_instruments")]);
   const instruments = await Promise.all(
@@ -95,10 +103,13 @@ export async function loadInstruments() {
           const endpoint = describeEndpoint(path, methods.get, root);
           const method = path.slice(uid.length + 2);
           const group = queries.includes(method) ? "query" : commands.includes(method) ? "command" : "other";
-          return { ...endpoint, method, group };
+          const section = methods.get[GROUP_KEY] ?? OTHER;
+          const order = methods.get[ORDER_KEY] ?? Infinity;
+          return { ...endpoint, method, group, section, order };
         })
         .sort((a, b) => a.name.localeCompare(b.name));
-      return { uid, kind, endpoints };
+      const grouped = endpoints.some((e) => e.order !== Infinity);
+      return { uid, kind, endpoints, grouped };
     }),
   );
   return instruments;
@@ -109,6 +120,26 @@ const GROUPS = [
   ["command", "Commands"],
   ["other", "Other"],
 ];
+
+// The headings the method list is shown under: a grouped driver's groups, in
+// the order of its code with Other last, or else its queries, commands and
+// others.
+function sectionsOf(instrument) {
+  if (!instrument.grouped) {
+    return GROUPS.map(([group, label]) => ({ label, has: (e) => e.group === group }));
+  }
+  const labels = [...new Set(inDriverOrder(instrument.endpoints).map((e) => e.section))];
+  const ordered = [...labels.filter((l) => l !== OTHER), ...labels.filter((l) => l === OTHER)];
+  return ordered.map((label) => ({ label, has: (e) => e.section === label }));
+}
+
+// A grouped driver's endpoints in the order of its code, so a setting's query
+// and command sit together, and those with no place after, by name.
+const inDriverOrder = (endpoints) =>
+  [...endpoints].sort((a, b) => a.order - b.order || a.name.localeCompare(b.name));
+
+// The tag on each of a grouped driver's methods: Q or C, and what it stands for.
+const KIND = { query: ["Q", "Query"], command: ["C", "Command"] };
 
 // Queues an instrument's query or command (as described by loadInstruments) on
 // a task manager, to run in its turn with the form's params (see the server's
@@ -240,7 +271,7 @@ export function InstrumentsTab({ managers }) {
 
   const instrument = instruments.find((i) => i.uid === picked.uid) ?? instruments[0];
   const needle = query.trim().toLowerCase();
-  const shown = instrument.endpoints.filter(
+  const shown = (instrument.grouped ? inDriverOrder(instrument.endpoints) : instrument.endpoints).filter(
     (e) => !needle || `${e.name} ${e.method} ${e.description}`.toLowerCase().includes(needle),
   );
   const endpoint =
@@ -290,11 +321,11 @@ export function InstrumentsTab({ managers }) {
           />
         </label>
         <div class="method-list">
-          ${GROUPS.map(([group, label]) => {
-            const items = shown.filter((e) => e.group === group);
+          ${sectionsOf(instrument).map(({ label, has }) => {
+            const items = shown.filter(has);
             if (items.length === 0) return null;
             return html`
-              <div class="method-group" key=${group}>
+              <div class="method-group" key=${label}>
                 <div class="popover-label">${label}</div>
                 <ul aria-label=${label}>
                   ${items.map(
@@ -307,7 +338,13 @@ export function InstrumentsTab({ managers }) {
                           title=${e.description}
                           onClick=${() => setPicked({ uid: instrument.uid, path: e.path })}
                         >
-                          ${e.method}
+                          <span class="method-name">${e.method}</span>
+                          ${instrument.grouped &&
+                          KIND[e.group] &&
+                          html`<span class="method-kind" data-group=${e.group} title=${KIND[e.group][1]}>
+                            <span aria-hidden="true">${KIND[e.group][0]}</span>
+                            <span class="visually-hidden">${KIND[e.group][1]}</span>
+                          </span>`}
                         </button>
                       </li>
                     `,

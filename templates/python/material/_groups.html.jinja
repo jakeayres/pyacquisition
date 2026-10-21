@@ -1,0 +1,54 @@
+{#- A driver's method groups, read from its markers as the code has them:
+    `@mark_query(group="Inputs")` and `@mark_command(group="Inputs")`. Static, as
+    the rest of the docs are, so a group must be written as a string there.
+    `pyacquisition.core.instrument.method_groups` gives the same groups from the
+    running code, and tests/unit/test_method_groups.py checks the two agree. -#}
+
+{#- The group a method's marker names, or nothing. -#}
+{% macro group_of(function) -%}
+  {%- for decorator in function.decorators -%}
+    {%- if decorator.callable_path.split(".")[-1] in ("mark_query", "mark_command") -%}
+      {%- for argument in decorator.value.arguments | default([]) -%}
+        {%- if argument.name == "group" -%}{{ (argument.value | string)[1:-1] }}{%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endmacro %}
+
+{#- The groups of these methods, one per line, in the order the methods are
+    given, with "Other" last for those without one. Nothing if none has a group. -#}
+{% macro group_names(functions) -%}
+  {%- set ns = namespace(names=[], other=false) -%}
+  {%- for function in functions -%}
+    {%- set group = group_of(function) | trim -%}
+    {%- if not group or group == "Other" -%}
+      {%- set ns.other = true -%}
+    {%- elif group not in ns.names -%}
+      {%- set ns.names = ns.names + [group] -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {%- if ns.names -%}{{ (ns.names + (["Other"] if ns.other else [])) | join("\n") }}{%- endif -%}
+{%- endmacro %}
+
+{#- Whether this method is listed under this group. -#}
+{% macro in_group(function, group) -%}
+  {%- set own = group_of(function) | trim -%}
+  {%- if own == group or (group == "Other" and not own) -%}yes{%- endif -%}
+{%- endmacro %}
+
+{#- A group's anchor on the page: the letters and digits of its name, lower case,
+    with a hyphen for anything between them ("Relays and digital I/O" is
+    relays-and-digital-i-o). -#}
+{% macro group_id(group) -%}
+  {%- set ns = namespace(id="", gap=false) -%}
+  {%- for ch in group | lower -%}
+    {%- if ch in "abcdefghijklmnopqrstuvwxyz0123456789" -%}
+      {%- if ns.gap and ns.id -%}{%- set ns.id = ns.id ~ "-" -%}{%- endif -%}
+      {%- set ns.id = ns.id ~ ch -%}
+      {%- set ns.gap = false -%}
+    {%- else -%}
+      {%- set ns.gap = true -%}
+    {%- endif -%}
+  {%- endfor -%}
+  {{- ns.id -}}
+{%- endmacro %}

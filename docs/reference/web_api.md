@@ -40,6 +40,8 @@ An endpoint that can't do what it was asked answers with an error status, and a 
 | `/<instrument>/commands/` | The instrument's commands. | |
 | `/rack/list_instruments` | Each instrument's name, with its driver's. | `{"status": "success", "instruments": {"lockin": "SR_830", ...}}` |
 
+A driver whose methods have [groups](python_api/instrument.md#pyacquisition.core.instrument.mark_query) gives each method's group in the experiment's schema, `/openapi.json`, where the interface reads it. Each of its methods' operations has `x-pyacquisition-group`, its group (`"Control loops"`), and `x-pyacquisition-order`, its place in the driver, counted from 0, group by group. The methods of a driver without groups have neither.
+
 ## Measurements
 
 | Endpoint | Does | Answers, for example |

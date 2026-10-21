@@ -142,7 +142,7 @@ class SR_860(Instrument):
     SyncFilter = SyncFilter
     TimeConstant = TimeConstant
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def identify(self) -> str:
         """Queries the instrument identification string.
 
@@ -151,7 +151,7 @@ class SR_860(Instrument):
         """
         return self.query("*IDN?")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def reset(self) -> int:
         """Resets the instrument to its default state.
 
@@ -160,7 +160,7 @@ class SR_860(Instrument):
         """
         return self.command("*RST")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def clear(self) -> int:
         """Clears the status and error registers of the instrument.
 
@@ -169,7 +169,7 @@ class SR_860(Instrument):
         """
         return self.command("*CLS")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_phase(self) -> float:
         """Queries the current excitation phase in degrees.
 
@@ -178,7 +178,7 @@ class SR_860(Instrument):
         """
         return float(self.query("PHAS?"))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_phase(self, phase: float) -> int:
         """Sets the excitation phase in degrees.
 
@@ -190,7 +190,7 @@ class SR_860(Instrument):
         """
         return self.command(f"PHAS {phase:.2f}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_reference_source(self) -> ReferenceSource:
         """Queries the current reference source.
 
@@ -199,7 +199,7 @@ class SR_860(Instrument):
         """
         return ReferenceSource.from_raw_value(int(self.query("RSRC?")))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_reference_source(self, source: ReferenceSource) -> int:
         """Sets the reference source.
 
@@ -211,7 +211,7 @@ class SR_860(Instrument):
         """
         return self.command(f"RSRC {source.raw_value}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_frequency(self) -> float:
         """Queries the current reference frequency.
 
@@ -220,7 +220,7 @@ class SR_860(Instrument):
         """
         return float(self.query("FREQ?"))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_frequency(self, frequency: float) -> int:
         """Sets the reference frequency.
 
@@ -232,7 +232,7 @@ class SR_860(Instrument):
         """
         return self.command(f"FREQ {frequency:.3f}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_internal_frequency(self) -> float:
         """Queries the internal reference frequency.
 
@@ -241,7 +241,7 @@ class SR_860(Instrument):
         """
         return float(self.query("FREQINT?"))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_internal_frequency(self, frequency: float) -> int:
         """Sets the internal reference frequency.
 
@@ -253,7 +253,7 @@ class SR_860(Instrument):
         """
         return self.command(f"FREQINT {frequency:.3f}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_external_reference_slope(self) -> ReferenceSlope:
         """Queries the slope of the external reference signal.
 
@@ -262,7 +262,7 @@ class SR_860(Instrument):
         """
         return ReferenceSlope.from_raw_value(int(self.query("RSLP?")))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_external_reference_slope(self, slope: ReferenceSlope) -> int:
         """Sets the slope of the external reference signal.
 
@@ -274,7 +274,7 @@ class SR_860(Instrument):
         """
         return self.command(f"RSLP {slope.raw_value}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_harmonic(self) -> int:
         """Queries the current harmonic setting.
 
@@ -283,7 +283,7 @@ class SR_860(Instrument):
         """
         return int(self.query("HARM?"))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_harmonic(self, harmonic: int) -> int:
         """Sets the harmonic.
 
@@ -295,7 +295,7 @@ class SR_860(Instrument):
         """
         return self.command(f"HARM {harmonic}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_reference_amplitude(self) -> float:
         """Queries the reference amplitude.
 
@@ -304,7 +304,7 @@ class SR_860(Instrument):
         """
         return float(self.query("SLVL?"))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_reference_amplitude(self, amplitude: float) -> int:
         """Sets the reference amplitude.
 
@@ -316,7 +316,7 @@ class SR_860(Instrument):
         """
         return self.command(f"SLVL {amplitude:.3f}")
 
-    @mark_query
+    @mark_query(group="Reference and phase")
     def get_reference_offset(self) -> float:
         """Queries the reference offset.
 
@@ -325,7 +325,7 @@ class SR_860(Instrument):
         """
         return float(self.query("SOFF?"))
 
-    @mark_command
+    @mark_command(group="Reference and phase")
     def set_reference_offset(self, amplitude: float) -> int:
         """Sets the reference offset.
 
@@ -337,7 +337,7 @@ class SR_860(Instrument):
         """
         return self.command(f"SOFF {amplitude:.3f}")
 
-    @mark_query
+    @mark_query(group="Input")
     def get_input_mode(self) -> InputMode:
         """Queries the input mode.
 
@@ -346,7 +346,7 @@ class SR_860(Instrument):
         """
         return InputMode.from_raw_value(int(self.query("IVMD?")))
 
-    @mark_command
+    @mark_command(group="Input")
     def set_input_mode(self, mode: InputMode) -> int:
         """Sets the input mode.
 
@@ -358,7 +358,7 @@ class SR_860(Instrument):
         """
         return self.command(f"IVMD {mode.raw_value}")
 
-    @mark_query
+    @mark_query(group="Input")
     def get_input_configuration(self) -> InputConfiguration:
         """Queries the input configuration.
 
@@ -367,7 +367,7 @@ class SR_860(Instrument):
         """
         return InputConfiguration.from_raw_value(int(self.query("ISRC?")))
 
-    @mark_command
+    @mark_command(group="Input")
     def set_input_configuration(self, configuration: InputConfiguration) -> int:
         """Sets the input configuration.
 
@@ -379,7 +379,7 @@ class SR_860(Instrument):
         """
         return self.command(f"ISRC {configuration.raw_value}")
 
-    @mark_query
+    @mark_query(group="Input")
     def get_input_coupling(self) -> InputCoupling:
         """Queries the input coupling configuration.
 
@@ -388,7 +388,7 @@ class SR_860(Instrument):
         """
         return InputCoupling.from_raw_value(int(self.query("ICPL?")))
 
-    @mark_command
+    @mark_command(group="Input")
     def set_input_coupling(self, coupling: InputCoupling) -> int:
         """Sets the input coupling configuration.
 
@@ -400,7 +400,7 @@ class SR_860(Instrument):
         """
         return self.command(f"ICPL {coupling.raw_value}")
 
-    @mark_query
+    @mark_query(group="Input")
     def get_input_grounding(self) -> InputGrounding:
         """Queries the input grounding configuration.
 
@@ -409,7 +409,7 @@ class SR_860(Instrument):
         """
         return InputGrounding.from_raw_value(int(self.query("IGND?")))
 
-    @mark_command
+    @mark_command(group="Input")
     def set_input_grounding(self, grounding: InputGrounding) -> int:
         """Sets the input grounding configuration.
 
@@ -421,7 +421,7 @@ class SR_860(Instrument):
         """
         return self.command(f"IGND {grounding.raw_value}")
 
-    @mark_query
+    @mark_query(group="Input")
     def get_input_voltage_range(self) -> InputVoltageRange:
         """Queries the input voltage range.
 
@@ -430,7 +430,7 @@ class SR_860(Instrument):
         """
         return InputVoltageRange.from_raw_value(int(self.query("IRNG?")))
 
-    @mark_command
+    @mark_command(group="Input")
     def set_input_voltage_range(self, input_range: InputVoltageRange) -> int:
         """Sets the input voltage range.
 
@@ -442,7 +442,7 @@ class SR_860(Instrument):
         """
         return self.command(f"IRNG {input_range.raw_value}")
 
-    @mark_query
+    @mark_query(group="Gain and time constant")
     def get_sync_filter(self) -> SyncFilter:
         """Queries the synchronization filter state.
 
@@ -451,7 +451,7 @@ class SR_860(Instrument):
         """
         return SyncFilter.from_raw_value(int(self.query("SYNC?")))
 
-    @mark_command
+    @mark_command(group="Gain and time constant")
     def set_sync_filter(self, configuration: SyncFilter) -> int:
         """Sets the synchronization filter state.
 
@@ -463,7 +463,7 @@ class SR_860(Instrument):
         """
         return self.command(f"SYNC {configuration.raw_value}")
 
-    @mark_query
+    @mark_query(group="Gain and time constant")
     def get_advanced_filter(self) -> AdvancedFilter:
         """Queries the advanced filter state.
 
@@ -472,7 +472,7 @@ class SR_860(Instrument):
         """
         return AdvancedFilter.from_raw_value(int(self.query("ADVFILT?")))
 
-    @mark_command
+    @mark_command(group="Gain and time constant")
     def set_advanced_filter(self, configuration: AdvancedFilter) -> int:
         """Sets the advanced filter state.
 
@@ -484,7 +484,7 @@ class SR_860(Instrument):
         """
         return self.command(f"ADVFILT {configuration.raw_value}")
 
-    @mark_query
+    @mark_query(group="Gain and time constant")
     def get_sensitivity(self) -> Sensitivity:
         """Queries the sensitivity setting.
 
@@ -493,7 +493,7 @@ class SR_860(Instrument):
         """
         return Sensitivity.from_raw_value(int(self.query("SCAL?")))
 
-    @mark_command
+    @mark_command(group="Gain and time constant")
     def set_sensitivity(self, sensitivity: Sensitivity) -> int:
         """Sets the sensitivity.
 
@@ -505,7 +505,7 @@ class SR_860(Instrument):
         """
         return self.command(f"SCAL {sensitivity.raw_value}")
 
-    @mark_query
+    @mark_query(group="Gain and time constant")
     def get_time_constant(self) -> TimeConstant:
         """Queries the time constant setting.
 
@@ -514,7 +514,7 @@ class SR_860(Instrument):
         """
         return TimeConstant.from_raw_value(int(self.query("OFLT?")))
 
-    @mark_command
+    @mark_command(group="Gain and time constant")
     def set_time_constant(self, time_constant: TimeConstant) -> int:
         """Sets the time constant.
 
@@ -526,7 +526,7 @@ class SR_860(Instrument):
         """
         return self.command(f"OFLT {time_constant.raw_value}")
 
-    @mark_query
+    @mark_query(group="Gain and time constant")
     def get_filter_slope(self) -> FilterSlope:
         """Queries the filter slope setting.
 
@@ -535,7 +535,7 @@ class SR_860(Instrument):
         """
         return FilterSlope.from_raw_value(int(self.query("OFSL?")))
 
-    @mark_command
+    @mark_command(group="Gain and time constant")
     def set_filter_slope(self, filter_slope: FilterSlope) -> int:
         """Sets the filter slope.
 
@@ -547,7 +547,7 @@ class SR_860(Instrument):
         """
         return self.command(f"OFSL {filter_slope.raw_value}")
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_output(self, parameter: int) -> float:
         """Queries the output value for a specific parameter.
 
@@ -559,7 +559,7 @@ class SR_860(Instrument):
         """
         return float(self.query(f"OUTP? {parameter}"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_display_output(self, parameter: int) -> float:
         """Queries the display output value for a specific parameter.
 
@@ -571,7 +571,7 @@ class SR_860(Instrument):
         """
         return float(self.query(f"OUTR? {parameter}"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_x(self) -> float:
         """Queries the X output value.
 
@@ -580,7 +580,7 @@ class SR_860(Instrument):
         """
         return float(self.query("OUTP? 0"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_y(self) -> float:
         """Queries the Y output value.
 
@@ -589,7 +589,7 @@ class SR_860(Instrument):
         """
         return float(self.query("OUTP? 1"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_r(self) -> float:
         """Queries the R output value.
 
@@ -598,7 +598,7 @@ class SR_860(Instrument):
         """
         return float(self.query("OUTP? 2"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_theta(self) -> float:
         """Queries the Theta output value.
 
@@ -607,7 +607,7 @@ class SR_860(Instrument):
         """
         return float(self.query("OUTP? 3"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_xy(self) -> list[float]:
         """Queries both X and Y output values simultaneously.
 

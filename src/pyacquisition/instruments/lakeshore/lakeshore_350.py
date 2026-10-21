@@ -332,7 +332,7 @@ class Lakeshore_350(Instrument):
         self.clear()
 
     # ------------------------------------------------------------ common commands
-    @mark_query
+    @mark_query(group="Identity and status")
     def identify(self) -> str:
         """Identifies the instrument.
 
@@ -342,7 +342,7 @@ class Lakeshore_350(Instrument):
         """
         return self.query("*IDN?")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def reset(self) -> int:
         """Sets the controller's parameters to their power-up settings (`*RST`).
 
@@ -351,7 +351,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command("*RST")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def clear(self) -> int:
         """Clears the status byte, the standard event status register and the
         operational event register, and ends pending operations (`*CLS`). It
@@ -362,7 +362,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command("*CLS")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def clear_event_register(self) -> int:
         """Clears the standard event status register, by reading it.
 
@@ -371,7 +371,7 @@ class Lakeshore_350(Instrument):
         """
         return self.get_event_status()
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_event_enable(self, value: int) -> int:
         """Sets which events of the standard event status register are reported
         (`*ESE`).
@@ -385,7 +385,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"*ESE {int(value)}")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_event_enable(self) -> int:
         """Queries which events of the standard event status register are reported.
 
@@ -394,7 +394,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query("*ESE?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_event_status(self) -> int:
         """Queries the standard event status register (`*ESR?`).
 
@@ -403,7 +403,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query("*ESR?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def operation_complete(self) -> int:
         """Sets the OPC event when every pending operation is complete (`*OPC`).
 
@@ -412,7 +412,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command("*OPC")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_operation_complete(self) -> int:
         """Waits until every pending operation is complete (`*OPC?`).
 
@@ -421,7 +421,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query("*OPC?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def wait_to_continue(self) -> int:
         """Holds the IEEE-488 interface off until every pending operation is
         complete, without setting the OPC event (`*WAI`).
@@ -431,7 +431,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command("*WAI")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_service_request_enable(self, value: int) -> int:
         """Sets which flags of the status byte request service (`*SRE`).
 
@@ -444,7 +444,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"*SRE {int(value)}")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_service_request_enable(self) -> int:
         """Queries which flags of the status byte request service.
 
@@ -453,7 +453,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query("*SRE?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_status_byte(self) -> int:
         """Queries the status byte, without clearing it (`*STB?`).
 
@@ -462,7 +462,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query("*STB?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def self_test(self) -> int:
         """Queries the result of the self-test the 350 runs at power-up (`*TST?`).
 
@@ -471,7 +471,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query("*TST?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_operational_status(self) -> int:
         """Queries the operational status bits as they are now (`OPST?`).
 
@@ -481,7 +481,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query("OPST?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_operational_status_register(self) -> int:
         """Queries the operational status bits latched since it was last read, which
         clears it (`OPSTR?`).
@@ -491,7 +491,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query("OPSTR?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_operational_status_enable(self, value: int) -> int:
         """Sets which operational status bits set the status byte's summary bit
         (`OPSTE`).
@@ -504,7 +504,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"OPSTE {int(value)}")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_operational_status_enable(self) -> int:
         """Queries which operational status bits set the status byte's summary bit
         (`OPSTE?`).
@@ -515,7 +515,7 @@ class Lakeshore_350(Instrument):
         return _int(self.query("OPSTE?"))
 
     # ---------------------------------------------------------------------- inputs
-    @mark_query
+    @mark_query(group="Inputs")
     def get_temperature(self, input_channel: InputChannel) -> float:
         """Queries an input's reading in kelvin (`KRDG?`).
 
@@ -527,7 +527,7 @@ class Lakeshore_350(Instrument):
         """
         return float(self.query(f"KRDG? {input_channel.raw_value}"))
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_all_temperatures(self) -> dict:
         """Queries every input's reading in kelvin at once (`KRDG? 0`).
 
@@ -538,7 +538,7 @@ class Lakeshore_350(Instrument):
         values = _fields(self.query("KRDG? 0"))
         return {channel.name: float(v) for channel, v in zip(InputChannel, values)}
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_temperature_celsius(self, input_channel: InputChannel) -> float:
         """Queries an input's reading in Celsius (`CRDG?`).
 
@@ -550,7 +550,7 @@ class Lakeshore_350(Instrument):
         """
         return float(self.query(f"CRDG? {input_channel.raw_value}"))
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_sensor_reading(self, input_channel: InputChannel) -> float:
         """Queries an input's reading in sensor units (`SRDG?`).
 
@@ -562,7 +562,7 @@ class Lakeshore_350(Instrument):
         """
         return float(self.query(f"SRDG? {input_channel.raw_value}"))
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_reading_status(self, input_channel: InputChannel) -> int:
         """Queries the status of an input's reading (`RDGST?`).
 
@@ -576,7 +576,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query(f"RDGST? {input_channel.raw_value}"))
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_junction_temperature(self) -> float:
         """Queries the temperature of the thermocouple card's junction block, which
         room temperature compensation uses (`TEMP?`).
@@ -586,7 +586,7 @@ class Lakeshore_350(Instrument):
         """
         return float(self.query("TEMP?"))
 
-    @mark_command
+    @mark_command(group="Inputs")
     def set_alarm(
         self,
         input_channel: InputChannel,
@@ -621,7 +621,7 @@ class Lakeshore_350(Instrument):
             f"{audible.raw_value},{visible.raw_value}"
         )
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_alarm(self, input_channel: InputChannel) -> dict:
         """Queries an input's alarm configuration (`ALARM?`).
 
@@ -644,7 +644,7 @@ class Lakeshore_350(Instrument):
             "visible": State.from_raw_value(_int(f[6])),
         }
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_alarm_status(self, input_channel: InputChannel) -> dict:
         """Queries whether an input's high and low alarms are active (`ALARMST?`).
 
@@ -660,7 +660,7 @@ class Lakeshore_350(Instrument):
             "low": State.from_raw_value(_int(f[1])),
         }
 
-    @mark_command
+    @mark_command(group="Inputs")
     def reset_alarms(self) -> int:
         """Clears the high and low status of every alarm, latched ones included
         (`ALMRST`).
@@ -670,7 +670,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command("ALMRST")
 
-    @mark_command
+    @mark_command(group="Inputs")
     def set_filter(
         self, input_channel: InputChannel, state: State, points: int, window: int
     ) -> int:
@@ -690,7 +690,7 @@ class Lakeshore_350(Instrument):
             f"FILTER {input_channel.raw_value},{state.raw_value},{int(points)},{int(window)}"
         )
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_filter(self, input_channel: InputChannel) -> dict:
         """Queries an input's reading filter (`FILTER?`).
 
@@ -707,7 +707,7 @@ class Lakeshore_350(Instrument):
             "window": _int(f[2]),
         }
 
-    @mark_command
+    @mark_command(group="Inputs")
     def set_input_curve(self, input_channel: InputChannel, curve: int) -> int:
         """Sets the curve an input uses to convert its reading to temperature
         (`INCRV`).
@@ -722,7 +722,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"INCRV {input_channel.raw_value},{int(curve)}")
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_input_curve(self, input_channel: InputChannel) -> int:
         """Queries the curve an input uses (`INCRV?`).
 
@@ -734,7 +734,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query(f"INCRV? {input_channel.raw_value}"))
 
-    @mark_command
+    @mark_command(group="Inputs")
     def set_input_type(
         self,
         input_channel: InputChannel,
@@ -772,7 +772,7 @@ class Lakeshore_350(Instrument):
             f"{units.raw_value},{excitation.raw_value}"
         )
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_input_type(self, input_channel: InputChannel) -> dict:
         """Queries an input's sensor configuration (`INTYPE?`). With autorange on,
         the range is the one chosen now.
@@ -795,7 +795,7 @@ class Lakeshore_350(Instrument):
             "excitation": Excitation.from_raw_value(_int(f[5])),
         }
 
-    @mark_command
+    @mark_command(group="Inputs")
     def set_input_name(self, input_channel: InputChannel, name: str) -> int:
         """Names an input, for the front panel (`INNAME`).
 
@@ -809,7 +809,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"INNAME {input_channel.raw_value},{_quoted(name)}")
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_input_name(self, input_channel: InputChannel) -> str:
         """Queries an input's name (`INNAME?`).
 
@@ -823,7 +823,7 @@ class Lakeshore_350(Instrument):
             self.query(f"INNAME? {input_channel.raw_value}").strip().strip('"').strip()
         )
 
-    @mark_command
+    @mark_command(group="Inputs")
     def set_diode_current(
         self, input_channel: InputChannel, current: DiodeCurrent
     ) -> int:
@@ -839,7 +839,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"DIOCUR {input_channel.raw_value},{current.raw_value}")
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_min_max_data(self, input_channel: InputChannel) -> dict:
         """Queries the least and greatest data an input has had (`MDAT?`).
 
@@ -852,7 +852,7 @@ class Lakeshore_350(Instrument):
         f = _fields(self.query(f"MDAT? {input_channel.raw_value}"))
         return {"min": float(f[0]), "max": float(f[1])}
 
-    @mark_command
+    @mark_command(group="Inputs")
     def reset_min_max(self) -> int:
         """Resets the max/min data of every input (`MNMXRST`).
 
@@ -861,7 +861,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command("MNMXRST")
 
-    @mark_command
+    @mark_command(group="Inputs")
     def set_temperature_limit(self, input_channel: InputChannel, limit: float) -> int:
         """Sets the temperature above which every control output is shut down
         (`TLIMIT`).
@@ -875,7 +875,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"TLIMIT {input_channel.raw_value},{_number(limit)}")
 
-    @mark_query
+    @mark_query(group="Inputs")
     def get_temperature_limit(self, input_channel: InputChannel) -> float:
         """Queries an input's temperature limit (`TLIMIT?`).
 
@@ -888,7 +888,7 @@ class Lakeshore_350(Instrument):
         return float(self.query(f"TLIMIT? {input_channel.raw_value}"))
 
     # ---------------------------------------------------------------------- loops
-    @mark_command
+    @mark_command(group="Control loops")
     def set_output_mode(
         self,
         output_channel: OutputChannel,
@@ -913,7 +913,7 @@ class Lakeshore_350(Instrument):
             f"{_input_number(input_channel)},{powerup.raw_value}"
         )
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_output_mode(self, output_channel: OutputChannel) -> dict:
         """Queries what an output does, and the input it controls from
         (`OUTMODE?`).
@@ -932,7 +932,7 @@ class Lakeshore_350(Instrument):
             "powerup": State.from_raw_value(_int(f[2])),
         }
 
-    @mark_command
+    @mark_command(group="Control loops")
     def set_control_mode(self, output_channel: OutputChannel, mode: ControlMode) -> int:
         """Sets what an output does, keeping its input and power-up setting
         (`OUTMODE?`, then `OUTMODE`).
@@ -951,7 +951,7 @@ class Lakeshore_350(Instrument):
             output_channel, mode, now["input_channel"], now["powerup"]
         )
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_control_mode(self, output_channel: OutputChannel) -> ControlMode:
         """Queries what an output does (`OUTMODE?`).
 
@@ -963,7 +963,7 @@ class Lakeshore_350(Instrument):
         """
         return self.get_output_mode(output_channel)["mode"]
 
-    @mark_command
+    @mark_command(group="Control loops")
     def set_control_input(
         self, output_channel: OutputChannel, input_channel: InputChannel
     ) -> int:
@@ -982,7 +982,7 @@ class Lakeshore_350(Instrument):
             output_channel, now["mode"], input_channel, now["powerup"]
         )
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_control_input(self, output_channel: OutputChannel) -> InputChannel | None:
         """Queries the input an output controls from (`OUTMODE?`).
 
@@ -994,7 +994,7 @@ class Lakeshore_350(Instrument):
         """
         return self.get_output_mode(output_channel)["input_channel"]
 
-    @mark_command
+    @mark_command(group="Control loops")
     def set_autotune_pid(self, output: OutputChannel, mode: AutotuneMode) -> int:
         """Starts autotuning an output's control loop (`ATUNE`). `get_tuning_status`
         says whether it could start.
@@ -1008,7 +1008,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"ATUNE {output.raw_value},{mode.raw_value}")
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_tuning(self) -> bool:
         """Queries whether a loop is autotuning (`TUNEST?`).
 
@@ -1017,7 +1017,7 @@ class Lakeshore_350(Instrument):
         """
         return self.get_tuning_status()["tuning"]
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_tuning_status(self) -> dict:
         """Queries autotuning's status (`TUNEST?`).
 
@@ -1035,7 +1035,7 @@ class Lakeshore_350(Instrument):
             "stage": _int(f[3]) if len(f) > 3 else 0,
         }
 
-    @mark_command
+    @mark_command(group="Control loops")
     def set_pid(
         self, output_channel: OutputChannel, p: float, i: float, d: float
     ) -> int:
@@ -1054,7 +1054,7 @@ class Lakeshore_350(Instrument):
             f"PID {output_channel.raw_value},{_number(p)},{_number(i)},{_number(d)}"
         )
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_pid(self, output_channel: OutputChannel) -> dict:
         """Queries an output's PID values (`PID?`).
 
@@ -1067,7 +1067,7 @@ class Lakeshore_350(Instrument):
         f = _fields(self.query(f"PID? {output_channel.raw_value}"))
         return {"p": float(f[0]), "i": float(f[1]), "d": float(f[2])}
 
-    @mark_command
+    @mark_command(group="Control loops")
     def set_setpoint(self, output_channel: OutputChannel, setpoint: float) -> int:
         """Sets an output's setpoint (`SETP`), in the preferred units of its
         control input. For outputs 3 and 4, it only applies in warmup mode.
@@ -1081,7 +1081,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"SETP {output_channel.raw_value},{_number(setpoint)}")
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_setpoint(self, output_channel: OutputChannel) -> float:
         """Queries an output's setpoint (`SETP?`). While it ramps, this is where the
         ramp has got to.
@@ -1094,7 +1094,7 @@ class Lakeshore_350(Instrument):
         """
         return float(self.query(f"SETP? {output_channel.raw_value}"))
 
-    @mark_command
+    @mark_command(group="Control loops")
     def set_ramp(self, output_channel: OutputChannel, state: State, rate: float) -> int:
         """Configures an output's setpoint ramp (`RAMP`): with it on, a new setpoint
         is ramped to at the rate.
@@ -1112,7 +1112,7 @@ class Lakeshore_350(Instrument):
             f"RAMP {output_channel.raw_value},{state.raw_value},{rate:.3f}"
         )
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_ramp(self, output_channel: OutputChannel) -> float:
         """Queries an output's ramp rate (`RAMP?`).
 
@@ -1124,7 +1124,7 @@ class Lakeshore_350(Instrument):
         """
         return float(_fields(self.query(f"RAMP? {output_channel.raw_value}"))[1])
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_ramp_state(self, output_channel: OutputChannel) -> State:
         """Queries whether an output's ramp is on (`RAMP?`).
 
@@ -1137,7 +1137,7 @@ class Lakeshore_350(Instrument):
         f = _fields(self.query(f"RAMP? {output_channel.raw_value}"))
         return State.from_raw_value(_int(f[0]))
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_ramping(self, output_channel: OutputChannel) -> bool:
         """Queries whether an output's setpoint is ramping now (`RAMPST?`).
 
@@ -1149,7 +1149,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query(f"RAMPST? {output_channel.raw_value}")) == 1
 
-    @mark_command
+    @mark_command(group="Control loops")
     def set_manual_output(self, output_channel: OutputChannel, percent: float) -> int:
         """Sets an output's manual output (`MOUT`), in percent. In open loop mode it
         is the output. In PID and zone modes it is added to the PID's.
@@ -1163,7 +1163,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"MOUT {output_channel.raw_value},{percent:.2f}")
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_manual_output(self, output_channel: OutputChannel) -> float:
         """Queries an output's manual output (`MOUT?`).
 
@@ -1175,7 +1175,7 @@ class Lakeshore_350(Instrument):
         """
         return float(self.query(f"MOUT? {output_channel.raw_value}"))
 
-    @mark_command
+    @mark_command(group="Control loops")
     def set_heater_range(
         self, output_channel: OutputChannel, heater_range: HeaterRange
     ) -> int:
@@ -1193,7 +1193,7 @@ class Lakeshore_350(Instrument):
             f"RANGE {output_channel.raw_value},{heater_range.raw_value}"
         )
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_heater_range(self, output_channel: OutputChannel) -> HeaterRange:
         """Queries an output's range (`RANGE?`).
 
@@ -1207,7 +1207,7 @@ class Lakeshore_350(Instrument):
             _int(self.query(f"RANGE? {output_channel.raw_value}"))
         )
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_heater_output(self, output_channel: OutputChannel) -> float:
         """Queries an output's output, in percent: a heater's (`HTR?`), or for
         outputs 3 and 4 the analog output's (`AOUT?`).
@@ -1221,7 +1221,7 @@ class Lakeshore_350(Instrument):
         command = "HTR?" if output_channel.raw_value <= 2 else "AOUT?"
         return float(self.query(f"{command} {output_channel.raw_value}"))
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_heater_status(self, output_channel: OutputChannel) -> int:
         """Queries a heater's error code, which clears it (`HTRST?`).
 
@@ -1241,7 +1241,7 @@ class Lakeshore_350(Instrument):
             )
         return _int(self.query(f"HTRST? {output_channel.raw_value}"))
 
-    @mark_command
+    @mark_command(group="Control loops")
     def set_heater_setup(
         self,
         output_channel: OutputChannel,
@@ -1269,7 +1269,7 @@ class Lakeshore_350(Instrument):
             f"{max_current.raw_value},{max_user_current:.3f},{heater_display.raw_value}"
         )
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_heater_setup(self, output_channel: OutputChannel) -> dict:
         """Queries a heater output's configuration (`HTRSET?`).
 
@@ -1289,7 +1289,7 @@ class Lakeshore_350(Instrument):
             "heater_display": HeaterDisplay.from_raw_value(_int(f[3])),
         }
 
-    @mark_command
+    @mark_command(group="Control loops")
     def set_zone(
         self,
         output_channel: OutputChannel,
@@ -1328,7 +1328,7 @@ class Lakeshore_350(Instrument):
             f"{heater_range.raw_value},{_input_number(input_channel)},{_number(rate)}"
         )
 
-    @mark_query
+    @mark_query(group="Control loops")
     def get_zone(self, output_channel: OutputChannel, zone: int) -> dict:
         """Queries a zone of an output's zone table (`ZONE?`).
 
@@ -1355,7 +1355,7 @@ class Lakeshore_350(Instrument):
         }
 
     # -------------------------------------------------------------- analog outputs
-    @mark_command
+    @mark_command(group="Analog outputs")
     def set_analog_output_setup(
         self,
         output: AnalogOutput,
@@ -1385,7 +1385,7 @@ class Lakeshore_350(Instrument):
             f"{bipolar.raw_value}"
         )
 
-    @mark_query
+    @mark_query(group="Analog outputs")
     def get_analog_output_setup(self, output: AnalogOutput) -> dict:
         """Queries what an analog output shows in monitor out mode (`ANALOG?`).
 
@@ -1406,7 +1406,7 @@ class Lakeshore_350(Instrument):
             "bipolar": State.from_raw_value(_int(f[4])),
         }
 
-    @mark_query
+    @mark_query(group="Analog outputs")
     def get_analog_output(self, output: AnalogOutput) -> float:
         """Queries an analog output's value (`AOUT?`).
 
@@ -1418,7 +1418,7 @@ class Lakeshore_350(Instrument):
         """
         return float(self.query(f"AOUT? {output.raw_value}"))
 
-    @mark_command
+    @mark_command(group="Analog outputs")
     def set_warmup(
         self, output: AnalogOutput, control: WarmupControl, percent: float
     ) -> int:
@@ -1438,7 +1438,7 @@ class Lakeshore_350(Instrument):
             f"WARMUP {output.raw_value},{control.raw_value},{percent:.2f}"
         )
 
-    @mark_query
+    @mark_query(group="Analog outputs")
     def get_warmup(self, output: AnalogOutput) -> dict:
         """Queries an analog output's warmup supply (`WARMUP?`).
 
@@ -1455,7 +1455,7 @@ class Lakeshore_350(Instrument):
         }
 
     # ---------------------------------------------------------------------- relays
-    @mark_command
+    @mark_command(group="Relays")
     def set_relay(
         self,
         relay: Relay,
@@ -1481,7 +1481,7 @@ class Lakeshore_350(Instrument):
             f"{alarm_type.raw_value}"
         )
 
-    @mark_query
+    @mark_query(group="Relays")
     def get_relay(self, relay: Relay) -> dict:
         """Queries a relay's configuration (`RELAY?`).
 
@@ -1499,7 +1499,7 @@ class Lakeshore_350(Instrument):
             "alarm_type": AlarmType.from_raw_value(_int(f[2])),
         }
 
-    @mark_query
+    @mark_query(group="Relays")
     def get_relay_status(self, relay: Relay) -> State:
         """Queries whether a relay is on now (`RELAYST?`).
 
@@ -1512,7 +1512,7 @@ class Lakeshore_350(Instrument):
         return State.from_raw_value(_int(self.query(f"RELAYST? {relay.raw_value}")))
 
     # --------------------------------------------------------------------- display
-    @mark_command
+    @mark_command(group="Front panel")
     def set_display(
         self, mode: DisplayMode, fields: int, output_channel: OutputChannel
     ) -> int:
@@ -1533,7 +1533,7 @@ class Lakeshore_350(Instrument):
             f"DISPLAY {mode.raw_value},{int(fields)},{output_channel.raw_value}"
         )
 
-    @mark_query
+    @mark_query(group="Front panel")
     def get_display(self) -> dict:
         """Queries the display's configuration (`DISPLAY?`).
 
@@ -1548,7 +1548,7 @@ class Lakeshore_350(Instrument):
             "output_channel": OutputChannel.from_raw_value(_int(f[2])),
         }
 
-    @mark_command
+    @mark_command(group="Front panel")
     def set_display_contrast(self, contrast: int) -> int:
         """Sets the display's contrast (`BRIGT`).
 
@@ -1560,7 +1560,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"BRIGT {int(contrast)}")
 
-    @mark_query
+    @mark_query(group="Front panel")
     def get_display_contrast(self) -> int:
         """Queries the display's contrast (`BRIGT?`).
 
@@ -1569,7 +1569,7 @@ class Lakeshore_350(Instrument):
         """
         return _int(self.query("BRIGT?"))
 
-    @mark_command
+    @mark_command(group="Front panel")
     def set_display_field(
         self, field: int, input_channel: InputChannel, source: DisplayData
     ) -> int:
@@ -1587,7 +1587,7 @@ class Lakeshore_350(Instrument):
             f"DISPFLD {int(field)},{_input_number(input_channel)},{source.raw_value}"
         )
 
-    @mark_query
+    @mark_query(group="Front panel")
     def get_display_field(self, field: int) -> dict:
         """Queries what a field of the custom display shows (`DISPFLD?`).
 
@@ -1604,7 +1604,7 @@ class Lakeshore_350(Instrument):
             "source": DisplayData.from_raw_value(_int(f[1])),
         }
 
-    @mark_command
+    @mark_command(group="Front panel")
     def set_leds(self, state: State) -> int:
         """Turns the front panel's LEDs on or off (`LEDS`).
 
@@ -1616,7 +1616,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"LEDS {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Front panel")
     def get_leds(self) -> State:
         """Queries whether the front panel's LEDs are on (`LEDS?`).
 
@@ -1625,7 +1625,7 @@ class Lakeshore_350(Instrument):
         """
         return State.from_raw_value(_int(self.query("LEDS?")))
 
-    @mark_command
+    @mark_command(group="Front panel")
     def set_lockout(self, state: State, code: int) -> int:
         """Locks or unlocks the front panel's keys, all but All Off (`LOCK`).
 
@@ -1638,7 +1638,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"LOCK {state.raw_value},{int(code):03d}")
 
-    @mark_query
+    @mark_query(group="Front panel")
     def get_lockout(self) -> dict:
         """Queries whether the front panel is locked, and its code (`LOCK?`).
 
@@ -1648,7 +1648,7 @@ class Lakeshore_350(Instrument):
         f = _fields(self.query("LOCK?"))
         return {"state": State.from_raw_value(_int(f[0])), "code": _int(f[1])}
 
-    @mark_command
+    @mark_command(group="Front panel")
     def set_remote_mode(self, mode: RemoteMode) -> int:
         """Sets whether the front panel or the interface is in control (`MODE`).
 
@@ -1661,7 +1661,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"MODE {mode.raw_value}")
 
-    @mark_query
+    @mark_query(group="Front panel")
     def get_remote_mode(self) -> RemoteMode:
         """Queries whether the front panel or the interface is in control (`MODE?`).
 
@@ -1671,7 +1671,7 @@ class Lakeshore_350(Instrument):
         return RemoteMode.from_raw_value(_int(self.query("MODE?")))
 
     # ------------------------------------------------------------------ interfaces
-    @mark_command
+    @mark_command(group="Interfaces")
     def set_interface(self, interface: Interface) -> int:
         """Enables a remote interface (`INTSEL`). A connection over another stops
         working.
@@ -1684,7 +1684,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"INTSEL {interface.raw_value}")
 
-    @mark_query
+    @mark_query(group="Interfaces")
     def get_interface(self) -> Interface:
         """Queries which remote interface is enabled (`INTSEL?`).
 
@@ -1693,7 +1693,7 @@ class Lakeshore_350(Instrument):
         """
         return Interface.from_raw_value(_int(self.query("INTSEL?")))
 
-    @mark_command
+    @mark_command(group="Interfaces")
     def set_ieee_interface(self, address: int) -> int:
         """Sets the IEEE-488 address (`IEEE`). It takes effect after the next
         terminator, so a connection over it must change to match.
@@ -1706,7 +1706,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"IEEE {int(address)}")
 
-    @mark_query
+    @mark_query(group="Interfaces")
     def get_ieee_interface(self) -> dict:
         """Queries the IEEE-488 interface's configuration (`IEEE?`).
 
@@ -1715,7 +1715,7 @@ class Lakeshore_350(Instrument):
         """
         return {"address": _int(self.query("IEEE?"))}
 
-    @mark_command
+    @mark_command(group="Interfaces")
     def set_network(
         self,
         dhcp: State,
@@ -1753,7 +1753,7 @@ class Lakeshore_350(Instrument):
             f"{_quoted(description)}"
         )
 
-    @mark_query
+    @mark_query(group="Interfaces")
     def get_network(self) -> dict:
         """Queries the Ethernet interface's configuration (`NET?`).
 
@@ -1779,7 +1779,7 @@ class Lakeshore_350(Instrument):
             **dict(zip(keys, f[2:])),
         }
 
-    @mark_query
+    @mark_query(group="Interfaces")
     def get_network_status(self) -> dict:
         """Queries the Ethernet interface's state and the addresses it has
         (`NETID?`).
@@ -1805,7 +1805,7 @@ class Lakeshore_350(Instrument):
             **dict(zip(keys, f[1:])),
         }
 
-    @mark_command
+    @mark_command(group="Interfaces")
     def set_web_login(self, username: str, password: str) -> int:
         """Sets the login of the 350's website (`WEBLOG`).
 
@@ -1818,7 +1818,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"WEBLOG {_quoted(username)},{_quoted(password)}")
 
-    @mark_query
+    @mark_query(group="Interfaces")
     def get_web_login(self) -> dict:
         """Queries the login of the 350's website (`WEBLOG?`).
 
@@ -1829,7 +1829,7 @@ class Lakeshore_350(Instrument):
         return {"username": f[0], "password": f[1]}
 
     # ---------------------------------------------------------------------- system
-    @mark_command
+    @mark_command(group="System")
     def reset_to_factory_defaults(self) -> int:
         """Sets every setting to its factory default, and resets the 350
         (`DFLT 99`).
@@ -1840,7 +1840,7 @@ class Lakeshore_350(Instrument):
         return self.command("DFLT 99")
 
     # ---------------------------------------------------------------------- curves
-    @mark_command
+    @mark_command(group="Curves")
     def set_curve_header(
         self,
         curve_index: int,
@@ -1871,7 +1871,7 @@ class Lakeshore_350(Instrument):
             f"{_number(upper_limit)},{coefficient.raw_value}"
         )
 
-    @mark_query
+    @mark_query(group="Curves")
     def get_curve_header(self, curve_index: int) -> dict:
         """Queries a curve's header (`CRVHDR?`).
 
@@ -1891,7 +1891,7 @@ class Lakeshore_350(Instrument):
             "coefficient": Coefficient.from_raw_value(_int(f[4])),
         }
 
-    @mark_command
+    @mark_command(group="Curves")
     def set_curve_point(
         self, curve_index: int, point_index: int, sensor: float, temperature: float
     ) -> int:
@@ -1911,7 +1911,7 @@ class Lakeshore_350(Instrument):
             f"{_number(temperature)}"
         )
 
-    @mark_query
+    @mark_query(group="Curves")
     def get_curve_point(self, curve_index: int, point_index: int) -> dict:
         """Queries a point of a curve (`CRVPT?`).
 
@@ -1925,7 +1925,7 @@ class Lakeshore_350(Instrument):
         f = _fields(self.query(f"CRVPT? {int(curve_index)},{int(point_index)}"))
         return {"sensor": float(f[0]), "temperature": float(f[1])}
 
-    @mark_command
+    @mark_command(group="Curves")
     def delete_curve(self, curve_index: int) -> int:
         """Deletes a user curve (`CRVDEL`).
 
@@ -1937,7 +1937,7 @@ class Lakeshore_350(Instrument):
         """
         return self.command(f"CRVDEL {int(curve_index)}")
 
-    @mark_command
+    @mark_command(group="Curves")
     def generate_softcal(
         self,
         standard_curve: int,

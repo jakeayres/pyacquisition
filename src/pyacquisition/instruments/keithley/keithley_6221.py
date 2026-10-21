@@ -253,7 +253,7 @@ class Keithley_6221(Instrument):
 
     """ IEEE-488.2 COMMON COMMANDS """
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def identify(self) -> str:
         """Identifies the instrument.
 
@@ -262,7 +262,7 @@ class Keithley_6221(Instrument):
         """
         return self.query("*IDN?")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def reset(self) -> int:
         """Resets the instrument to its *RST default state.
 
@@ -271,7 +271,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("*RST")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def clear(self) -> int:
         """Clears the event registers and the error queue.
 
@@ -280,7 +280,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("*CLS")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_options(self) -> str:
         """Queries the installed options.
 
@@ -289,7 +289,7 @@ class Keithley_6221(Instrument):
         """
         return self.query("*OPT?")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def save_setup(self, location: int) -> int:
         """Saves the present setup to memory.
 
@@ -301,7 +301,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"*SAV {location}")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def recall_setup(self, location: int) -> int:
         """Recalls a setup from memory.
 
@@ -313,16 +313,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"*RCL {location}")
 
-    @mark_command
-    def trigger(self) -> int:
-        """Sends a bus trigger. Only acts if BUS is the arm control source.
-
-        Returns:
-            int: Status code indicating the success of the operation.
-        """
-        return self.command("*TRG")
-
-    @mark_query
+    @mark_query(group="Identity and status")
     def self_test(self) -> int:
         """Runs a checksum test of the ROM.
 
@@ -331,7 +322,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("*TST?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def operation_complete(self) -> int:
         """Sets the operation complete bit once all pending operations finish.
 
@@ -340,7 +331,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("*OPC")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_operation_complete(self) -> int:
         """Waits for all pending operations to finish.
 
@@ -349,7 +340,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("*OPC?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_event_status(self) -> int:
         """Reads and clears the standard event status register.
 
@@ -358,7 +349,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("*ESR?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_event_enable(self, value: int) -> int:
         """Sets the standard event enable register.
 
@@ -370,7 +361,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"*ESE {value}")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_event_enable(self) -> int:
         """Queries the standard event enable register.
 
@@ -379,7 +370,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("*ESE?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_status_byte(self) -> int:
         """Reads the status byte register.
 
@@ -388,7 +379,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("*STB?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_service_request_enable(self, value: int) -> int:
         """Sets the service request enable register.
 
@@ -400,7 +391,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"*SRE {value}")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_service_request_enable(self) -> int:
         """Queries the service request enable register.
 
@@ -411,7 +402,7 @@ class Keithley_6221(Instrument):
 
     """ STATUS STRUCTURE AND ERROR QUEUE """
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_status_event(self, register: StatusRegister) -> int:
         """Reads and clears an event register.
 
@@ -423,7 +414,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query(f"STAT:{register.raw_value}:EVEN?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_status_condition(self, register: StatusRegister) -> int:
         """Reads a condition register.
 
@@ -435,7 +426,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query(f"STAT:{register.raw_value}:COND?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_status_enable(self, register: StatusRegister, value: int) -> int:
         """Sets the event enable register.
 
@@ -448,7 +439,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"STAT:{register.raw_value}:ENAB {value}")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_status_enable(self, register: StatusRegister) -> int:
         """Queries the event enable register.
 
@@ -460,7 +451,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query(f"STAT:{register.raw_value}:ENAB?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def preset_status(self) -> int:
         """Resets the operation, measurement and questionable enable registers to 0.
 
@@ -469,7 +460,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("STAT:PRES")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_next_error(self) -> dict:
         """Reads and removes the oldest entry in the error queue.
 
@@ -478,7 +469,7 @@ class Keithley_6221(Instrument):
         """
         return parse_error(self.query("STAT:QUE?"))
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_error(self) -> dict:
         """Reads and removes the latest entry in the error queue.
 
@@ -487,7 +478,7 @@ class Keithley_6221(Instrument):
         """
         return parse_error(self.query("SYST:ERR?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def clear_error_queue(self) -> int:
         """Clears all messages from the error queue.
 
@@ -496,7 +487,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SYST:CLE")
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_error_queue_enable(self, messages: str) -> int:
         """Sets which error and status messages are placed in the error queue. Others are disabled.
 
@@ -508,7 +499,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"STAT:QUE:ENAB ({messages})")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_error_queue_enable(self) -> str:
         """Queries the messages enabled for the error queue.
 
@@ -517,7 +508,7 @@ class Keithley_6221(Instrument):
         """
         return unquote(self.query("STAT:QUE:ENAB?"))
 
-    @mark_command
+    @mark_command(group="Identity and status")
     def set_error_queue_disable(self, messages: str) -> int:
         """Removes messages from the set placed in the error queue.
 
@@ -529,7 +520,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"STAT:QUE:DIS ({messages})")
 
-    @mark_query
+    @mark_query(group="Identity and status")
     def get_error_queue_disable(self) -> str:
         """Queries the messages disabled for the error queue.
 
@@ -540,7 +531,7 @@ class Keithley_6221(Instrument):
 
     """ DISPLAY """
 
-    @mark_command
+    @mark_command(group="Display")
     def set_display_enabled(self, state: State) -> int:
         """Enables or disables the front panel display and controls.
 
@@ -552,7 +543,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"DISP:ENAB {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Display")
     def get_display_enabled(self) -> State:
         """Queries whether the front panel display and controls is enabled.
 
@@ -561,7 +552,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("DISP:ENAB?")))
 
-    @mark_command
+    @mark_command(group="Display")
     def set_display_text(self, line: DisplayLine, text: str) -> int:
         """Sets the display message.
 
@@ -574,7 +565,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"DISP:WIND{line.raw_value}:TEXT:DATA '{text}'")
 
-    @mark_query
+    @mark_query(group="Display")
     def get_display_text(self, line: DisplayLine) -> str:
         """Queries the display message.
 
@@ -586,7 +577,7 @@ class Keithley_6221(Instrument):
         """
         return unquote(self.query(f"DISP:WIND{line.raw_value}:TEXT:DATA?"))
 
-    @mark_command
+    @mark_command(group="Display")
     def set_display_text_state(self, line: DisplayLine, state: State) -> int:
         """Enables or disables the display message.
 
@@ -599,7 +590,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"DISP:WIND{line.raw_value}:TEXT:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Display")
     def get_display_text_state(self, line: DisplayLine) -> State:
         """Queries whether the display message is enabled.
 
@@ -613,7 +604,7 @@ class Keithley_6221(Instrument):
             to_int(self.query(f"DISP:WIND{line.raw_value}:TEXT:STAT?"))
         )
 
-    @mark_query
+    @mark_query(group="Display")
     def get_display_text_attributes(self, line: DisplayLine) -> str:
         """Queries whether each character of the display message is blinking.
 
@@ -627,7 +618,7 @@ class Keithley_6221(Instrument):
 
     """ OUTPUT """
 
-    @mark_command
+    @mark_command(group="Output")
     def set_output_state(self, state: State) -> int:
         """Enables or disables the current source output.
 
@@ -639,7 +630,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"OUTP {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Output")
     def get_output_state(self) -> State:
         """Queries whether the current source output is enabled.
 
@@ -648,7 +639,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("OUTP?")))
 
-    @mark_command
+    @mark_command(group="Output")
     def set_low_to_earth(self, state: State) -> int:
         """Enables or disables the connection of output low to earth ground.
 
@@ -660,7 +651,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"OUTP:LTE {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Output")
     def get_low_to_earth(self) -> State:
         """Queries whether the connection of output low to earth ground is enabled.
 
@@ -669,7 +660,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("OUTP:LTE?")))
 
-    @mark_command
+    @mark_command(group="Output")
     def set_inner_shield(self, shield: InnerShield) -> int:
         """Sets the triax inner shield connection.
 
@@ -681,7 +672,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"OUTP:ISH {shield.raw_value}")
 
-    @mark_query
+    @mark_query(group="Output")
     def get_inner_shield(self) -> InnerShield:
         """Queries the triax inner shield connection.
 
@@ -690,7 +681,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(InnerShield, self.query("OUTP:ISH?"))
 
-    @mark_command
+    @mark_command(group="Output")
     def set_output_response(self, response: OutputResponse) -> int:
         """Sets the output response.
 
@@ -702,7 +693,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"OUTP:RESP {response.raw_value}")
 
-    @mark_query
+    @mark_query(group="Output")
     def get_output_response(self) -> OutputResponse:
         """Queries the output response.
 
@@ -711,7 +702,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(OutputResponse, self.query("OUTP:RESP?"))
 
-    @mark_query
+    @mark_query(group="Output")
     def get_interlock_closed(self) -> bool:
         """Queries whether the interlock is closed.
 
@@ -722,7 +713,7 @@ class Keithley_6221(Instrument):
 
     """ CURRENT SOURCE """
 
-    @mark_command
+    @mark_command(group="Output")
     def clear_source(self) -> int:
         """Sets the output to zero and then turns the output off.
 
@@ -731,7 +722,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SOUR:CLE")
 
-    @mark_command
+    @mark_command(group="Source")
     def set_current(self, current: float) -> int:
         """Sets the output current.
 
@@ -743,7 +734,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:CURR {format_number(current)}")
 
-    @mark_query
+    @mark_query(group="Source")
     def get_current(self) -> float:
         """Queries the output current.
 
@@ -752,7 +743,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:CURR?"))
 
-    @mark_command
+    @mark_command(group="Source")
     def set_current_range(self, range: float) -> int:
         """Sets the source range.
 
@@ -764,7 +755,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:CURR:RANG {format_number(range)}")
 
-    @mark_query
+    @mark_query(group="Source")
     def get_current_range(self) -> float:
         """Queries the source range.
 
@@ -773,7 +764,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:CURR:RANG?"))
 
-    @mark_command
+    @mark_command(group="Source")
     def set_auto_range(self, state: State) -> int:
         """Enables or disables the source auto range.
 
@@ -785,7 +776,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:CURR:RANG:AUTO {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Source")
     def get_auto_range(self) -> State:
         """Queries whether the source auto range is enabled.
 
@@ -794,7 +785,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SOUR:CURR:RANG:AUTO?")))
 
-    @mark_command
+    @mark_command(group="Source")
     def set_compliance(self, compliance: float) -> int:
         """Sets the voltage compliance.
 
@@ -806,7 +797,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:CURR:COMP {format_number(compliance)}")
 
-    @mark_query
+    @mark_query(group="Source")
     def get_compliance(self) -> float:
         """Queries the voltage compliance.
 
@@ -815,7 +806,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:CURR:COMP?"))
 
-    @mark_command
+    @mark_command(group="Source")
     def set_analog_filter(self, state: State) -> int:
         """Enables or disables the analog filter.
 
@@ -827,7 +818,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:CURR:FILT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Source")
     def get_analog_filter(self) -> State:
         """Queries whether the analog filter is enabled.
 
@@ -838,7 +829,7 @@ class Keithley_6221(Instrument):
 
     """ SWEEPS """
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_sweep_start(self, start: float) -> int:
         """Sets the sweep start current.
 
@@ -850,7 +841,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:CURR:STAR {format_number(start)}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_sweep_start(self) -> float:
         """Queries the sweep start current.
 
@@ -859,7 +850,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:CURR:STAR?"))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_sweep_stop(self, stop: float) -> int:
         """Sets the sweep stop current.
 
@@ -871,7 +862,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:CURR:STOP {format_number(stop)}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_sweep_stop(self) -> float:
         """Queries the sweep stop current.
 
@@ -880,7 +871,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:CURR:STOP?"))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_sweep_step(self, step: float) -> int:
         """Sets the sweep step current.
 
@@ -892,7 +883,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:CURR:STEP {format_number(step)}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_sweep_step(self) -> float:
         """Queries the sweep step current.
 
@@ -901,7 +892,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:CURR:STEP?"))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_sweep_center(self, center: float) -> int:
         """Sets the sweep center current.
 
@@ -913,7 +904,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:CURR:CENT {format_number(center)}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_sweep_center(self) -> float:
         """Queries the sweep center current.
 
@@ -922,7 +913,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:CURR:CENT?"))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_sweep_span(self, span: float) -> int:
         """Sets the sweep span current.
 
@@ -934,7 +925,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:CURR:SPAN {format_number(span)}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_sweep_span(self) -> float:
         """Queries the sweep span current.
 
@@ -943,7 +934,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:CURR:SPAN?"))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_source_delay(self, delay: float) -> int:
         """Sets the source delay.
 
@@ -955,7 +946,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DEL {format_number(delay)}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_source_delay(self) -> float:
         """Queries the source delay.
 
@@ -964,7 +955,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DEL?"))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_sweep_spacing(self, spacing: SweepSpacing) -> int:
         """Sets the sweep type.
 
@@ -976,7 +967,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:SWE:SPAC {spacing.raw_value}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_sweep_spacing(self) -> SweepSpacing:
         """Queries the sweep type.
 
@@ -985,7 +976,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(SweepSpacing, self.query("SOUR:SWE:SPAC?"))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_sweep_points(self, points: int) -> int:
         """Sets the number of sweep points.
 
@@ -997,7 +988,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:SWE:POIN {points}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_sweep_points(self) -> int:
         """Queries the number of sweep points.
 
@@ -1006,7 +997,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("SOUR:SWE:POIN?"))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_sweep_ranging(self, ranging: SweepRanging) -> int:
         """Sets the sweep ranging.
 
@@ -1018,7 +1009,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:SWE:RANG {ranging.raw_value}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_sweep_ranging(self) -> SweepRanging:
         """Queries the sweep ranging.
 
@@ -1027,7 +1018,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(SweepRanging, self.query("SOUR:SWE:RANG?"))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_sweep_count(self, count: float) -> int:
         """Sets the number of sweeps.
 
@@ -1039,7 +1030,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:SWE:COUN {format_count(count)}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_sweep_count(self) -> float:
         """Queries the number of sweeps.
 
@@ -1048,7 +1039,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:SWE:COUN?"))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_sweep_compliance_abort(self, state: State) -> int:
         """Enables or disables the abort of the sweep on compliance.
 
@@ -1060,7 +1051,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:SWE:CAB {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_sweep_compliance_abort(self) -> State:
         """Queries whether the abort of the sweep on compliance is enabled.
 
@@ -1069,7 +1060,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SOUR:SWE:CAB?")))
 
-    @mark_command
+    @mark_command(group="Sweep")
     def arm_sweep(self) -> int:
         """Arms the sweep.
 
@@ -1078,7 +1069,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SOUR:SWE:ARM")
 
-    @mark_command
+    @mark_command(group="Sweep")
     def abort_sweep(self) -> int:
         """Aborts a sweep, delta, pulse delta or differential conductance test immediately.
 
@@ -1089,7 +1080,7 @@ class Keithley_6221(Instrument):
 
     """ CUSTOM SWEEP LISTS """
 
-    @mark_command
+    @mark_command(group="Sweep")
     def set_list(self, parameter: ListParameter, values: list[float]) -> int:
         """Defines a list of values for a custom sweep.
 
@@ -1102,7 +1093,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:LIST:{parameter.raw_value} {format_list(values)}")
 
-    @mark_command
+    @mark_command(group="Sweep")
     def append_list(self, parameter: ListParameter, values: list[float]) -> int:
         """Adds values to the end of a custom sweep list.
 
@@ -1117,7 +1108,7 @@ class Keithley_6221(Instrument):
             f"SOUR:LIST:{parameter.raw_value}:APP {format_list(values)}"
         )
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_list(self, parameter: ListParameter) -> list[float]:
         """Queries a custom sweep list.
 
@@ -1129,7 +1120,7 @@ class Keithley_6221(Instrument):
         """
         return to_floats(self.query(f"SOUR:LIST:{parameter.raw_value}?"))
 
-    @mark_query
+    @mark_query(group="Sweep")
     def get_list_points(self, parameter: ListParameter) -> int:
         """Queries the number of values in a custom sweep list.
 
@@ -1143,7 +1134,7 @@ class Keithley_6221(Instrument):
 
     """ DELTA """
 
-    @mark_query
+    @mark_query(group="Delta")
     def get_nanovoltmeter_present(self) -> bool:
         """Queries whether a 2182 or 2182A nanovoltmeter is connected.
 
@@ -1152,7 +1143,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("SOUR:DELT:NVPR?")) == 1
 
-    @mark_command
+    @mark_command(group="Delta")
     def set_delta_high(self, high: float) -> int:
         """Sets the delta high source value.
 
@@ -1164,7 +1155,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DELT:HIGH {format_number(high)}")
 
-    @mark_query
+    @mark_query(group="Delta")
     def get_delta_high(self) -> float:
         """Queries the delta high source value.
 
@@ -1173,7 +1164,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DELT:HIGH?"))
 
-    @mark_command
+    @mark_command(group="Delta")
     def set_delta_low(self, low: float) -> int:
         """Sets the delta low source value.
 
@@ -1185,7 +1176,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DELT:LOW {format_number(low)}")
 
-    @mark_query
+    @mark_query(group="Delta")
     def get_delta_low(self) -> float:
         """Queries the delta low source value.
 
@@ -1194,7 +1185,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DELT:LOW?"))
 
-    @mark_command
+    @mark_command(group="Delta")
     def set_delta_delay(self, delay: float) -> int:
         """Sets the delta delay.
 
@@ -1206,7 +1197,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DELT:DEL {format_number(delay)}")
 
-    @mark_query
+    @mark_query(group="Delta")
     def get_delta_delay(self) -> float:
         """Queries the delta delay.
 
@@ -1215,7 +1206,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DELT:DEL?"))
 
-    @mark_command
+    @mark_command(group="Delta")
     def set_delta_count(self, count: float) -> int:
         """Sets the number of delta cycles.
 
@@ -1227,7 +1218,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DELT:COUN {format_count(count)}")
 
-    @mark_query
+    @mark_query(group="Delta")
     def get_delta_count(self) -> float:
         """Queries the number of delta cycles.
 
@@ -1236,7 +1227,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DELT:COUN?"))
 
-    @mark_command
+    @mark_command(group="Delta")
     def set_delta_compliance_abort(self, state: State) -> int:
         """Enables or disables the abort of the delta test on compliance.
 
@@ -1248,7 +1239,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DELT:CAB {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Delta")
     def get_delta_compliance_abort(self) -> State:
         """Queries whether the abort of the delta test on compliance is enabled.
 
@@ -1257,7 +1248,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SOUR:DELT:CAB?")))
 
-    @mark_command
+    @mark_command(group="Delta")
     def set_delta_cold_switching(self, state: State) -> int:
         """Enables or disables the cold switching mode.
 
@@ -1269,7 +1260,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DELT:CSW {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Delta")
     def get_delta_cold_switching(self) -> State:
         """Queries whether the cold switching mode is enabled.
 
@@ -1278,7 +1269,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SOUR:DELT:CSW?")))
 
-    @mark_command
+    @mark_command(group="Delta")
     def arm_delta(self) -> int:
         """Arms the delta test.
 
@@ -1287,7 +1278,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SOUR:DELT:ARM")
 
-    @mark_query
+    @mark_query(group="Delta")
     def get_delta_armed(self) -> bool:
         """Queries whether the delta test is armed.
 
@@ -1298,7 +1289,7 @@ class Keithley_6221(Instrument):
 
     """ PULSE DELTA """
 
-    @mark_command
+    @mark_command(group="Pulse delta")
     def set_pulse_delta_high(self, high: float) -> int:
         """Sets the pulse delta high value.
 
@@ -1310,7 +1301,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:PDEL:HIGH {format_number(high)}")
 
-    @mark_query
+    @mark_query(group="Pulse delta")
     def get_pulse_delta_high(self) -> float:
         """Queries the pulse delta high value.
 
@@ -1319,7 +1310,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:PDEL:HIGH?"))
 
-    @mark_command
+    @mark_command(group="Pulse delta")
     def set_pulse_delta_low(self, low: float) -> int:
         """Sets the pulse delta low value.
 
@@ -1331,7 +1322,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:PDEL:LOW {format_number(low)}")
 
-    @mark_query
+    @mark_query(group="Pulse delta")
     def get_pulse_delta_low(self) -> float:
         """Queries the pulse delta low value.
 
@@ -1340,7 +1331,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:PDEL:LOW?"))
 
-    @mark_command
+    @mark_command(group="Pulse delta")
     def set_pulse_delta_width(self, width: float) -> int:
         """Sets the pulse width.
 
@@ -1352,7 +1343,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:PDEL:WIDT {format_number(width)}")
 
-    @mark_query
+    @mark_query(group="Pulse delta")
     def get_pulse_delta_width(self) -> float:
         """Queries the pulse width.
 
@@ -1361,7 +1352,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:PDEL:WIDT?"))
 
-    @mark_command
+    @mark_command(group="Pulse delta")
     def set_pulse_delta_source_delay(self, delay: float) -> int:
         """Sets the pulse source delay.
 
@@ -1373,7 +1364,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:PDEL:SDEL {format_number(delay)}")
 
-    @mark_query
+    @mark_query(group="Pulse delta")
     def get_pulse_delta_source_delay(self) -> float:
         """Queries the pulse source delay.
 
@@ -1382,7 +1373,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:PDEL:SDEL?"))
 
-    @mark_command
+    @mark_command(group="Pulse delta")
     def set_pulse_delta_count(self, count: float) -> int:
         """Sets the number of pulse delta readings.
 
@@ -1394,7 +1385,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:PDEL:COUN {format_count(count)}")
 
-    @mark_query
+    @mark_query(group="Pulse delta")
     def get_pulse_delta_count(self) -> float:
         """Queries the number of pulse delta readings.
 
@@ -1403,7 +1394,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:PDEL:COUN?"))
 
-    @mark_command
+    @mark_command(group="Pulse delta")
     def set_pulse_delta_ranging(self, ranging: Ranging) -> int:
         """Sets the pulse source ranging.
 
@@ -1415,7 +1406,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:PDEL:RANG {ranging.raw_value}")
 
-    @mark_query
+    @mark_query(group="Pulse delta")
     def get_pulse_delta_ranging(self) -> Ranging:
         """Queries the pulse source ranging.
 
@@ -1424,7 +1415,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(Ranging, self.query("SOUR:PDEL:RANG?"))
 
-    @mark_command
+    @mark_command(group="Pulse delta")
     def set_pulse_delta_interval(self, interval: int) -> int:
         """Sets the interval of each pulse cycle in power line cycles.
 
@@ -1436,7 +1427,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:PDEL:INT {interval}")
 
-    @mark_query
+    @mark_query(group="Pulse delta")
     def get_pulse_delta_interval(self) -> int:
         """Queries the interval of each pulse cycle in power line cycles.
 
@@ -1445,7 +1436,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("SOUR:PDEL:INT?"))
 
-    @mark_command
+    @mark_command(group="Pulse delta")
     def set_pulse_delta_sweep(self, state: State) -> int:
         """Enables or disables the pulse delta sweep output mode.
 
@@ -1457,7 +1448,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:PDEL:SWE {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Pulse delta")
     def get_pulse_delta_sweep(self) -> State:
         """Queries whether the pulse delta sweep output mode is enabled.
 
@@ -1466,7 +1457,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SOUR:PDEL:SWE?")))
 
-    @mark_command
+    @mark_command(group="Pulse delta")
     def set_pulse_delta_low_measurements(self, count: int) -> int:
         """Sets the number of low measurements per cycle.
 
@@ -1478,7 +1469,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:PDEL:LME {count}")
 
-    @mark_query
+    @mark_query(group="Pulse delta")
     def get_pulse_delta_low_measurements(self) -> int:
         """Queries the number of low measurements per cycle.
 
@@ -1487,7 +1478,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("SOUR:PDEL:LME?"))
 
-    @mark_command
+    @mark_command(group="Pulse delta")
     def arm_pulse_delta(self) -> int:
         """Arms the pulse delta test.
 
@@ -1496,7 +1487,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SOUR:PDEL:ARM")
 
-    @mark_query
+    @mark_query(group="Pulse delta")
     def get_pulse_delta_armed(self) -> bool:
         """Queries whether the pulse delta test is armed.
 
@@ -1507,7 +1498,7 @@ class Keithley_6221(Instrument):
 
     """ DIFFERENTIAL CONDUCTANCE """
 
-    @mark_query
+    @mark_query(group="Differential conductance")
     def get_diffcond_v_zero(self) -> float:
         """Queries the V-zero value acquired from the nanovoltmeter.
 
@@ -1516,7 +1507,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DCON:NVZ?"))
 
-    @mark_command
+    @mark_command(group="Differential conductance")
     def set_diffcond_start(self, start: float) -> int:
         """Sets the differential conductance start value.
 
@@ -1528,7 +1519,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DCON:STAR {format_number(start)}")
 
-    @mark_query
+    @mark_query(group="Differential conductance")
     def get_diffcond_start(self) -> float:
         """Queries the differential conductance start value.
 
@@ -1537,7 +1528,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DCON:STAR?"))
 
-    @mark_command
+    @mark_command(group="Differential conductance")
     def set_diffcond_step(self, step: float) -> int:
         """Sets the differential conductance step size.
 
@@ -1549,7 +1540,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DCON:STEP {format_number(step)}")
 
-    @mark_query
+    @mark_query(group="Differential conductance")
     def get_diffcond_step(self) -> float:
         """Queries the differential conductance step size.
 
@@ -1558,7 +1549,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DCON:STEP?"))
 
-    @mark_command
+    @mark_command(group="Differential conductance")
     def set_diffcond_stop(self, stop: float) -> int:
         """Sets the differential conductance stop value.
 
@@ -1570,7 +1561,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DCON:STOP {format_number(stop)}")
 
-    @mark_query
+    @mark_query(group="Differential conductance")
     def get_diffcond_stop(self) -> float:
         """Queries the differential conductance stop value.
 
@@ -1579,7 +1570,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DCON:STOP?"))
 
-    @mark_command
+    @mark_command(group="Differential conductance")
     def set_diffcond_delta(self, delta: float) -> int:
         """Sets the differential conductance delta value.
 
@@ -1591,7 +1582,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DCON:DELT {format_number(delta)}")
 
-    @mark_query
+    @mark_query(group="Differential conductance")
     def get_diffcond_delta(self) -> float:
         """Queries the differential conductance delta value.
 
@@ -1600,7 +1591,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DCON:DELT?"))
 
-    @mark_command
+    @mark_command(group="Differential conductance")
     def set_diffcond_delay(self, delay: float) -> int:
         """Sets the differential conductance delay.
 
@@ -1612,7 +1603,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DCON:DEL {format_number(delay)}")
 
-    @mark_query
+    @mark_query(group="Differential conductance")
     def get_diffcond_delay(self) -> float:
         """Queries the differential conductance delay.
 
@@ -1621,7 +1612,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:DCON:DEL?"))
 
-    @mark_command
+    @mark_command(group="Differential conductance")
     def set_diffcond_compliance_abort(self, state: State) -> int:
         """Enables or disables the abort of the differential conductance test on compliance.
 
@@ -1633,7 +1624,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:DCON:CAB {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Differential conductance")
     def get_diffcond_compliance_abort(self) -> State:
         """Queries whether the abort of the differential conductance test on compliance is enabled.
 
@@ -1642,7 +1633,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SOUR:DCON:CAB?")))
 
-    @mark_command
+    @mark_command(group="Differential conductance")
     def arm_diffcond(self) -> int:
         """Arms the differential conductance test.
 
@@ -1651,7 +1642,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SOUR:DCON:ARM")
 
-    @mark_query
+    @mark_query(group="Differential conductance")
     def get_diffcond_armed(self) -> bool:
         """Queries whether the differential conductance test is armed.
 
@@ -1662,7 +1653,7 @@ class Keithley_6221(Instrument):
 
     """ WAVE GENERATOR """
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_function(self, function: WaveFunction) -> int:
         """Sets the wave function.
 
@@ -1674,7 +1665,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:FUNC {function.raw_value}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_function(self) -> WaveFunction:
         """Queries the wave function.
 
@@ -1683,7 +1674,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(WaveFunction, self.query("SOUR:WAVE:FUNC?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_duty_cycle(self, duty_cycle: float) -> int:
         """Sets the wave duty cycle.
 
@@ -1695,7 +1686,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:DCYC {format_number(duty_cycle)}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_duty_cycle(self) -> float:
         """Queries the wave duty cycle.
 
@@ -1704,7 +1695,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:WAVE:DCYC?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_amplitude(self, amplitude: float) -> int:
         """Sets the wave amplitude.
 
@@ -1716,7 +1707,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:AMPL {format_number(amplitude)}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_amplitude(self) -> float:
         """Queries the wave amplitude.
 
@@ -1725,7 +1716,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:WAVE:AMPL?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_frequency(self, frequency: float) -> int:
         """Sets the wave frequency.
 
@@ -1737,7 +1728,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:FREQ {format_number(frequency)}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_frequency(self) -> float:
         """Queries the wave frequency.
 
@@ -1746,7 +1737,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:WAVE:FREQ?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_offset(self, offset: float) -> int:
         """Sets the wave offset.
 
@@ -1758,7 +1749,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:OFFS {format_number(offset)}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_offset(self) -> float:
         """Queries the wave offset.
 
@@ -1767,7 +1758,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:WAVE:OFFS?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_phase_marker_level(self, phase: float) -> int:
         """Sets the phase marker phase.
 
@@ -1779,7 +1770,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:PMAR {format_number(phase)}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_phase_marker_level(self) -> float:
         """Queries the phase marker phase.
 
@@ -1788,7 +1779,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:WAVE:PMAR?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_phase_marker_line(self, line: int) -> int:
         """Sets the phase marker trigger line.
 
@@ -1800,7 +1791,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:PMAR:OLIN {line}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_phase_marker_line(self) -> int:
         """Queries the phase marker trigger line.
 
@@ -1809,7 +1800,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("SOUR:WAVE:PMAR:OLIN?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_phase_marker_state(self, state: State) -> int:
         """Enables or disables the phase marker.
 
@@ -1821,7 +1812,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:PMAR:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_phase_marker_state(self) -> State:
         """Queries whether the phase marker is enabled.
 
@@ -1830,7 +1821,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SOUR:WAVE:PMAR:STAT?")))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_arbitrary_data(self, points: list[float]) -> int:
         """Defines the points of the arbitrary waveform.
 
@@ -1842,7 +1833,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:ARB:DATA {format_list(points)}")
 
-    @mark_command
+    @mark_command(group="Waveform")
     def append_arbitrary_data(self, points: list[float]) -> int:
         """Appends points to the arbitrary waveform.
 
@@ -1854,7 +1845,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:ARB:APP {format_list(points)}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_arbitrary_data(self) -> list[float]:
         """Queries the points of the arbitrary waveform.
 
@@ -1863,7 +1854,7 @@ class Keithley_6221(Instrument):
         """
         return to_floats(self.query("SOUR:WAVE:ARB:DATA?"))
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_arbitrary_points(self) -> int:
         """Queries the number of points in the arbitrary waveform.
 
@@ -1872,7 +1863,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("SOUR:WAVE:ARB:POIN?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def copy_arbitrary_to_memory(self, location: int) -> int:
         """Copies the arbitrary waveform to non-volatile memory.
 
@@ -1884,7 +1875,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:ARB:COPY {location}")
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_ranging(self, ranging: Ranging) -> int:
         """Sets the wave source ranging.
 
@@ -1896,7 +1887,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:RANG {ranging.raw_value}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_ranging(self) -> Ranging:
         """Queries the wave source ranging.
 
@@ -1905,7 +1896,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(Ranging, self.query("SOUR:WAVE:RANG?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_duration_time(self, duration: float) -> int:
         """Sets the wave duration.
 
@@ -1917,7 +1908,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:DUR:TIME {format_duration(duration)}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_duration_time(self) -> float:
         """Queries the wave duration.
 
@@ -1926,7 +1917,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:WAVE:DUR:TIME?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_duration_cycles(self, cycles: float) -> int:
         """Sets the wave duration in cycles.
 
@@ -1938,7 +1929,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:DUR:CYCL {format_duration(cycles)}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_duration_cycles(self) -> float:
         """Queries the wave duration in cycles.
 
@@ -1947,7 +1938,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SOUR:WAVE:DUR:CYCL?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def arm_wave(self) -> int:
         """Arms the wave function.
 
@@ -1956,7 +1947,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SOUR:WAVE:ARM")
 
-    @mark_command
+    @mark_command(group="Waveform")
     def start_wave(self) -> int:
         """Starts the waveform output.
 
@@ -1965,7 +1956,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SOUR:WAVE:INIT")
 
-    @mark_command
+    @mark_command(group="Waveform")
     def abort_wave(self) -> int:
         """Aborts the waveform output.
 
@@ -1974,7 +1965,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SOUR:WAVE:ABOR")
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_external_trigger(self, state: State) -> int:
         """Enables or disables the external triggering of the waveform generator.
 
@@ -1986,7 +1977,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:EXTR {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_external_trigger(self) -> State:
         """Queries whether the external triggering of the waveform generator is enabled.
 
@@ -1995,7 +1986,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SOUR:WAVE:EXTR?")))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_external_trigger_line(self, line: int) -> int:
         """Sets the trigger link input line for the waveform.
 
@@ -2007,7 +1998,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:EXTR:ILIN {line}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_external_trigger_line(self) -> int:
         """Queries the trigger link input line for the waveform.
 
@@ -2016,7 +2007,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("SOUR:WAVE:EXTR:ILIN?"))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_ignore_retrigger(self, state: State) -> int:
         """Enables or disables the ignoring of retriggers, which otherwise restart the waveform.
 
@@ -2028,7 +2019,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:EXTR:IGN {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_ignore_retrigger(self) -> State:
         """Queries whether the ignoring of retriggers, which otherwise restart the waveform is enabled.
 
@@ -2037,7 +2028,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SOUR:WAVE:EXTR:IGN?")))
 
-    @mark_command
+    @mark_command(group="Waveform")
     def set_wave_inactive_value(self, value: float) -> int:
         """Sets the value output before and after the waveform.
 
@@ -2049,7 +2040,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SOUR:WAVE:EXTR:IVAL {format_number(value)}")
 
-    @mark_query
+    @mark_query(group="Waveform")
     def get_wave_inactive_value(self) -> float:
         """Queries the value output before and after the waveform.
 
@@ -2060,7 +2051,7 @@ class Keithley_6221(Instrument):
 
     """ READINGS FROM THE NANOVOLTMETER """
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_latest_reading(self) -> float:
         """Reads the latest pre-math delta, pulse delta or differential conductance reading.
 
@@ -2069,7 +2060,7 @@ class Keithley_6221(Instrument):
         """
         return first_number(self.query("SENS:DATA?"))
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_fresh_reading(self) -> float:
         """Reads the latest pre-math reading, which can only be returned once.
 
@@ -2078,7 +2069,7 @@ class Keithley_6221(Instrument):
         """
         return first_number(self.query("SENS:DATA:FRES?"))
 
-    @mark_command
+    @mark_command(group="Filter")
     def set_average_filter_control(self, control: FilterControl) -> int:
         """Sets the averaging filter control.
 
@@ -2090,7 +2081,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SENS:AVER:TCON {control.raw_value}")
 
-    @mark_query
+    @mark_query(group="Filter")
     def get_average_filter_control(self) -> FilterControl:
         """Queries the averaging filter control.
 
@@ -2099,7 +2090,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(FilterControl, self.query("SENS:AVER:TCON?"))
 
-    @mark_command
+    @mark_command(group="Filter")
     def set_average_filter_window(self, window: float) -> int:
         """Sets the averaging filter window.
 
@@ -2111,7 +2102,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SENS:AVER:WIND {format_number(window)}")
 
-    @mark_query
+    @mark_query(group="Filter")
     def get_average_filter_window(self) -> float:
         """Queries the averaging filter window.
 
@@ -2120,7 +2111,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("SENS:AVER:WIND?"))
 
-    @mark_command
+    @mark_command(group="Filter")
     def set_average_filter_count(self, count: int) -> int:
         """Sets the averaging filter count.
 
@@ -2132,7 +2123,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SENS:AVER:COUN {count}")
 
-    @mark_query
+    @mark_query(group="Filter")
     def get_average_filter_count(self) -> int:
         """Queries the averaging filter count.
 
@@ -2141,7 +2132,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("SENS:AVER:COUN?"))
 
-    @mark_command
+    @mark_command(group="Filter")
     def set_average_filter(self, state: State) -> int:
         """Enables or disables the averaging filter.
 
@@ -2153,7 +2144,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SENS:AVER:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Filter")
     def get_average_filter(self) -> State:
         """Queries whether the averaging filter is enabled.
 
@@ -2162,7 +2153,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SENS:AVER:STAT?")))
 
-    @mark_command
+    @mark_command(group="Readings")
     def set_reading_units(self, units: ReadingUnits) -> int:
         """Sets the reading units.
 
@@ -2174,7 +2165,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"UNIT:VOLT:DC {units.raw_value}")
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_reading_units(self) -> ReadingUnits:
         """Queries the reading units.
 
@@ -2183,7 +2174,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(ReadingUnits, self.query("UNIT:VOLT:DC?"))
 
-    @mark_command
+    @mark_command(group="Readings")
     def set_power_type(self, power_type: PowerType) -> int:
         """Sets the pulse delta power reading type.
 
@@ -2195,7 +2186,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"UNIT:POW:TYPE {power_type.raw_value}")
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_power_type(self) -> PowerType:
         """Queries the pulse delta power reading type.
 
@@ -2206,7 +2197,7 @@ class Keithley_6221(Instrument):
 
     """ READING FORMAT """
 
-    @mark_command
+    @mark_command(group="Readings")
     def set_reading_elements(self, elements: list[ReadingElement]) -> int:
         """Selects the data elements included in reading strings.
 
@@ -2219,7 +2210,7 @@ class Keithley_6221(Instrument):
         items = ",".join(element.raw_value for element in elements)
         return self.command(f"FORM:ELEM {items}")
 
-    @mark_query
+    @mark_query(group="Readings")
     def get_reading_elements(self) -> list[ReadingElement]:
         """Queries the data elements included in reading strings.
 
@@ -2231,7 +2222,7 @@ class Keithley_6221(Instrument):
 
     """ MATH, STATISTICS AND LIMIT TESTING """
 
-    @mark_command
+    @mark_command(group="Math")
     def set_math_format(self, math_format: MathFormat) -> int:
         """Sets the math format.
 
@@ -2243,7 +2234,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"CALC1:FORM {math_format.raw_value}")
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_format(self) -> MathFormat:
         """Queries the math format.
 
@@ -2252,7 +2243,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(MathFormat, self.query("CALC1:FORM?"))
 
-    @mark_command
+    @mark_command(group="Math")
     def set_math_factor_m(self, factor: float) -> int:
         """Sets the math "m" factor.
 
@@ -2264,7 +2255,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"CALC1:KMAT:MMF {format_number(factor)}")
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_factor_m(self) -> float:
         """Queries the math "m" factor.
 
@@ -2273,7 +2264,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("CALC1:KMAT:MMF?"))
 
-    @mark_command
+    @mark_command(group="Math")
     def set_math_factor_b(self, factor: float) -> int:
         """Sets the math "b" factor.
 
@@ -2285,7 +2276,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"CALC1:KMAT:MBF {format_number(factor)}")
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_factor_b(self) -> float:
         """Queries the math "b" factor.
 
@@ -2294,7 +2285,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("CALC1:KMAT:MBF?"))
 
-    @mark_command
+    @mark_command(group="Math")
     def set_math_state(self, state: State) -> int:
         """Enables or disables the math calculation.
 
@@ -2306,7 +2297,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"CALC1:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_state(self) -> State:
         """Queries whether the math calculation is enabled.
 
@@ -2315,7 +2306,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("CALC1:STAT?")))
 
-    @mark_query
+    @mark_query(group="Math")
     def get_math_reading(self) -> float:
         """Reads the latest post-math reading.
 
@@ -2324,7 +2315,7 @@ class Keithley_6221(Instrument):
         """
         return first_number(self.query("CALC1:DATA?"))
 
-    @mark_query
+    @mark_query(group="Math")
     def get_fresh_math_reading(self) -> float:
         """Reads the latest post-math reading, which can only be returned once.
 
@@ -2333,7 +2324,7 @@ class Keithley_6221(Instrument):
         """
         return first_number(self.query("CALC1:DATA:FRES?"))
 
-    @mark_command
+    @mark_command(group="Buffer statistics")
     def set_statistic_format(self, statistic: StatisticFormat) -> int:
         """Sets the buffer statistic.
 
@@ -2345,7 +2336,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"CALC2:FORM {statistic.raw_value}")
 
-    @mark_query
+    @mark_query(group="Buffer statistics")
     def get_statistic_format(self) -> StatisticFormat:
         """Queries the buffer statistic.
 
@@ -2354,7 +2345,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(StatisticFormat, self.query("CALC2:FORM?"))
 
-    @mark_command
+    @mark_command(group="Buffer statistics")
     def set_statistic_state(self, state: State) -> int:
         """Enables or disables the buffer statistic calculation.
 
@@ -2366,7 +2357,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"CALC2:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Buffer statistics")
     def get_statistic_state(self) -> State:
         """Queries whether the buffer statistic calculation is enabled.
 
@@ -2375,7 +2366,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("CALC2:STAT?")))
 
-    @mark_command
+    @mark_command(group="Buffer statistics")
     def calculate_statistic(self) -> int:
         """Performs the selected statistic on the buffer contents.
 
@@ -2384,7 +2375,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("CALC2:IMM")
 
-    @mark_query
+    @mark_query(group="Buffer statistics")
     def get_statistic(self) -> float:
         """Reads the result of the buffer statistic.
 
@@ -2393,7 +2384,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("CALC2:DATA?"))
 
-    @mark_command
+    @mark_command(group="Limits")
     def set_limit_test(self, state: State) -> int:
         """Enables or disables the limit test.
 
@@ -2405,7 +2396,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"CALC3:LIM:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Limits")
     def get_limit_test(self) -> State:
         """Queries whether the limit test is enabled.
 
@@ -2414,7 +2405,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("CALC3:LIM:STAT?")))
 
-    @mark_command
+    @mark_command(group="Limits")
     def set_limit_fail_pattern(self, pattern: int) -> int:
         """Sets the limit test fail pattern.
 
@@ -2426,7 +2417,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"CALC3:LIM:SOUR2 {pattern}")
 
-    @mark_query
+    @mark_query(group="Limits")
     def get_limit_fail_pattern(self) -> int:
         """Queries the limit test fail pattern.
 
@@ -2435,7 +2426,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("CALC3:LIM:SOUR2?"))
 
-    @mark_query
+    @mark_query(group="Limits")
     def get_limit_test_failed(self) -> bool:
         """Queries whether the limit test failed.
 
@@ -2444,7 +2435,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("CALC3:LIM:FAIL?")) == 1
 
-    @mark_command
+    @mark_command(group="Limits")
     def set_io_pattern_force(self, state: State) -> int:
         """Enables or disables the I/O pattern force.
 
@@ -2456,7 +2447,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"CALC3:FORC:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="Limits")
     def get_io_pattern_force(self) -> State:
         """Queries whether the I/O pattern force is enabled.
 
@@ -2465,7 +2456,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("CALC3:FORC:STAT?")))
 
-    @mark_command
+    @mark_command(group="Limits")
     def set_io_pattern(self, pattern: int) -> int:
         """Sets the forced I/O pattern.
 
@@ -2477,7 +2468,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"CALC3:FORC:PATT {pattern}")
 
-    @mark_query
+    @mark_query(group="Limits")
     def get_io_pattern(self) -> int:
         """Queries the forced I/O pattern.
 
@@ -2488,7 +2479,7 @@ class Keithley_6221(Instrument):
 
     """ BUFFER """
 
-    @mark_command
+    @mark_command(group="Buffer")
     def clear_buffer(self) -> int:
         """Clears the readings from the buffer.
 
@@ -2497,7 +2488,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("TRAC:CLE")
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_free(self) -> str:
         """Queries the memory available in the buffer.
 
@@ -2506,7 +2497,7 @@ class Keithley_6221(Instrument):
         """
         return unquote(self.query("TRAC:FREE?"))
 
-    @mark_command
+    @mark_command(group="Buffer")
     def set_buffer_size(self, size: int) -> int:
         """Sets the buffer size.
 
@@ -2518,7 +2509,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"TRAC:POIN {size}")
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_size(self) -> int:
         """Queries the buffer size.
 
@@ -2527,7 +2518,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("TRAC:POIN?"))
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_count(self) -> int:
         """Queries the number of readings stored in the buffer.
 
@@ -2536,7 +2527,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("TRAC:POIN:ACT?"))
 
-    @mark_command
+    @mark_command(group="Buffer")
     def set_buffer_notify(self, count: int) -> int:
         """Sets the number of stored readings that sets the trace notify bit.
 
@@ -2548,7 +2539,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"TRAC:NOT {count}")
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_notify(self) -> int:
         """Queries the number of stored readings that sets the trace notify bit.
 
@@ -2557,7 +2548,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query("TRAC:NOT?"))
 
-    @mark_command
+    @mark_command(group="Buffer")
     def set_buffer_feed(self, feed: TraceFeed) -> int:
         """Sets the source of the buffer readings.
 
@@ -2569,7 +2560,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"TRAC:FEED {feed.raw_value}")
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_feed(self) -> TraceFeed:
         """Queries the source of the buffer readings.
 
@@ -2578,7 +2569,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(TraceFeed, self.query("TRAC:FEED?"))
 
-    @mark_command
+    @mark_command(group="Buffer")
     def set_buffer_control(self, control: TraceControl) -> int:
         """Sets the buffer control.
 
@@ -2590,7 +2581,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"TRAC:FEED:CONT {control.raw_value}")
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_control(self) -> TraceControl:
         """Queries the buffer control.
 
@@ -2599,7 +2590,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(TraceControl, self.query("TRAC:FEED:CONT?"))
 
-    @mark_command
+    @mark_command(group="Buffer")
     def set_buffer_timestamp_format(self, timestamp_format: TimestampFormat) -> int:
         """Sets the buffer timestamp format.
 
@@ -2611,7 +2602,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"TRAC:TST:FORM {timestamp_format.raw_value}")
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_timestamp_format(self) -> TimestampFormat:
         """Queries the buffer timestamp format.
 
@@ -2620,7 +2611,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(TimestampFormat, self.query("TRAC:TST:FORM?"))
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_data(self) -> str:
         """Reads all the readings in the buffer.
 
@@ -2629,7 +2620,7 @@ class Keithley_6221(Instrument):
         """
         return unquote(self.query("TRAC:DATA?"))
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_type(self) -> str:
         """Queries the type of readings in the buffer.
 
@@ -2638,7 +2629,7 @@ class Keithley_6221(Instrument):
         """
         return unquote(self.query("TRAC:DATA:TYPE?"))
 
-    @mark_query
+    @mark_query(group="Buffer")
     def get_buffer_selected(self, start: int, count: int) -> str:
         """Reads a range of the readings in the buffer.
 
@@ -2653,7 +2644,7 @@ class Keithley_6221(Instrument):
 
     """ TRIGGER MODEL """
 
-    @mark_command
+    @mark_command(group="Trigger")
     def initiate(self) -> int:
         """Takes the instrument out of idle and starts one trigger cycle.
 
@@ -2662,7 +2653,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("INIT:IMM")
 
-    @mark_command
+    @mark_command(group="Trigger")
     def abort_trigger(self) -> int:
         """Resets the trigger system.
 
@@ -2671,7 +2662,16 @@ class Keithley_6221(Instrument):
         """
         return self.command("ABOR")
 
-    @mark_command
+    @mark_command(group="Trigger")
+    def trigger(self) -> int:
+        """Sends a bus trigger. Only acts if BUS is the arm control source.
+
+        Returns:
+            int: Status code indicating the success of the operation.
+        """
+        return self.command("*TRG")
+
+    @mark_command(group="Trigger")
     def set_arm_source(self, source: ArmSource) -> int:
         """Sets the arm event detector.
 
@@ -2683,7 +2683,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"ARM:SOUR {source.raw_value}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_arm_source(self) -> ArmSource:
         """Queries the arm event detector.
 
@@ -2692,7 +2692,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(ArmSource, self.query("ARM:SOUR?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_arm_timer(self, interval: float) -> int:
         """Sets the arm timer interval.
 
@@ -2704,7 +2704,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"ARM:TIM {format_number(interval)}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_arm_timer(self) -> float:
         """Queries the arm timer interval.
 
@@ -2713,7 +2713,7 @@ class Keithley_6221(Instrument):
         """
         return float(self.query("ARM:TIM?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_arm_output(self, output: ArmOutput) -> int:
         """Sets the arm output trigger.
 
@@ -2725,7 +2725,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"ARM:TCON:ASYN:OUTP {output.raw_value}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_arm_output(self) -> ArmOutput:
         """Queries the arm output trigger.
 
@@ -2734,7 +2734,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(ArmOutput, self.query("ARM:TCON:ASYN:OUTP?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_trigger_source(self, source: TriggerSource) -> int:
         """Sets the trigger event detector.
 
@@ -2746,7 +2746,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"TRIG:SOUR {source.raw_value}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_trigger_source(self) -> TriggerSource:
         """Queries the trigger event detector.
 
@@ -2755,7 +2755,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(TriggerSource, self.query("TRIG:SOUR?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_trigger_output(self, output: TriggerOutput) -> int:
         """Sets the trigger output trigger.
 
@@ -2767,7 +2767,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"TRIG:TCON:ASYN:OUTP {output.raw_value}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_trigger_output(self) -> TriggerOutput:
         """Queries the trigger output trigger.
 
@@ -2776,7 +2776,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(TriggerOutput, self.query("TRIG:TCON:ASYN:OUTP?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def bypass_layer(self, layer: TriggerLayer) -> int:
         """Bypasses the control source of a trigger model layer.
 
@@ -2788,7 +2788,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"{layer.raw_value}:SIGN")
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_layer_direction(
         self, layer: TriggerLayer, direction: BypassDirection
     ) -> int:
@@ -2803,7 +2803,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"{layer.raw_value}:TCON:DIR {direction.raw_value}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_layer_direction(self, layer: TriggerLayer) -> BypassDirection:
         """Queries the control source bypass direction.
 
@@ -2815,7 +2815,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(BypassDirection, self.query(f"{layer.raw_value}:TCON:DIR?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_layer_input_line(self, layer: TriggerLayer, line: int) -> int:
         """Sets the input signal line.
 
@@ -2828,7 +2828,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"{layer.raw_value}:TCON:ASYN:ILIN {line}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_layer_input_line(self, layer: TriggerLayer) -> int:
         """Queries the input signal line.
 
@@ -2840,7 +2840,7 @@ class Keithley_6221(Instrument):
         """
         return to_int(self.query(f"{layer.raw_value}:TCON:ASYN:ILIN?"))
 
-    @mark_command
+    @mark_command(group="Trigger")
     def set_layer_output_line(self, layer: TriggerLayer, line: int) -> int:
         """Sets the output signal line.
 
@@ -2853,7 +2853,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"{layer.raw_value}:TCON:ASYN:OLIN {line}")
 
-    @mark_query
+    @mark_query(group="Trigger")
     def get_layer_output_line(self, layer: TriggerLayer) -> int:
         """Queries the output signal line.
 
@@ -2867,7 +2867,7 @@ class Keithley_6221(Instrument):
 
     """ SYSTEM """
 
-    @mark_command
+    @mark_command(group="System")
     def preset(self) -> int:
         """Returns the instrument to its preset defaults.
 
@@ -2880,7 +2880,7 @@ class Keithley_6221(Instrument):
         self.query("*OPC?")
         return result
 
-    @mark_command
+    @mark_command(group="System")
     def set_power_on_setup(self, setup: PowerOnSetup) -> int:
         """Sets the power-on setup.
 
@@ -2892,7 +2892,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SYST:POS {setup.raw_value}")
 
-    @mark_query
+    @mark_query(group="System")
     def get_power_on_setup(self) -> PowerOnSetup:
         """Queries the power-on setup.
 
@@ -2901,7 +2901,7 @@ class Keithley_6221(Instrument):
         """
         return parse_enum(PowerOnSetup, self.query("SYST:POS?"))
 
-    @mark_command
+    @mark_command(group="System")
     def set_key_click(self, state: State) -> int:
         """Enables or disables the key click.
 
@@ -2913,7 +2913,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SYST:KCL {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="System")
     def get_key_click(self) -> State:
         """Queries whether the key click is enabled.
 
@@ -2922,7 +2922,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SYST:KCL?")))
 
-    @mark_command
+    @mark_command(group="System")
     def set_beeper(self, state: State) -> int:
         """Enables or disables the beeper.
 
@@ -2934,7 +2934,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SYST:BEEP:STAT {state.raw_value}")
 
-    @mark_query
+    @mark_query(group="System")
     def get_beeper(self) -> State:
         """Queries whether the beeper is enabled.
 
@@ -2943,7 +2943,7 @@ class Keithley_6221(Instrument):
         """
         return State.from_raw_value(to_int(self.query("SYST:BEEP:STAT?")))
 
-    @mark_command
+    @mark_command(group="System")
     def press_key(self, key: Key) -> int:
         """Simulates a front panel key press.
 
@@ -2955,7 +2955,7 @@ class Keithley_6221(Instrument):
         """
         return self.command(f"SYST:KEY {key.raw_value}")
 
-    @mark_query
+    @mark_query(group="System")
     def get_last_key(self) -> Key:
         """Queries the last key pressed.
 
@@ -2964,7 +2964,7 @@ class Keithley_6221(Instrument):
         """
         return Key.from_raw_value(to_int(self.query("SYST:KEY?")))
 
-    @mark_command
+    @mark_command(group="System")
     def reset_timestamp(self) -> int:
         """Resets the system timestamp to zero seconds.
 
@@ -2973,7 +2973,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SYST:TST:RES")
 
-    @mark_command
+    @mark_command(group="System")
     def reset_reading_number(self) -> int:
         """Resets the system reading number to zero.
 
@@ -2982,7 +2982,7 @@ class Keithley_6221(Instrument):
         """
         return self.command("SYST:RNUM:RES")
 
-    @mark_query
+    @mark_query(group="System")
     def get_scpi_version(self) -> str:
         """Queries the revision level of the SCPI standard.
 
@@ -2991,7 +2991,7 @@ class Keithley_6221(Instrument):
         """
         return unquote(self.query("SYST:VERS?"))
 
-    @mark_query
+    @mark_query(group="System")
     def get_analog_board_serial(self) -> str:
         """Queries the serial number of the analog board.
 
@@ -3000,7 +3000,7 @@ class Keithley_6221(Instrument):
         """
         return unquote(self.query("SYST:ABO:SNUM?"))
 
-    @mark_query
+    @mark_query(group="System")
     def get_analog_board_revision(self) -> str:
         """Queries the revision level of the analog board.
 
@@ -3009,7 +3009,7 @@ class Keithley_6221(Instrument):
         """
         return unquote(self.query("SYST:ABO:REV?"))
 
-    @mark_query
+    @mark_query(group="System")
     def get_digital_board_serial(self) -> str:
         """Queries the serial number of the digital board.
 
@@ -3018,7 +3018,7 @@ class Keithley_6221(Instrument):
         """
         return unquote(self.query("SYST:DBO:SNUM?"))
 
-    @mark_query
+    @mark_query(group="System")
     def get_digital_board_revision(self) -> str:
         """Queries the revision level of the digital board.
 

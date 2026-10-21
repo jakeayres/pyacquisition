@@ -6,4 +6,6 @@
 
 ::: pyacquisition.core.instrument.mark_command
 
+::: pyacquisition.core.instrument.method_groups
+
 ::: pyacquisition.core.instrument.BaseEnum

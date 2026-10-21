@@ -42,7 +42,7 @@ class PIDController(SoftwareInstrument):
         self._pid = pid
 
     # ------------------------------------------------------------ the setpoint
-    @mark_query
+    @mark_query(group="Setpoint")
     def get_setpoint(self) -> float:
         """The setpoint the PID holds.
 
@@ -51,7 +51,7 @@ class PIDController(SoftwareInstrument):
         """
         return self._pid.setpoint
 
-    @mark_command
+    @mark_command(group="Setpoint")
     def set_setpoint(self, setpoint: float) -> None:
         """Sets the setpoint the PID holds. With a ramp rate, the PID ramps to it.
 
@@ -60,7 +60,7 @@ class PIDController(SoftwareInstrument):
         """
         self._pid.setpoint = float(setpoint)
 
-    @mark_query
+    @mark_query(group="Setpoint")
     def get_ramped_setpoint(self) -> float:
         """The setpoint the PID's loop is using now: on its way to the setpoint at
         the ramp rate, or the setpoint itself with no ramp.
@@ -70,7 +70,7 @@ class PIDController(SoftwareInstrument):
         """
         return self._pid.ramped_setpoint
 
-    @mark_query
+    @mark_query(group="Setpoint")
     def get_ramp_rate(self) -> float:
         """How fast the setpoint in use moves to a new setpoint.
 
@@ -79,7 +79,7 @@ class PIDController(SoftwareInstrument):
         """
         return self._pid.ramp_rate
 
-    @mark_command
+    @mark_command(group="Setpoint")
     def set_ramp_rate(self, rate: float) -> None:
         """Sets how fast the setpoint in use moves to a new setpoint.
 
@@ -95,7 +95,7 @@ class PIDController(SoftwareInstrument):
         self._pid.ramp_rate = float(rate)
 
     # --------------------------------------------------------------- the gains
-    @mark_query
+    @mark_query(group="Gains")
     def get_p(self) -> float:
         """The proportional gain.
 
@@ -104,7 +104,7 @@ class PIDController(SoftwareInstrument):
         """
         return self._pid.kp
 
-    @mark_command
+    @mark_command(group="Gains")
     def set_p(self, p: float) -> None:
         """Sets the proportional gain.
 
@@ -117,7 +117,7 @@ class PIDController(SoftwareInstrument):
         """
         self._pid.kp = _gain("p", p)
 
-    @mark_query
+    @mark_query(group="Gains")
     def get_i(self) -> float:
         """The integral gain.
 
@@ -126,7 +126,7 @@ class PIDController(SoftwareInstrument):
         """
         return self._pid.ki
 
-    @mark_command
+    @mark_command(group="Gains")
     def set_i(self, i: float) -> None:
         """Sets the integral gain.
 
@@ -138,7 +138,7 @@ class PIDController(SoftwareInstrument):
         """
         self._pid.ki = _gain("i", i)
 
-    @mark_query
+    @mark_query(group="Gains")
     def get_d(self) -> float:
         """The derivative gain.
 
@@ -147,7 +147,7 @@ class PIDController(SoftwareInstrument):
         """
         return self._pid.kd
 
-    @mark_command
+    @mark_command(group="Gains")
     def set_d(self, d: float) -> None:
         """Sets the derivative gain.
 
@@ -159,7 +159,7 @@ class PIDController(SoftwareInstrument):
         """
         self._pid.kd = _gain("d", d)
 
-    @mark_query
+    @mark_query(group="Gains")
     def get_pid(self) -> dict:
         """The three gains.
 
@@ -168,7 +168,7 @@ class PIDController(SoftwareInstrument):
         """
         return {"p": self.get_p(), "i": self.get_i(), "d": self.get_d()}
 
-    @mark_command
+    @mark_command(group="Gains")
     def set_pid(self, p: float, i: float, d: float) -> None:
         """Sets the three gains, with `set_p`, `set_i` and `set_d`. None is changed
         if any is refused.
@@ -188,7 +188,7 @@ class PIDController(SoftwareInstrument):
         self.set_d(d)
 
     # ------------------------------------------------------ the output and period
-    @mark_query
+    @mark_query(group="Output and period")
     def get_output_limits(self) -> dict:
         """The limits the output is kept within.
 
@@ -197,7 +197,7 @@ class PIDController(SoftwareInstrument):
         """
         return {"output_min": self._pid.output_min, "output_max": self._pid.output_max}
 
-    @mark_command
+    @mark_command(group="Output and period")
     def set_output_limits(self, output_min: float, output_max: float) -> None:
         """Sets the limits the output is kept within.
 
@@ -215,7 +215,7 @@ class PIDController(SoftwareInstrument):
         self._pid.output_min = float(output_min)
         self._pid.output_max = float(output_max)
 
-    @mark_query
+    @mark_query(group="Output and period")
     def get_period(self) -> float:
         """The time between the PID's cycles.
 
@@ -224,7 +224,7 @@ class PIDController(SoftwareInstrument):
         """
         return self._pid.period
 
-    @mark_command
+    @mark_command(group="Output and period")
     def set_period(self, seconds: float) -> None:
         """Sets the time between the PID's cycles.
 
@@ -239,7 +239,7 @@ class PIDController(SoftwareInstrument):
         self._pid.period = float(seconds)
 
     # -------------------------------------------------------------- live values
-    @mark_query
+    @mark_query(group="Live values")
     def get_value(self) -> float:
         """The measured value the PID last read.
 
@@ -248,7 +248,7 @@ class PIDController(SoftwareInstrument):
         """
         return self._pid.process_value
 
-    @mark_query
+    @mark_query(group="Live values")
     def get_output(self) -> float:
         """The output the PID last wrote.
 
@@ -257,7 +257,7 @@ class PIDController(SoftwareInstrument):
         """
         return self._pid.output
 
-    @mark_query
+    @mark_query(group="Live values")
     def get_error(self) -> float:
         """The PID's last error: the setpoint in use minus the measured value (the
         other way round if it is `inverted`).

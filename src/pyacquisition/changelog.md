@@ -3,6 +3,17 @@
 What changed in each version of PyAcquisition, newest first. The interface
 shows a version's **Highlights** once, after you upgrade to it.
 
+## 0.5.1 (unreleased)
+
+### Highlights
+
+- An instrument's queries and commands are listed in groups, such as
+  **Inputs** and **Control loops** on a Lakeshore, in the **Instruments** tab
+  and on its page in the documentation, with a setting's query and command
+  side by side. Every driver with more than a handful has them. Group your own
+  driver's with `@mark_query(group="Inputs")` and
+  `@mark_command(group="Inputs")`.
+
 ## 0.5.0 (2026-10-21)
 
 ### Highlights

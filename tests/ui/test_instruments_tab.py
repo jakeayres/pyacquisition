@@ -14,6 +14,9 @@ pytest.importorskip("playwright")
 from playwright.sync_api import expect
 from ui_helpers import Page, Running
 
+from pyacquisition.core.instrument import method_groups
+from pyacquisition.instruments import Lakeshore_350
+
 SIMULATED_RIG = Path(__file__).parents[2] / "examples" / "simulated_rig"
 sys.path.insert(0, str(SIMULATED_RIG))
 from sweep_rig import MyExperiment as Tutorial  # noqa: E402
@@ -289,3 +292,71 @@ def test_the_docs_example_queues_a_setpoint_from_the_palette(context, rig):
     finally:
         rig.get("/task_manager/clear_tasks")
         rig.get("/task_manager/resume")
+
+
+# ------------------------------------------------------------ method groups
+class GroupedRig(Tutorial):
+    """The tutorial's rig, with a Lakeshore 350 on the mock adapter, whose
+    methods have groups."""
+
+    def setup(self):
+        super().setup()
+        self.add_instrument(Lakeshore_350("cryo", "GPIB0::12::INSTR", adapter="mock"))
+
+
+@pytest.fixture(scope="module")
+def grouped_rig(tmp_path_factory):
+    running = Running(GroupedRig, tmp_path_factory.mktemp("grouped"))
+    yield running
+    running.stop()
+
+
+def group_labels(page):
+    return page.page.locator(".method-group > .popover-label")
+
+
+def test_a_grouped_drivers_methods_are_listed_by_group_in_the_order_of_its_code(context, grouped_rig):
+    page = open_tab(context, grouped_rig)
+    instrument(page, "cryo")
+
+    groups = method_groups(Lakeshore_350)
+    expect(group_labels(page)).to_have_text(list(groups))
+    loops = page.page.get_by_role("list", name="Control loops").locator(".method-name")
+    expect(loops).to_have_text(groups["Control loops"])
+    assert page.errors == []
+
+
+def test_each_method_of_a_grouped_driver_says_whether_it_is_a_query_or_a_command(context, grouped_rig):
+    page = open_tab(context, grouped_rig)
+    instrument(page, "cryo")
+    loops = page.page.get_by_role("list", name="Control loops")
+
+    command = loops.get_by_role("button", name=re.compile(r"^set_heater_range\s*Command$"))
+    expect(command.locator(".method-kind")).to_have_text(re.compile(r"^C"))
+    query = loops.get_by_role("button", name=re.compile(r"^get_heater_range\s*Query$"))
+    expect(query.locator(".method-kind")).to_have_text(re.compile(r"^Q"))
+
+    command.click()
+    expect(page.page.locator(".call-title")).to_have_text("cryo.set_heater_range")
+    expect(page.page.locator(".call-kind")).to_have_text("Command")
+
+
+def test_the_search_narrows_a_grouped_list_and_leaves_out_groups_with_no_match(context, grouped_rig):
+    page = open_tab(context, grouped_rig)
+    instrument(page, "cryo")
+
+    page.page.get_by_role("searchbox", name="Search the queries and commands").fill("analog_output_setup")
+
+    expect(group_labels(page)).to_have_text(["Analog outputs"])
+    expect(page.page.locator(".method-name")).to_have_text(
+        ["set_analog_output_setup", "get_analog_output_setup"]
+    )
+
+
+def test_a_driver_with_no_groups_is_listed_as_before(context, grouped_rig):
+    page = open_tab(context, grouped_rig)
+    instrument(page, "lakeshore")
+
+    expect(group_labels(page).first).to_have_text("Queries")
+    assert set(group_labels(page).all_text_contents()) <= {"Queries", "Commands", "Other"}
+    expect(page.page.locator(".method-kind")).to_have_count(0)

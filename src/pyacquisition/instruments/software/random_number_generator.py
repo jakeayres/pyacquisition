@@ -33,7 +33,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         super().__init__(uid)
         self._random = random.Random(seed)
 
-    @mark_command
+    @mark_command(group="Seed")
     def set_seed(self, seed: int) -> int:
         """
         Restarts the generator from a seed, so that the numbers repeat.
@@ -49,7 +49,7 @@ class RandomNumberGenerator(SoftwareInstrument):
 
     # Continuous distributions
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def uniform(self, low: float = 0.0, high: float = 1.0) -> float:
         """
         Draws from the uniform distribution between `low` and `high`.
@@ -60,7 +60,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         """
         return self._random.uniform(low, high)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def gaussian(self, mean: float = 0.0, sigma: float = 1.0) -> float:
         """
         Draws from the Gaussian (normal) distribution.
@@ -72,7 +72,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(sigma >= 0, "sigma must not be negative.")
         return self._random.normalvariate(mean, sigma)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def lognormal(self, mu: float = 0.0, sigma: float = 1.0) -> float:
         """
         Draws from the log-normal distribution.
@@ -87,7 +87,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(sigma >= 0, "sigma must not be negative.")
         return self._random.lognormvariate(mu, sigma)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def exponential(self, rate: float = 1.0) -> float:
         """
         Draws from the exponential distribution, whose mean is `1 / rate`.
@@ -98,7 +98,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(rate > 0, "rate must be positive.")
         return self._random.expovariate(rate)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def gamma(self, shape: float = 1.0, scale: float = 1.0) -> float:
         """
         Draws from the gamma distribution, whose mean is `shape * scale`.
@@ -110,7 +110,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(shape > 0 and scale > 0, "shape and scale must be positive.")
         return self._random.gammavariate(shape, scale)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def beta(self, alpha: float = 1.0, beta: float = 1.0) -> float:
         """
         Draws from the beta distribution, which lies between 0 and 1.
@@ -122,7 +122,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(alpha > 0 and beta > 0, "alpha and beta must be positive.")
         return self._random.betavariate(alpha, beta)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def chi_squared(self, dof: float = 1.0) -> float:
         """
         Draws from the chi-squared distribution.
@@ -133,7 +133,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(dof > 0, "dof must be positive.")
         return self._random.gammavariate(dof / 2, 2)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def student_t(self, dof: float = 1.0) -> float:
         """
         Draws from Student's t-distribution.
@@ -146,7 +146,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         chi_squared = self._random.gammavariate(dof / 2, 2)
         return z / math.sqrt(chi_squared / dof)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def cauchy(self, location: float = 0.0, scale: float = 1.0) -> float:
         """
         Draws from the Cauchy (Lorentz) distribution.
@@ -158,7 +158,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(scale > 0, "scale must be positive.")
         return location + scale * math.tan(math.pi * (self._random.random() - 0.5))
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def laplace(self, location: float = 0.0, scale: float = 1.0) -> float:
         """
         Draws from the Laplace (double exponential) distribution.
@@ -173,7 +173,7 @@ class RandomNumberGenerator(SoftwareInstrument):
             self._random.expovariate(1) - self._random.expovariate(1)
         )
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def logistic(self, location: float = 0.0, scale: float = 1.0) -> float:
         """
         Draws from the logistic distribution.
@@ -188,7 +188,7 @@ class RandomNumberGenerator(SoftwareInstrument):
             u = self._random.random()
         return location + scale * math.log(u / (1 - u))
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def rayleigh(self, sigma: float = 1.0) -> float:
         """
         Draws from the Rayleigh distribution.
@@ -201,7 +201,7 @@ class RandomNumberGenerator(SoftwareInstrument):
             self._random.normalvariate(0, sigma), self._random.normalvariate(0, sigma)
         )
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def weibull(self, scale: float = 1.0, shape: float = 1.0) -> float:
         """
         Draws from the Weibull distribution.
@@ -213,7 +213,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(scale > 0 and shape > 0, "scale and shape must be positive.")
         return self._random.weibullvariate(scale, shape)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def pareto(self, alpha: float = 1.0, scale: float = 1.0) -> float:
         """
         Draws from the Pareto distribution, which is never below `scale`.
@@ -225,7 +225,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(alpha > 0 and scale > 0, "alpha and scale must be positive.")
         return scale * self._random.paretovariate(alpha)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def triangular(
         self, low: float = 0.0, mode: float = 0.5, high: float = 1.0
     ) -> float:
@@ -240,7 +240,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(low <= mode <= high, "mode must be between low and high.")
         return self._random.triangular(low, high, mode)
 
-    @mark_query
+    @mark_query(group="Continuous distributions")
     def von_mises(self, mu: float = 0.0, kappa: float = 1.0) -> float:
         """
         Draws an angle in radians from the von Mises (circular normal) distribution.
@@ -255,7 +255,7 @@ class RandomNumberGenerator(SoftwareInstrument):
 
     # Discrete distributions
 
-    @mark_query
+    @mark_query(group="Discrete distributions")
     def integer(self, low: int = 0, high: int = 100) -> int:
         """
         Draws a whole number between `low` and `high`, both included.
@@ -267,7 +267,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(low <= high, "low must not be above high.")
         return self._random.randint(low, high)
 
-    @mark_query
+    @mark_query(group="Discrete distributions")
     def bernoulli(self, p: float = 0.5) -> int:
         """
         Draws 1 with probability `p`, and 0 otherwise.
@@ -278,7 +278,7 @@ class RandomNumberGenerator(SoftwareInstrument):
         _require(0 <= p <= 1, "p must be between 0 and 1.")
         return int(self._random.random() < p)
 
-    @mark_query
+    @mark_query(group="Discrete distributions")
     def binomial(self, n: int = 1, p: float = 0.5) -> int:
         """
         Draws the number of successes in `n` trials, each with probability `p`.
@@ -293,7 +293,7 @@ class RandomNumberGenerator(SoftwareInstrument):
             return self._random.binomialvariate(n, p)
         return sum(self._random.random() < p for _ in range(n))
 
-    @mark_query
+    @mark_query(group="Discrete distributions")
     def poisson(self, mean: float = 1.0) -> int:
         """
         Draws from the Poisson distribution.
@@ -317,7 +317,7 @@ class RandomNumberGenerator(SoftwareInstrument):
                 product *= self._random.random()
         return count
 
-    @mark_query
+    @mark_query(group="Discrete distributions")
     def geometric(self, p: float = 0.5) -> int:
         """
         Draws the number of trials up to and including the first success (1, 2, 3, ...).
