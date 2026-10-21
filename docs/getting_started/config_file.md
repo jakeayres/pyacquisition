@@ -6,13 +6,15 @@ An experiment in PyAcquisition is made of **instruments**, the things it reads f
 
 All of that can be described in one small file. It is written in [TOML](https://toml.io/en/), a simple format: `[tables]`, each with `key = value` lines under it. In this part you build the file a few lines at a time. There is no Python to write and nothing to plug in, since every instrument here is a software one or a stand-in for the real thing. Keep the `my-lab` project from [installation](installation.md) open in your editor, and follow along: the file runs after every step.
 
-<div class="gs" markdown>
+Beside the file, the interface shows what it makes at each step: this very file, running, recorded from the real experiment, with what the step added outlined.
+
+<div class="gs" data-demo data-lines="10" data-term-lines="3" markdown>
 
 <div class="gs-stage" markdown>
 
 <div class="gs-notes" markdown>
 
-<section class="gs-step" data-new-file data-result="The interface opens, with nothing in it yet." markdown>
+<section class="gs-step" data-new-file data-result="The interface opens, with nothing in it yet." data-demo="config-1" data-demo-view="values" data-demo-show=".brand-name" markdown>
 
 ## Start with an empty file
 
@@ -31,7 +33,7 @@ It makes a `data` folder for its data files, and a `logs` folder too. Close the 
 
 </section>
 
-<section class="gs-step" markdown>
+<section class="gs-step" data-demo="config-2" data-demo-view="instruments" data-demo-show=".instrument-item@clock" markdown>
 
 ## Add an instrument: a clock
 
@@ -44,14 +46,14 @@ clock = { instrument = "Clock" }
 
 On the left, `clock` is the instrument's name: yours to choose, and how the rest of the file refers to it. `instrument = "Clock"` names its **driver**, the code that knows how to talk to it. `Clock` is a *software* instrument, which runs on your computer, so there is nothing to connect.
 
-An instrument has **queries**, values it can be asked for, and **commands**, which change it. The clock's `time` query is the seconds since it was made.
+An instrument has **queries**, values it can be asked for, and **commands**, which change it. The clock's `time` query is the seconds since it was made. The interface lists them in its **Instruments** tab.
 
 **More:** [every driver](../reference/instruments/overview.md), and [the `[instruments]` table](../reference/config_file.md#instruments).
 { .gs-more }
 
 </section>
 
-<section class="gs-step" markdown>
+<section class="gs-step" data-demo="config-3" data-demo-view="values" data-demo-show='[data-column="time"]' markdown>
 
 ## Add a measurement: time
 
@@ -69,7 +71,7 @@ The experiment **polls** its measurements: once a cycle, over and over, it reads
 
 </section>
 
-<section class="gs-step" markdown>
+<section class="gs-step" data-demo="config-4" data-demo-view="values" data-demo-show='[data-column="wave"]; .series-chip@wave' markdown>
 
 ## Add a measurement with arguments
 
@@ -92,7 +94,7 @@ Add each line under its table. A table can only appear once in a file, so the ta
 
 </section>
 
-<section class="gs-step" markdown>
+<section class="gs-step" data-demo="config-5" data-demo-view="values" data-demo-show=".rack-control" markdown>
 
 ## Change the polling period
 
@@ -110,7 +112,7 @@ The **rack** is the part of the experiment that polls the measurements, and `[ra
 
 </section>
 
-<section class="gs-step" markdown>
+<section class="gs-step" data-demo="config-6" data-demo-view="instruments" data-demo-do="instrument lockin" data-demo-show=".instrument-item@lockin" markdown>
 
 ## Add a hardware instrument
 
@@ -137,7 +139,7 @@ The `mock` adapter stands in for the device, answering each query with the value
 
 </section>
 
-<section class="gs-step" data-result="Recording every 0.2 s to data/01.00 start.data" markdown>
+<section class="gs-step" data-result="Recording every 0.2 s to data/01.00 start.data" data-demo="config-6" data-demo-view="values" data-demo-show=".file-control .topbar-chip" markdown>
 
 ## Run the experiment
 
@@ -162,30 +164,22 @@ Each run starts a new data file, numbered on from those already there, so that n
 
 ## What you built
 
-Everything in the window comes from the file:
+The finished file, running. Each part of the window comes from it: point at an item below to find it.
 
-<div class="gs-shot" markdown>
-
-![The interface running rig.toml: a live plot of wave against time, 00.00 start.data and Every 0.2 s in the top bar, and a tile for each measurement](../images/getting_started/interface.png){ .pa-shot }
-
-<span class="gs-pin" style="--x: 19%; --y: 3%">1</span>
-<span class="gs-pin" style="--x: 26.8%; --y: 3%">2</span>
-<span class="gs-pin" style="--x: 25.5%; --y: 16%">3</span>
-<span class="gs-pin" style="--x: 39.6%; --y: 81.1%">4</span>
-<span class="gs-pin" style="--x: 7.9%; --y: 72.2%">5</span>
-<span class="gs-pin" style="--x: 14%; --y: 72.2%">6</span>
-
+<div class="pa-built" data-demo="config-6" data-demo-view="values" markdown="0">
+<div class="pa-built__device">
+<div class="pa-built__bar"><span class="pa-built__lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="pa-built__title">rig</span><span class="pa-built__label">Recorded from rig.toml</span></div>
+<div class="pa-built__screen"><iframe title="The interface rig.toml makes, running" tabindex="-1"></iframe></div>
 </div>
-
-<div class="gs-legend" markdown>
-
-1. **The data file.** Every row, saved as it is measured. Click it for more.
-2. **Every 0.2 s.** The polling period, from `[rack]`. The button beside it pauses polling.
-3. **The plot.** Any measurement against any other, live.
-4. **Values.** A tile for each measurement, with its latest reading.
-5. **Queue.** Waits, new files, and later your own tasks.
-6. **Instruments.** Every query and command of each instrument, to send by hand.
-
+<ol class="pa-built__legend">
+<li tabindex="0" data-show=".file-control .topbar-chip"><b>The data file.</b> Every row, saved as it is measured. Click it for more.</li>
+<li tabindex="0" data-show=".rack-control"><b>Every 0.2 s.</b> The polling period, from <code>[rack]</code>. The button beside it pauses polling.</li>
+<li tabindex="0" data-show=".plot-panel"><b>The plot.</b> Any measurement against any other, live.</li>
+<li tabindex="0" data-show=".value-tile"><b>Values.</b> A tile for each measurement, with its latest reading.</li>
+<li tabindex="0" data-show='[role="tab"]@Queue'><b>Queue.</b> Waits, new files, and later your own tasks.</li>
+<li tabindex="0" data-show='[role="tab"]@Instruments'><b>Instruments.</b> Every query and command of each instrument, to send by hand.</li>
+</ol>
+<p class="pa-built__more"><a href="../demo/index.html?session=config-6">Open it full size</a></p>
 </div>
 
 !!! success "Checkpoint"

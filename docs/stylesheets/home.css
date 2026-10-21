@@ -42,7 +42,7 @@
 .md-content__inner:has(.pa-hero) { margin: 0; padding: 0; }
 .md-content__inner:has(.pa-hero)::before { display: none; }
 
-/* Hero: one screen tall, text pinned bottom-left ---------------------- */
+/* Hero: the dark band at the top (its layout is in hero.css) ---------- */
 .pa-hero {
   --md-code-bg-color: var(--pa-bg-raised);
   --md-code-fg-color: #e6e9f0;
@@ -60,25 +60,6 @@
     radial-gradient(ellipse 45% 45% at 100% 0%, rgba(255, 159, 67, 0.14), transparent 70%),
     var(--pa-bg);
 }
-
-/* Faint oscilloscope-style traces, top right. */
-.pa-hero::before {
-  content: "";
-  position: absolute;
-  top: 4%;
-  right: 0;
-  width: min(80%, 60rem);
-  height: 55%;
-  opacity: 0.55;
-  pointer-events: none;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 300' preserveAspectRatio='none'%3E%3Cpath d='M0 150 C100 30 200 30 300 150 S500 270 600 150 S800 30 900 150 S1100 270 1200 150' fill='none' stroke='rgb(74,222,128)' stroke-width='2'/%3E%3Cpath d='M0 150 C75 90 150 90 225 150 S375 210 450 150 S600 90 675 150 S825 210 900 150 S1050 90 1125 150 S1200 190 1200 150' fill='none' stroke='rgb(255,159,67)' stroke-width='2'/%3E%3C/svg%3E")
-    center / 100% 100% no-repeat;
-  -webkit-mask-image: linear-gradient(to left, #000 20%, transparent 95%);
-  mask-image: linear-gradient(to left, #000 20%, transparent 95%);
-}
-
-.pa-hero__text { position: relative; max-width: 34rem; }
 
 .pa-hero h1 {
   margin: 0.2rem 0 1rem;
@@ -235,7 +216,5 @@
 
 /* Narrow screens ------------------------------------------------------ */
 @media (max-width: 60em) {
-  .pa-hero { min-height: calc(100vh - 3rem); }
-  .pa-hero::before { top: 2%; height: 35%; }
   .pa-stats strong { font-size: 1.9rem; }
 }

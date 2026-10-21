@@ -25,6 +25,8 @@ logs/
 # Documentation build (Zensical)
 site/
 .cache/
+# The interface's files, copied in for the front page's demo (see CONTRIBUTING.md)
+docs/demo/app/
 
 # hardware verification: local inventory and recorded traffic
 tests/hardware/hardware.toml

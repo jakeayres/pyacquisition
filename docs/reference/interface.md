@@ -5,6 +5,8 @@ Every part of the window, its keyboard shortcuts, and the command palette. [1. T
 
 The window is a page served by the experiment itself, so you can also open it in a browser at [http://localhost:8000](http://localhost:8000) (the API server's address), on this computer or another. It has three parts: a slim bar across the top, the plots filling the window, and a **dock** of tabs along the bottom.
 
+To try it before you install anything, open the [live demo](../demo/index.html): the interface of the front page's experiment, running with simulated instruments.
+
 ![The interface running Getting Started's rig: the top bar, a plot of wave against time, and the dock with a tile for each measurement](../images/getting_started/interface.png){ .pa-shot }
 
 ## The top bar

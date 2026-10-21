@@ -18,6 +18,10 @@ build:
     install:
       # Install exactly what uv.lock says, and only the documentation dependencies.
       - uv sync --frozen --only-group docs
+    pre_build:
+      # The front page's demo runs the interface's own page, from a copy of its
+      # files (docs/demo/, CONTRIBUTING.md).
+      - cp --recursive src/pyacquisition/gui/static docs/demo/app
     build:
       html:
         - uv run --frozen --no-sync zensical build

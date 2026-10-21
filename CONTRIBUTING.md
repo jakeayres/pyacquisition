@@ -76,3 +76,15 @@ By making a contribution to this project, I certify that:
   tests in `tests/ui/` need Microsoft Edge.
 - Keep a pull request to one change, with a message that says what changed and
   why.
+
+## Previewing the docs
+
+Preview the docs with `uv run zensical serve`. The front page runs the real
+interface, from a copy of its files that the docs build makes. Make the copy
+yourself before you preview, and again after changing the interface:
+
+```
+uv run python -c "import shutil; shutil.copytree('src/pyacquisition/gui/static', 'docs/demo/app', dirs_exist_ok=True)"
+```
+
+`docs/demo/app/` is not committed.

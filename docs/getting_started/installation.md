@@ -78,7 +78,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "pyacquisition>=0.3.2",
+    "pyacquisition>=0.5.0",
 ]
 ```
 

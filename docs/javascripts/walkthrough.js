@@ -39,7 +39,8 @@
 
    On a wide screen the panels are pinned while the page scrolls past the steps, and the
    note of the step in view is placed against the lines it adds, or at the top when it
-   adds none. Otherwise, or without this script, the steps are an ordinary lesson, each
+   adds none. With data-demo, the real interface is shown too, at each step as the file
+   then makes it (see "the interface", below). Otherwise, or without this script, the steps are an ordinary lesson, each
    with its code in place. docs/stylesheets/walkthrough.css has the styles. */
 (() => {
   "use strict";
@@ -210,6 +211,311 @@
   const own = (step, selector) => [...step.querySelectorAll(selector)].filter((b) => !b.closest(".admonition, details"));
   const titleOf = (block) => block.querySelector(".filename")?.textContent.trim() || "";
 
+  // ---------------------------------------------------------------- the interface
+  // A walkthrough with data-demo (Getting Started's) shows the real interface in a
+  // panel between the file and the terminal: at each step, what the file so far
+  // makes, from a recording of it (docs/demo/, specs/getting-started.md). On a step:
+  //
+  // - data-demo="config-3" names its recording, loaded as demo/?session=config-3;
+  // - data-demo-view="instruments" opens that tab of the dock;
+  // - data-demo-do="instrument lockin", "query lockin get_frequency" or
+  //   "add-task Record" does that in the interface, as a reader would;
+  // - data-demo-show=".rack-control; .instrument-item@lockin" outlines those parts
+  //   (a selector, and after @ the text the part must hold), and a line joins the
+  //   step's new lines to the first.
+  //
+  // A step with none shows the step before's recording and view, with nothing
+  // outlined. The frames take no clicks, so the page scrolls over them: "Open full
+  // size" is the interface to use.
+  const APP = { minW: 880, maxW: 1000, scale: 0.8, minH: 340, minLines: 7 };
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // Whether a frame's interface is live
+  const live = (f) => {
+    try {
+      return f.contentWindow?.pyacquisition?.store?.status === "live";
+    } catch {
+      return false;
+    }
+  };
+
+  // The interface's own controls, found by what they say, as a reader finds them
+  const byText = (doc, selector, text) =>
+    [...doc.querySelectorAll(selector)].find((e) => e.textContent.trim() === text);
+  async function tab(doc, name) {
+    const t = byText(doc, '[role="tab"]', name[0].toUpperCase() + name.slice(1));
+    if (t && t.getAttribute("aria-selected") !== "true") t.click();
+    await sleep(120);
+  }
+
+  // The parts a spec names: selectors, each with the text the part must hold after @
+  function targets(doc, spec) {
+    return spec.split(";").map((s) => s.trim()).filter(Boolean).flatMap((item) => {
+      const [selector, text] = item.split("@");
+      const found = [...doc.querySelectorAll(selector.trim())];
+      return text ? found.filter((e) => e.textContent.includes(text.trim())) : found;
+    });
+  }
+
+  // Boxes round parts of a frame's interface, drawn in an SVG over `over`: the
+  // frame is scaled by `scale`, and only what shows in `view` is boxed. Returns the
+  // boxes, in the page's coordinates.
+  function boxParts(svg, over, frame, view, scale, elements) {
+    const box = over.getBoundingClientRect();
+    const frameBox = frame.getBoundingClientRect();
+    const shown = view.getBoundingClientRect();
+    const rects = [];
+    for (const element of elements) {
+      const r = element.getBoundingClientRect();
+      if (!r.width && !r.height) continue;
+      const left = Math.max(frameBox.left + r.left * scale - 3, shown.left);
+      const top = Math.max(frameBox.top + r.top * scale - 3, shown.top);
+      const right = Math.min(frameBox.left + r.right * scale + 3, shown.right);
+      const bottom = Math.min(frameBox.top + r.bottom * scale + 3, shown.bottom);
+      if (right <= left || bottom <= top) continue;
+      rects.push({ left, top, right, bottom });
+      const e = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      for (const [key, value] of Object.entries({
+        class: "box", x: left - box.left, y: top - box.top, width: right - left, height: bottom - top, rx: 5,
+      })) e.setAttribute(key, value);
+      svg.append(e);
+    }
+    return rects;
+  }
+
+  function demoPanel(root, stage, panels, termPanel, steps) {
+    const base = new URL(root.dataset.demoBase || "../../demo/", location.href);
+    const plan = [];
+    steps.forEach((s, i) => {
+      const own = s.dataset.demo !== undefined;
+      const before = plan[i - 1] || {};
+      plan.push({
+        own,
+        session: s.dataset.demo || before.session,
+        view: own ? s.dataset.demoView || "" : before.view,
+        act: own ? s.dataset.demoDo || "" : "",
+        show: own ? s.dataset.demoShow || "" : "",
+      });
+    });
+
+    const panel = make("div", "gs-panel gs-panel--app",
+      '<div class="gs-panel__name">The interface<a class="gs-app__open" href="#">Open full size ↗</a></div>');
+    const body = make("div", "gs-app");
+    const frames = [0, 1].map(() => {
+      const f = document.createElement("iframe");
+      f.className = "gs-app__frame";
+      f.title = "The interface, as the file at this step makes it";
+      f.tabIndex = -1;
+      body.append(f);
+      return f;
+    });
+    panel.append(body);
+    panels.insertBefore(panel, termPanel);
+    const open = panel.querySelector(".gs-app__open");
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.classList.add("gs-outline");
+    panels.append(svg);
+
+    // ------------------------------------------------------------ fitting it
+    // As wide as the column, laid out 880 to 1000 pixels wide; as tall as the window
+    // leaves after the other panels, and at least 340 pixels as laid out. The file
+    // panel gives up lines for it, down to what the step needs: all its new lines,
+    // or else their longest run. When even that leaves too little, the interface
+    // folds away for the step, and the file has the room.
+    const fileBody = panels.querySelector(".gs-panel--file .gs-panel__body");
+    const wantedLines = +(root.dataset.lines || 15);
+    let scale = APP.scale, need = { all: 0, run: 0 };
+    function needed(newLines) {
+      const file = newLines[0]?.closest(".gs-panel--file .gs-scroll");
+      if (!file) return { all: 0, run: 0 };
+      const shown = [...file.children].filter((r) => !r.classList.contains("is-hidden"));
+      const at = newLines.map((r) => shown.indexOf(r)).filter((j) => j >= 0);
+      let run = 0, best = 0;
+      for (const r of shown) {
+        run = r.classList.contains("is-new") ? run + 1 : 0;
+        best = Math.max(best, run);
+      }
+      return { all: at.length ? Math.max(...at) - Math.min(...at) + 1 : 0, run: best };
+    }
+    function fit() {
+      // The column's width (less the panel's border), which a folded panel hasn't
+      const width = panels.clientWidth - 2;
+      if (width <= 0) return;
+      const appW = Math.min(APP.maxW, Math.max(APP.minW, width / APP.scale));
+      scale = width / appW;
+      const minH = APP.minH * scale;
+      const top = parseFloat(getComputedStyle(stage).top) || 0;
+      const set = (n) => root.style.setProperty("--file-lines", n);
+      const room = () => window.innerHeight - top - 12 - (panels.offsetHeight - body.offsetHeight);
+      // With the interface: the file gives up lines, down to one more than the step's
+      // new lines need, or, when they are more than the file panel holds, their
+      // longest run. (Never to a run when they would all fit: of two runs alike, the
+      // one in view could be either.)
+      let lines = wantedLines;
+      panel.classList.remove("is-folded"); // measured as it would be, shown
+      body.style.height = `${minH}px`;
+      set(lines);
+      const floor = need.all && need.all < wantedLines ? need.all : need.run;
+      const least = Math.max(3, Math.min(wantedLines, (floor || APP.minLines - 1) + 1));
+      while (fileBody && lines > least && room() < minH) set(--lines);
+      const folded = room() < minH;
+      panel.classList.toggle("is-folded", folded);
+      let height = 0;
+      if (folded) {
+        // Without it: the file takes the room, as many lines as the step needs.
+        body.style.height = "0px";
+        lines = wantedLines;
+        set(lines);
+        const most = Math.max(wantedLines, need.all + 1);
+        while (fileBody && lines < most && room() > 0) set(++lines);
+        if (room() < 0 && lines > wantedLines) set(--lines);
+      } else {
+        height = room();
+      }
+      body.style.height = `${height}px`;
+      for (const f of frames) {
+        f.style.width = `${appW}px`;
+        f.style.height = `${Math.max(height, minH) / scale}px`;
+        f.style.transform = `scale(${scale})`;
+      }
+    }
+    new ResizeObserver(() => fit()).observe(panels);
+    window.addEventListener("resize", () => fit());
+
+    // ------------------------------------------------------------ the frames
+    const loaded = [null, null]; // the recording in each frame
+    let on = -1; // the frame shown
+    async function load(k, session) {
+      if (loaded[k] !== session) {
+        loaded[k] = session;
+        frames[k].src = `${base.href}?session=${encodeURIComponent(session)}`;
+        await sleep(50);
+      }
+      for (let n = 0; n < 200 && !live(frames[k]); n += 1) await sleep(75);
+      return loaded[k] === session;
+    }
+    const docOf = (k) => frames[k].contentDocument;
+
+    async function act(doc, what) {
+      const [verb, ...args] = what.trim().split(/\s+/);
+      if (verb === "instrument" || verb === "query") {
+        await tab(doc, "instruments");
+        const item = [...doc.querySelectorAll(".instrument-item")].find((e) =>
+          e.textContent.trim().startsWith(args[0]));
+        item?.click();
+        await sleep(150);
+        if (verb === "query") {
+          byText(doc, ".method-item", args[1])?.click();
+          await sleep(200);
+          byText(doc, "button", "Read")?.click();
+          await sleep(300);
+        }
+      } else if (verb === "add-task") {
+        await tab(doc, "queue");
+        byText(doc, "button", "Add task")?.click();
+        await sleep(300);
+        if (args[0]) {
+          [...doc.querySelectorAll(".task-option")]
+            .find((e) => e.querySelector(".task-option-name")?.textContent.trim() === args[0])
+            ?.click();
+          await sleep(200);
+        }
+      }
+    }
+    async function prepare(k, p) {
+      const doc = docOf(k);
+      if (!doc) return;
+      if (p.view) await tab(doc, p.view);
+      if (p.act) await act(doc, p.act);
+    }
+    function swap(k) {
+      on = k;
+      frames.forEach((f, j) => f.classList.toggle("is-on", j === k));
+      open.href = `${base.href}?session=${encodeURIComponent(loaded[k])}`;
+    }
+
+    // ------------------------------------------------------------ a step
+    let wanted = -1, lines = [];
+    async function show(i, newLines) {
+      wanted = i;
+      lines = newLines;
+      need = needed(newLines);
+      fit();
+      const p = plan[i];
+      if (!p || !p.session) return;
+      if (on < 0 || loaded[on] !== p.session) {
+        const k = on < 0 ? 0 : 1 - on;
+        if (!(await load(k, p.session)) || wanted !== i) return;
+        await prepare(k, p);
+        if (wanted !== i) return;
+        swap(k);
+      } else if (p.own) {
+        await prepare(on, p);
+      }
+      // The next step's recording, ready in the frame not shown
+      const next = plan.slice(i + 1).find((q) => q.session && q.session !== p.session);
+      if (next && wanted === i) load(1 - on, next.session);
+    }
+
+    // ------------------------------------------------------------ the outline
+    function draw() {
+      svg.replaceChildren();
+      const p = plan[wanted];
+      if (!p || !p.show || on < 0 || loaded[on] !== p.session) return;
+      const doc = docOf(on);
+      if (!doc) return;
+      const box = panels.getBoundingClientRect();
+      const add = (name, attrs) => {
+        const e = document.createElementNS(ns, name);
+        for (const [key, value] of Object.entries(attrs)) e.setAttribute(key, value);
+        svg.append(e);
+        return e;
+      };
+      const rects = boxParts(svg, panels, frames[on], body, scale, targets(doc, p.show));
+      // From the step's new lines, where they show, to the first part
+      const shown = lines.filter((l) => !l.classList.contains("is-hidden"));
+      if (!rects.length || !shown.length) return;
+      const panelOf = shown[0].closest(".gs-panel__body").getBoundingClientRect();
+      const a = shown[0].getBoundingClientRect(), b = shown[shown.length - 1].getBoundingClientRect();
+      const fromTop = Math.max(a.top, panelOf.top), fromBottom = Math.min(b.bottom, panelOf.bottom);
+      if (fromBottom <= fromTop) return;
+      const t = rects[0];
+      const x1 = panelOf.left + 10 - box.left;
+      const below = t.top >= fromBottom;
+      const y1 = (below ? fromBottom - 4 : fromTop + 4) - box.top;
+      const x2 = (t.left + t.right) / 2 - box.left;
+      const y2 = (below ? t.top : t.bottom) - box.top;
+      const bend = Math.max(30, Math.abs(y2 - y1) / 2) * (below ? 1 : -1);
+      add("path", { class: "link", d: `M ${x1} ${y1} C ${x1} ${y1 + bend}, ${x2} ${y2 - bend}, ${x2} ${y2}` });
+      add("circle", { class: "end", cx: x1, cy: y1, r: 2.5 });
+      add("circle", { class: "end", cx: x2, cy: y2, r: 2.5 });
+    }
+
+    // Drawn on every frame while in view, as the interface moves; held when out of it.
+    let inView = false;
+    const loop = () => {
+      if (inView && root.classList.contains("gs--live")) draw();
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+    new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      for (const f of frames) {
+        try {
+          const d = f.contentWindow?.pyacquisitionDemo;
+          if (inView) d?.release("away");
+          else d?.hold("away");
+        } catch {
+          // not loaded yet
+        }
+      }
+    }).observe(root);
+
+    fit();
+    return { show };
+  }
+
   function mount(root) {
     if (root.dataset.ready) return;
     root.dataset.ready = "1";
@@ -311,6 +617,7 @@
     termBody.append(...termRows);
     panels.append(termPanel);
     stage.prepend(panels);
+    const demo = root.hasAttribute("data-demo") ? demoPanel(root, stage, panels, termPanel, steps) : null;
 
     // Showing a step
     const given = steps.map((s) => s.hasAttribute("data-given"));
@@ -372,6 +679,7 @@
 
       target = newInFile.length ? newInFile : newInTerm;
       up = !newInFile.length;
+      demo?.show(i, target);
       steps[i].classList.toggle("is-unanchored", !target.length);
       setTimeout(scrollFile, 0);
       follow(700);
@@ -525,6 +833,102 @@
     else window.addEventListener("load", () => setTimeout(toHash, 50));
   }
 
+  // ---------------------------------------------------------------- what you built
+  // A .pa-built block (Getting Started's "What you built"): the last step's recording,
+  // running in a frame, and a legend under it. An item outlines its part when hovered
+  // or focused, and while the block is in view the items take their turn by
+  // themselves (not with reduced motion). The frame takes no clicks, so the page
+  // scrolls over it; its link opens it full size.
+  const BUILT = { width: 1000, height: 700, turn: 3200 };
+
+  function built(el) {
+    if (el.dataset.ready) return;
+    el.dataset.ready = "1";
+    const screen = el.querySelector(".pa-built__screen");
+    const frame = screen.querySelector("iframe");
+    const items = [...el.querySelectorAll("[data-show]")];
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.classList.add("gs-outline");
+    screen.append(svg);
+    const src = new URL(`../../demo/?session=${encodeURIComponent(el.dataset.demo)}`, location.href);
+    let scale = 1, at = -1, inView = false, held = false, timer = null;
+
+    const fit = () => {
+      scale = screen.clientWidth / BUILT.width;
+      screen.style.height = `${BUILT.height * scale}px`;
+      frame.style.transform = `scale(${scale})`;
+    };
+    new ResizeObserver(fit).observe(screen);
+    fit();
+
+    async function start() {
+      frame.src = src.href;
+      for (let n = 0; n < 200 && !live(frame); n += 1) await sleep(75);
+      if (el.dataset.demoView) await tab(frame.contentDocument, el.dataset.demoView);
+      el.classList.add("is-live");
+      turn();
+    }
+
+    function select(i) {
+      at = i;
+      items.forEach((item, j) => item.classList.toggle("is-on", j === i));
+    }
+    // The next item, in a while, unless one is held or motion is reduced
+    function turn() {
+      clearTimeout(timer);
+      if (reduced() || held || !inView || !items.length) return;
+      timer = setTimeout(() => {
+        select((at + 1) % items.length);
+        turn();
+      }, at < 0 ? 600 : BUILT.turn);
+    }
+    items.forEach((item, i) => {
+      const hold = () => {
+        held = true;
+        clearTimeout(timer);
+        select(i);
+      };
+      const free = () => {
+        held = false;
+        turn();
+      };
+      item.addEventListener("mouseenter", hold);
+      item.addEventListener("focus", hold);
+      item.addEventListener("mouseleave", free);
+      item.addEventListener("blur", free);
+    });
+
+    const draw = () => {
+      svg.replaceChildren();
+      if (at < 0 || !el.classList.contains("is-live")) return;
+      const doc = frame.contentDocument;
+      if (doc) boxParts(svg, screen, frame, screen, scale, targets(doc, items[at].dataset.show));
+    };
+    const loop = () => {
+      if (inView) draw();
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+
+    // Loaded as it comes near; held, and its turns stopped, out of view
+    let started = false;
+    new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      if (inView && !started) {
+        started = true;
+        start();
+      }
+      try {
+        const demo = frame.contentWindow?.pyacquisitionDemo;
+        if (inView) demo?.release("away");
+        else demo?.hold("away");
+      } catch {
+        // not loaded yet
+      }
+      turn();
+    }, { rootMargin: "200px 0px" }).observe(el);
+  }
+
   // The screenshot's numbered pins pop in when it comes into view.
   function pins() {
     const shot = document.querySelector(".gs-shot");
@@ -542,6 +946,7 @@
 
   function init() {
     document.querySelectorAll(".gs").forEach(mount);
+    document.querySelectorAll(".pa-built").forEach(built);
     pins();
   }
   if (window.document$ && typeof window.document$.subscribe === "function") window.document$.subscribe(init);

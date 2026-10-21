@@ -165,7 +165,7 @@ def build_from_config():
 def test_the_config_file_example_sets_up(examples, fake_visa):
     experiment = build_from_config()
     assert {"lockin", "lakeshore"} <= set(experiment.instruments)
-    assert set(experiment.measurements) == {"x", "y", "T"}
+    assert set(experiment.measurements) == {"time", "x", "y", "T"}
 
 
 def test_the_calculations_config_example_sets_up(examples, fake_visa):
@@ -186,9 +186,47 @@ def test_the_config_file_example_is_equivalent_to_the_python_one(examples, fake_
     assert set(config.instruments) == set(python.instruments)
     assert set(config.measurements) == set(python.measurements)
     assert config._data_path == python._data_path
-    # Each measurement reads the same thing, including the one with an argument.
+    # Each measurement reads the same thing, including the one with an argument,
+    # in the same unit. (Two clocks, started a moment apart, can't read the same.)
     for name in python.measurements:
-        assert config.measurements[name].run() == python.measurements[name].run()
+        assert config.measurements[name].unit == python.measurements[name].unit
+        if name != "time":
+            assert config.measurements[name].run() == python.measurements[name].run()
+
+
+def test_the_front_pages_simulated_rig_is_the_front_pages_experiment(examples, fake_visa):
+    # The front page's demo is recorded from front_page_rig.py, so the interface it
+    # shows must be the one front_page.py makes: the same instruments, with the real
+    # drivers, and the same columns, sources and units.
+    from pyacquisition.instruments import SR_830, Lakeshore_350
+
+    python = build("front_page")
+    rig = build("front_page_rig")
+
+    assert {k: type(v) for k, v in rig.instruments.items()} == {
+        k: type(v) for k, v in python.instruments.items()
+    }
+    assert type(rig.instruments["lockin"]) is SR_830
+    assert type(rig.instruments["lakeshore"]) is Lakeshore_350
+    assert rig._column_info() == python._column_info()
+    assert rig._data_path == python._data_path
+
+
+def test_the_front_pages_simulated_rig_reads_the_simulated_sample(examples):
+    rig = build("front_page_rig")
+    x, y, kelvin = (rig.measurements[name].run() for name in ("x", "y", "T"))
+    assert kelvin == pytest.approx(85.0, abs=0.1)  # where the simulation starts
+    assert x == pytest.approx(10e-6 * (0.8 + 0.045 * 85.0), rel=0.01)  # normal: I times R
+    assert abs(y) < 1e-6
+
+
+def test_the_front_pages_film_loses_its_resistance_through_75_kelvin(examples):
+    from front_page_rig import SuperconductingFilm
+
+    film = SuperconductingFilm(cryostat=None, transition=75.0)
+    assert film.resistance(85.0) == pytest.approx(0.8 + 0.045 * 85.0, rel=1e-6)
+    assert film.resistance(75.0) == pytest.approx((0.8 + 0.045 * 75.0) / 2)
+    assert film.resistance(70.0) < 1e-6
 
 
 ROOT = EXAMPLES.parent
@@ -227,8 +265,9 @@ def annotated_snippets():
 
 
 def test_there_are_annotated_snippets_to_check():
-    # The front page's two, of the Python and the config file
-    assert len(list(annotated_snippets())) >= 2
+    # The front page's, of the config file. (Its Python is joined to the interface
+    # by the hero's tour instead, docs/javascripts/hero.js.)
+    assert len(list(annotated_snippets())) >= 1
 
 
 @pytest.mark.parametrize(

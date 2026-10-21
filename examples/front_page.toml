@@ -1,6 +1,9 @@
 [data]
 path = "my_data"
 
+[instruments.clock]
+instrument = "Clock"
+
 [instruments.lockin]
 instrument = "SR_830"
 adapter = "pyvisa"
@@ -11,15 +14,23 @@ instrument = "Lakeshore_350"
 adapter = "pyvisa"
 resource = "GPIB0::12::INSTR"
 
+[measurements.time]
+instrument = "clock"
+method = "time"
+unit = "s"
+
 [measurements.x]
 instrument = "lockin"
 method = "get_x"
+unit = "V"
 
 [measurements.y]
 instrument = "lockin"
 method = "get_y"
+unit = "V"
 
 [measurements.T]
 instrument = "lakeshore"
 method = "get_temperature"
 args = {input_channel = "INPUT_A"}
+unit = "K"

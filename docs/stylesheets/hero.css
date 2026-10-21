@@ -1,0 +1,491 @@
+/* The front page: its hero, and its "Or build it in a window" section.
+
+   The hero is one pane of glass floating over the page: the script on the left,
+   and the interface it makes, running, on the right. The interface is the real
+   one, in a frame (docs/demo/), drawn at its own size and scaled to fit by
+   hero.js, which also runs the tour that joins each part of the script to what it
+   makes. The dark band behind it stops partway down, so the glass hangs over the
+   white page below. Scoped to .pa-live, .pa-stage and .pa-setup. */
+
+/* The band ------------------------------------------------------------ */
+.pa-live {
+  --pa-app-w: 1000; /* the interface's own size, in CSS pixels, before scaling: */
+  --pa-app-h: 700; /* hero.js sets the width and the scale to fit */
+  --pa-scale: 0.8;
+  --pa-code-w: 23.5rem; /* the script's longest line, 72 characters */
+  --pa-width: 59.4rem; /* the page's column, as every section below has it */
+  --pa-overhang: 16rem; /* how far the glass hangs below the band, with the note */
+
+  display: block;
+  min-height: 0;
+  padding: clamp(1.6rem, 5vh, 3rem) 0.8rem 1.6rem;
+  overflow: visible;
+  background: none;
+  isolation: isolate;
+}
+.pa-live::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 var(--pa-overhang);
+  z-index: -2;
+  background: var(--pa-bg);
+}
+
+/* Slow light behind the glass, and a faint grid of dots */
+.pa-aurora {
+  position: absolute;
+  inset: 0 0 var(--pa-overhang);
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+.pa-aurora::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000, transparent 75%);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 30%, #000, transparent 75%);
+}
+.pa-aurora i {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: pa-drift 26s ease-in-out infinite alternate;
+}
+.pa-aurora i:nth-child(1) {
+  width: 44rem;
+  height: 30rem;
+  left: -12rem;
+  top: 38%;
+  background: radial-gradient(closest-side, rgba(74, 222, 128, 0.42), transparent);
+}
+.pa-aurora i:nth-child(2) {
+  width: 40rem;
+  height: 28rem;
+  right: -10rem;
+  top: -8rem;
+  background: radial-gradient(closest-side, rgba(255, 159, 67, 0.38), transparent);
+  animation-duration: 32s;
+  animation-direction: alternate-reverse;
+}
+.pa-aurora i:nth-child(3) {
+  width: 56rem;
+  height: 26rem;
+  left: 22%;
+  bottom: -10rem;
+  background: radial-gradient(closest-side, rgba(96, 165, 250, 0.3), transparent);
+  animation-duration: 38s;
+}
+@keyframes pa-drift {
+  50% { transform: translate(4rem, -2rem) scale(1.08); }
+  100% { transform: translate(-3rem, 2rem) scale(0.95); }
+}
+
+/* The headline, centred ----------------------------------------------- */
+.pa-live__head {
+  position: relative;
+  max-width: 46rem;
+  margin: 0 auto;
+  text-align: center;
+}
+.pa-live h1 {
+  margin: 0.45rem 0 0.8rem;
+  font-size: clamp(2rem, 4.7vw, 3.4rem);
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+.pa-live .pa-lede {
+  max-width: 34rem;
+  margin: 0 auto;
+  font-size: clamp(0.72rem, 1.4vw, 0.84rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+}
+.pa-live__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 1.4rem 0 0;
+}
+.pa-live__actions > p { display: contents; }
+.pa-live__actions .md-button { margin: 0; padding: 0.55em 1.4em; font-size: 0.66rem; }
+.pa-live .md-button.pa-glass {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.22);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+.pa-live .pa-install { margin: 0 0 0 0.4rem; max-width: none; }
+.pa-live .pa-install .highlight, .pa-live .pa-install pre { margin: 0; }
+.pa-live .pa-install .md-code__nav { background: transparent; }
+.pa-live .pa-install .md-code__button { color: rgba(255, 255, 255, 0.45); }
+.pa-live .pa-install code {
+  padding-right: 2.4rem;
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+
+.pa-live__head > * { animation: pa-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.pa-live__head > :nth-child(2) { animation-delay: 0.06s; }
+.pa-live__head > :nth-child(3) { animation-delay: 0.12s; }
+.pa-live__head > :nth-child(4) { animation-delay: 0.18s; }
+@keyframes pa-up {
+  from { opacity: 0; transform: translateY(1rem); }
+}
+
+/* The glass: the script, and the interface ---------------------------- */
+.pa-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--pa-code-w) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 0.4rem;
+  width: min(100%, var(--pa-width));
+  margin: clamp(1.6rem, 4.5vh, 2.6rem) auto 0;
+  padding: 0 0.4rem 0.4rem;
+  border-radius: 1.4rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
+  -webkit-backdrop-filter: blur(28px) saturate(170%);
+  backdrop-filter: blur(28px) saturate(170%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 2px 6px rgba(4, 8, 16, 0.25),
+    0 40px 90px -24px rgba(4, 8, 16, 0.6),
+    0 90px 180px -50px rgba(4, 8, 16, 0.5);
+  animation: pa-rise 1.4s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+@keyframes pa-rise {
+  from {
+    opacity: 0;
+    transform: perspective(2200px) rotateX(16deg) translateY(4rem) scale(0.95);
+  }
+}
+
+.pa-stage__bar {
+  position: relative;
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 2.1rem;
+  padding: 0 0.5rem;
+  font-size: 0.56rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+.pa-stage__lights { display: flex; gap: 0.32rem; }
+.pa-stage__lights i { width: 0.52rem; height: 0.52rem; border-radius: 50%; background: #ff5f57; }
+.pa-stage__lights i:nth-child(2) { background: #febc2e; }
+.pa-stage__lights i:nth-child(3) { background: #28c840; }
+.pa-stage__title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.pa-window__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.12rem 0.6rem;
+  font-weight: 600;
+  color: #ffc58f;
+  border: 1px solid rgba(255, 159, 67, 0.35);
+  border-radius: 999px;
+  background: rgba(255, 159, 67, 0.1);
+}
+.pa-window__label::before {
+  content: "";
+  width: 0.34rem;
+  height: 0.34rem;
+  border-radius: 50%;
+  background: var(--pa-orange);
+  box-shadow: 0 0 8px var(--pa-orange);
+}
+
+/* The script's pane: dark glass */
+.pa-stage__code { position: relative; min-width: 0; }
+.pa-stage__code.pa-ide {
+  --ide-bg: transparent;
+  --ide-chrome: transparent;
+  --ide-line: rgba(255, 255, 255, 0.07);
+  --hdr: 1.9rem;
+  --fs: 0.5rem;
+  --lh: 0.78rem;
+  --pad: 0.75rem;
+  border-radius: 0.95rem;
+  border-color: rgba(255, 255, 255, 0.07);
+  background: rgba(8, 11, 18, 0.8);
+  box-shadow: none;
+}
+.pa-stage__code .highlight code { overflow-x: auto; }
+
+/* The tour's lines in the script */
+.pa-stage__code code > span[id^="__span"] {
+  display: block;
+  margin: 0 -1rem;
+  padding: 0 1rem;
+  transition: opacity 0.3s, background 0.25s, box-shadow 0.25s;
+}
+.pa-stage__code code > span.pa-on {
+  background: rgba(255, 159, 67, 0.12);
+  box-shadow: inset 2px 0 var(--pa-orange);
+}
+.pa-stage[data-touring] .pa-stage__code code > span[id^="__span"]:not(.pa-on) { opacity: 0.45; }
+
+/* The interface's pane */
+.pa-stage__app { min-width: 0; }
+.pa-window {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 0.95rem;
+  background: #0d1117;
+}
+
+/* The frame is drawn at the interface's own size and scaled to the window. */
+.pa-window__view {
+  position: relative;
+  height: calc(var(--pa-app-h) * var(--pa-scale) * 1px);
+  overflow: hidden;
+}
+.pa-window__view iframe {
+  display: block;
+  width: calc(var(--pa-app-w) * 1px);
+  max-width: none; /* the theme keeps frames to their column */
+  height: calc(var(--pa-app-h) * 1px);
+  border: 0;
+  transform: scale(var(--pa-scale));
+  transform-origin: 0 0;
+  background: #0d1117;
+}
+.pa-window__missing {
+  display: grid;
+  place-content: center;
+  gap: 0.6rem;
+  height: 100%;
+  padding: 1.5rem;
+  font-size: 0.65rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.75);
+}
+.pa-window__missing code { font-size: 0.55rem; text-align: left; white-space: pre-wrap; }
+
+/* Under the glass, on the white page */
+.pa-live .pa-stage__note {
+  position: relative;
+  margin: 1.1rem auto 0;
+  max-width: var(--pa-width);
+  font-size: 0.6rem;
+  text-align: center;
+  color: var(--md-default-fg-color--light);
+}
+.pa-stage__note a { font-weight: 600; color: var(--pa-green-ink); }
+.pa-stage__note a::after, .pa-setup__more a::after { content: " ›"; }
+
+/* The tour's boxes and lines, over the glass */
+.pa-tour {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+  z-index: 2;
+}
+.pa-tour .box {
+  fill: rgba(255, 159, 67, 0.1);
+  stroke: var(--pa-orange);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 6px rgba(255, 159, 67, 0.55));
+}
+.pa-tour .link {
+  fill: none;
+  stroke: var(--pa-orange);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+  filter: drop-shadow(0 0 4px rgba(255, 159, 67, 0.6));
+  animation: pa-flow 0.9s linear infinite;
+}
+.pa-tour .end { fill: var(--pa-orange); }
+@keyframes pa-flow { to { stroke-dashoffset: -8; } }
+
+/* Not wide enough for the two side by side, with the interface at a scale of 0.7
+   or more: the interface, then the script, in the one pane of glass. */
+@media (max-width: 73em) {
+  .pa-live { --pa-overhang: 22rem; }
+  .pa-stage { grid-template-columns: minmax(0, 1fr); }
+  .pa-stage__app { order: -1; }
+  .pa-stage__bar { order: -2; }
+  .pa-tour .link, .pa-tour .end { display: none; }
+}
+
+/* A phone: the interface is a picture, with a way into the real thing. */
+@media (max-width: 45em) {
+  .pa-live { --pa-overhang: 18rem; }
+  .pa-window__view iframe { pointer-events: none; }
+  .pa-stage__title { display: none; }
+  .pa-stage { border-radius: 1.1rem; }
+}
+
+/* "Or build it in a window": the setup page -------------------------- */
+.pa-kicker {
+  margin: 0 !important;
+  text-align: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--pa-green-ink);
+}
+.md-typeset .pa-setup h2 {
+  margin: 0.4rem 0 0.6rem;
+  text-align: center;
+  font-size: clamp(1.5rem, 3.6vw, 2.3rem);
+  font-weight: 800;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+.pa-setup__lede {
+  max-width: 32rem;
+  margin: 0 auto !important;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--md-default-fg-color--light);
+}
+.pa-setup__cmd { margin: 1.2rem 0 0 !important; text-align: center; }
+.md-typeset .pa-setup__cmd code {
+  display: inline-block;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.62rem;
+  color: #e6e9f0;
+  background: var(--pa-bg);
+  border-radius: 999px;
+  box-shadow: 0 10px 24px -12px rgba(10, 15, 26, 0.6);
+}
+.pa-setup__cmd b { margin-right: 0.45rem; color: var(--pa-green); }
+
+.pa-switch {
+  display: grid;
+  grid-template-columns: minmax(0, 17rem) minmax(0, 1fr);
+  gap: 2.2rem;
+  align-items: center;
+  margin-top: 2.6rem;
+}
+.pa-switch__list { display: flex; flex-direction: column; gap: 0.35rem; }
+.md-typeset .pa-switch__tab {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0.85rem 1rem 1rem;
+  text-align: left;
+  font: inherit;
+  color: var(--md-default-fg-color--light);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  cursor: pointer;
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s, color 0.3s;
+}
+.pa-switch__tab:hover { color: var(--md-default-fg-color); }
+.pa-switch__tab:focus-visible { outline: 2px solid var(--pa-green-ink); outline-offset: 2px; }
+.pa-switch__tab b { display: block; font-size: 0.8rem; font-weight: 700; color: inherit; }
+.pa-switch__tab span {
+  display: block;
+  max-height: 0;
+  margin-top: 0;
+  overflow: hidden;
+  font-size: 0.64rem;
+  line-height: 1.5;
+  opacity: 0;
+  transition: max-height 0.45s, margin 0.45s, opacity 0.45s;
+}
+.pa-switch__tab span em { font-style: normal; font-weight: 600; }
+.pa-switch__tab[aria-selected="true"] {
+  color: var(--md-default-fg-color);
+  background: #fff;
+  border-color: var(--pa-border);
+  box-shadow: 0 14px 34px -16px rgba(10, 15, 26, 0.28);
+}
+.pa-switch__tab[aria-selected="true"] span { max-height: 6rem; margin-top: 0.35rem; opacity: 1; }
+.pa-switch__bar {
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  bottom: 0.5rem;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 2px;
+  background: rgba(10, 15, 26, 0.07);
+  opacity: 0;
+}
+.pa-switch__bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--pa-green-ink);
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.pa-switch[data-playing] .pa-switch__tab[aria-selected="true"] .pa-switch__bar { opacity: 1; }
+.pa-switch[data-playing] .pa-switch__tab[aria-selected="true"] .pa-switch__bar::after {
+  animation: pa-progress var(--pa-dwell, 6s) linear forwards;
+}
+@keyframes pa-progress { to { transform: scaleX(1); } }
+
+/* The setup page's window: a device, floating */
+.pa-device {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  padding: 0.35rem;
+  border-radius: 1.15rem;
+  background: linear-gradient(180deg, #232b3a, #0b0f17);
+  box-shadow:
+    0 0 0 1px rgba(10, 15, 26, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 30px 70px -28px rgba(10, 15, 26, 0.55),
+    0 70px 140px -60px rgba(10, 15, 26, 0.45);
+}
+.pa-device img {
+  position: absolute;
+  inset: 0.35rem;
+  width: calc(100% - 0.7rem);
+  height: calc(100% - 0.7rem);
+  object-fit: cover;
+  object-position: top left;
+  border-radius: 0.85rem;
+  opacity: 0;
+  transform: scale(1.012);
+  transition: opacity 0.6s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.pa-device img.is-on { opacity: 1; transform: none; }
+
+.pa-setup__more {
+  margin: 2rem 0 0 !important;
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color--light);
+}
+.pa-setup__more a { font-weight: 600; }
+
+@media (max-width: 60em) {
+  .pa-switch { grid-template-columns: minmax(0, 1fr); gap: 1.4rem; }
+  .pa-switch__view { order: -1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pa-aurora i, .pa-live__head > *, .pa-stage, .pa-tour .link { animation: none; }
+  .pa-stage__code code > span[id^="__span"], .pa-device img, .pa-switch__tab span { transition: none; }
+}

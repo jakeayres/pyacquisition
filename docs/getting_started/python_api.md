@@ -6,13 +6,15 @@ A config file says what the rig is, but not what to do with it. That part is Pyt
 
 You need only a little Python: a class with a few methods, and a `for` loop. Anything more is explained as it comes.
 
-<div class="gs" data-mode="versions" data-file="lab.py" data-lines="20" data-term-lines="4" markdown>
+As in part 1, the interface beside the file shows what each step makes, recorded from the real experiment.
+
+<div class="gs" data-mode="versions" data-file="lab.py" data-lines="12" data-term-lines="3" data-demo markdown>
 
 <div class="gs-stage" markdown>
 
 <div class="gs-notes" markdown>
 
-<section class="gs-step" data-new-file data-result="The same interface, now called Lab." markdown>
+<section class="gs-step" data-new-file data-result="The same interface, now called Lab." data-demo="python-1" data-demo-view="values" data-demo-show=".brand-name" markdown>
 
 ## Running from Python
 
@@ -35,7 +37,7 @@ The window is the same, but titled `Lab`, after the class. Keep `.run()` under `
 
 </section>
 
-<section class="gs-step" markdown>
+<section class="gs-step" data-demo="python-2" data-demo-do="query lockin get_frequency" data-demo-show=".result-value" markdown>
 
 ## Experiment setup
 
@@ -69,7 +71,7 @@ The lock-in's sine output drives whatever it is wired to, and would go on doing 
 
 </section>
 
-<section class="gs-step" markdown>
+<section class="gs-step" data-demo="python-4" data-demo-view="values" data-demo-show='[data-column="power"]; .series-chip@power' markdown>
 
 ## Add calculations
 
@@ -105,7 +107,7 @@ A task is a `dataclass` of `Task`. Its fields, with their types and defaults, ar
 
 </section>
 
-<section class="gs-step" markdown>
+<section class="gs-step" data-demo="python-6" data-demo-do="add-task Record" data-demo-show=".task-option@Record; .task-form-pane" markdown>
 
 ## Register your task
 
@@ -122,7 +124,7 @@ A task you write isn't offered anywhere until it is registered. `register_task`,
 
 </section>
 
-<section class="gs-step" data-result="Record is in Add task. Queue it." markdown>
+<section class="gs-step" data-result="Record is in Add task. Queue it." data-demo="python-7" data-demo-view="queue" data-demo-show=".running-task; .file-control .topbar-chip" markdown>
 
 ## Run the experiment
 
@@ -151,13 +153,22 @@ When they are done, close the window and choose **Stop experiment**. `teardown()
 
 ## What you built
 
-Your task, in **Add task**, with a form made from its fields:
+Your task, running. Point at an item below to find it in the window.
 
-![The Add a task window: Record is in the list with its description, and its form asks for Files and Seconds](../images/getting_started/add-task.png){ .pa-shot }
-
-And running. The queue shows `Record` and the step it is on, and the plot draws the new file over the one before it:
-
-![Record running: the top bar shows 00.02 run 2.data and Record, and the queue shows WaitFor half done](../images/getting_started/record-running.png){ .pa-shot }
+<div class="pa-built" data-demo="python-7" data-demo-view="queue" markdown="0">
+<div class="pa-built__device">
+<div class="pa-built__bar"><span class="pa-built__lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="pa-built__title">Lab</span><span class="pa-built__label">Recorded from lab.py</span></div>
+<div class="pa-built__screen"><iframe title="The interface lab.py makes, running Record" tabindex="-1"></iframe></div>
+</div>
+<ol class="pa-built__legend">
+<li tabindex="0" data-show=".running-task"><b>Record, running.</b> The queue shows it, and the step it is on.</li>
+<li tabindex="0" data-show=".button@Add task"><b>Add task.</b> Where <code>Record</code> is offered, with a form made from its fields.</li>
+<li tabindex="0" data-show=".file-control .topbar-chip"><b>Its files.</b> <code>run 1</code> to <code>run 3</code>, each started by <code>NewFile</code>, numbered on from the run's first.</li>
+<li tabindex="0" data-show=".series-chip@power"><b>power.</b> Your calculation's column, plotted beside <code>wave</code>.</li>
+<li tabindex="0" data-show='[role="tab"]@Logs'><b>Logs.</b> Where <code>self.log()</code> writes <code>Recorded 1 of 3</code>.</li>
+</ol>
+<p class="pa-built__more"><a href="../demo/index.html?session=python-7">Open it full size</a></p>
+</div>
 
 !!! success "Checkpoint"
     In the **Instruments** tab, the lock-in's `get_frequency` answers `137`. **Record** is in **Add task**, and queued, it writes three files, `run 1` to `run 3`, each with a `power` column beside `wave`. When you stop the experiment, the terminal says `The lock-in's output is turned down.`

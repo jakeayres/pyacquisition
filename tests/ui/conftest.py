@@ -41,6 +41,9 @@ def pytest_configure(config):
         "markers",
         "real_layout: let the page keep its layout on the server, as it does for real",
     )
+    config.addinivalue_line(
+        "markers", "still: open the docs' demo with reduced motion (test_demo_page.py)"
+    )
 
 
 @pytest.fixture

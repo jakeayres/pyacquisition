@@ -5,22 +5,21 @@ hide:
   - path
 ---
 
-<div class="pa-hero" markdown>
+<div class="pa-hero pa-live" markdown>
 
-<div class="pa-hero__text" markdown>
+<div class="pa-aurora" aria-hidden="true" markdown="0"><i></i><i></i><i></i></div>
+
+<div class="pa-live__head" markdown>
 
 <p class="pa-eyebrow">Python · Lab automation</p>
 
-# Talk to your instruments.<br><span class="pa-gradient">Skip the boilerplate.</span>
+# Write only the science.<br><span class="pa-gradient">The rest is built for you.</span>
 
-Compose your own tasks to build automated experiments of any complexity,
-using ready-made instruments or your own, and write only the logic that is
-unique to your science. Scheduling, logging, data files, live graphing and a
-full GUI all come free.
+<p class="pa-lede">PyAcquisition turns a short Python script into a complete lab application: instrument control, scheduled measurements, data files, automated tasks and a live interface.</p>
 
-[Get started](getting_started/installation.md){ .md-button .md-button--primary }
-[Install](getting_started/installation.md){ .md-button }
-[GitHub](https://github.com/jakeayres/pyacquisition){ .md-button }
+<div class="pa-live__actions" markdown>
+
+[Get started](getting_started/installation.md){ .md-button .md-button--primary } <a class="md-button pa-glass" href="demo/">Try it live</a>
 
 <div class="pa-install" markdown>
 
@@ -34,51 +33,37 @@ uv add pyacquisition
 
 </div>
 
-<div class="pa-section pa-showcase" markdown>
+<div class="pa-stage" markdown>
 
-## One experiment. Two ways to write it.
+<div class="pa-stage__bar" markdown="0"><span class="pa-stage__lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="pa-stage__title">MyExperiment</span><span class="pa-window__label">Simulated instruments</span></div>
 
-The interface, the recording and the data files are generated either way.
+<div class="pa-ide pa-stage__code" markdown>
 
-/// tab | <span class="pa-opt"><span class="pa-opt__kicker">In Python</span><span class="pa-opt__title">Two instruments. Three measurements. One command.</span><span class="pa-opt__text">A short script you can read top to bottom.</span></span>
-
-<p class="pa-step"><span>1</span> Describe the experiment</p>
-
-<div class="pa-annot" data-source="examples/front_page.py" markdown>
-
-<div class="pa-ide" markdown>
-
-```python title="my_experiment.py" linenums="1" hl_lines="5-6 9-10 11-12 14-18 21-22"
+```python title="my_experiment.py"
 --8<-- "examples/front_page.py"
 ```
 
 </div>
 
-<div class="pa-annot__notes" markdown="0">
-<div class="pa-note" style="--from: 5; --to: 6" data-contains="class MyExperiment"><b>Your experiment</b><span>Inherits the recording and the interface. Options such as <code>data_path</code> go in the class body.</span></div>
-<div class="pa-note" style="--from: 9; --to: 10" data-contains="add_instrument"><b>Add an instrument</b><span>An id and an address. Its commands appear in the menus.</span></div>
-<div class="pa-note" style="--from: 11; --to: 12" data-contains="add_measurement"><b>Add measurements</b><span>Any query, read every cycle and saved to the data file.</span></div>
-<div class="pa-note" style="--from: 14; --to: 18" data-contains="Lakeshore_350"><b>Repeat for the rest of the rig</b><span>A second instrument, and a measurement that takes an argument.</span></div>
-<div class="pa-note" style="--from: 21; --to: 22" data-contains=".run()"><b>Run it</b><span>Starts the recording and the interface.</span></div>
-</div>
+<div class="pa-stage__app" markdown="0"><div class="pa-window"><div class="pa-window__view"><iframe src="demo/" title="The interface the script beside it makes, running with simulated instruments"></iframe></div></div></div>
 
 </div>
 
-<p class="pa-step"><span>2</span> Run it</p>
+<p class="pa-stage__note" markdown="0">The interface is real: the readings come from a simulated sample. <a href="demo/">Open it full size</a></p>
 
-<div class="pa-flow" markdown="0"><span class="cmd"><b>$</b> uv run my_experiment.py</span></div>
+</div>
 
-///
+<div class="pa-section pa-showcase" markdown>
 
-/// tab | <span class="pa-opt"><span class="pa-opt__kicker">In a config file</span><span class="pa-opt__title">Name your instruments. Get a lab.</span><span class="pa-opt__text">Declare the rig in TOML. There is no Python to write.</span></span>
+## Prefer a config file?
 
-<p class="pa-step"><span>1</span> Describe the experiment</p>
+The same experiment, declared in TOML, with no Python to write.
 
 <div class="pa-annot" data-source="examples/front_page.toml" markdown>
 
 <div class="pa-ide" markdown>
 
-```toml title="rig.toml" linenums="1" hl_lines="1-2 4-12 14-20 22-25"
+```toml title="rig.toml" linenums="1" hl_lines="1-2 4-15 17-30 32-36"
 --8<-- "examples/front_page.toml"
 ```
 
@@ -86,24 +71,37 @@ The interface, the recording and the data files are generated either way.
 
 <div class="pa-annot__notes" markdown="0">
 <div class="pa-note" style="--from: 1; --to: 2" data-contains="[data]"><b>Set options</b><span>Where the data files go, and any other option.</span></div>
-<div class="pa-note" style="--from: 4; --to: 12" data-contains="Lakeshore_350"><b>Add instruments</b><span>A class name, an adapter and an address. The key is the instrument's id.</span></div>
-<div class="pa-note" style="--from: 14; --to: 20" data-contains="get_x"><b>Add measurements</b><span>An instrument and one of its queries, read every cycle and saved to the data file.</span></div>
-<div class="pa-note" style="--from: 22; --to: 25" data-contains="args"><b>With arguments</b><span><code>args</code> gives a query its arguments. An enum member is named as text.</span></div>
+<div class="pa-note" style="--from: 4; --to: 15" data-contains="Lakeshore_350"><b>Add instruments</b><span>A class name, and for hardware an adapter and an address. The key is the instrument's id.</span></div>
+<div class="pa-note" style="--from: 17; --to: 30" data-contains="get_x"><b>Add measurements</b><span>An instrument and one of its queries, read every cycle and saved to the data file, with a unit for the interface.</span></div>
+<div class="pa-note" style="--from: 32; --to: 36" data-contains="args"><b>With arguments</b><span><code>args</code> gives a query its arguments. An enum member is named as text.</span></div>
 </div>
 
 </div>
-
-<p class="pa-step"><span>2</span> Run it</p>
 
 <div class="pa-flow" markdown="0"><span class="cmd"><b>$</b> uv run pyacquisition --toml rig.toml</span></div>
 
-Or build the file in a window, from forms, with `uv run pyacquisition new rig.toml`: see [Build a config in the interface](usage/setup_page.md).
+</div>
 
-///
-
-<!-- A screenshot of the running interface goes here. Suggested caption:
-     "The interface is generated from the experiment above: live plots and values, every instrument query and command, the task queue and the log." -->
-
+<div class="pa-section pa-setup" markdown="0">
+<p class="pa-kicker">No code at all</p>
+<h2 id="build-it-in-a-window">Or build it in a window.</h2>
+<p class="pa-setup__lede">One command opens a page of forms that writes the file above for you, and checks it as you type.</p>
+<p class="pa-setup__cmd"><code><b>$</b> uv run pyacquisition new rig.toml</code></p>
+<div class="pa-switch">
+<div class="pa-switch__list" role="tablist" aria-label="The setup page">
+<button class="pa-switch__tab" type="button" role="tab" id="pa-setup-tab-1" aria-controls="pa-setup-shot-1" aria-selected="true"><b>Pick your instruments</b><span>Choose a driver from the list, and give it an adapter and an address. <em>Test</em> asks the instrument who it is.</span><i class="pa-switch__bar" aria-hidden="true"></i></button>
+<button class="pa-switch__tab" type="button" role="tab" id="pa-setup-tab-2" aria-controls="pa-setup-shot-2" aria-selected="false" tabindex="-1"><b>Choose what to measure</b><span>Any query of the instrument's driver, with a field for each argument and its choices, and a unit for the plots.</span><i class="pa-switch__bar" aria-hidden="true"></i></button>
+<button class="pa-switch__tab" type="button" role="tab" id="pa-setup-tab-3" aria-controls="pa-setup-shot-3" aria-selected="false" tabindex="-1"><b>Checked as you type</b><span>The file is written beside the forms as you go, and anything wrong is named before you run it. A file you open keeps its comments and order.</span><i class="pa-switch__bar" aria-hidden="true"></i></button>
+</div>
+<div class="pa-switch__view">
+<div class="pa-device">
+<img id="pa-setup-shot-1" role="tabpanel" aria-labelledby="pa-setup-tab-1" class="is-on" src="images/front_page/setup-instruments.webp" width="1280" height="800" loading="lazy" alt="The setup page's Instruments section, with its list of drivers open, and beside it the file it writes.">
+<img id="pa-setup-shot-2" role="tabpanel" aria-labelledby="pa-setup-tab-2" src="images/front_page/setup-measurements.webp" width="1280" height="800" loading="lazy" alt="The setup page's Measurements section: the lock-in's x and y, and the temperature with its input channel and unit.">
+<img id="pa-setup-shot-3" role="tabpanel" aria-labelledby="pa-setup-tab-3" src="images/front_page/setup-checked.webp" width="1280" height="800" loading="lazy" alt="The setup page naming a problem as it is typed: the measurement period must be a positive number, not 'fast'.">
+</div>
+</div>
+</div>
+<p class="pa-setup__more">Then <b>Run</b>, from the same window, and the interface opens on your experiment. <a href="usage/setup_page/">Build a config in the interface</a></p>
 </div>
 
 <div class="pa-section pa-features" markdown>

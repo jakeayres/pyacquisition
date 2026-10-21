@@ -5,9 +5,13 @@ both folders are collected together.)
 """
 
 import asyncio
+import functools
+import http.server
+import shutil
 import socket
 import threading
 import time
+from pathlib import Path
 
 import pytest
 import requests
@@ -92,6 +96,41 @@ class SetupRunning:
             except requests.exceptions.RequestException:
                 pass
         self.thread.join(timeout=15)
+
+
+class StaticSite:
+    """A folder of files served over HTTP, in a background thread: the docs' demo,
+    or a built docs site."""
+
+    def __init__(self, folder):
+        class Quiet(http.server.SimpleHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+
+        class Server(http.server.ThreadingHTTPServer):
+            # The interface asks for its forty-odd modules at once. With the
+            # default backlog of 5, Windows refuses the rest of them.
+            request_queue_size = 128
+
+        handler = functools.partial(Quiet, directory=str(folder))
+        self.server = Server(("127.0.0.1", 0), handler)
+        self.address = f"http://127.0.0.1:{self.server.server_address[1]}"
+        threading.Thread(target=self.server.serve_forever, daemon=True).start()
+
+    def stop(self):
+        self.server.shutdown()
+        self.server.server_close()
+
+
+REPO = Path(__file__).resolve().parents[2]
+
+
+def copy_interface(destination):
+    """Copies the interface's files to `destination`, as the docs build does for
+    the front page's demo (.readthedocs.yml)."""
+    shutil.copytree(
+        REPO / "src" / "pyacquisition" / "gui" / "static", destination, dirs_exist_ok=True
+    )
 
 
 class Page:
