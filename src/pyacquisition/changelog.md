@@ -3,7 +3,7 @@
 What changed in each version of PyAcquisition, newest first. The interface
 shows a version's **Highlights** once, after you upgrade to it.
 
-## 0.5.0 (unreleased)
+## 0.5.0 (2026-10-21)
 
 ### Highlights
 
@@ -20,6 +20,9 @@ shows a version's **Highlights** once, after you upgrade to it.
   value, a CSV column, or a regular expression's match. A software instrument
   can now take options in a config file, and the setup page has fields for
   them.
+- The documentation's front page runs the interface itself, live, beside the
+  script that makes it, and Getting Started shows what each step makes as you
+  read it.
 
 ## 0.4.0 (2026-10-10)
 
