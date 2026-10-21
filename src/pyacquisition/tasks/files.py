@@ -6,6 +6,7 @@
 # file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 from ..core import Task
+from ..core.scribe import title_problem
 from dataclasses import dataclass
 
 
@@ -20,6 +21,14 @@ class NewFile(Task):
 
     file_name: str
     increment_block: bool = False
+
+    def __post_init__(self):
+        super().__post_init__()
+        # Refused as it is made, so that a task that starts files is refused before
+        # anything is recorded into a file that can't be saved.
+        problem = title_problem(self.file_name)
+        if problem:
+            raise ValueError(f"{problem.rstrip('.')}: {self.file_name!r}.")
 
     @property
     def description(self) -> str:

@@ -1159,16 +1159,17 @@ class Experiment:
 
         Example:
             ```python
-            experiment.register_task(MyCustomTask())
+            experiment.register_task(MyCustomTask)
             experiment.register_task(HoldTemperature, manager="control")
             ```
 
         """
         self._registered_tasks.add(task)
         if manager is None:
-            self._shared_tasks.append((task, kwargs))
             for task_manager in self._task_managers.values():
                 task_manager.register_task(self, task, **kwargs)
+            # Kept for the task managers added later, once it has registered.
+            self._shared_tasks.append((task, kwargs))
             return
 
         names = [manager] if isinstance(manager, str) else list(manager)

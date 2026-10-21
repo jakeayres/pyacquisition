@@ -13,6 +13,28 @@ shows a version's **Highlights** once, after you upgrade to it.
   side by side. Every driver with more than a handful has them. Group your own
   driver's with `@mark_query(group="Inputs")` and
   `@mark_command(group="Inputs")`.
+- Tasks are safer to stop and to get wrong: an abort no longer cuts a task's
+  teardown short, a pause or abort reaches a loop that calls nothing else, and
+  a task that is built wrongly is refused with a message, rather than stopping
+  the experiment. See **Fixes**.
+
+### Fixes
+
+- An abort, or stopping the experiment, during a teardown (a task's own or a
+  subtask's) no longer cuts it short. The task stops at its next wait after it.
+- `Task.checkpoint()` gives the rest of the experiment a turn, so a pause or an
+  abort reaches a loop that calls nothing else.
+- A subtask is logged as it ended ("Subtask failed", "aborted" or
+  "completed"), and keeps its `outcome`.
+- The queue shows a task's choice by the label its form shows, such as
+  **Output 2**, not `OutputChannel.OUTPUT_2`.
+- Refused with a message, where each used to stop the experiment or break the
+  **Queue** tab: queueing a task's class instead of a task made from it, a
+  `__post_init__` that doesn't call `super().__post_init__()`, registering a
+  second task under a label already used (`ValueError`), and an input no form
+  can ask for, with no default (`TypeError` when it is registered).
+- `NewFile`, and `Scribe.next_file`, refuse a title that can't be part of a
+  file's name, such as one with `/` or `:`. Every row after it used to be lost.
 
 ## 0.5.0 (2026-10-21)
 

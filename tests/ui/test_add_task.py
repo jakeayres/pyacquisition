@@ -209,7 +209,7 @@ def test_enums_and_instruments_are_lists_to_choose_from(context, rig):
     expect(dialog.get_by_role("status")).to_contain_text("added")
     (task,) = queue_of(rig)
     assert task["parameters"]["lakeshore"] == "cryo_b"
-    assert "OUTPUT_2" in str(task["parameters"]["output_channel"])
+    assert task["parameters"]["output_channel"] == "Output 2"  # shown as the form shows it
 
 
 def test_a_measurement_is_picked_from_the_columns_and_a_blank_number_left_out(context, rig):

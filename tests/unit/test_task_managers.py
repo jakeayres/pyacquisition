@@ -3,6 +3,7 @@
 import asyncio
 import socket
 from dataclasses import dataclass, field
+from enum import Enum
 from unittest.mock import ANY
 
 import pytest
@@ -10,6 +11,7 @@ from fastapi.testclient import TestClient
 
 from pyacquisition import Experiment, Measurement, Task
 from pyacquisition.core.task_manager.task_manager import TaskManager
+from pyacquisition.instruments.lakeshore.lakeshore_350 import InputChannel
 from pyacquisition.instruments.software import Clock
 
 
@@ -355,6 +357,11 @@ def test_nothing_is_being_aborted_when_nothing_is_running():
     assert TaskManager().state()["aborting"] is False
 
 
+class Side(Enum):
+    LEFT = 1
+    RIGHT = 2
+
+
 @dataclass
 class Described(Task):
     """A task that shows its description and some parameters."""
@@ -379,6 +386,8 @@ class Described(Task):
         ),
         ({"nan": float("nan"), "inf": float("inf")}, {"nan": "nan", "inf": "inf"}),
         ({"object": [1, 2]}, {"object": "[1, 2]"}),
+        # A choice as its form shows it: the label, or for a plain enum, the name
+        ({"channel": InputChannel.INPUT_B, "side": Side.LEFT}, {"channel": "Input B", "side": "LEFT"}),
         (None, None),
     ],
 )

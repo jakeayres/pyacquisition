@@ -19,6 +19,9 @@ values make sense, the choices.
   experiment's instruments of that kind as its choices.
 - A task can offer other choices from the experiment with `input_choices`:
   `{input name: function of the experiment giving the choices}`.
+- An input that no form can ask for (a function, say) is left out, and takes its
+  default. One with no default must be given as the task is registered
+  (`register_task(PID, read=...)`), or registering it is refused.
 """
 
 import re
@@ -28,6 +31,7 @@ from inspect import Parameter
 from typing import Annotated, get_type_hints
 
 from fastapi import Query
+from pydantic import TypeAdapter
 
 from ..instrument import _allows_text, enum_classes
 
@@ -84,6 +88,16 @@ def _enum_choices(enums: list) -> tuple[list, list]:
     return names, labels
 
 
+def _askable(kind) -> bool:
+    """Whether a form can ask for a value of this type: whether the API's schema,
+    which the forms are made from, can describe it."""
+    try:
+        TypeAdapter(kind).json_schema()
+    except Exception:  # noqa: BLE001 - whatever pydantic can't describe
+        return False
+    return True
+
+
 def input_parameters(cls, experiment, fixed_kwargs: dict) -> tuple[list, dict]:
     """The parameters of a task's endpoint, and the annotations to go with them.
 
@@ -116,6 +130,15 @@ def input_parameters(cls, experiment, fixed_kwargs: dict) -> tuple[list, dict]:
         enums = enum_classes(hint)
         # An enum is asked for as text, which is resolved to the member.
         kind = str if enums else hint
+        has_default = field.default is not MISSING or field.default_factory is not MISSING
+        if not _askable(kind):
+            if has_default:
+                continue  # left out of the form, the task takes its default
+            raise TypeError(
+                f"{cls.__name__}'s input `{field.name}` ({getattr(hint, '__name__', hint)}) "
+                f"can't be asked for in a form: give it as you register the task, as in "
+                f"register_task({cls.__name__}, {field.name}=...)."
+            )
 
         extra = {}
         if enums and not _allows_text(hint):

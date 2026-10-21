@@ -113,7 +113,14 @@ class Scribe(Consumer):
         Args:
             title (str): The title of the file.
             next_block (bool): If True, increment the block number. Defaults to False.
+
+        Raises:
+            ValueError: If the title can't be part of a file's name (see
+                `title_problem`), so that no row goes to a file that can't be saved.
         """
+        problem = title_problem(title)
+        if problem:
+            raise ValueError(f"{problem.rstrip('.')}: {title!r}.")
         self.title = title
         if next_block:
             self._increment_block()

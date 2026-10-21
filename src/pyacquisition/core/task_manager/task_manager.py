@@ -7,17 +7,22 @@
 
 from ..history import json_value
 from ..logging import logger
-from .task import Task
+from .task import Task, _check_made
 import asyncio
 import dataclasses
 import time
 import math
+from enum import Enum
 from fastapi import HTTPException
 from typing import Literal
 
 
 def _json_safe(value):
-    """A value that can be sent as JSON: `nan` and objects become text."""
+    """A value that can be sent as JSON: `nan` and objects become text, and a
+    choice (an enum's member) the label that the forms show for it, or its name."""
+    if isinstance(value, Enum) and not isinstance(value, (str, int, float)):
+        label = getattr(value, "label", None)
+        return label if isinstance(label, str) else value.name
     if value is None or isinstance(value, (str, bool, int)):
         return value
     if isinstance(value, float):
@@ -273,7 +278,12 @@ class TaskManager:
     def add_task(self, task: Task):
         """
         Add a task to the queue.
+
+        Raises:
+            TypeError: If `task` is a class rather than a task made from it, or
+                its `__post_init__` didn't call `super().__post_init__()`.
         """
+        _check_made(task)
         logger.info(f"{self._tag} Adding task to queue: {task.name}")
         self._task_queue.put_nowait(task)
 
@@ -520,12 +530,13 @@ class TaskManager:
             task.register_endpoints(
                 experiment, task_manager=self, tasks_path=self._tasks_path, **kwargs
             )
-            self._task_registry[task.__class__.__name__] = task
             # A task is registered as a class, and `name` is a property of its instances.
             name = task.__name__ if isinstance(task, type) else task.name
+            self._task_registry[name] = task
             logger.debug(f"Task '{name}' registered with the experiment")
         except Exception as e:
-            logger.error(f"Error registering task {task.__class__.__name__}: {e}")
+            name = getattr(task, "__name__", type(task).__name__)
+            logger.error(f"Error registering task {name}: {e}")
             raise
 
     def _register_endpoints(self, api_server):

@@ -45,6 +45,20 @@ def _cancel(runner) -> None:
     runner.cancel()
 
 
+def _check_made(task) -> None:
+    """Raises `TypeError` if `task` isn't a task that can run: a class given where a
+    task made from it is wanted, or a task whose `__post_init__` didn't call
+    `super().__post_init__()`, which leaves it without the state it runs on."""
+    if isinstance(task, type):
+        name = task.__name__
+        raise TypeError(f"{name} is a class: give a task made from it, such as {name}().")
+    if not isinstance(task, Task):
+        raise TypeError(f"{task!r} isn't a task.")
+    if not hasattr(task, "_id"):
+        name = type(task).__name__
+        raise TypeError(f"{name}.__post_init__() must call super().__post_init__() first.")
+
+
 def _consume_cancel() -> None:
     """Forgets the cancels that were requested of the current asyncio task, which
     the caller has dealt with, so that they do not affect what runs next and a
@@ -231,7 +245,12 @@ class Task:
         Blocks while the task is paused, and raises to end the task if it has been
         aborted. `sleep()`, `wait_until()` and `run_subtask()` are checkpoints, so
         it is only needed in a loop of your own that calls none of them.
+
+        It gives the rest of the experiment a turn first: measuring, the interface,
+        and a pause or abort asked for meanwhile, which would otherwise wait until
+        such a loop had finished.
         """
+        await asyncio.sleep(0)
         await self._check_control_flags()
 
     async def sleep(self, seconds: float) -> None:
@@ -575,12 +594,16 @@ class Task:
         # Do not begin if this task has already been aborted or is paused.
         await self._check_control_flags()
 
+        _check_made(subtask)
         self._adopt([subtask])
         try:
             await self._execute_subtask(subtask, experiment)
         except asyncio.CancelledError:
             self.abort()  # a subtask that is aborted takes this task with it
             raise
+        # An abort that came during the subtask's teardown, which it let finish,
+        # stops this task here.
+        await self._check_control_flags()
 
     async def run_subtasks(self, *subtasks: "Task", experiment=None):
         """
@@ -617,6 +640,8 @@ class Task:
 
         await self._check_control_flags()
 
+        for subtask in subtasks:
+            _check_made(subtask)
         self._adopt(subtasks)
         runners = {
             asyncio.create_task(self._execute_subtask(subtask, experiment)): subtask
@@ -711,6 +736,8 @@ class Task:
                     aborted_by_failure = True
                 self.abort()  # interrupt the block, and the other subtasks
 
+        for subtask in subtasks:
+            _check_made(subtask)
         self._adopt(subtasks)
         runners = [asyncio.create_task(supervise(subtask)) for subtask in subtasks]
         try:
@@ -761,19 +788,26 @@ class Task:
         # It runs in whichever asyncio task is running this, so that aborting it
         # cancels that.
         subtask._runner = asyncio.current_task()
+        subtask._outcome = subtask._failure = None
         try:
             logger.info(f"[{subtask.name}] Starting subtask of [{self.name}].")
             await subtask._execute(experiment)
+            subtask._outcome = "completed"
         except asyncio.CancelledError:
             if subtask._hook_failure is not None:
                 # It was stopped by an error in one of its hooks: raise that.
                 _consume_cancel()
+                subtask._outcome, subtask._failure = "failed", subtask._hook_failure
                 raise subtask._hook_failure from None
+            subtask._outcome = "aborted"
+            raise
+        except Exception as error:
+            subtask._outcome, subtask._failure = "failed", error
             raise
         finally:
             subtask._runner = None
             self._release(subtask)
-            logger.info(f"[{subtask.name}] Subtask completed.")
+            logger.info(f"[{subtask.name}] Subtask {subtask._outcome or 'ended'}.")
 
     async def _check_control_flags(self):
         """
@@ -882,6 +916,10 @@ class Task:
 
         The task stops wherever it is waiting, then `teardown()` runs. Aborting a
         task that is already being aborted does nothing.
+
+        A teardown is never cut short, since it is where a task leaves its hardware
+        safe: one that is running, the task's own or a subtask's, runs to its end,
+        and the task then stops at its next wait, if it has one.
         """
         if self._abort_event.is_set():
             return
@@ -892,7 +930,16 @@ class Task:
         self._stop_pause_clock()
         for subtask in list(self._active_subtasks):
             subtask.abort()
+        if self._tearing_down():
+            logger.info(f"[{self.name}] Aborted: a teardown is running, and finishes first.")
+            return
         _cancel(self._runner)
+
+    def _tearing_down(self) -> bool:
+        """Whether this task, or a subtask it is running, is in its teardown."""
+        if self._phase == "teardown":
+            return True
+        return any(subtask._tearing_down() for subtask in self._active_subtasks)
 
     def _call_hook(self, hook) -> bool:
         """Calls `on_pause` or `on_resume`. An error in it fails the task."""
@@ -952,9 +999,17 @@ class Task:
                 for key, value in kwargs.items()
             }
             task = cls(**fixed_kwargs, **resolve_enum_kwargs(cls, given))
+            _check_made(task)
             task._queued_with = {"task": slug, "name": name, "parameters": given}
             return task
 
+        # Two registrations under one label would share its address: the form
+        # would show one's inputs and the address queue the other's.
+        if slug in queue._queueable:
+            raise ValueError(
+                f"A task is already registered as {name!r} ({tasks_path}/{slug}): "
+                "give this one a label of its own."
+            )
         # How the task manager makes this task again, from a saved sequence.
         queue._queueable[slug] = make
 
