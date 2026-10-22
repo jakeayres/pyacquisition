@@ -31,7 +31,7 @@ def text(path: Path) -> str:
 
 
 def test_it_starts_from_the_end_of_getting_started():
-    assert text(HERE / "lab_1.py") == text(GETTING_STARTED / "lab_6.py")
+    assert text(HERE / "lab_1.py") == text(GETTING_STARTED / "lab_9.py")
 
 
 # -------------------------------------------------------------- disk_space.py

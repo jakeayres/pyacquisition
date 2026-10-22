@@ -454,8 +454,9 @@ def test_the_simulated_rig_sets_up(examples):
 
 
 # -- Getting Started ---------------------------------------------------------------
-# Part 1's page builds rig.toml from its steps' snippets (checked by
-# test_docs_walkthroughs.py), and part 2's includes the six versions of lab.py.
+# Part 2's page builds rig.toml from its steps' snippets (checked by
+# test_docs_walkthroughs.py), and shows it whole at its end. Part 3's includes the nine
+# versions of lab.py: the task is built in four of them, and registered in the last.
 
 GETTING_STARTED = EXAMPLES / "getting_started"
 def test_the_getting_started_rig_loads_with_no_problems(examples):
@@ -468,18 +469,38 @@ def test_the_getting_started_rig_loads_with_no_problems(examples):
     Path("rig.toml").write_text(rig, encoding="utf-8")
     experiment = Experiment.from_config("rig.toml")
     assert set(experiment.instruments) == {"clock", "signal", "lockin"}
-    assert set(experiment.measurements) == {"time", "wave"}
+    assert set(experiment.measurements) == {"time", "wave", "frequency"}
     assert experiment._name == "rig"  # what the interface is called
+
+
+def test_the_config_file_page_ends_with_the_whole_rig():
+    """The file in the page's last card is the example, without its pins, and the
+    heading over it counts its lines."""
+    page = (DOCS / "getting_started" / "config_file.md").read_text(encoding="utf-8")
+    shown = re.search(r'^```toml title="rig.toml"\n(.*?)^```', page, flags=re.S | re.M)[1]
+    rig = (GETTING_STARTED / "rig.toml").read_text(encoding="utf-8")
+    assert re.sub(r"  # \(\d+\)$", "", shown, flags=re.M) == rig
+    lines = re.search(r"^## A whole experiment, in (\d+) lines$", page, flags=re.M)[1]
+    assert int(lines) == len(rig.splitlines())
+
+
+def test_the_python_api_page_ends_with_the_whole_lab_py():
+    """The file in the page's last card is the last version, without its pins."""
+    page = (DOCS / "getting_started" / "python_api.md").read_text(encoding="utf-8")
+    card = page[page.index('<div class="gs-finish"'):]
+    shown = re.search(r'^```python title="lab.py"\n(.*?)^```', card, flags=re.S | re.M)[1]
+    lab = (GETTING_STARTED / "lab_9.py").read_text(encoding="utf-8")
+    assert re.sub(r"  # \(\d+\)$", "", shown, flags=re.M) == lab
 
 
 def test_the_python_api_page_shows_each_version_of_lab_py():
     page = (DOCS / "getting_started" / "python_api.md").read_text(encoding="utf-8")
     shown = re.findall(r'--8<-- "examples/getting_started/(lab_\d)\.py"', page)
-    assert shown == ["lab_1", "lab_2", "lab_3", "lab_4", "lab_5", "lab_6"]
+    assert shown == [f"lab_{n}" for n in range(1, 10)]
 
 
 def lab(step):
-    """Part 2's lab.py as it is after a step, made from the example rig."""
+    """Part 3's lab.py as it is after a step, made from the example rig."""
     shutil.copy(GETTING_STARTED / "rig.toml", "rig.toml")
     module = importlib.import_module(f"lab_{step}")
     experiment = module.Lab.from_config("rig.toml")
@@ -487,25 +508,25 @@ def lab(step):
     return experiment
 
 
-@pytest.mark.parametrize("step", [1, 2, 3, 4, 5, 6])
+@pytest.mark.parametrize("step", range(1, 10))
 def test_each_version_of_lab_py_makes_the_experiment(examples, step):
     experiment = lab(step)
     assert experiment._name == "Lab"
     assert set(experiment.instruments) == {"clock", "signal", "lockin"}
     registered = [task.__name__ for task, _ in experiment._shared_tasks]
-    assert ("Record" in registered) == (step == 6)
+    assert ("FrequencySweep" in registered) == (step == 9)
     row = experiment._calculations._apply({"time": 1.0, "wave": 0.5})
     assert ("power" in row) == (step >= 4)
 
 
-@pytest.mark.parametrize("step", [1, 2, 3, 4, 5, 6])
+@pytest.mark.parametrize("step", range(1, 10))
 def test_setup_puts_the_lock_in_at_137_hz_from_step_2(examples, step):
     # What the Instruments tab's get_frequency answers: the mock gives the value last set.
     lockin = lab(step).instruments["lockin"]
     assert lockin.get_frequency() == (137.0 if step >= 2 else 0.0)
 
 
-@pytest.mark.parametrize("step", [1, 2, 3, 4, 5, 6])
+@pytest.mark.parametrize("step", range(1, 10))
 def test_teardown_turns_the_lock_in_output_down_from_step_3(examples, step, capsys):
     experiment = lab(step)
     lockin = experiment.instruments["lockin"]
@@ -521,21 +542,31 @@ def test_the_calculation_adds_power_to_each_row(examples):
     assert row["power"] == pytest.approx(0.25)
 
 
-def test_record_can_be_queued_from_a_form(examples):
-    from lab_6 import Record
+def test_the_sweep_can_be_queued_from_a_form(examples):
+    from lab_9 import FrequencySweep
 
-    for field in dataclasses.fields(Record):
-        assert field.type in FORM_TYPES, f"Record.{field.name}"
+    for field in dataclasses.fields(FrequencySweep):
+        assert field.type in FORM_TYPES, f"FrequencySweep.{field.name}"
 
 
 @pytest.mark.asyncio
-async def test_record_starts_a_file_for_each_run(examples):
-    from lab_6 import Record
+async def test_the_sweep_starts_a_file_at_its_amplitude_and_steps_the_frequency(examples):
+    from lab_9 import FrequencySweep
 
-    experiment = SimpleNamespace(instruments={}, _scribe=MagicMock())
-    await Record(files=2, seconds=0).start(experiment)
-    calls = experiment._scribe.next_file.call_args_list
-    assert [call.kwargs["title"] for call in calls] == ["run 1", "run 2"]
+    rig = MagicMock()  # the lock-in and the scribe, so that their calls are in one order
+    experiment = SimpleNamespace(instruments={"lockin": rig.lockin}, _scribe=rig.scribe)
+    sweep = FrequencySweep(amplitude=0.5, start_hz=100, stop_hz=200, points=3, seconds_per_point=0)
+    await sweep.start(experiment)
+    done = [
+        ("file", c.kwargs["title"]) if name == "scribe.next_file" else (name.split(".")[1], c.args[0])
+        for name, c in ((c[0], c) for c in rig.mock_calls)
+        if name in ("scribe.next_file", "lockin.set_reference_amplitude", "lockin.set_frequency")
+    ]
+    # The file starts with the lock-in already at the amplitude and the first frequency
+    assert done == [
+        ("set_reference_amplitude", 0.5), ("set_frequency", 100), ("file", "0.5 V"),
+        ("set_frequency", 100), ("set_frequency", 150), ("set_frequency", 200),
+    ]
 
 
 # -- The examples fixture ----------------------------------------------------------

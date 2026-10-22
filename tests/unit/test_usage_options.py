@@ -32,7 +32,7 @@ def made(version: int, rig: int, tmp_path, **arguments):
 
 
 def test_it_starts_from_the_end_of_getting_started():
-    assert text(HERE / "lab_1.py") == text(GETTING_STARTED / "lab_6.py")
+    assert text(HERE / "lab_1.py") == text(GETTING_STARTED / "lab_9.py")
     assert text(HERE / "rig_1.toml") == text(GETTING_STARTED / "rig.toml")
 
 

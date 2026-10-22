@@ -47,7 +47,7 @@ def experiment_from(folder: Path, rig: str, cls=Experiment):
 
 def test_it_starts_from_the_end_of_getting_started():
     assert text(HERE / "rig_1.toml") == text(GETTING_STARTED / "rig.toml")
-    assert text(HERE / "lab_1.py") == text(GETTING_STARTED / "lab_6.py")
+    assert text(HERE / "lab_1.py") == text(GETTING_STARTED / "lab_9.py")
 
 
 def test_the_lock_in_moves_from_mock_to_pyvisa_at_the_same_address():

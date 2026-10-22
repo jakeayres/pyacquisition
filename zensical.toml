@@ -14,9 +14,9 @@ nav = [
     { "License" = "overview/license.md" },
   ] },
   { "Getting Started" = [
-    { "0. Installation" = "getting_started/installation.md" },
-    { "1. The Config File" = "getting_started/config_file.md" },
-    { "2. The Python API" = "getting_started/python_api.md" },
+    { "1. Installation" = "getting_started/installation.md" },
+    { "2. The Config File" = "getting_started/config_file.md" },
+    { "3. The Python API" = "getting_started/python_api.md" },
   ] },
   { "Usage" = [
     { "Overview" = "usage/index.md" },
@@ -41,7 +41,6 @@ nav = [
     { "The Experiment" = [
       { "Set the Experiment's Options" = "usage/options.md" },
       { "Build a Config in the Interface" = "usage/setup_page.md" },
-      { "Drive an Experiment from a Script" = "usage/api_script.md" },
       { "Build a Standalone App" = "usage/standalone_app.md" },
     ] },
   ] },
@@ -151,6 +150,7 @@ summary = true
 # now, so links and bookmarks to them still work: Basic Usage's lessons, which Getting
 # Started replaced, and the pages that moved into Reference.
 [project.plugins.redirects.redirect_maps]
+"usage/api_script.md" = "usage/index.md"
 "usage/introduction.md" = "getting_started/installation.md"
 "usage/installation.md" = "getting_started/installation.md"
 "usage/first_experiment.md" = "getting_started/config_file.md"

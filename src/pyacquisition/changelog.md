@@ -21,8 +21,7 @@ shows a version's **Highlights** once, after you upgrade to it.
   can now take options in a config file, and the setup page has fields for
   them.
 - The documentation's front page runs the interface itself, live, beside the
-  script that makes it, and Getting Started shows what each step makes as you
-  read it.
+  script that makes it.
 
 ## 0.4.0 (2026-10-10)
 

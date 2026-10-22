@@ -10,6 +10,7 @@ resource = "GPIB0::8::INSTR"
 [measurements]
 time = { instrument = "clock", method = "time" }
 wave = { instrument = "signal", method = "sine", args = { frequency = 0.2 } }
+frequency = { instrument = "lockin", method = "get_frequency" }
 x = { instrument = "lockin", method = "get_x", unit = "V" }
 y = { instrument = "lockin", method = "get_y", unit = "V" }
 

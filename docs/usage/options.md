@@ -4,7 +4,7 @@
 
 An experiment's **options** say where its data goes, how much the terminal says, which port the interface is on, and how often it measures. Each has a default, so Getting Started set none. In this tutorial you set the ones a real experiment needs: a data folder for each sample and each day, a quieter terminal, a port of its own, and the measuring period. You also see what happens when the class and the config file both set one.
 
-It starts where [2. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with `rig.toml` and `lab.py`.
+It starts where [3. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with `rig.toml` and `lab.py`.
 
 <div class="gs" data-files="lab.py:versions rig.toml:versions" data-lines="24" data-term-lines="3" markdown>
 
@@ -24,9 +24,9 @@ It starts where [2. The Python API](../getting_started/python_api.md) ends: your
 --8<-- "examples/usage/options/lab_1.py"
 ```
 
-These are `rig.toml` and `lab.py` as [2. The Python API](../getting_started/python_api.md) left them. `lab.py` makes the experiment from the file, with a calculation, the `Record` task, and the lock-in's setup and teardown.
+These are `rig.toml` and `lab.py` as [3. The Python API](../getting_started/python_api.md) left them. `lab.py` makes the experiment from the file, with a calculation, the `FrequencySweep` task, and the lock-in's setup and teardown.
 
-**More:** [2. The Python API](../getting_started/python_api.md), which builds them.
+**More:** [3. The Python API](../getting_started/python_api.md), which builds them.
 { .gs-more }
 
 </section>
@@ -35,7 +35,7 @@ These are `rig.toml` and `lab.py` as [2. The Python API](../getting_started/pyth
 
 ## Keep each sample's data apart
 
-```python title="lab.py" hl_lines="1 25 27-29"
+```python title="lab.py" hl_lines="1 33 35-37"
 --8<-- "examples/usage/options/lab_2.py"
 ```
 
@@ -52,7 +52,7 @@ An option is a class attribute of your experiment, named for what it sets. `data
 
 ## Quieten the terminal
 
-```python title="lab.py" hl_lines="26"
+```python title="lab.py" hl_lines="34"
 --8<-- "examples/usage/options/lab_3.py"
 ```
 
@@ -69,7 +69,7 @@ The **Logs** tab and the log file have levels of their own, `gui_log_level` and 
 
 ## Use another port
 
-```python title="lab.py" hl_lines="27-28"
+```python title="lab.py" hl_lines="35-36"
 --8<-- "examples/usage/options/lab_4.py"
 ```
 
@@ -84,7 +84,7 @@ The **Logs** tab and the log file have levels of their own, `gui_log_level` and 
 
 ## Set the period in the class
 
-```python title="lab.py" hl_lines="29"
+```python title="lab.py" hl_lines="37"
 --8<-- "examples/usage/options/lab_5.py"
 ```
 

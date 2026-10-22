@@ -48,7 +48,7 @@ lockin = SR_830(
 
 ## `pyvisa`
 
-Talks to the instrument through [PyVISA](https://pyvisa.readthedocs.io/). GPIB needs a VISA library, such as NI-VISA (see [installing a VISA library](../getting_started/installation.md#before-you-connect-real-instruments)).
+Talks to the instrument through [PyVISA](https://pyvisa.readthedocs.io/). GPIB needs a VISA library, such as NI-VISA (see [installing a VISA library](../usage/connect_instrument.md#a-visa-library-for-gpib)).
 
 | Option | Meaning | Default |
 |---|---|---|

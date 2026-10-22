@@ -4,7 +4,7 @@
 
 Everything an experiment measures is saved in its data files, as it is measured. In this tutorial you read them back for analysis. You find the files, read one into pandas, plot one column against another, and read every file of a run together, to plot them as one figure. Then you let the interface write a plotting script for you.
 
-It starts where [2. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with the data from its runs in `data`. You write `analyse.py` beside it.
+It starts where [3. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with the data from its runs in `data`. You write `analyse.py` beside it.
 
 <div class="gs" data-files="analyse.py:versions" data-lines="18" data-term-lines="9" markdown>
 
@@ -29,12 +29,12 @@ uv run analyse.py
 01.00 start.data
 02.00 start.data
 03.00 start.data
-03.01 run 1.data
-03.02 run 2.data
-03.03 run 3.data
+03.01 0.1 V.data
+03.02 0.5 V.data
+03.03 1 V.data
 ```
 
-Every run of the experiment writes to `data`, in `my-lab`, and a file's name says where it belongs. `03.01 run 1.data` is the first new file (`.01`) of the fourth run (`03.`), titled `run 1`. A run's first file is `.00 start`, and each new file takes the next number, so none is ever written over.
+Every run of the experiment writes to `data`, in `my-lab`, and a file's name says where it belongs. `03.01 0.1 V.data` is the first new file (`.01`) of the fourth run (`03.`), titled `0.1 V`: the sweep at 0.1 V. A run's first file is `.00 start`, and each new file takes the next number, so none is ever written over.
 
 `Path.glob` lists the files that match a pattern, and `sorted` puts them in order. Yours are your own runs: these come from doing each step of Getting Started once.
 
@@ -56,17 +56,17 @@ uv run analyse.py
 ```
 
 ```text
-       time      wave     power
-0  2.626775 -0.156434  0.024472
-1  2.827687 -0.400605  0.160484
-2  3.032861 -0.618847  0.382972
-3  3.235366 -0.797036  0.635267
-4  3.439124 -0.923639  0.853109
+       time      wave  frequency     power
+0  2.193052  0.383264      100.0  0.146891
+1  2.396519  0.137790      100.0  0.018986
+2  2.599506 -0.116601      100.0  0.013596
+3  2.802774 -0.363446      100.0  0.132093
+4  3.004489 -0.587785      100.0  0.345492
 ```
 
 A data file is plain CSV: a header of column names, then a row for each cycle. `pd.read_csv` reads it into a table, a `DataFrame`, and `head()` shows its first five rows. pandas comes with PyAcquisition, so there is nothing to install.
 
-`time` is the clock's: seconds since the experiment started. So `run 1`, begun a few seconds into its run, starts at 2.6.
+`time` is the clock's: seconds since the experiment started. So the first sweep, begun a couple of seconds into its run, starts at 2.2, and at 100 Hz, its first `frequency`.
 
 **More:** [what is in a data file](../reference/data_files.md), and [`pandas.read_csv`](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html).
 { .gs-more }
@@ -106,14 +106,14 @@ uv run analyse.py
 ```
 
 ```text
-03.01 run 1: 50 rows, from 2.6 s
-03.02 run 2: 49 rows, from 12.7 s
-03.03 run 3: 75 rows, from 22.6 s
+03.01 0.1 V: 105 rows, from 2.2 s
+03.02 0.5 V: 106 rows, from 23.3 s
+03.03 1 V: 126 rows, from 44.4 s
 ```
 
-A run's stages are in files of their own, and a pattern picks them: `03.* run *.data` is every file of the fourth run titled `run …`. The loop reads each, says how long it is, and plots it with its name as its label, so the legend says which is which. `plt.savefig` keeps the figure as `wave.png`, beside the script.
+A run's stages are in files of their own, and a pattern picks them: `03.* * V.data` is every file of the fourth run whose title ends in `V`, its three sweeps. The loop reads each, says how long it is, and plots it with its name as its label, so the legend says which is which. `plt.savefig` keeps the figure as `wave.png`, beside the script.
 
-`run 3` is longer, since recording goes on into it until the experiment stops. Change `03` to the run you want.
+`1 V` is longer, since recording goes on into it until the experiment stops. Change `03` to the run you want.
 
 **More:** [`Path.glob`](https://docs.python.org/3/library/pathlib.html#pathlib.Path.glob), and [`NewFile`](../reference/tasks/new_file.md), the task that starts each file.
 { .gs-more }
@@ -150,23 +150,23 @@ The figure `analyse.py` draws, and saves as `wave.png`:
 
 <div class="gs-shot" markdown>
 
-![A matplotlib figure of wave against time in seconds, from 3 to 37 s: three sine waves one after another, in blue, orange and green, labelled 03.01 run 1, 03.02 run 2 and 03.03 run 3](../images/usage/read_data/wave.png){ .pa-shot }
+![A matplotlib figure of wave against time in seconds, from 2 to 69 s: three stretches of sine wave one after another, in blue, orange and green, labelled 03.01 0.1 V, 03.02 0.5 V and 03.03 1 V](../images/usage/read_data/wave.png){ .pa-shot }
 
 </div>
 
 !!! success "Checkpoint"
-    `uv run analyse.py` prints a line for each of `run 1`, `run 2` and `run 3`, and a window shows `wave` against time, in a colour for each file, saved as `wave.png`. The script the interface wrote draws the plot you exported.
+    `uv run analyse.py` prints a line for each of `0.1 V`, `0.5 V` and `1 V`, and a window shows `wave` against time, in a colour for each file, saved as `wave.png`. The script the interface wrote draws the plot you exported.
 
 ??? failure "Something not working?"
-    - **`FileNotFoundError: [Errno 2] No such file or directory: 'data\\03.01 run 1.data'`.** Your files are numbered differently, or the terminal isn't in `my-lab`. Use a name that step 1 printed.
+    - **`FileNotFoundError: [Errno 2] No such file or directory: 'data\\03.01 0.1 V.data'`.** Your files are numbered differently, or the terminal isn't in `my-lab`. Use a name that step 1 printed.
     - **`pandas.errors.EmptyDataError: No columns to parse from file`.** The file has no columns: `00.00 start.data` is from Getting Started's empty file, which measured nothing. Read another.
     - **`KeyError: 'power'`.** That file has no `power` column: the files from before `lab.py` added the calculation don't. `print(run.columns)` lists a file's columns.
     - **`ModuleNotFoundError: No module named 'matplotlib'`.** Run `uv add matplotlib` in `my-lab`.
-    - **Step 4 prints nothing, and the plot is empty.** No file matched the pattern: your **Record** run is in another block (`04.`, say), or the terminal isn't in `my-lab`.
+    - **Step 4 prints nothing, and the plot is empty.** No file matched the pattern: your sweeps are in another block (`04.`, say), or the terminal isn't in `my-lab`.
 
 ## What you learned
 
-- Data files are in `data`, named by run, file and title: `03.01 run 1.data`. Each run and each new file takes the next number.
+- Data files are in `data`, named by run, file and title: `03.01 0.1 V.data`. Each run and each new file takes the next number.
 - Each is plain CSV, with a header of column names, which `pd.read_csv` reads into a `DataFrame`.
 - `Path.glob` finds a run's files, to read and plot together.
 - A plot's export writes a matplotlib script of what it shows, or a figure for a paper.

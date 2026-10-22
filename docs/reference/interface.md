@@ -1,6 +1,6 @@
 # The interface
 
-Every part of the window, its keyboard shortcuts, and the command palette. [1. The Config File](../getting_started/config_file.md#what-you-built) opens it for the first time.
+Every part of the window, its keyboard shortcuts, and the command palette. [2. The Config File](../getting_started/config_file.md#a-whole-experiment-in-16-lines) opens it for the first time.
 
 
 The window is a page served by the experiment itself, so you can also open it in a browser at [http://localhost:8000](http://localhost:8000) (the API server's address), on this computer or another. It has three parts: a slim bar across the top, the plots filling the window, and a **dock** of tabs along the bottom.

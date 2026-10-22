@@ -289,166 +289,264 @@
   .gs-pin { width: 0.95rem; height: 0.95rem; margin: -0.475rem 0 0 -0.475rem; font-size: 0.46rem; }
 }
 
-/* The interface, for a walkthrough with data-demo (Getting Started's) ---- *
- * Between the file and the terminal: the real interface, at each step as the file
- * then makes it, with what the step made outlined and joined to its lines.        */
-.gs--live .gs-panels { position: relative; }
-.gs-panel--app .gs-panel__name { color: #8b98ad; }
-.gs-app__open { font-weight: 600; color: var(--pa-green); }
-.gs-app__open:hover { color: var(--pa-orange); }
-.gs-app { position: relative; overflow: hidden; height: 20rem; background: #0d1117; }
-/* Folded away for a step whose lines need the room, on a short screen */
-.gs-panel--app.is-folded { display: none; }
-.gs-app .gs-app__frame {
-  position: absolute;
-  top: 0;
-  left: 0;
-  max-width: none; /* the theme keeps frames to their column */
-  border: 0;
-  background: #0d1117;
-  transform-origin: 0 0;
-  opacity: 0;
-  pointer-events: none; /* the page scrolls over it: "Open full size" is to use */
-  transition: opacity 0.35s ease;
+/* The end of a part ------------------------------------------------------- */
+/* Each of Getting Started's parts ends on one card, in place of a checkpoint and a
+   recap: the whole file you wrote, what it made, and anything that went wrong folded
+   away under it. Then a card for the next part. */
+.gs-finish {
+  margin: 2.8rem 0 1.2rem;
+  padding: 1.3rem 1.5rem 0.5rem;
+  border: 1px solid var(--pa-border);
+  border-radius: 1rem;
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.09), rgba(74, 222, 128, 0) 9rem), var(--md-default-bg-color);
+  box-shadow: 0 1px 2px rgba(10, 15, 26, 0.04), 0 22px 44px -28px rgba(10, 15, 26, 0.3);
 }
-.gs-app .gs-app__frame.is-on { opacity: 1; }
-.gs-outline {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-  z-index: 3;
-}
-.gs-outline .box {
-  fill: rgba(255, 159, 67, 0.1);
-  stroke: var(--pa-orange);
-  stroke-width: 1.5;
-  filter: drop-shadow(0 0 6px rgba(255, 159, 67, 0.55));
-}
-.gs-outline .link {
-  fill: none;
-  stroke: var(--pa-orange);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 4;
-  animation: gs-flow 0.9s linear infinite;
-}
-.gs-outline .end { fill: var(--pa-orange); }
-@keyframes gs-flow { to { stroke-dashoffset: -8; } }
-@media (prefers-reduced-motion: reduce) {
-  .gs-outline .link { animation: none; }
-  .gs-app__frame { transition: none; }
-}
-
-/* What you built, live (.pa-built): the last step's recording in a device's frame,
-   with a legend whose items outline their part of it. */
-.pa-built { margin: 1.4rem 0 1.8rem; }
-.pa-built__device {
-  padding: 0 0.35rem 0.35rem;
-  border-radius: 1.1rem;
-  background: linear-gradient(180deg, #232b3a, #0b0f17);
-  box-shadow:
-    0 0 0 1px rgba(10, 15, 26, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    0 30px 70px -28px rgba(10, 15, 26, 0.55),
-    0 70px 140px -60px rgba(10, 15, 26, 0.4);
-}
-.pa-built__bar {
-  position: relative;
+.gs-finish__head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  height: 1.9rem;
-  padding: 0 0.45rem;
-  font-size: 0.55rem;
-  color: rgba(255, 255, 255, 0.6);
+  gap: 0.6rem 1.2rem;
 }
-.pa-built__lights { display: flex; gap: 0.3rem; }
-.pa-built__lights i { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #ff5f57; }
-.pa-built__lights i:nth-child(2) { background: #febc2e; }
-.pa-built__lights i:nth-child(3) { background: #28c840; }
-.pa-built__title { position: absolute; left: 50%; transform: translateX(-50%); font-weight: 600; }
-.pa-built__label {
-  padding: 0.1rem 0.55rem;
-  font-weight: 600;
-  color: #86efac;
-  border: 1px solid rgba(74, 222, 128, 0.3);
-  border-radius: 999px;
-  background: rgba(74, 222, 128, 0.08);
-}
-.pa-built__screen {
-  position: relative;
-  overflow: hidden;
-  height: 24rem;
-  border-radius: 0.8rem;
-  background: #0d1117;
-}
-.pa-built__screen iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 1000px;
-  max-width: none; /* the theme keeps frames to their column */
-  height: 700px;
-  border: 0;
-  background: #0d1117;
-  transform-origin: 0 0;
-  pointer-events: none; /* the page scrolls over it: "Open it full size" is to use */
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-.pa-built.is-live .pa-built__screen iframe { opacity: 1; }
-.md-typeset .pa-built__legend {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0.35rem 1.2rem;
-  margin: 1rem 0 0;
-  padding: 0;
-  list-style: none;
-  counter-reset: pa-built;
-}
-.md-typeset .pa-built__legend li {
-  position: relative;
+.md-typeset .gs-finish__eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   margin: 0;
-  padding: 0.5rem 0.7rem 0.5rem 2.3rem;
-  font-size: 0.66rem;
-  line-height: 1.45;
-  color: var(--md-default-fg-color--light);
-  border-radius: 0.7rem;
-  counter-increment: pa-built;
-  cursor: default;
-  transition: background 0.25s, box-shadow 0.25s, color 0.25s;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--pa-green-ink);
 }
-.md-typeset .pa-built__legend li b { color: var(--md-default-fg-color); }
-.md-typeset .pa-built__legend li::before {
-  content: counter(pa-built);
-  position: absolute;
-  left: 0.6rem;
-  top: 0.5rem;
+.md-typeset .gs-finish__eyebrow::before {
+  content: "✓";
+  display: grid;
+  place-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  font-size: 0.64rem;
+  letter-spacing: 0;
+  color: #fff;
+  background: var(--pa-green-ink);
+  border-radius: 50%;
+  box-shadow: 0 0 0 0.25rem rgba(21, 128, 61, 0.12);
+}
+.md-typeset .gs-finish h2 {
+  margin: 0.7rem 0 1.4rem;
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: -0.01em;
+}
+.md-typeset .gs-finish__label {
+  margin: 0 0 0.5rem;
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--md-default-fg-color--light);
+}
+.gs-finish__part + .gs-finish__part { margin-top: 1.8rem; }
+.md-typeset .gs-finish__part > .highlight { margin: 0; }
+.md-typeset .gs-finish__aside {
+  margin: 0.6rem 0 0;
+  font-size: 0.66rem;
+  color: var(--md-default-fg-color--light);
+}
+.gs-finish .gs-shot { margin: 0 0 1.1rem; }
+.gs-shot.is-shown .gs-pin:nth-of-type(7) { transition-delay: 0.48s; }
+
+/* Where the part is in Getting Started: the parts done, ticked */
+.md-typeset .gs-progress {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem 0;
+  margin: 0;
+  font-size: 0.6rem;
+  counter-reset: gs-part;
+}
+.md-typeset .gs-progress a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--md-default-fg-color--light);
+  counter-increment: gs-part;
+}
+.md-typeset .gs-progress a + a {
+  margin-left: 0.5rem;
+  padding-left: 1.7rem;
+  background: linear-gradient(var(--pa-border), var(--pa-border)) no-repeat left center / 1.2rem 1px;
+}
+.md-typeset .gs-progress a::before {
+  content: counter(gs-part);
   display: grid;
   place-items: center;
   width: 1.1rem;
   height: 1.1rem;
-  font-size: 0.55rem;
+  font-size: 0.52rem;
   font-weight: 700;
-  color: #fff;
+  border: 1px solid var(--pa-border);
   border-radius: 50%;
-  background: var(--pa-orange-ink);
 }
-.md-typeset .pa-built__legend li.is-on {
-  color: var(--md-default-fg-color);
-  background: rgba(255, 159, 67, 0.1);
-  box-shadow: inset 0 0 0 1px rgba(194, 65, 12, 0.3);
+.md-typeset .gs-progress a.is-done { color: var(--md-default-fg-color); }
+.md-typeset .gs-progress a.is-done::before {
+  content: "✓";
+  color: #fff;
+  background: var(--pa-green-ink);
+  border-color: var(--pa-green-ink);
 }
-.md-typeset .pa-built__legend li:focus-visible { outline: 2px solid var(--pa-orange-ink); outline-offset: 2px; }
-.pa-built__more { margin: 0.8rem 0 0 !important; font-size: 0.66rem; text-align: right; }
-.pa-built__more a { font-weight: 600; }
-.pa-built__more a::after { content: " ›"; }
-@media (max-width: 45em) {
-  .md-typeset .pa-built__legend { grid-template-columns: minmax(0, 1fr); }
+.md-typeset .gs-progress a.is-done + a.is-done {
+  background-image: linear-gradient(var(--pa-green-ink), var(--pa-green-ink));
 }
-@media (prefers-reduced-motion: reduce) {
-  .pa-built__screen iframe, .md-typeset .pa-built__legend li { transition: none; }
+.md-typeset .gs-progress a:hover { color: var(--pa-green-ink); }
+
+/* Stuck?: the fixes, folded away and quiet, at the foot of the card */
+.md-typeset details.pa-stuck {
+  margin: 1.2rem -1.5rem 0;
+  padding: 0 1.5rem;
+  font-size: 0.66rem;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--pa-border);
+  border-radius: 0;
+  box-shadow: none;
+}
+.md-typeset details.pa-stuck > summary {
+  margin: 0;
+  padding: 0.75rem 1.6rem 0.75rem 1.4rem;
+  font-weight: 600;
+  color: var(--md-default-fg-color--light);
+  background: none;
+}
+.md-typeset details.pa-stuck > summary::before {
+  top: 0.85rem;
+  left: 0;
+  width: 0.9rem;
+  height: 0.9rem;
+  background-color: currentcolor;
+  -webkit-mask-image: var(--md-admonition-icon--question);
+  mask-image: var(--md-admonition-icon--question);
+}
+.md-typeset details.pa-stuck > summary::after { top: 0.8rem; right: 0; }
+.md-typeset details.pa-stuck > summary:hover,
+.md-typeset details.pa-stuck[open] > summary { color: var(--md-default-fg-color); }
+.md-typeset details.pa-stuck > ul { margin: 0 0 1rem; }
+
+/* The next part: a card to go on to it, with a glimpse of what it makes */
+.gs-next {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 15rem);
+  align-items: center;
+  gap: 1.6rem;
+  margin: 1.2rem 0 2.4rem;
+  padding: 1.4rem 1.4rem 1.4rem 1.6rem;
+  color: #a9b6cb;
+  background:
+    radial-gradient(90% 140% at 100% 0%, rgba(74, 222, 128, 0.16), transparent 60%),
+    var(--pa-bg);
+  border-radius: 1rem;
+  box-shadow: 0 22px 44px -24px rgba(10, 15, 26, 0.6);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.gs-next:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 28px 52px -24px rgba(10, 15, 26, 0.7);
+}
+.md-typeset .gs-next p { margin: 0; }
+.md-typeset .gs-next__eyebrow {
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--pa-green);
+}
+.md-typeset .gs-next p.gs-next__title { margin: 0.3rem 0 0.55rem; font-size: 1.25rem; font-weight: 300; }
+.md-typeset .gs-next__title a { color: #fff; }
+/* The whole card is the link */
+.md-typeset .gs-next__title a::before { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.md-typeset .gs-next__title a::after {
+  content: "→";
+  display: inline-block;
+  margin-left: 0.45rem;
+  color: var(--pa-green);
+  transition: transform 0.25s ease;
+}
+.gs-next:hover .gs-next__title a::after { transform: translateX(0.25rem); }
+.md-typeset .gs-next__text > p:last-child { font-size: 0.68rem; line-height: 1.6; }
+.md-typeset .gs-next code { color: #e6edf7; background: rgba(255, 255, 255, 0.08); }
+.md-typeset .gs-next img {
+  display: block;
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 0.5rem;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.45);
 }
 
+@media (max-width: 40em) {
+  .gs-finish { padding: 1rem 1rem 0.4rem; }
+  .md-typeset .gs-progress a { font-size: 0; } /* only the ticks and numbers */
+  .md-typeset details.pa-stuck { margin: 1rem -1rem 0; padding: 0 1rem; }
+  .gs-next { grid-template-columns: minmax(0, 1fr); gap: 1rem; padding: 1.2rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gs-next, .md-typeset .gs-next__title a::after { transition: none; }
+}
+
+/* Two pictures of what a part made, side by side */
+.gs-finish__shots {
+  display: grid;
+  grid-template-columns: minmax(0, 1.37fr) minmax(0, 1.78fr); /* their widths to height: one height */
+  gap: 0.8rem;
+  margin-bottom: 1.1rem;
+}
+.md-typeset .gs-finish__shots a { display: block; cursor: zoom-in; } /* to the full picture */
+.md-typeset .gs-finish__shots p { margin: 0; }
+.md-typeset .gs-finish__shots img.pa-shot { width: 100%; margin: 0; }
+
+/* What next, at the end of Getting Started: what you might want to do, a card each */
+.md-typeset .gs-goals ul {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 0.2rem 0 1.2rem;
+  padding: 0;
+  list-style: none;
+}
+[dir] .md-typeset .gs-goals ul li {
+  position: relative;
+  margin: 0;
+  padding: 0.9rem 1rem 1rem;
+  background: var(--md-default-bg-color);
+  border: 1px solid var(--pa-border);
+  border-radius: 0.8rem;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.md-typeset .gs-goals li:hover {
+  border-color: rgba(21, 128, 61, 0.45);
+  box-shadow: 0 14px 30px -20px rgba(10, 15, 26, 0.4);
+  transform: translateY(-2px);
+}
+.md-typeset .gs-goals li p { margin: 0; }
+.md-typeset .gs-goals li > p:first-child a { font-weight: 600; color: var(--md-default-fg-color); }
+/* The whole card is the link */
+.md-typeset .gs-goals li > p:first-child a::before { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+.md-typeset .gs-goals li > p:first-child a::after { content: " →"; color: var(--pa-green-ink); }
+.md-typeset .gs-goals li > p + p {
+  margin-top: 0.35rem;
+  font-size: 0.66rem;
+  line-height: 1.55;
+  color: var(--md-default-fg-color--light);
+}
+.md-typeset .gs-goals__more { font-size: 0.68rem; color: var(--md-default-fg-color--light); }
+
+@media (max-width: 60em) {
+  .md-typeset .gs-goals ul { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 40em) {
+  .gs-finish__shots, .md-typeset .gs-goals ul { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .md-typeset .gs-goals li { transition: none; }
+}

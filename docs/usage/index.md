@@ -35,7 +35,6 @@ Each page here is a short tutorial for one thing you may want to do after [Getti
 |---|---|
 | [Set the experiment's options](options.md) | A data folder for each sample and day, a quieter terminal, a port of its own, and which wins, the class or the file. About 10 minutes. |
 | [Build a config in the interface](setup_page.md) | A rig's config file written from forms with `pyacquisition new`, checked as you go, and run from the same window. About 10 minutes. |
-| [Drive an experiment from a script](api_script.md) | The lab run with no window, and driven by a script over the web API: a value read, a command sent, two files recorded, and the experiment stopped. About 15 minutes. |
 | [Build a standalone app](standalone_app.md) | An experiment frozen into an app for a lab PC with no Python, from a config file or a script. About 15 minutes. |
 
 ## After Getting Started
@@ -45,6 +44,6 @@ Each page here is a short tutorial for one thing you may want to do after [Getti
 | [Installed PyAcquisition](../getting_started/installation.md) | [Connect a real instrument](connect_instrument.md), with a VISA library, and [Build a standalone app](standalone_app.md), for a lab PC with no Python |
 | [Described a rig in a config file](../getting_started/config_file.md) | [Tune your measurements](measurements.md), [Read your data](read_data.md) and [Build a config in the interface](setup_page.md) |
 | [Added an instrument with `mock`](../getting_started/config_file.md#add-a-hardware-instrument) | [Connect a real instrument](connect_instrument.md), [Write a hardware instrument](hardware_instrument.md) and [Verify a driver on real hardware](verify_driver.md) |
-| [Ran it from Python](../getting_started/python_api.md) | [Set the experiment's options](options.md), [Write a software instrument](software_instrument.md) and [Drive an experiment from a script](api_script.md) |
+| [Ran it from Python](../getting_started/python_api.md) | [Set the experiment's options](options.md) and [Write a software instrument](software_instrument.md) |
 | [Added a calculated column](../getting_started/python_api.md#add-calculations) | [Calculate new columns](calculations.md) and [Record spectra and traces](traces.md) |
-| [Wrote and queued a task](../getting_started/python_api.md#tasks-custom-automation) | [Write a task](write_task.md), [Sweep a temperature](sweep.md), [Queue, pause and save tasks](queue.md) and [Hold a temperature with PID](pid.md) |
+| [Wrote and queued a task](../getting_started/python_api.md#create-a-task) | [Write a task](write_task.md), [Sweep a temperature](sweep.md), [Queue, pause and save tasks](queue.md) and [Hold a temperature with PID](pid.md) |

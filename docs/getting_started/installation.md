@@ -1,4 +1,4 @@
-# 0. Installation
+# 1. Installation
 
 <p class="pa-meta" markdown="span">About 5 minutes · Needs a terminal, and an internet connection</p>
 
@@ -114,38 +114,76 @@ Start every command in this guide with `uv run`, from the `my-lab` folder. There
 
 </div>
 
-!!! success "Checkpoint"
-    In the `my-lab` folder, the check prints `pyacquisition is installed`.
+<div class="gs-finish" markdown>
 
-??? failure "Something not working?"
+<div class="gs-finish__head" markdown>
+
+Part 1 of 3 done
+{ .gs-finish__eyebrow }
+
+[Installation](installation.md){ .is-done } [The Config File](config_file.md) [The Python API](python_api.md)
+{ .gs-progress }
+
+</div>
+
+## Installed, in three commands
+
+<div class="gs-finish__part" markdown>
+
+You typed
+{ .gs-finish__label }
+
+```bash
+uv init my-lab
+cd my-lab
+uv add pyacquisition
+```
+
+And uv itself, once for your whole computer. Rather use pip? `pyacquisition` is on PyPI, so `pip install pyacquisition`, in a virtual environment, installs it too.
+{ .gs-finish__aside }
+
+</div>
+
+<div class="gs-finish__part" markdown>
+
+You got
+{ .gs-finish__label }
+
+``` { .text .no-copy }
+my-lab/
+├── .venv/            Python and the packages, for this project alone
+├── pyproject.toml    what the project needs: PyAcquisition
+├── uv.lock           the exact version of every package
+├── main.py           uv's example: keep it or delete it
+└── …                 README.md, and git's and uv's own files
+```
+
+`uv run` runs anything in it, with nothing to activate first: the check says `pyacquisition is installed`. Real instruments on GPIB need one thing more, a VISA library, which [Connect a real instrument](../usage/connect_instrument.md#a-visa-library-for-gpib) covers when you get there.
+{ .gs-finish__aside }
+
+</div>
+
+??? pa-stuck "Stuck?"
     - **`uv` is not found.** Open a new terminal after installing it, so that it is on your path.
     - **`ModuleNotFoundError: No module named 'pyacquisition'`.** Plain `python` doesn't use the project's environment. Run commands with `uv run`, from the `my-lab` folder.
     - **uv says there is no `pyproject.toml`.** The terminal is in another folder. `cd` into `my-lab` first.
 
-??? note "Using `pip` instead"
-    `pyacquisition` is on PyPI, so it also installs with `pip`. Create and activate a virtual environment first:
+</div>
 
-    ```
-    python -m venv .venv
-    .venv\Scripts\activate
-    pip install pyacquisition
-    ```
+<div class="gs-next" markdown>
 
-    On macOS and Linux, activate with `source .venv/bin/activate`.
+<div class="gs-next__text" markdown>
 
-## Before you connect real instruments
+Next · about 10 minutes
+{ .gs-next__eyebrow }
 
-This guide needs nothing more, since its instruments are software ones, or stand-ins for real ones. Real instruments need one more thing. PyAcquisition talks to them through [`pyvisa`](https://pyvisa.readthedocs.io/), which it installs, and `pyvisa` talks to the hardware through a *VISA library*:
+[2. The Config File](config_file.md)
+{ .gs-next__title }
 
-- For **GPIB** instruments, install one. [PyVISA recommends the National Instruments implementation](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html), and it is what PyAcquisition has been tested against.
-- `pyvisa-py`, a pure Python backend installed alongside it, talks to many serial, USB and Ethernet instruments without a separate VISA installation.
+Describe a whole experiment in one small file, with no Python, and run it: a live window, a data file and a log, from sixteen lines.
 
-Once you have finished Getting Started, [Connect a real instrument](../usage/connect_instrument.md) puts one in place of a stand-in.
+</div>
 
-## What you learned
+![The interface that part 2's file makes: a live plot of a sine wave against time, and a tile for each measurement](../images/getting_started/next-config-file.webp)
 
-- A **project** is a folder with an environment of its own, so its packages can't clash with anything else's.
-- **uv** installs Python, makes a project's environment, and adds packages to it. `pyproject.toml` lists what the project needs, and `uv.lock` the exact versions.
-- `uv run` runs a command in the project's environment.
-
-Next: [1. The Config File](config_file.md) describes a whole experiment in one small file.
+</div>

@@ -1,20 +1,18 @@
-# 1. The Config File
+# 2. The Config File
 
-<p class="pa-meta" markdown="span">About 10 minutes · Needs [0. Installation](installation.md)</p>
+<p class="pa-meta" markdown="span">About 10 minutes · Needs [1. Installation](installation.md)</p>
 
 An experiment in PyAcquisition is made of **instruments**, the things it reads from and controls, and **measurements**, the values it reads from them, over and over, as it runs. From those it makes the rest: the interface, a data file with a column for each measurement, and a log.
 
 All of that can be described in one small file. It is written in [TOML](https://toml.io/en/), a simple format: `[tables]`, each with `key = value` lines under it. In this part you build the file a few lines at a time. There is no Python to write and nothing to plug in, since every instrument here is a software one or a stand-in for the real thing. Keep the `my-lab` project from [installation](installation.md) open in your editor, and follow along: the file runs after every step.
 
-Beside the file, the interface shows what it makes at each step: this very file, running, recorded from the real experiment, with what the step added outlined.
-
-<div class="gs" data-demo data-lines="10" data-term-lines="3" markdown>
+<div class="gs" markdown>
 
 <div class="gs-stage" markdown>
 
 <div class="gs-notes" markdown>
 
-<section class="gs-step" data-new-file data-result="The interface opens, with nothing in it yet." data-demo="config-1" data-demo-view="values" data-demo-show=".brand-name" markdown>
+<section class="gs-step" data-new-file data-result="The interface opens, with nothing in it yet." markdown>
 
 ## Start with an empty file
 
@@ -33,7 +31,7 @@ It makes a `data` folder for its data files, and a `logs` folder too. Close the 
 
 </section>
 
-<section class="gs-step" data-demo="config-2" data-demo-view="instruments" data-demo-show=".instrument-item@clock" markdown>
+<section class="gs-step" markdown>
 
 ## Add an instrument: a clock
 
@@ -46,14 +44,14 @@ clock = { instrument = "Clock" }
 
 On the left, `clock` is the instrument's name: yours to choose, and how the rest of the file refers to it. `instrument = "Clock"` names its **driver**, the code that knows how to talk to it. `Clock` is a *software* instrument, which runs on your computer, so there is nothing to connect.
 
-An instrument has **queries**, values it can be asked for, and **commands**, which change it. The clock's `time` query is the seconds since it was made. The interface lists them in its **Instruments** tab.
+An instrument has **queries**, values it can be asked for, and **commands**, which change it. The clock's `time` query is the seconds since it was made.
 
 **More:** [every driver](../reference/instruments/overview.md), and [the `[instruments]` table](../reference/config_file.md#instruments).
 { .gs-more }
 
 </section>
 
-<section class="gs-step" data-demo="config-3" data-demo-view="values" data-demo-show='[data-column="time"]' markdown>
+<section class="gs-step" markdown>
 
 ## Add a measurement: time
 
@@ -71,7 +69,7 @@ The experiment **polls** its measurements: once a cycle, over and over, it reads
 
 </section>
 
-<section class="gs-step" data-demo="config-4" data-demo-view="values" data-demo-show='[data-column="wave"]; .series-chip@wave' markdown>
+<section class="gs-step" markdown>
 
 ## Add a measurement with arguments
 
@@ -94,7 +92,7 @@ Add each line under its table. A table can only appear once in a file, so the ta
 
 </section>
 
-<section class="gs-step" data-demo="config-5" data-demo-view="values" data-demo-show=".rack-control" markdown>
+<section class="gs-step" markdown>
 
 ## Change the polling period
 
@@ -112,7 +110,7 @@ The **rack** is the part of the experiment that polls the measurements, and `[ra
 
 </section>
 
-<section class="gs-step" data-demo="config-6" data-demo-view="instruments" data-demo-do="instrument lockin" data-demo-show=".instrument-item@lockin" markdown>
+<section class="gs-step" markdown>
 
 ## Add a hardware instrument
 
@@ -121,11 +119,16 @@ The **rack** is the part of the experiment that polls the measurements, and `[ra
 instrument = "SR_830"
 adapter = "mock"
 resource = "GPIB0::8::INSTR"
+
+[measurements]
+frequency = { instrument = "lockin", method = "get_frequency" }
 ```
 
 A *hardware* instrument is a device that the computer talks to, here a Stanford Research SR830 lock-in amplifier, whose driver is `SR_830`. It needs two keys that a software one doesn't: an `adapter`, how the computer reaches it, and a `resource`, its address.
 
 The `mock` adapter stands in for the device, answering each query with the value last set, or 0. So the driver runs without one, and its queries and commands are all in the interface's **Instruments** tab to try.
+
+A hardware instrument is measured like any other: `frequency` records the lock-in's reference frequency, which reads 0 until something sets it, as part 3 does.
 
 ??? tip "Have a real SR830 connected?"
     Use it instead: set `adapter = "pyvisa"`, and `resource` to its address, such as `GPIB0::8::INSTR` at GPIB address 8. Through a Prologix GPIB-USB controller, it is `adapter = "prologix"`, with the port and the GPIB address as the resource, such as `COM3::8`.
@@ -134,12 +137,12 @@ The `mock` adapter stands in for the device, answering each query with the value
 
 `[instruments.lockin]` is the same as a line under `[instruments]`, as a table of its own because it is longer.
 
-**More:** [the SR 830](../reference/instruments/sr_830.md), [the `mock` adapter](../reference/adapters.md#mock), [finding an instrument's address](../usage/connect_instrument.md#find-the-instruments-address), [a Prologix controller](../reference/adapters.md#prologix), and [installing a VISA library](installation.md#before-you-connect-real-instruments) for GPIB.
+**More:** [the SR 830](../reference/instruments/sr_830.md), [the `mock` adapter](../reference/adapters.md#mock), [finding an instrument's address](../usage/connect_instrument.md#find-the-instruments-address), [a Prologix controller](../reference/adapters.md#prologix), and [installing a VISA library](../usage/connect_instrument.md#a-visa-library-for-gpib) for GPIB.
 { .gs-more }
 
 </section>
 
-<section class="gs-step" data-result="Recording every 0.2 s to data/01.00 start.data" data-demo="config-6" data-demo-view="values" data-demo-show=".file-control .topbar-chip" markdown>
+<section class="gs-step" data-result="Recording every 0.2 s to data/01.00 start.data" markdown>
 
 ## Run the experiment
 
@@ -149,7 +152,7 @@ uv run pyacquisition --toml rig.toml
 
 The same command as before, now with the whole rig. The experiment polls the measurements every 0.2 s, and writes each cycle as a row of a data file in `data`, with a column for each measurement.
 
-Each run starts a new data file, numbered on from those already there, so that none is overwritten: after the empty file's `00.00 start.data`, this one is `01.00 start.data`. That is a whole experiment, in fifteen lines.
+Each run starts a new data file, numbered on from those already there, so that none is overwritten: after the empty file's `00.00 start.data`, this one is `01.00 start.data`. That is a whole experiment, in sixteen lines.
 
 **More:** [data files and their names](../reference/data_files.md), and [reading your data](../usage/read_data.md).
 { .gs-more }
@@ -162,43 +165,104 @@ Each run starts a new data file, numbered on from those already there, so that n
 
 </div>
 
-## What you built
+<div class="gs-finish" markdown>
 
-The finished file, running. Each part of the window comes from it: point at an item below to find it.
+<div class="gs-finish__head" markdown>
 
-<div class="pa-built" data-demo="config-6" data-demo-view="values" markdown="0">
-<div class="pa-built__device">
-<div class="pa-built__bar"><span class="pa-built__lights" aria-hidden="true"><i></i><i></i><i></i></span><span class="pa-built__title">rig</span><span class="pa-built__label">Recorded from rig.toml</span></div>
-<div class="pa-built__screen"><iframe title="The interface rig.toml makes, running" tabindex="-1"></iframe></div>
-</div>
-<ol class="pa-built__legend">
-<li tabindex="0" data-show=".file-control .topbar-chip"><b>The data file.</b> Every row, saved as it is measured. Click it for more.</li>
-<li tabindex="0" data-show=".rack-control"><b>Every 0.2 s.</b> The polling period, from <code>[rack]</code>. The button beside it pauses polling.</li>
-<li tabindex="0" data-show=".plot-panel"><b>The plot.</b> Any measurement against any other, live.</li>
-<li tabindex="0" data-show=".value-tile"><b>Values.</b> A tile for each measurement, with its latest reading.</li>
-<li tabindex="0" data-show='[role="tab"]@Queue'><b>Queue.</b> Waits, new files, and later your own tasks.</li>
-<li tabindex="0" data-show='[role="tab"]@Instruments'><b>Instruments.</b> Every query and command of each instrument, to send by hand.</li>
-</ol>
-<p class="pa-built__more"><a href="../demo/index.html?session=config-6">Open it full size</a></p>
+Part 2 of 3 done
+{ .gs-finish__eyebrow }
+
+[Installation](installation.md){ .is-done } [The Config File](config_file.md){ .is-done } [The Python API](python_api.md)
+{ .gs-progress }
+
 </div>
 
-!!! success "Checkpoint"
-    The plot shows `wave` swinging between -1 and 1, the top bar says **Every 0.2 s**, the **Instruments** tab lists `lockin`, and the newest file in `data` grows while it runs.
+## A whole experiment, in 16 lines
 
-??? failure "Something not working?"
-    - **`Cannot declare ('instruments',) twice`.** A table appears twice. Put the new lines under the `[instruments]` or `[measurements]` you already have.
+<div class="gs-finish__part" markdown>
+
+You wrote
+{ .gs-finish__label }
+
+```toml title="rig.toml"
+[instruments]  # (6)
+clock = { instrument = "Clock" }
+signal = { instrument = "SignalGenerator" }
+
+[instruments.lockin]
+instrument = "SR_830"
+adapter = "mock"
+resource = "GPIB0::8::INSTR"
+
+[measurements]  # (4)
+time = { instrument = "clock", method = "time" }
+wave = { instrument = "signal", method = "sine", args = { frequency = 0.2 } }
+frequency = { instrument = "lockin", method = "get_frequency" }
+
+[rack]
+period = 0.2  # (2)
+```
+
+No Python, and one command runs it: `uv run pyacquisition --toml rig.toml`. [Config file](../reference/config_file.md) lists every option it can take, and `uv run pyacquisition new rig.toml` writes it from forms ([Build a config in the interface](../usage/setup_page.md)).
+{ .gs-finish__aside }
+
+</div>
+
+<div class="gs-finish__part" markdown>
+
+You got
+{ .gs-finish__label }
+
+<div class="gs-shot" markdown>
+
+![The interface running rig.toml: a live plot of wave against time, 00.00 start.data and Every 0.2 s in the top bar, and a tile for each measurement, the lock-in's frequency at 0](../images/getting_started/interface.png){ .pa-shot }
+
+<span class="gs-pin" style="--x: 19.1%; --y: 3%">1</span>
+<span class="gs-pin" style="--x: 26.1%; --y: 3%">2</span>
+<span class="gs-pin" style="--x: 28.7%; --y: 16%">3</span>
+<span class="gs-pin" style="--x: 60.7%; --y: 81%">4</span>
+<span class="gs-pin" style="--x: 7.9%; --y: 69.4%">5</span>
+<span class="gs-pin" style="--x: 14%; --y: 69.4%">6</span>
+<span class="gs-pin" style="--x: 19.7%; --y: 69.4%">7</span>
+
+</div>
+
+<div class="gs-legend" markdown>
+
+1. **A data file**, in `data`. Every row, saved as it is measured, a column for each measurement. Each run starts a new one.
+2. **Every 0.2 s**, the `period` from `[rack]`. The button beside it pauses polling.
+3. **A live plot.** Any measurement against any other.
+4. **A tile for each measurement**, with its latest reading.
+5. **A queue**, for waits and new files, and in part 3, a sweep of your own.
+6. **Each instrument's controls.** Every query and command, to send by hand. The lock-in is a stand-in until you give it a real `adapter`.
+7. **A log** of everything the experiment does, also saved in `logs`.
+
+</div>
+
+</div>
+
+??? pa-stuck "Stuck?"
+    - **`Cannot declare ('instruments',) twice`.** A table appears twice. Put the new lines under the `[instruments]` or `[measurements]` you already have, or copy the whole file above.
     - **`rig.toml has 1 problem`.** The file is checked before anything starts, and every mistake in it is listed, naming the instrument or measurement it's in. A misspelt driver is given the closest name, as in `there is no driver called 'signalgenerator' (did you mean 'SignalGenerator'?)`, since names are case sensitive. The [Instruments](../reference/instruments/overview.md) pages list them.
     - **A real instrument is missing from the Instruments tab.** An instrument that can't be opened, at a wrong address say, is skipped with a warning in the log, and the rest of the experiment still starts. Check its address, and that a VISA library is installed for GPIB.
     - **No window appears.** Look at the terminal for an error. The page is also at [http://localhost:8000](http://localhost:8000) in a browser.
 
-## What you learned
+</div>
 
-- A TOML file is a whole experiment: `[instruments]`, `[measurements]`, and options such as `[rack]`.
-- An instrument has a name and a driver. A hardware one also needs an `adapter` and a `resource`, and `mock` stands in until the device is connected.
-- A measurement reads one of an instrument's queries, with `args` if it takes any, into a column of the data file.
-- The experiment polls every measurement once a cycle, and `period` sets how often. Each run starts a new data file.
+<div class="gs-next" markdown>
 
-Next: [2. The Python API](python_api.md) keeps this file as it is, and builds on it in Python: setting up the lock-in as the experiment starts and leaving it safe as it ends, a calculated column, and a task of your own.
+<div class="gs-next__text" markdown>
 
-!!! tip "Every option the file can take"
-    [Config file](../reference/config_file.md) lists them all, section by section. To write the file from forms instead, run `uv run pyacquisition new rig.toml` (see [Build a config in the interface](../usage/setup_page.md)).
+Next · about 20 minutes
+{ .gs-next__eyebrow }
+
+[3. The Python API](python_api.md)
+{ .gs-next__title }
+
+Keep `rig.toml` as it is, and add a short Python file: the lock-in set up as the experiment starts and left safe as it ends, a calculated column, and a frequency sweep of your own, queued from a form in the interface that you don't write.
+
+</div>
+
+![Frequency Sweep in the interface's Add task window, with a form for its amplitude, frequencies, points and seconds per point](../images/getting_started/next-python-api.webp)
+
+</div>

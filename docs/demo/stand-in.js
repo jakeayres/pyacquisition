@@ -34,13 +34,7 @@
     "Install PyAcquisition to run your own.";
 
   const realFetch = window.fetch.bind(window);
-  // The recording: the front page's, or the one the address names
-  // (?session=config-3 loads sessions/config-3.json), for Getting Started's steps.
-  const named = new URLSearchParams(location.search).get("session");
-  const SESSION = new URL(
-    named && /^[a-z0-9-]+$/.test(named) ? `../sessions/${named}.json` : "../session.json",
-    document.baseURI,
-  );
+  const SESSION = new URL("../session.json", document.baseURI);
   const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // What changes the experiment, answered with the demo message.
@@ -55,9 +49,9 @@
     /^\/traces\/[^/]+\/acquire$/,
   ];
 
-  // The interface keeps its layout for the session in sessionStorage, which every
-  // frame of the docs' site shares: the walkthroughs show several recordings, each
-  // with its own layout. So each page of the demo keeps its own, in memory.
+  // The interface keeps its layout for the session in sessionStorage, which the
+  // docs' pages share with it: a layout the front page's frame kept would come back
+  // in the full-size demo. So each page of the demo keeps its own, in memory.
   const memory = new Map();
   const own = {
     getItem: (key) => (memory.has(key) ? memory.get(key) : null),
@@ -358,13 +352,12 @@
     "/news/choices": () => ({ status: 200 }),
   };
 
-  // How a path is answered: "live", "recorded", "measured", "answer" (a query
-  // the recording asked), "demo", or null for a path the stand-in doesn't know.
+  // How a path is answered: "live", "recorded", "measured", "demo", or null
+  // for a path the stand-in doesn't know.
   function answers(path) {
     if (path in LIVE) return "live";
     if (path in demo.session.responses) return "recorded";
     if (path in demo.session.measured) return "measured";
-    if (path in (demo.session.answers ?? {})) return "answer";
     if (ACTIONS.some((pattern) => pattern.test(path))) return "demo";
     const uid = path.split("/")[1];
     const instruments = demo.session.responses["/rack/list_instruments"]?.instruments ?? {};
@@ -399,8 +392,6 @@
         const value = measured(path, params);
         return value ? reply(value) : reply({ detail: MESSAGE }, 409);
       }
-      case "answer":
-        return reply(ok(demo.session.answers[path]));
       case "demo":
         return reply({ detail: MESSAGE }, 409);
       default:

@@ -66,8 +66,9 @@ def rows(folder: Path, name: str) -> int:
 @pytest.fixture(scope="module")
 def my_lab(tmp_path_factory):
     """`my-lab` after Getting Started: the empty file's run, the rig's, lab.py's
-    first and lab.py's last, with Record queued (for 2 s a file, not 10: enough for
-    the five rows that step 2 prints, at 0.25 s a row)."""
+    first and lab.py's last, with Frequency Sweep queued at 0.1, 0.5 and 1 V (3 points
+    of 0.5 s a sweep, not 21 of 1 s: enough for the five rows that step 2 prints, at
+    0.2 s a row)."""
     folder = tmp_path_factory.mktemp("my-lab")
     before = os.getcwd()
     os.chdir(folder)
@@ -86,10 +87,12 @@ def my_lab(tmp_path_factory):
 
         def recorded(address):
             if not queued and rows(folder, "03.00 start.data") >= 2:
-                queued.append(requests.get(f"{address}/tasks/record", params={"files": 3, "seconds": 2}, timeout=5))
-            return rows(folder, "03.03 run 3.data") >= 3
+                for amplitude in (0.1, 0.5, 1):
+                    queued.append(requests.get(f"{address}/tasks/frequency_sweep", timeout=5, params={
+                        "amplitude": amplitude, "points": 3, "seconds_per_point": 0.5}))
+            return rows(folder, "03.03 1 V.data") >= 3
 
-        run(made(lab_class("lab_6"), "lab_6"), recorded)
+        run(made(lab_class("lab_9"), "lab_9"), recorded)
     finally:
         os.chdir(before)
     return folder
@@ -121,11 +124,11 @@ def test_step_1_lists_the_files(my_lab):
     assert done.stdout.splitlines() == page_output("## Find the data files")
 
 
-def test_step_2_prints_the_first_rows_of_run_1(my_lab):
+def test_step_2_prints_the_first_rows_of_the_first_sweep(my_lab):
     done = analyse(2, my_lab)
     assert done.returncode == 0, done.stderr
     lines = done.stdout.splitlines()
-    assert lines[0].split() == ["time", "wave", "power"] == page_output("## Read a file with pandas")[0].split()
+    assert lines[0].split() == ["time", "wave", "frequency", "power"] == page_output("## Read a file with pandas")[0].split()
     assert [line.split()[0] for line in lines[1:]] == ["0", "1", "2", "3", "4"]
 
 
@@ -139,14 +142,15 @@ def test_step_4_reads_every_file_of_the_run_and_saves_the_figure(my_lab):
     done = analyse(4, my_lab)
     assert done.returncode == 0, done.stderr
     lines = done.stdout.splitlines()
-    pattern = re.compile(r"^03\.0(\d) run (\d): \d+ rows, from \d+\.\d s$")
-    assert [pattern.match(line).groups() for line in lines] == [("1", "1"), ("2", "2"), ("3", "3")]
+    pattern = re.compile(r"^03\.0(\d) ([\d.]+) V: \d+ rows, from \d+\.\d s$")
+    assert [pattern.match(line).groups() for line in lines] == [("1", "0.1"), ("2", "0.5"), ("3", "1")]
     assert all(pattern.match(line) for line in page_output("## Read every file of a run"))
     assert (my_lab / "wave.png").stat().st_size > 10_000
 
 
 def test_each_file_of_a_run_starts_where_the_last_ended(my_lab):
-    starts = [pd.read_csv(p)["time"].min() for p in sorted((my_lab / "data").glob("03.* run *.data"))]
+    starts = [pd.read_csv(p)["time"].min() for p in sorted((my_lab / "data").glob("03.* * V.data"))]
+    assert len(starts) == 3
     assert starts == sorted(starts)
 
 
@@ -154,6 +158,6 @@ def test_the_empty_file_has_no_columns_and_the_early_files_no_power(my_lab):
     with pytest.raises(pd.errors.EmptyDataError, match="No columns to parse from file"):
         pd.read_csv(my_lab / "data" / "00.00 start.data")
     early = pd.read_csv(my_lab / "data" / "01.00 start.data")
-    assert list(early.columns) == ["time", "wave"]
+    assert list(early.columns) == ["time", "wave", "frequency"]
     with pytest.raises(KeyError, match="power"):
         early["power"]

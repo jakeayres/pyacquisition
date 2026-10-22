@@ -1,16 +1,14 @@
-"""The docs' live demo (docs/demo/): the interface's own page, fed by recordings,
-of the front page's experiment and of Getting Started's steps. These check that its
-files agree with the package and the pages they stand in for. The demo running in
-a browser is checked by tests/ui/test_demo_page.py."""
+"""The front page's live demo (docs/demo/): the interface's own page, fed by a
+recording of the front page's experiment. These check that its files agree with
+the package they stand in for. The demo running in a browser is checked by
+tests/ui/test_demo_page.py."""
 
 import json
-import re
 from html.parser import HTMLParser
 from pathlib import Path
 
 import pytest
 from test_docs_examples import build, examples, fake_visa  # noqa: F401 (fixtures)
-from test_docs_walkthroughs import content, merged, walkthrough
 
 ROOT = Path(__file__).resolve().parents[2]
 DEMO = ROOT / "docs" / "demo"
@@ -135,79 +133,3 @@ def test_read_the_docs_copies_the_interface_in_before_it_builds():
 
 def test_the_copy_is_not_committed():
     assert "docs/demo/app/" in (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
-
-
-# ------------------------------------------------------------ Getting Started's
-# The walkthroughs of "1. The Config File" and "2. The Python API" show the interface
-# at each step, from recordings in docs/demo/sessions/ (scripts/record_getting_started.py).
-GETTING_STARTED = ROOT / "docs" / "getting_started"
-SESSIONS = DEMO / "sessions"
-
-
-def named(page):
-    """Each recording a page names, with the step that first names it."""
-    found = {}
-    text = page.read_text(encoding="utf-8")
-    for i, attrs in enumerate(re.findall(r'<section class="gs-step"([^>]*)>', text)):
-        name = re.search(r'data-demo="([^"]+)"', attrs)
-        if name and name[1] not in found:
-            found[name[1]] = i
-    for name in re.findall(r'<div class="pa-built" data-demo="([^"]+)"', text):
-        found.setdefault(name, None)
-    return found
-
-
-def session(name):
-    return json.loads((SESSIONS / f"{name}.json").read_text(encoding="utf-8"))
-
-
-ALL = {name for page in GETTING_STARTED.glob("*.md") for name in named(page)}
-
-
-def test_every_recording_a_page_names_is_there():
-    assert ALL, "the pages name no recordings"
-    assert ALL <= {p.stem for p in SESSIONS.glob("*.json")}
-
-
-@pytest.mark.parametrize("name, step", list(named(GETTING_STARTED / "config_file.md").items()))
-def test_each_config_recording_ran_the_pages_file_at_its_step(name, step):
-    w = walkthrough(GETTING_STARTED / "config_file.md")
-    snippets = [content(block) for i, block in w.blocks_of("rig.toml") if i <= step]
-    assert session(name)["config"] == (merged(snippets) if snippets else "")
-    assert session(name)["responses"]["/experiment/info"]["data"]["name"] == "rig"
-
-
-@pytest.mark.parametrize("name, step", list(named(GETTING_STARTED / "python_api.md").items()))
-def test_each_python_recording_ran_the_steps_lab(name, step):
-    w = walkthrough(GETTING_STARTED / "python_api.md")
-    labs = [block.body for i, block in w.blocks_of("lab.py") if i <= step]
-    recorded = session(name)
-    assert f"examples/getting_started/{recorded['source']}" == labs[-1]
-    assert recorded["responses"]["/experiment/info"]["data"]["name"] == "Lab"
-
-
-def test_the_python_recordings_show_what_their_steps_add():
-    assert session("python-2")["answers"] == {"/lockin/get_frequency": 137.0}
-    assert "power" not in session("python-2")["columns"]
-    assert "power" in session("python-4")["columns"]
-    paths = session("python-6")["responses"]["/openapi.json"]["paths"]
-    assert "/tasks/record" in paths
-    files = [file for _, file in session("python-7")["files"]]
-    assert files == ["03.01 run 1.data", "03.02 run 2.data", "03.03 run 3.data"]
-
-
-def test_the_data_files_are_named_as_the_pages_say():
-    # "after the empty file's 00.00 start.data, this one is 01.00 start.data", and
-    # part 2's runs are 02, then 03 for Record's files.
-    file = lambda name: session(name)["responses"]["/scribe/state"]["data"]["file"]  # noqa: E731
-    assert file("config-1") == "00.00 start.data"
-    assert file("config-6") == "01.00 start.data"
-    assert file("python-1") == "02.00 start.data"
-
-
-def test_the_recordings_hold_no_path_and_are_small():
-    for path in SESSIONS.glob("*.json"):
-        text = path.read_text(encoding="utf-8")
-        for leak in ("Users", "AppData", "/home/", "/tmp/", "Temp\\\\"):
-            assert leak not in text, path.name
-        assert path.stat().st_size < 250_000, path.name

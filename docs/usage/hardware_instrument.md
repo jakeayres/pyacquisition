@@ -4,7 +4,7 @@
 
 A driver for an instrument that PyAcquisition has no driver for is a class of your own, like [a software instrument's](software_instrument.md), whose methods send the instrument text and read its replies. In this tutorial you write one for a Keithley 2400 SourceMeter, which is behind many current-voltage measurements: it sources a voltage, and measures the current that flows. Your driver reads the current, sets the voltage, turns the output on and off, and picks the terminals. You try it with no device, on the `mock` adapter.
 
-It starts where [2. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with `rig.toml` and `lab.py`. You write `keithley_2400.py` beside them. The messages it sends are the 2400's own, from its manual. For another instrument, its manual gives the messages, and the steps are the same.
+It starts where [3. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with `rig.toml` and `lab.py`. You write `keithley_2400.py` beside them. The messages it sends are the 2400's own, from its manual. For another instrument, its manual gives the messages, and the steps are the same.
 
 <div class="gs" data-files="lab.py:versions keithley_2400.py:versions" data-lines="24" data-term-lines="3" markdown>
 
@@ -20,11 +20,11 @@ It starts where [2. The Python API](../getting_started/python_api.md) ends: your
 --8<-- "examples/usage/hardware_instrument/lab_1.py"
 ```
 
-This is `lab.py` as [2. The Python API](../getting_started/python_api.md) left it: an experiment of your own made from `rig.toml`, with a calculation, the `Record` task, and the lock-in's setup and teardown.
+This is `lab.py` as [3. The Python API](../getting_started/python_api.md) left it: an experiment of your own made from `rig.toml`, with a calculation, the `FrequencySweep` task, and the lock-in's setup and teardown.
 
 You add a Keithley 2400 to it, from a driver you write yourself in `keithley_2400.py`, beside it.
 
-**More:** [2. The Python API](../getting_started/python_api.md), which builds it.
+**More:** [3. The Python API](../getting_started/python_api.md), which builds it.
 { .gs-more }
 
 </section>
@@ -118,7 +118,7 @@ The enum is above the class, since the method's argument names it as its type.
 
 ## Try it with no device
 
-```python title="lab.py" hl_lines="3-4 7-10 37-46 53-55"
+```python title="lab.py" hl_lines="3-4 7-10 45-54 61-63"
 --8<-- "examples/usage/hardware_instrument/lab_2.py"
 ```
 

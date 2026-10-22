@@ -4,7 +4,14 @@
 
 Getting Started's lock-in is a stand-in: the `mock` adapter answers for it. In this tutorial you connect the real one. You find its address, tell the experiment how to reach it, record what it measures, and check that it answers. Then you connect a second instrument, a multimeter, from Python. The same steps connect any instrument that has a [driver](../reference/instruments/overview.md).
 
-It starts where [2. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with `rig.toml` and `lab.py`. With no instrument at hand, follow along and keep `adapter = "mock"`: everything runs, and the readings are 0.
+It starts where [3. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with `rig.toml` and `lab.py`. With no instrument at hand, follow along and keep `adapter = "mock"`: everything runs, and the readings are 0.
+
+## A VISA library, for GPIB
+
+PyAcquisition talks to instruments through [`pyvisa`](https://pyvisa.readthedocs.io/), which it installs, and `pyvisa` talks to the hardware through a *VISA library*:
+
+- For **GPIB** instruments, install one before you start. [PyVISA recommends the National Instruments implementation](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html), and it is what PyAcquisition has been tested against.
+- `pyvisa-py`, a pure Python backend installed alongside it, talks to many serial, USB and Ethernet instruments without a separate VISA installation.
 
 <div class="gs" data-files="rig.toml:versions lab.py:versions" data-lines="22" data-term-lines="4" markdown>
 
@@ -24,11 +31,11 @@ It starts where [2. The Python API](../getting_started/python_api.md) ends: your
 --8<-- "examples/usage/connect_instrument/rig_1.toml"
 ```
 
-These are `rig.toml` and `lab.py` as [2. The Python API](../getting_started/python_api.md) left them. The lock-in, an SR830, is on `mock`, which answers every query with the value last set, or 0.
+These are `rig.toml` and `lab.py` as [3. The Python API](../getting_started/python_api.md) left them. The lock-in, an SR830, is on `mock`, which answers every query with the value last set, or 0.
 
 `lab.py`'s `setup()` sets the lock-in's frequency to 137 Hz, and `teardown()` turns its output down to 4 mV. A real lock-in does both, so change them to what your experiment needs before you connect it.
 
-**More:** [2. The Python API](../getting_started/python_api.md), which builds them, and [the SR 830](../reference/instruments/sr_830.md).
+**More:** [3. The Python API](../getting_started/python_api.md), which builds them, and [the SR 830](../reference/instruments/sr_830.md).
 { .gs-more }
 
 </section>
@@ -52,7 +59,7 @@ Every instrument has an **address**, and VISA, the library that talks to instrum
 ??? tip "NI MAX lists them too"
     With NI-VISA installed, NI Measurement & Automation Explorer (NI MAX) lists the instruments under **Devices and Interfaces**, and can send `*IDN?` to one to find out which it is.
 
-**More:** [the `pyvisa` adapter](../reference/adapters.md#pyvisa), and [installing a VISA library](../getting_started/installation.md#before-you-connect-real-instruments).
+**More:** [the `pyvisa` adapter](../reference/adapters.md#pyvisa), and [installing a VISA library](#a-visa-library-for-gpib).
 { .gs-more }
 
 </section>
@@ -91,7 +98,7 @@ The experiment opens the connection as it starts, and closes it as it ends, afte
 
 ## Record its readings
 
-```toml title="rig.toml" hl_lines="13-14"
+```toml title="rig.toml" hl_lines="14-15"
 --8<-- "examples/usage/connect_instrument/rig_3.toml"
 ```
 
@@ -125,7 +132,7 @@ The `x` and `y` tiles, in **Values**, follow the signal at the lock-in's input.
 
 ## Connect a multimeter in Python
 
-```python title="lab.py" hl_lines="3-4 32-34"
+```python title="lab.py" hl_lines="3-4 40-42"
 --8<-- "examples/usage/connect_instrument/lab_2.py"
 ```
 

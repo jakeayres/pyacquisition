@@ -1,6 +1,6 @@
 # Config file
 
-Every table and key a TOML config file can hold. [1. The Config File](../getting_started/config_file.md) builds one step by step, and [`pyacquisition new`](../usage/setup_page.md) writes one from forms.
+Every table and key a TOML config file can hold. [2. The Config File](../getting_started/config_file.md) builds one step by step, and [`pyacquisition new`](../usage/setup_page.md) writes one from forms.
 
 A file is run with `pyacquisition --toml rig.toml`, or read in Python with `Experiment.from_config("rig.toml")`. Every table is optional, and an empty file is a valid experiment. The file is [TOML](https://toml.io/en/).
 

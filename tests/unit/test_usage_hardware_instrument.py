@@ -40,7 +40,7 @@ def smu(version: int, **responses):
 
 
 def test_it_starts_from_the_end_of_getting_started():
-    assert text(HERE / "lab_1.py") == text(GETTING_STARTED / "lab_6.py")
+    assert text(HERE / "lab_1.py") == text(GETTING_STARTED / "lab_9.py")
 
 
 @pytest.mark.parametrize("version", [1, 2, 3, 4, 5])

@@ -4,7 +4,7 @@
 
 A **driver** is the code that knows an instrument: what can be read from it, and what can be set. PyAcquisition comes with [several](../reference/instruments/overview.md), and yours can be a class with a few marked methods. A driver for a *software* instrument talks to no hardware. It reads or does something on the computer itself, and puts it in the interface and the data file beside everything else. In this tutorial you write one that watches the space left on the drive your data is written to, since a long run that fills the drive can't write any more.
 
-It starts where [2. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with `rig.toml` and `lab.py`. You write `disk_space.py` beside them, a few lines at a time, then add the instrument to `lab.py`, and try it in the interface.
+It starts where [3. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with `rig.toml` and `lab.py`. You write `disk_space.py` beside them, a few lines at a time, then add the instrument to `lab.py`, and try it in the interface.
 
 <div class="gs" data-files="lab.py:versions disk_space.py:versions" data-lines="22" data-term-lines="3" markdown>
 
@@ -20,11 +20,11 @@ It starts where [2. The Python API](../getting_started/python_api.md) ends: your
 --8<-- "examples/usage/software_instrument/lab_1.py"
 ```
 
-This is `lab.py` as [2. The Python API](../getting_started/python_api.md) left it: an experiment of your own made from `rig.toml`, with a calculation, the `Record` task, and the lock-in's setup and teardown.
+This is `lab.py` as [3. The Python API](../getting_started/python_api.md) left it: an experiment of your own made from `rig.toml`, with a calculation, the `FrequencySweep` task, and the lock-in's setup and teardown.
 
 You add an instrument to it, from a driver you write yourself in `disk_space.py`, beside it.
 
-**More:** [2. The Python API](../getting_started/python_api.md), which builds it.
+**More:** [3. The Python API](../getting_started/python_api.md), which builds it.
 { .gs-more }
 
 </section>
@@ -118,7 +118,7 @@ Here the codes are the names that `shutil.disk_usage` gives its three figures: `
 
 ## Add it to the experiment
 
-```python title="lab.py" hl_lines="3-4 32-41"
+```python title="lab.py" hl_lines="3-4 40-49"
 --8<-- "examples/usage/software_instrument/lab_2.py"
 ```
 

@@ -1,6 +1,6 @@
 # Build a config in the interface
 
-<p class="pa-meta" markdown="span">About 10 minutes · Needs [0. Installation](../getting_started/installation.md). [1. The Config File](../getting_started/config_file.md) helps</p>
+<p class="pa-meta" markdown="span">About 10 minutes · Needs [1. Installation](../getting_started/installation.md). [2. The Config File](../getting_started/config_file.md) helps</p>
 
 A config file describes a whole experiment: its instruments, what it measures, its calculations and its options. `pyacquisition new` writes one from forms, in a window, and checks it as you go, so it runs the first time. In this tutorial you build one for a common rig, a lock-in and a temperature controller on a cryostat, and run it from the same window.
 
@@ -167,4 +167,4 @@ And the experiment that **Run** starts from it:
 - Measurements' order is the data file's columns' order, and only the options you set are written.
 - **Run** starts the experiment from the file, in the same window.
 
-Next: [Drive an experiment from a script](api_script.md), to run and control an experiment from your own code.
+Next: [Build a standalone app](standalone_app.md), to run an experiment on a lab PC with no Python.

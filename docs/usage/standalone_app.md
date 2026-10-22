@@ -4,7 +4,7 @@
 
 The PC beside a cryostat often has no Python, and shouldn't need one. `pyacquisition build` freezes an experiment into an **app**: one file that runs on any Windows PC, with its interface, its drivers and Python inside it. In this tutorial you build one from Getting Started's `rig.toml`, try it, build one from `lab.py` instead, and take it to the lab PC.
 
-It starts where [2. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with `rig.toml` and `lab.py`. Everything happens in the terminal.
+It starts where [3. The Python API](../getting_started/python_api.md) ends: your `my-lab` project, with `rig.toml` and `lab.py`. Everything happens in the terminal.
 
 <div class="gs" data-files="" data-lines="18" data-term-lines="4" markdown>
 

@@ -1,21 +1,20 @@
 from dataclasses import dataclass
 
 from pyacquisition import Experiment, Task
-from pyacquisition.tasks import NewFile, WaitFor
 
 
 @dataclass
-class Record(Task):
-    """Record a few files, one after another."""
+class FrequencySweep(Task):
+    """Sweep the lock-in's frequency at one amplitude, into a file of its own."""
 
-    files: int = 3
-    seconds: int = 10
+    amplitude: float = 0.1  # volts
+    start_hz: float = 100.0
+    stop_hz: float = 200.0
+    points: int = 21
+    seconds_per_point: float = 1.0
 
     async def run(self, experiment):
-        for i in range(self.files):
-            await self.run_subtask(NewFile(file_name=f"run {i + 1}"))
-            await self.run_subtask(WaitFor(seconds=self.seconds))
-            self.log(f"Recorded {i + 1} of {self.files}")
+        pass
 
 
 class Lab(Experiment):
@@ -26,7 +25,6 @@ class Lab(Experiment):
         lockin.set_frequency(137.0)
 
         self.add_calculation(lambda row: {"power": row["wave"] ** 2})
-        self.register_task(Record, label="Record")
 
     def teardown(self):
         lockin = self.instruments["lockin"]
