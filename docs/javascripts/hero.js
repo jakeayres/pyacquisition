@@ -107,8 +107,54 @@
     new IntersectionObserver(([entry]) => {
       onScreen = entry.isIntersecting;
       holdIfAway();
+      stage.closest(".pa-live")?.toggleAttribute("data-away", !onScreen);
       if (onScreen) draw();
     }).observe(stage);
+
+    // While the page scrolls, the interface waits: it shares the page's main thread,
+    // and scrolling goes more smoothly without its plots redrawing. It carries on a
+    // moment after the scrolling stops.
+    // The lights behind the glass stop drifting then too, and while the hero is out
+    // of view: Chrome does work on the main thread for them on every frame.
+    const band = stage.closest(".pa-live") ?? stage;
+    let settle = null;
+    window.addEventListener(
+      "scroll",
+      () => {
+        demo()?.hold("scrolling");
+        band.setAttribute("data-scrolling", "");
+        clearTimeout(settle);
+        settle = setTimeout(() => {
+          demo()?.release("scrolling");
+          band.removeAttribute("data-scrolling");
+        }, 250);
+      },
+      { passive: true },
+    );
+
+    // ---------------------------------------------------------- click to use it
+    // The interface's plots take the wheel, to pan, so the page would stop
+    // scrolling under the pointer, and wait for the interface at every notch. So
+    // the page scrolls over the frame until it is clicked, as over a map in a page,
+    // and again once the pointer has left it.
+    const shield = document.createElement("button");
+    shield.type = "button";
+    shield.className = "pa-window__shield";
+    shield.setAttribute("aria-label", "Use the interface");
+    shield.innerHTML = "<span>Click to try it</span>";
+    view.append(shield);
+    let leaving = null;
+    shield.addEventListener("click", () => {
+      view.classList.add("is-active");
+      pause();
+      show(null);
+      frame.focus();
+    });
+    view.addEventListener("mouseenter", () => clearTimeout(leaving));
+    view.addEventListener("mouseleave", () => {
+      clearTimeout(leaving);
+      leaving = setTimeout(() => view.classList.remove("is-active"), 400);
+    });
     frame.addEventListener("load", () => {
       holdIfAway();
       listen();
@@ -132,6 +178,7 @@
 
     // ---------------------------------------------------------------- the tour
     let shown = null; // the step shown, or null
+    let used = false; // whether the interface has been used since the pointer came
     let auto = !still;
     let timer = null;
     let at = -1;
@@ -224,22 +271,22 @@
           linked = true;
           const to = { x: left - box.left, y: (top + bottom) / 2 - box.top };
           const bend = Math.max(40, (to.x - from.x) / 2);
-          add("path", {
-            class: "link",
-            d: `M ${from.x} ${from.y} C ${from.x + bend} ${from.y}, ${to.x - bend} ${to.y}, ${to.x} ${to.y}`,
-          });
+          const d = `M ${from.x} ${from.y} C ${from.x + bend} ${from.y}, ${to.x - bend} ${to.y}, ${to.x} ${to.y}`;
+          add("path", { class: "halo", d }); // a soft glow, without a filter to repaint
+          add("path", { class: "link", d });
           add("circle", { class: "end", cx: to.x, cy: to.y, r: 2.5 });
         }
       }
       if (from) add("circle", { class: "end", cx: from.x, cy: from.y, r: 2.5 });
     }
 
-    // Redrawn on every frame while a step shows, since the interface moves.
-    const loop = () => {
+    // Redrawn four times a second while a step shows, as the interface updates
+    // with each row: often enough to follow it, and no work on every frame. (The
+    // boxes are drawn in the stage's own coordinates, so scrolling moves them with
+    // it, and needs no redrawing.)
+    setInterval(() => {
       if (shown && onScreen) draw();
-      requestAnimationFrame(loop);
-    };
-    requestAnimationFrame(loop);
+    }, 250);
 
     // ------------------------------------------------------ hovering, using it
     const stepOfLine = (line) => STEPS.find((step) => step.spans.includes(line));
@@ -255,7 +302,6 @@
       resume(BACK_AFTER_HOVER);
     });
 
-    let used = false;
     function listen() {
       const doc = frame.contentDocument;
       if (!doc) return;

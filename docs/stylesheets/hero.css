@@ -51,7 +51,7 @@
 .pa-aurora i {
   position: absolute;
   border-radius: 50%;
-  filter: blur(60px);
+  will-change: transform; /* the drift runs on the compositor: no repaints */
   animation: pa-drift 26s ease-in-out infinite alternate;
 }
 .pa-aurora i:nth-child(1) {
@@ -59,14 +59,14 @@
   height: 30rem;
   left: -12rem;
   top: 38%;
-  background: radial-gradient(closest-side, rgba(74, 222, 128, 0.42), transparent);
+  background: radial-gradient(closest-side, rgba(74, 222, 128, 0.4), rgba(74, 222, 128, 0.14) 55%, transparent);
 }
 .pa-aurora i:nth-child(2) {
   width: 40rem;
   height: 28rem;
   right: -10rem;
   top: -8rem;
-  background: radial-gradient(closest-side, rgba(255, 159, 67, 0.38), transparent);
+  background: radial-gradient(closest-side, rgba(255, 159, 67, 0.36), rgba(255, 159, 67, 0.12) 55%, transparent);
   animation-duration: 32s;
   animation-direction: alternate-reverse;
 }
@@ -75,9 +75,12 @@
   height: 26rem;
   left: 22%;
   bottom: -10rem;
-  background: radial-gradient(closest-side, rgba(96, 165, 250, 0.3), transparent);
+  background: radial-gradient(closest-side, rgba(96, 165, 250, 0.28), rgba(96, 165, 250, 0.1) 55%, transparent);
   animation-duration: 38s;
 }
+/* Still while the page scrolls, and while the hero is out of view (hero.js) */
+.pa-live[data-scrolling] .pa-aurora i,
+.pa-live[data-away] .pa-aurora i { animation-play-state: paused; }
 @keyframes pa-drift {
   50% { transform: translate(4rem, -2rem) scale(1.08); }
   100% { transform: translate(-3rem, 2rem) scale(0.95); }
@@ -154,8 +157,8 @@
   border-radius: 1.4rem;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
-  -webkit-backdrop-filter: blur(28px) saturate(170%);
-  backdrop-filter: blur(28px) saturate(170%);
+  /* No backdrop-filter: its panes are opaque, so it showed only in the rim, and it
+     cost a redraw of everything behind the glass as the lights moved. */
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.32),
     inset 0 0 0 1px rgba(255, 255, 255, 0.04),
@@ -260,6 +263,37 @@
   height: calc(var(--pa-app-h) * var(--pa-scale) * 1px);
   overflow: hidden;
 }
+/* Until it is clicked, the page scrolls over the frame (hero.js) */
+.pa-window__shield {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.pa-window__shield span {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(10, 15, 26, 0.78);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  transform: translateY(0.3rem);
+  transition: opacity 0.2s 0.25s, transform 0.2s 0.25s;
+}
+.pa-window__shield:hover span,
+.pa-window__shield:focus-visible span { opacity: 1; transform: none; }
+.pa-window__view.is-active .pa-window__shield { display: none; }
+.pa-window__view iframe { pointer-events: none; }
+.pa-window__view.is-active iframe { pointer-events: auto; }
 .pa-window__view iframe {
   display: block;
   width: calc(var(--pa-app-w) * 1px);
@@ -304,22 +338,15 @@
   pointer-events: none;
   z-index: 2;
 }
+/* No SVG filters or moving dashes: each would repaint the stage on every frame. */
 .pa-tour .box {
-  fill: rgba(255, 159, 67, 0.1);
+  fill: rgba(255, 159, 67, 0.12);
   stroke: var(--pa-orange);
   stroke-width: 1.5;
-  filter: drop-shadow(0 0 6px rgba(255, 159, 67, 0.55));
 }
-.pa-tour .link {
-  fill: none;
-  stroke: var(--pa-orange);
-  stroke-width: 1.5;
-  stroke-dasharray: 4 4;
-  filter: drop-shadow(0 0 4px rgba(255, 159, 67, 0.6));
-  animation: pa-flow 0.9s linear infinite;
-}
+.pa-tour .halo { fill: none; stroke: rgba(255, 159, 67, 0.22); stroke-width: 6; stroke-linecap: round; }
+.pa-tour .link { fill: none; stroke: var(--pa-orange); stroke-width: 1.5; stroke-dasharray: 4 4; }
 .pa-tour .end { fill: var(--pa-orange); }
-@keyframes pa-flow { to { stroke-dashoffset: -8; } }
 
 /* Not wide enough for the two side by side, with the interface at a scale of 0.7
    or more: the interface, then the script, in the one pane of glass. */
@@ -334,7 +361,8 @@
 /* A phone: the interface is a picture, with a way into the real thing. */
 @media (max-width: 45em) {
   .pa-live { --pa-overhang: 18rem; }
-  .pa-window__view iframe { pointer-events: none; }
+  .pa-window__view iframe, .pa-window__view.is-active iframe { pointer-events: none; }
+  .pa-window__shield { display: none; }
   .pa-stage__title { display: none; }
   .pa-stage { border-radius: 1.1rem; }
 }
@@ -486,6 +514,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pa-aurora i, .pa-live__head > *, .pa-stage, .pa-tour .link { animation: none; }
+  .pa-aurora i, .pa-live__head > *, .pa-stage { animation: none; }
   .pa-stage__code code > span[id^="__span"], .pa-device img, .pa-switch__tab span { transition: none; }
 }

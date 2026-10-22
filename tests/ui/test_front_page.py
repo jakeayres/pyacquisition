@@ -6,6 +6,7 @@ On a small site built in a temporary folder from the front page alone, with the
 real config's theme, extensions, stylesheets and scripts, and the interface's
 files copied in as the docs build copies them. Skipped without Zensical."""
 
+import re
 import shutil
 import subprocess
 import sys
@@ -199,6 +200,18 @@ def test_the_demo_is_held_while_the_hero_is_out_of_view(browser, site):
     page.context.close()
 
 
+def test_the_lights_and_the_rows_wait_while_the_page_scrolls(browser, site):
+    page = front(browser, site)
+    live(page)
+    held = "document.querySelector('.pa-window__view iframe').contentWindow.pyacquisitionDemo.held"
+    page.page.evaluate("window.scrollBy(0, 40)")
+    page.page.wait_for_function(held, polling="raf")  # the scroll event comes a frame later
+    expect(page.page.locator(".pa-live")).to_have_attribute("data-scrolling", "")
+    page.page.wait_for_function(f"!{held}")  # a moment after it stops
+    expect(page.page.locator(".pa-live")).not_to_have_attribute("data-scrolling", "")
+    page.context.close()
+
+
 def test_without_the_interfaces_files_the_hero_says_how_to_copy_them(browser, site):
     def missing(page):
         page.route(
@@ -263,9 +276,35 @@ def test_each_step_joins_its_lines_to_what_they_make(browser, site, start, lines
     page.context.close()
 
 
+def use(page):
+    """Clicks into the interface, which the page scrolls over until then."""
+    page.page.locator(".pa-window__shield").click()
+    expect(page.page.locator(".pa-window__view")).to_have_class(re.compile("is-active"))
+
+
+def test_the_page_scrolls_over_the_interface_until_it_is_clicked(browser, site):
+    page = front(browser, site)
+    live(page)
+    events = "getComputedStyle(document.querySelector('.pa-window__view iframe')).pointerEvents"
+    assert page.page.evaluate(events) == "none"
+    # The wheel over the interface scrolls the page, not its plots.
+    box = boxes(page, ".pa-window__view")
+    page.page.mouse.move(box["x"] + box["width"] / 2, box["y"] + 60)
+    page.page.mouse.wheel(0, 300)
+    page.page.wait_for_function("window.scrollY > 100")
+
+    page.page.evaluate("window.scrollTo(0, 0)")
+    use(page)
+    assert page.page.evaluate(events) == "auto"
+    page.page.mouse.move(5, 5)  # leaving it, it goes back to letting the page scroll
+    expect(page.page.locator(".pa-window__view")).not_to_have_class(re.compile("is-active"))
+    page.context.close()
+
+
 def test_hovering_the_interface_lights_the_lines_that_made_it(browser, site):
     page = front(browser, site)
     live(page)
+    use(page)
     frame(page).locator('[data-column="T"]').hover()
     page.page.wait_for_timeout(150)
     assert 'Lakeshore_350("lakeshore"' in shown(page)["first"]
@@ -283,7 +322,7 @@ def test_the_tour_moves_by_itself_and_stops_when_the_interface_is_used(browser, 
         timeout=6000,
     )
 
-    frame(page).locator(".plot-panel").first.click()
+    use(page)
     expect(page.page.locator(".pa-stage")).not_to_have_attribute("data-touring", "")
     assert shown(page)["lines"] == 0
     page.context.close()
