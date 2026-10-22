@@ -107,7 +107,9 @@ def instrument(page, uid):
 
 
 def method(page, name):
-    page.page.locator(".method-item", has_text=re.compile(f"^{name}$")).click()
+    # By its name alone: a grouped driver's method also has its Q or C tag.
+    named = page.page.locator(".method-name", has_text=re.compile(f"^{name}$"))
+    page.page.locator(".method-item", has=named).click()
     expect(page.page.locator(".call-title")).to_have_text(re.compile(f"\\.{name}$"))
 
 
