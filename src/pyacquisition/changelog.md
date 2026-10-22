@@ -3,7 +3,7 @@
 What changed in each version of PyAcquisition, newest first. The interface
 shows a version's **Highlights** once, after you upgrade to it.
 
-## 0.5.1 (unreleased)
+## 0.5.1 (2026-10-22)
 
 ### Highlights
 
