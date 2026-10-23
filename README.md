@@ -44,11 +44,6 @@ under the license it was released with.
 
 Copyright © 2023–2026 Jake Ayres.
 
-## 🤝 Contributing
-
-Contributions are welcome, under the MPL-2.0, with each commit signed off. See
-[CONTRIBUTING.md](https://github.com/jakeayres/pyacquisition/blob/main/CONTRIBUTING.md).
-
 ## 📝 Citing
 
 **Cite this repository** on [the GitHub page](https://github.com/jakeayres/pyacquisition)

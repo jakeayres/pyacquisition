@@ -11,7 +11,7 @@
    - scales the frame, which is drawn at the interface's own size, to its window;
    - holds the demo's rows while the hero is out of view, so it costs nothing;
    - says how to copy the interface's files in, when they are missing (a local
-     preview that hasn't made the copy, see CONTRIBUTING.md);
+     preview that hasn't made the copy);
    - runs the tour: each step lights up some lines of the script and the parts of
      the interface they make, joined by a line. Hovering either side shows its
      step. Using the interface stops the tour for a while.

@@ -20,7 +20,7 @@ build:
       - uv sync --frozen --only-group docs
     pre_build:
       # The front page's demo runs the interface's own page, from a copy of its
-      # files (docs/demo/, CONTRIBUTING.md).
+      # files (see docs/demo/). A local preview needs the same copy.
       - cp --recursive src/pyacquisition/gui/static docs/demo/app
     build:
       html:

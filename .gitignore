@@ -25,7 +25,7 @@ logs/
 # Documentation build (Zensical)
 site/
 .cache/
-# The interface's files, copied in for the front page's demo (see CONTRIBUTING.md)
+# The interface's files, copied in for the front page's demo (see .readthedocs.yml)
 docs/demo/app/
 
 # hardware verification: local inventory and recorded traffic
