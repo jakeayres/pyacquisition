@@ -31,3 +31,14 @@ docs/demo/app/
 # hardware verification: local inventory and recorded traffic
 tests/hardware/hardware.toml
 recordings/
+
+# The maintainer's own, kept out of the repository: scratch files at the root,
+# and editor settings
+/test_experiment.py
+/experiment.toml
+.vscode/
+
+# Claude Code's personal files. The shared ones, CLAUDE.md and .claude/, are
+# committed, and kept out of the public repository (.github/private-paths.txt).
+CLAUDE.local.md
+.claude/settings.local.json
