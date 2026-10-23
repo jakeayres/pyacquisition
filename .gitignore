@@ -25,6 +25,8 @@ logs/
 # Documentation build (Zensical)
 site/
 .cache/
+# Plain-text copies of the built pages, which /review-docs makes for its readers
+.review/
 # The interface's files, copied in for the front page's demo (see .readthedocs.yml)
 docs/demo/app/
 
