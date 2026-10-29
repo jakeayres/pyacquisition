@@ -176,7 +176,9 @@ async def test_another_error_still_stops_the_sweep(simulated, monkeypatch):
 async def test_a_step_of_0_fails_at_once(simulated):
     sweep = module(5).Sweep(10.0, 14.0, step=0.0, dwell=0)
     await asyncio.wait_for(sweep.start(a_lab(simulated)), 10)
-    assert sweep.outcome == "failed" and str(sweep.failure) == "float division by zero"
+    # Its message is "float division by zero" before Python 3.14, and "division by
+    # zero" from it, so the page names the error rather than quoting it.
+    assert sweep.outcome == "failed" and isinstance(sweep.failure, ZeroDivisionError)
 
 
 def test_it_is_registered_as_sweep(tmp_path, simulated):

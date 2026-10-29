@@ -110,7 +110,7 @@ To see the interlock act, without taking the sample anywhere it shouldn't go, se
 
 ??? failure "Something not working?"
     - **The sweep stops with `RuntimeError: The sample is at … K: too warm`, and the queue pauses.** That is the interlock, doing its job: the sample went above `limit`. Set it to what your sample can take.
-    - **The sweep fails at once with `float division by zero`.** **Step** was 0.
+    - **The sweep fails at once with a `ZeroDivisionError`.** **Step** was 0.
     - **The experiment freezes when the sweep starts.** A loop has no wait in it: every loop in a task needs one, such as `await self.sleep(1)`.
     - **The sweep can't be aborted.** A bare `except:` catches the abort. Catch the error you expect, such as `TimeoutError`.
 
