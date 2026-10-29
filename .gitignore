@@ -12,8 +12,9 @@ wheels/
 # Ruff
 .ruff_cache/
 
-# Virtual environments
+# Virtual environments, and those for running the tests on other Pythons
 .venv
+.venvs/
 
 # Environment variables
 .env
