@@ -127,6 +127,9 @@ async def test_the_state_says_how_far_along_the_running_task_is():
     manager.add_task(task)
     runner = asyncio.create_task(manager.run(experiment=None))
     await until(lambda: task.progress and task.progress["step"] == 4)
+    # Before Python 3.13, Windows's monotonic clock moves in 15.6 ms ticks, so a
+    # quick task's elapsed time can still read 0 here.
+    await until(lambda: task.elapsed > 0)
 
     current = manager.state()["current_task"]
 
