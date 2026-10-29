@@ -24,6 +24,8 @@ shows a version's **Highlights** once, after you upgrade to it.
   subtask's) no longer cuts it short. The task stops at its next wait after it.
 - `Task.checkpoint()` gives the rest of the experiment a turn, so a pause or an
   abort reaches a loop that calls nothing else.
+- On Python 3.11 under Windows, a task's `self.sleep()` of less than about
+  16 ms waits, as on other Pythons. It used to return at once.
 - A subtask is logged as it ended ("Subtask failed", "aborted" or
   "completed"), and keeps its `outcome`.
 - The queue shows a task's choice by the label its form shows, such as

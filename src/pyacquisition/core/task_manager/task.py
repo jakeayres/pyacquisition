@@ -276,7 +276,10 @@ class Task:
             await self._check_control_flags()
             started = loop.time()
             try:
-                await asyncio.wait_for(self._paused_event.wait(), timeout=remaining)
+                # Not wait_for: on Windows, Python 3.11's returns at once for a
+                # timeout under the clock's 15.6 ms tick.
+                async with asyncio.timeout(remaining):
+                    await self._paused_event.wait()
             except TimeoutError:
                 break  # the whole time has passed without a pause
             remaining -= loop.time() - started  # paused: hold the rest until resumed

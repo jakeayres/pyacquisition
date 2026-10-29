@@ -237,6 +237,23 @@ async def test_a_generator_task_held_at_a_checkpoint_cleans_up_on_abort():
     assert events == ["generator cleanup", "teardown"]
 
 
+# ----------------------------------------------------------------- sleep
+@pytest.mark.asyncio
+async def test_a_short_sleep_still_waits():
+    """On Windows, Python 3.11's `asyncio.wait_for` returns at once for a timeout
+    under the clock's 15.6 ms tick, so a short sleep can't rely on it."""
+
+    class Short(Task):
+        async def run(self, experiment=None):
+            for _ in range(10):
+                await self.sleep(0.01)
+
+    started = time.perf_counter()
+    await asyncio.wait_for(Short().start(), timeout=5)
+
+    assert time.perf_counter() - started >= 0.09
+
+
 # ----------------------------------------------------------------- pause
 @pytest.mark.asyncio
 async def test_a_pause_freezes_a_sleep_so_only_running_time_counts():
