@@ -32,6 +32,9 @@ def test_the_installation_page_makes_projects_with_the_newest():
         )
     pins = re.findall(r"uv python pin ([\d.]+)", page)
     assert set(pins) <= {newest}, f"{PAGE.name} pins Python {sorted(set(pins))}: the newest listed is {newest}"
+    # and its prose, such as "`--python 3.14` makes the project use Python 3.14"
+    named = re.findall(r"--python (\d+\.\d+)", page) + re.findall(r"\bPython (3\.\d+)", page)
+    assert set(named) <= {newest}, f"{PAGE.name} names Python {sorted(set(named))}: the newest listed is {newest}"
     shown = re.findall(r'requires-python = ">=([\d.]+)"', page)
     assert shown and set(shown) == {newest}, (
         f"{PAGE.name} shows requires-python >= {sorted(set(shown))}: the newest listed Python is {newest}"

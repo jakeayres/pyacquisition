@@ -13,16 +13,17 @@ Its setup, and why it keeps a uv and a folder of its own, is in conftest.py.
 
 import json
 import os
+import re
 import socket
 import subprocess
 import time
-import tomllib
 import urllib.request
+from dataclasses import replace
 from pathlib import Path
 
 import pytest
 
-from pythons import listed, next_after
+from pythons import ROOT, listed, next_after
 
 pytestmark = pytest.mark.install
 
@@ -42,6 +43,20 @@ PYTHONS = [
 ]
 
 VERSION = "import importlib.metadata as m; print(m.version('pyacquisition'))"
+
+PAGE = ROOT / "docs" / "getting_started" / "installation.md"
+
+
+def the_pages_pyproject() -> str:
+    """The installation page's first `pyproject.toml`: what `uv init` writes."""
+    page = PAGE.read_text(encoding="utf-8")
+    return re.search(r'```toml title="pyproject.toml"\n(.*?)\n```', page, re.S).group(1)
+
+
+def lines_to_compare(pyproject: str) -> list[str]:
+    """Its lines, with uv_build's version range left out: that changes with every
+    uv release, while a change of layout (as in uv 0.13) is what the page must follow."""
+    return re.sub(r'"uv_build[^"]*"', '"uv_build"', pyproject).strip().splitlines()
 
 RIG = """\
 [experiment]
@@ -179,13 +194,18 @@ def test_installs_and_runs(python, uv, wheels, target, tmp_path, record_property
 
 def test_the_install_page_commands(uv, wheels, target, tmp_path, record_property):
     """The installation page's commands, on the newest listed Python:
-    `uv init my-lab --python <newest> --no-package`, `uv add pyacquisition` and
-    its check."""
-    made = uv("init", "my-lab", "--python", NEWEST, "--no-package", cwd=tmp_path)
+    `uv init my-lab --python <newest>`, `uv add pyacquisition` and its check."""
+    # As on a lab PC where git doesn't know your name, so uv adds no `authors`.
+    no_git_name = tmp_path / "empty.gitconfig"
+    no_git_name.write_text("", encoding="utf-8")
+    on_a_lab_pc = replace(uv, env={**uv.env, "GIT_CONFIG_GLOBAL": str(no_git_name), "GIT_CONFIG_NOSYSTEM": "1"})
+    made = on_a_lab_pc("init", "my-lab", "--python", NEWEST, cwd=tmp_path)
     assert made.ok, made.tail()
     lab = tmp_path / "my-lab"
-    project = tomllib.loads((lab / "pyproject.toml").read_text(encoding="utf-8"))["project"]
-    assert project["requires-python"] == f">={NEWEST}"
+    written = (lab / "pyproject.toml").read_text(encoding="utf-8")
+    assert lines_to_compare(written) == lines_to_compare(the_pages_pyproject()), (
+        f"uv {uv.version}'s `uv init` writes a pyproject.toml unlike the installation page's:\n{written}"
+    )
 
     added = uv("add", target.add, "--no-build", "--find-links", wheels, cwd=lab)
     assert added.ok, f"uv {uv.version}: `uv add` on Python {NEWEST} doesn't install from wheels alone:\n{added.tail()}"

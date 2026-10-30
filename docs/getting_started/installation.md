@@ -6,7 +6,7 @@ PyAcquisition is a Python package, and it installs into a **project**: a folder 
 
 [uv](https://docs.astral.sh/uv/) makes and manages projects. It is one program that installs Python when a project needs it, makes each project's environment, and adds packages to it, writing down exactly which ones, so that the project can be set up again anywhere. It is the first thing to install, below.
 
-<div class="gs" data-mode="versions" data-file="pyproject.toml" data-lines="10" data-term-lines="10" markdown>
+<div class="gs" data-mode="versions" data-file="pyproject.toml" data-lines="16" data-term-lines="10" markdown>
 
 <div class="gs-stage" markdown>
 
@@ -37,7 +37,7 @@ You don't need to install Python yourself: if you don't have one that a project 
 ## Create a project
 
 ```bash
-uv init my-lab --python 3.14 --no-package
+uv init my-lab --python 3.14
 cd my-lab
 ```
 
@@ -49,13 +49,20 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = []
+
+[project.scripts]
+my-lab = "my_lab:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
 ```
 
-`uv init my-lab --python 3.14 --no-package` makes a folder called `my-lab` for the project, and `cd my-lab` moves the terminal into it. Run every command from now on in that folder.
+`uv init my-lab --python 3.14` makes a folder called `my-lab` for the project, and `cd my-lab` moves the terminal into it. Run every command from now on in that folder. `--python 3.14` makes the project use Python 3.14, the newest version PyAcquisition is tested on. uv downloads it if it isn't on your computer.
 
-`--python 3.14` makes the project use Python 3.14, the newest version PyAcquisition is tested on. uv downloads it if it isn't on your computer. `--no-package` keeps the project a plain folder for your files, rather than a package to publish.
+`pyproject.toml` describes the project: its name, the versions of Python it runs on (`requires-python`), and its `dependencies`, the packages it uses, which is none yet. The two tables at the end let uv install the project itself. If git knows your name, uv adds an `authors` line too.
 
-`pyproject.toml` describes the project: its name, the versions of Python it runs on (`requires-python`), and its `dependencies`, the packages it uses, which is none yet. uv makes a `README.md` and a `main.py` too, which you can leave or delete.
+uv makes a `README.md`, and a folder, `src/my_lab/`, for Python code of your own. Keep that folder: uv needs it to set up the project.
 
 Open the `my-lab` folder in your editor. Your experiment's files go in it.
 
@@ -64,7 +71,7 @@ Open the `my-lab` folder in your editor. Your experiment's files go in it.
 
 </section>
 
-<section class="gs-step" data-result="Installed 80 packages in 1.55s" markdown>
+<section class="gs-step" data-result="Installed 81 packages in 1.22s" markdown>
 
 ## Add PyAcquisition
 
@@ -82,6 +89,13 @@ requires-python = ">=3.14"
 dependencies = [
     "pyacquisition>=0.5.0",
 ]
+
+[project.scripts]
+my-lab = "my_lab:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
 ```
 
 `uv add` adds PyAcquisition to the project's `dependencies`, with the lowest version the project accepts. Then it works out everything PyAcquisition needs in turn, at versions that work together, writes them all down in `uv.lock`, and installs them into the project's environment, the `.venv` folder, which it makes the first time.
@@ -136,7 +150,7 @@ You typed
 { .gs-finish__label }
 
 ```bash
-uv init my-lab --python 3.14 --no-package
+uv init my-lab --python 3.14
 cd my-lab
 uv add pyacquisition
 ```
@@ -156,7 +170,7 @@ my-lab/
 ├── .venv/            Python and the packages, for this project alone
 ├── pyproject.toml    what the project needs: PyAcquisition
 ├── uv.lock           the exact version of every package
-├── main.py           uv's example: keep it or delete it
+├── src/my_lab/       Python code of your own: keep it, uv needs it
 └── …                 README.md, and git's and uv's own files
 ```
 

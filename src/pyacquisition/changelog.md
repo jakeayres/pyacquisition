@@ -19,7 +19,7 @@ shows a version's **Highlights** once, after you upgrade to it.
   the experiment. See **Fixes**.
 - PyPI lists the Python versions PyAcquisition is tested on: 3.11 to 3.14.
   It doesn't install on Python 3.15 yet, so make a new project with
-  `uv init --python 3.14`.
+  `uv init my-lab --python 3.14`.
 
 ### Fixes
 
