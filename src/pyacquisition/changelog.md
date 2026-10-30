@@ -17,6 +17,9 @@ shows a version's **Highlights** once, after you upgrade to it.
   teardown short, a pause or abort reaches a loop that calls nothing else, and
   a task that is built wrongly is refused with a message, rather than stopping
   the experiment. See **Fixes**.
+- PyPI lists the Python versions PyAcquisition is tested on: 3.11 to 3.14.
+  It doesn't install on Python 3.15 yet, so make a new project with
+  `uv init --python 3.14`.
 
 ### Fixes
 
