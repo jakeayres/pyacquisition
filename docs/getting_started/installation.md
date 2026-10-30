@@ -37,7 +37,7 @@ You don't need to install Python yourself: if you don't have one that a project 
 ## Create a project
 
 ```bash
-uv init my-lab
+uv init my-lab --python 3.14 --no-package
 cd my-lab
 ```
 
@@ -47,11 +47,13 @@ name = "my-lab"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = []
 ```
 
-`uv init my-lab` makes a folder called `my-lab` for the project, and `cd my-lab` moves the terminal into it. Run every command from now on in that folder.
+`uv init my-lab --python 3.14 --no-package` makes a folder called `my-lab` for the project, and `cd my-lab` moves the terminal into it. Run every command from now on in that folder.
+
+`--python 3.14` makes the project use Python 3.14, the newest version PyAcquisition is tested on. uv downloads it if it isn't on your computer. `--no-package` keeps the project a plain folder for your files, rather than a package to publish.
 
 `pyproject.toml` describes the project: its name, the versions of Python it runs on (`requires-python`), and its `dependencies`, the packages it uses, which is none yet. uv makes a `README.md` and a `main.py` too, which you can leave or delete.
 
@@ -62,7 +64,7 @@ Open the `my-lab` folder in your editor. Your experiment's files go in it.
 
 </section>
 
-<section class="gs-step" data-result="Installed 67 packages in 1.30s" markdown>
+<section class="gs-step" data-result="Installed 80 packages in 1.55s" markdown>
 
 ## Add PyAcquisition
 
@@ -76,7 +78,7 @@ name = "my-lab"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = [
     "pyacquisition>=0.5.0",
 ]
@@ -134,7 +136,7 @@ You typed
 { .gs-finish__label }
 
 ```bash
-uv init my-lab
+uv init my-lab --python 3.14 --no-package
 cd my-lab
 uv add pyacquisition
 ```
@@ -167,6 +169,7 @@ my-lab/
     - **`uv` is not found.** Open a new terminal after installing it, so that it is on your path.
     - **`ModuleNotFoundError: No module named 'pyacquisition'`.** Plain `python` doesn't use the project's environment. Run commands with `uv run`, from the `my-lab` folder.
     - **uv says there is no `pyproject.toml`.** The terminal is in another folder. `cd` into `my-lab` first.
+    - **`uv add` stops with `error: Failed to add dependencies`, because it failed to build `h5py` or `pyyaml`.** The project uses a Python too new for some of the packages PyAcquisition needs, which happens when it was made with plain `uv init`. Set `requires-python = ">=3.14"` in `pyproject.toml`, run `uv python pin 3.14`, then `uv add pyacquisition` again.
 
 </div>
 

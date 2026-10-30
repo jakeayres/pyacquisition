@@ -176,8 +176,9 @@ def test_installs_and_runs(python, uv, wheels, target, tmp_path, record_property
 
 def test_the_install_page_commands(uv, wheels, target, tmp_path, record_property):
     """The installation page's commands, on the newest listed Python:
-    `uv init my-lab --python <newest>`, `uv add pyacquisition` and its check."""
-    made = uv("init", "my-lab", "--python", NEWEST, cwd=tmp_path)
+    `uv init my-lab --python <newest> --no-package`, `uv add pyacquisition` and
+    its check."""
+    made = uv("init", "my-lab", "--python", NEWEST, "--no-package", cwd=tmp_path)
     assert made.ok, made.tail()
     lab = tmp_path / "my-lab"
     project = tomllib.loads((lab / "pyproject.toml").read_text(encoding="utf-8"))["project"]
