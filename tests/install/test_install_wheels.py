@@ -34,6 +34,9 @@ PYTHONS = [
     pytest.param(NEXT, marks=pytest.mark.xfail(
         # On GitHub its first pass fails the run, which is the notice to list it.
         strict=bool(os.environ.get("GITHUB_ACTIONS")),
+        # Only the test's own pytest.xfail(), when the install fails, is expected.
+        # Anything after it, such as the rig, fails with its own reason.
+        raises=pytest.xfail.Exception,
         reason="the next Python: it passes once every dependency has a wheel for it",
     )),
 ]
