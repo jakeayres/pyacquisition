@@ -1,0 +1,39 @@
+name: Install check
+
+# Every Monday, the newest release on PyPI is installed from wheels alone, as a
+# lab PC with no compiler must, on each Python the package lists, and runs a rig
+# (tests/install). The next Python is tried too. A break can come with no commit
+# here: a new Python, or a dependency's new release. So it runs on a timer, and
+# can be started by hand from the Actions tab.
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Mondays, 06:00 UTC
+  workflow_dispatch:
+
+# Nothing is granted by default. Each job asks for only what it needs.
+permissions: {}
+
+jobs:
+  install:
+    name: Install from wheels alone
+    # Only in the public repository. The private one it is made from
+    # (publish-public.yml) has the same file.
+    if: github.repository == 'jakeayres/pyacquisition'
+    runs-on: windows-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The newest uv, on purpose: it is what a new machine gets.
+      - uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: false
+
+      # Only pytest is needed to run the check, so the project itself isn't
+      # installed. Each test adds a row to this run's summary.
+      - name: Install the newest release on each listed Python
+        run: uv run --frozen --only-group test pytest tests/install --install-release -rA
