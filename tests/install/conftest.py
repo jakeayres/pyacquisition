@@ -245,7 +245,8 @@ def pytest_runtest_logreport(report):
     call, or from its setup when it never got that far."""
     global _summary_started
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
-    if not summary or "install" not in report.keywords:
+    # By module, not by the `install` keyword, which every test in this folder has.
+    if not summary or "test_install_wheels.py::" not in report.nodeid:
         return
     if report.when != "call" and not (report.when == "setup" and not report.passed):
         return

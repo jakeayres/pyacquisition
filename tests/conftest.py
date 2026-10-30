@@ -110,7 +110,9 @@ def pytest_collection_modifyitems(config, items):
     if not (config.getoption("--install") or config.getoption("--install-release")):
         skip_install = pytest.mark.skip(reason="an install check: give --install to run it")
         for item in items:
-            if "install" in item.keywords:
+            # The marker, not the keyword: every test in tests/install has the
+            # folder's name as a keyword, the ones that always run included.
+            if item.get_closest_marker("install"):
                 item.add_marker(skip_install)
     if config.getoption("--hardware"):
         return
