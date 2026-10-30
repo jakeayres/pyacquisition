@@ -7,6 +7,7 @@
 
 import asyncio
 import inspect
+import sys
 import time
 import traceback
 import uuid
@@ -22,6 +23,12 @@ from fastapi import HTTPException
 from ..instrument import resolve_enum_kwargs
 from ..logging import logger
 from .inputs import input_parameters
+
+# `asyncio.timeout()`, which `Task.sleep` waits with, keeps an abort's pending
+# cancel apart from its own only from Python 3.11.3. Before, a sleep in a
+# teardown's subtask raised CancelledError when its time was up, so those versions
+# wait with `wait_for` instead.
+_TIMEOUT_KEEPS_CANCELS = sys.version_info >= (3, 11, 3)
 
 # Runners that have been cancelled. Several tasks can share one runner (a subtask
 # that runs inside its parent does), so a cancel is sent once, however many of them
@@ -276,10 +283,13 @@ class Task:
             await self._check_control_flags()
             started = loop.time()
             try:
-                # Not wait_for: on Windows, Python 3.11's returns at once for a
-                # timeout under the clock's 15.6 ms tick.
-                async with asyncio.timeout(remaining):
-                    await self._paused_event.wait()
+                if _TIMEOUT_KEEPS_CANCELS:
+                    # Not wait_for: on Windows, Python 3.11's returns at once for a
+                    # timeout under the clock's 15.6 ms tick.
+                    async with asyncio.timeout(remaining):
+                        await self._paused_event.wait()
+                else:
+                    await asyncio.wait_for(self._paused_event.wait(), timeout=remaining)
             except TimeoutError:
                 break  # the whole time has passed without a pause
             remaining -= loop.time() - started  # paused: hold the rest until resumed

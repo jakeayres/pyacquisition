@@ -1,6 +1,7 @@
 """Pause, resume and abort of a task: hooks, cancellation, outcomes and the toolkit."""
 
 import asyncio
+import sys
 import time
 from dataclasses import dataclass, field
 from unittest.mock import Mock
@@ -238,6 +239,10 @@ async def test_a_generator_task_held_at_a_checkpoint_cleans_up_on_abort():
 
 
 # ----------------------------------------------------------------- sleep
+@pytest.mark.skipif(
+    sys.version_info < (3, 11, 3),
+    reason="before 3.11.3, a sleep waits with wait_for, so its short sleeps don't wait",
+)
 @pytest.mark.asyncio
 async def test_a_short_sleep_still_waits():
     """On Windows, Python 3.11's `asyncio.wait_for` returns at once for a timeout
@@ -252,6 +257,37 @@ async def test_a_short_sleep_still_waits():
     await asyncio.wait_for(Short().start(), timeout=5)
 
     assert time.perf_counter() - started >= 0.09
+
+
+@pytest.mark.asyncio
+async def test_a_subtask_in_a_teardown_after_an_abort_runs_to_its_end():
+    """Before Python 3.11.3, `asyncio.timeout()` raised `CancelledError` instead
+    of `TimeoutError` while an abort's cancel was pending, which cut a teardown's
+    subtask short at its first sleep."""
+    events = []
+
+    class Settle(Task):
+        async def run(self, experiment=None):
+            for step in range(3):
+                await self.sleep(0.05)
+                events.append(f"step {step + 1}")
+
+    class Ramp(Task):
+        async def run(self, experiment=None):
+            await self.sleep(3600)
+
+        async def teardown(self, experiment=None):
+            await self.run_subtask(Settle())
+            events.append("torn down")
+
+    task = Ramp()
+    running = asyncio.create_task(task.start())
+    await spin()
+    task.abort()
+    await asyncio.wait_for(running, timeout=5)
+
+    assert events == ["step 1", "step 2", "step 3", "torn down"]
+    assert task.outcome == "aborted"
 
 
 # ----------------------------------------------------------------- pause
