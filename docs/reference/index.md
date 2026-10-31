@@ -1,4 +1,4 @@
-# Reference
+# API Reference
 
 The lists to look things up in: every option, driver, task and endpoint, with its exact name. To learn how to do something, start with [Getting Started](../getting_started/installation.md) or [Usage](../usage/index.md).
 

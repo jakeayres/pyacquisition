@@ -1,6 +1,6 @@
 # Usage
 
-Each page here is a short tutorial for one thing you may want to do after [Getting Started](../getting_started/installation.md), in the same format: a file built up a step at a time, beside the terminal. Read them in any order, when you need them. For every option, driver or task, see [Reference](../reference/index.md).
+Each page here is a short tutorial for one thing you may want to do after [Getting Started](../getting_started/installation.md), in the same format: a file built up a step at a time, beside the terminal. Read them in any order, when you need them. For every option, driver or task, see [API Reference](../reference/index.md).
 
 ## Instruments
 

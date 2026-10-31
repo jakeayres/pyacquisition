@@ -44,7 +44,7 @@ nav = [
       { "Build a Standalone App" = "usage/standalone_app.md" },
     ] },
   ] },
-  { "Reference" = [
+  { "API Reference" = [
     { "Overview" = "reference/index.md" },
     { "Config File" = "reference/config_file.md" },
     { "Experiment Options" = "reference/experiment_options.md" },
