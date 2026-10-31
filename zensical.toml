@@ -102,7 +102,6 @@ nav = [
 ]
 
 [project.theme]
-variant = "classic" # the Material look. Remove this line for Zensical's newer default design.
 features = [
   "content.code.copy",
   "navigation.footer",

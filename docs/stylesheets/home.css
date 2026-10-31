@@ -37,6 +37,50 @@
 }
 .md-header { box-shadow: none; }
 
+/* The theme draws the search box and the active tab's underline for a light
+   header, so they are redrawn here for the dark one. */
+.md-header .md-search__button { color: #f4f6fa; background-color: var(--pa-border-dark); }
+.md-header .md-search__button:focus,
+.md-header .md-search__button:hover { color: #fff; background-color: rgba(255, 255, 255, 0.16); }
+.md-header .md-search__button::before { background-color: currentColor; }
+.md-header .md-search__button::after { background: var(--pa-border-dark); }
+.md-tabs__item--active { border-bottom: 0.1rem solid var(--pa-orange); }
+.md-tabs[hidden] .md-tabs__item--active { border-bottom-color: transparent; }
+
+/* The left menu's links to the page's headings ------------------------ */
+/* The heading in view, or a walkthrough's current step (which walkthrough.js
+   marks), is green and bold, with a bar on the menu's line. The theme also
+   colours a link while it has focus, so a clicked heading stayed marked after
+   the reader scrolled on: only the keyboard's focus shows now. */
+.md-sidebar--primary .md-nav--integrated .md-nav--secondary .md-nav__link:focus:not(:focus-visible, :hover, .md-nav__link--passed:not([data-gs-step]), .gs-done, .gs-now, .md-nav__link--active:not([data-gs-step])) {
+  color: var(--md-default-fg-color);
+}
+.md-sidebar--primary .md-nav--integrated .md-nav--secondary .md-nav__link.md-nav__link--passed:not([data-gs-step], :hover),
+.md-sidebar--primary .md-nav--integrated .md-nav--secondary .md-nav__link.gs-done:not(:hover) {
+  color: var(--md-default-fg-color--light);
+}
+.md-sidebar--primary .md-nav--integrated .md-nav--secondary .md-nav__link.md-nav__link--active:not([data-gs-step]),
+.md-sidebar--primary .md-nav--integrated .md-nav--secondary .md-nav__link[data-gs-step].gs-now {
+  position: relative;
+  color: var(--pa-green-ink);
+  font-weight: 600;
+}
+.md-sidebar--primary .md-nav--integrated .md-nav--secondary .md-nav__link.md-nav__link--active:not([data-gs-step])::before,
+.md-sidebar--primary .md-nav--integrated .md-nav--secondary .md-nav__link[data-gs-step].gs-now::before {
+  content: "";
+  position: absolute;
+  top: 0.15rem;
+  bottom: 0.15rem;
+  left: -0.25rem;
+  width: 0.1rem;
+  border-radius: 0.05rem;
+  background: currentColor;
+}
+/* The theme can't tell which step is in view, so its own mark is left off them. */
+.md-sidebar--primary .md-nav--integrated .md-nav--secondary .md-nav__link[data-gs-step].md-nav__link--active:not(.gs-now) {
+  font-weight: 400;
+}
+
 /* Full-bleed landing page --------------------------------------------- */
 .md-main__inner:has(.pa-hero) { max-width: none; margin: 0; }
 .md-content__inner:has(.pa-hero) { margin: 0; padding: 0; }
